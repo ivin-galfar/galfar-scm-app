@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser, registerUser } from "../APIs/api";
 import { SiTicktick } from "react-icons/si";
 import { MdErrorOutline } from "react-icons/md";
-import toggleNewUser from "../store/userStore";
+import { toggleNewUser } from "../store/userStore";
 
 const Login = () => {
   const [email, setEmail] = useState("");

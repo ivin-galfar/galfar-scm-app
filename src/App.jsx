@@ -11,6 +11,8 @@ import Dashboard from "./Pages/Dashboard";
 import Footer from "./Components/Footer";
 import Contact from "./Pages/Contact";
 import LogisticsStatement from "./Pages/LogisticsStatement";
+import LogisticsDashboard from "./Pages/LogisticsDashboard";
+import { Suspense } from "react";
 
 const App = () => {
   const location = useLocation();
@@ -20,7 +22,7 @@ const App = () => {
 
   return (
     <div
-      className={`${location.pathname !== "/login" && "pl-12"} flex flex-col min-h-screen`}
+      className={`${location.pathname !== "/login" && "pl-12"} flex flex-col  min-h-screen`}
     >
       {!userInfo && (
         <FloatingNotification
@@ -29,45 +31,62 @@ const App = () => {
         />
       )}{" "}
       {!isLoginPage && <Header />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/particulars/:dept_id"
-          element={
-            <ProtectedRoute>
-              <Particulars />
-            </ProtectedRoute>
-          }
-        />
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center h-64">
+            <div className="w-10 h-10 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/particulars/:dept_id"
+            element={
+              <ProtectedRoute>
+                <Particulars />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/receipts"
-          element={
-            <ProtectedRoute>
-              <Receipts />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/lstatements"
-          element={
-            <ProtectedRoute>
-              <LogisticsStatement />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/receipts/:mrnumber"
-          element={
-            <ProtectedRoute>
-              <Receipts />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/contact" element={<Contact />} />
-      </Routes>
+          <Route
+            path="/receipts"
+            element={
+              <ProtectedRoute>
+                <Receipts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lstatements"
+            element={
+              <ProtectedRoute>
+                <LogisticsStatement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lstatements/:cs_no"
+            element={
+              <ProtectedRoute>
+                <LogisticsStatement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/receipts/:mrnumber"
+            element={
+              <ProtectedRoute>
+                <Receipts />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboardlg" element={<LogisticsDashboard />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </Suspense>
       {!isLoginPage && <Footer />}
     </div>
   );

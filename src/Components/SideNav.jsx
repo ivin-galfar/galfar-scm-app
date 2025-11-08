@@ -14,13 +14,14 @@ import { FaSignInAlt } from "react-icons/fa";
 import { FaTruck } from "react-icons/fa";
 import { is_logistics, is_plant } from "../Helpers/dept_helper";
 import { GiCrane } from "react-icons/gi";
+import { useDashboardType } from "../store/logisticsStore";
 
 // import scaffolding from "../assets/Images/scaffolding.png";
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const { setStatusFilter, setMultiStatusFilter } = useContext(AppContext);
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const [submenu1Open, setSubmenu1Open] = useState(false);
-
+  const { setDashboardType } = useDashboardType();
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
@@ -98,6 +99,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               onClick={() => {
                 setStatusFilter("All");
                 setMultiStatusFilter([]);
+                setDashboardType("plant");
               }}
             >
               <MdSpaceDashboard />
@@ -151,16 +153,17 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
         {isOpen && submenu1Open && (
           <div className="ml-6 mt-2 space-y-2">
             <Link
-              to="/dashboard"
+              to="/dashboardlg"
               className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
                 !isLogistics
                   ? "pointer-events-none opacity-50 cursor-not-allowed"
                   : ""
               }`}
-              // onClick={() => {
-              //   setStatusFilter("All");
-              //   setMultiStatusFilter([]);
-              // }}
+              onClick={() => {
+                // setStatusFilter("All");
+                // setMultiStatusFilter([]);
+                setDashboardType("logistics");
+              }}
             >
               <MdSpaceDashboard />
               {isOpen && <span>Dashboard</span>}
@@ -197,14 +200,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             </Link>
           </div>
         )}
-        {/* <button className="flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer">
-          <img
-            src={scaffolding}
-            className="h-4 w-5 object-contain"
-            alt="Scaffolding Icon"
-          />
-          {isOpen && <span className="whitespace-nowrap">Scaffolding</span>}
-        </button> */}
 
         <button
           className="flex gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"

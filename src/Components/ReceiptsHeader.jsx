@@ -59,14 +59,14 @@ const TableHeader = ({ isAdmin }) => {
   const { deleted, resetDeleted, setDeleted } = useDeleteStatement();
 
   const Asset =
-    userInfo.role == "InitA" || formData.type == "asset" ? true : false;
+    userInfo.role == "inita" || formData.type == "asset" ? true : false;
 
   useEffect(() => {
     const loadParticulars = async () => {
       try {
         const particulars = await fetchParticulars(
           userInfo,
-          userInfo.dept_code[0]
+          userInfo?.dept_code?.[0]
         );
         setParticulars(particulars.Particulars);
         setfreezeQuantity(false);
@@ -185,7 +185,7 @@ const TableHeader = ({ isAdmin }) => {
       setSharedTableData({
         formData: {
           datevalue: new Date().toISOString().split("T")[0],
-          type: userInfo.role == "InitA" ? "asset" : "hiring",
+          type: userInfo.role == "inita" ? "asset" : "hiring",
         },
         tableData: [],
       });
@@ -323,7 +323,7 @@ const TableHeader = ({ isAdmin }) => {
                   currency: "",
                   requireddatevalue: new Date(),
                   datevalue: new Date(),
-                  type: userInfo.role == "InitA" ? "asset" : "hiring",
+                  type: userInfo.role == "inita" ? "asset" : "hiring",
                 },
                 tableData: [],
               });

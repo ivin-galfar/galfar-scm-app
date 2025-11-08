@@ -17,10 +17,10 @@ const ReasonForSelection = ({
   const userInfo = useUserInfo();
 
   const statusMap = {
-    Initiator: "Pending For HOD",
-    HOD: "Pending for GM",
-    GM: "Pending for CEO",
-    CEO: "Approved",
+    initiator: "Pending For HOD",
+    hod: "Pending for GM",
+    gm: "Pending for CEO",
+    ceo: "Approved",
   };
 
   const reqApproval = async (cs_id) => {

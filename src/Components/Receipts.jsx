@@ -36,7 +36,7 @@ const Receipts = () => {
     selectedVendorReason,
     setSelectedVendorReason,
   } = useContext(AppContext);
-  const Asset = userInfo.role == "InitA" ? true : false;
+  const Asset = userInfo.role == "inita" ? true : false;
 
   const { setSortVendors, resetSortVendors } = useSortVendors();
   const ReceiptMutation = useMutation({
@@ -175,10 +175,10 @@ const Receipts = () => {
     window.location.reload();
   };
   const statusMapping = {
-    Initiator: [],
-    HOD: ["Pending For HOD", "Approved", "Rejected"],
-    GM: ["Pending for GM", "Approved", "Rejected"],
-    CEO: ["Pending for CEO", "Approved", "Rejected"],
+    initiator: [],
+    hod: ["Pending For HOD", "Approved", "Rejected"],
+    gm: ["Pending for GM", "Approved", "Rejected"],
+    ceo: ["Pending for CEO", "Approved", "Rejected"],
   };
 
   const expectedStatuses =
@@ -210,10 +210,10 @@ const Receipts = () => {
 
   let statusclass = "";
   if (
-    (isStatusSet == "Pending for CEO" && userInfo.role != "CEO") ||
-    (isStatusSet == "Pending for GM" && userInfo.role != "GM") ||
-    (isStatusSet == "Pending For HOD" && userInfo.role != "HOD") ||
-    (isStatusSet == "Pending For HOD" && userInfo.role == "Initiator") ||
+    (isStatusSet == "Pending for CEO" && userInfo.role != "ceo") ||
+    (isStatusSet == "Pending for GM" && userInfo.role != "gm") ||
+    (isStatusSet == "Pending For HOD" && userInfo.role != "hod") ||
+    (isStatusSet == "Pending For HOD" && userInfo.role == "initiator") ||
     isStatusSet == "Approved" ||
     isStatusSet == "Rejected"
   ) {
@@ -247,64 +247,66 @@ const Receipts = () => {
       <h1 className="font-bold mb-4">
         <TableHeader isAdmin={userInfo?.is_admin} />
       </h1>
-      <div className="flex w-full justify-center gap-4">
+      <div className="flex w-full gap-4">
         <div className="w-2/3">
           <MyTable showcalc={showcalc} />
         </div>
 
-        <div className="w-1/3 p-4 bg-gray-50 rounded-xl shadow-inner overflow-y-auto max-h-[40vh]">
-          <h2 className="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">
-            Uploaded Files{" "}
-            {sharedTableData.formData?.filename?.length > 0
-              ? `(${sharedTableData.formData?.filename?.length})`
-              : ""}
-          </h2>
+        {sharedTableData.formData?.filename?.length > 0 && (
+          <div className="w-1/3 p-4 bg-gray-50 rounded-xl shadow-inner overflow-y-auto max-h-[40vh]">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">
+              Uploaded Files{" "}
+              {sharedTableData.formData?.filename?.length > 0
+                ? `(${sharedTableData.formData?.filename?.length})`
+                : ""}
+            </h2>
 
-          <div className="grid grid-cols-2 gap-3">
-            {sharedTableData.formData?.file ||
-            sharedTableData.formData?.filename?.length > 0 ? (
-              sharedTableData.formData?.filename?.map((file, index) => {
-                const url = sharedTableData.formData.file?.[index];
-                return (
-                  <div
-                    key={index}
-                    className="relative flex flex-col items-center justify-center bg-white p-3 rounded-lg shadow hover:shadow-md transition-all border border-gray-200"
-                  >
-                    <button
-                      onClick={() => handleRemoveFile(index)}
-                      disabled={sharedTableData.formData?.created_at != null}
-                      className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${sharedTableData.formData?.created_at != null ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-                      title="Remove file"
+            <div className="grid grid-cols-2 gap-3">
+              {sharedTableData.formData?.file ||
+              sharedTableData.formData?.filename?.length > 0 ? (
+                sharedTableData.formData?.filename?.map((file, index) => {
+                  const url = sharedTableData.formData.file?.[index];
+                  return (
+                    <div
+                      key={index}
+                      className="relative flex flex-col items-center justify-center bg-white p-3 rounded-lg shadow hover:shadow-md transition-all border border-gray-200"
                     >
-                      ✕
-                    </button>
+                      <button
+                        onClick={() => handleRemoveFile(index)}
+                        disabled={sharedTableData.formData?.created_at != null}
+                        className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${sharedTableData.formData?.created_at != null ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                        title="Remove file"
+                      >
+                        ✕
+                      </button>
 
-                    <div className="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg">
-                      📄
+                      <div className="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg">
+                        📄
+                      </div>
+
+                      <p className="text-xs mt-2 text-gray-600 text-center truncate w-full">
+                        {file}
+                      </p>
+
+                      <a
+                        href={url}
+                        target="_blank"
+                        download
+                        className="text-xs text-blue-600 hover:underline mt-1"
+                      >
+                        Download
+                      </a>
                     </div>
-
-                    <p className="text-xs mt-2 text-gray-600 text-center truncate w-full">
-                      {file}
-                    </p>
-
-                    <a
-                      href={url}
-                      target="_blank"
-                      download
-                      className="text-xs text-blue-600 hover:underline mt-1"
-                    >
-                      Download
-                    </a>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="col-span-2 text-center text-gray-500 text-sm">
-                No files uploaded yet
-              </div>
-            )}
+                  );
+                })
+              ) : (
+                <div className="col-span-2 text-center text-gray-500 text-sm">
+                  No files uploaded yet
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div
         className={` z-50 flex justify-between items-center gap-3.5 pt-3 flex-wrap`}

@@ -19,7 +19,7 @@ const fetchStatments = async ({ expectedStatuses, userInfo }) => {
 
     let categorizedReceipts = receipts;
     if (userInfo?.is_admin) {
-      const type = userInfo?.role == "InitA" ? "asset" : "hiring";
+      const type = userInfo?.role == "inita" ? "asset" : "hiring";
       categorizedReceipts = receipts.filter((r) => r.formData.type == type);
     } else {
       categorizedReceipts = receipts.filter((receipt) => {
