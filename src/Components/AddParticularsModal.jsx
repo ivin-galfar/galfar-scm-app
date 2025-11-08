@@ -6,6 +6,7 @@ import axios from "axios";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { AppContext } from "./Context";
 import { useStatementupdated } from "../store/statementStore";
+import { useParams } from "react-router-dom";
 
 const AddParticularsModal = ({ setShowmodal }) => {
   const [fields, setFields] = useState(Array(5).fill(""));
@@ -15,6 +16,7 @@ const AddParticularsModal = ({ setShowmodal }) => {
   const [showToast, setShowToast] = useState(false);
 
   const { setshowupdated } = useStatementupdated();
+  const { dept_id } = useParams();
 
   const name = userInfo?.email.split("@")[0];
   const formattedName =
@@ -49,6 +51,7 @@ const AddParticularsModal = ({ setShowmodal }) => {
             name: templatename,
             particulars: filteredfields,
           },
+          dept_code: dept_id,
         },
         config
       );

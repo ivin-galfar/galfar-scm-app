@@ -1,5 +1,3 @@
-import React from "react";
-
 const Currency = (denotion) => {
   const symbols = {
     aed: "د.إ",

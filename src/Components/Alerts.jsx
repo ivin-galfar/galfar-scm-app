@@ -2,7 +2,7 @@ const Alerts = ({ message, onCancel, onConfirm }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-transparent">
       <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm">
-        <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
+        <h2 className="text-lg font-semibold mb-4">Are you sure to proceed?</h2>
         <p className="text-gray-600 mb-6">{message}</p>
 
         <div className="flex justify-end space-x-3">

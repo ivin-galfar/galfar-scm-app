@@ -1,7 +1,7 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 
-const fetchParticulars = async (userInfo) => {
+const fetchParticulars = async (userInfo, dept_id) => {
   try {
     const config = {
       headers: {
@@ -10,7 +10,10 @@ const fetchParticulars = async (userInfo) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    const response = await axios.get(`${REACT_SERVER_URL}/particulars`, config);
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/particulars?dept_code=${dept_id}`,
+      config
+    );
     return response.data;
   } catch (error) {
     throw error;

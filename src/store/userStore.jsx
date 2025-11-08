@@ -1,8 +1,11 @@
 import { create } from "zustand";
 
-const toggleNewUser = create((set) => ({
+export const toggleNewUser = create((set) => ({
   newuser: false,
   setNewuser: () => set((state) => ({ newuser: !state.newuser })),
 }));
 
-export default toggleNewUser;
+export const useSelectedDept = create((set) => ({
+  selectedDept: "",
+  setSelectedDept: (dept) => set({ selectedDept: dept }),
+}));

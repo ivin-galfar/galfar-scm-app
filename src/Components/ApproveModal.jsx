@@ -9,6 +9,7 @@ import {
   useClearStatementTable,
   useSortVendors,
 } from "../store/statementStore";
+import { RxCross1 } from "react-icons/rx";
 
 const ApproveModal = ({ setShowmodal, cs_id }) => {
   const [comments, setComments] = useState("");
@@ -33,11 +34,11 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
     if (status === "rejected") {
       finalStatus = "Rejected";
       rejectedBy = userInfo.role;
-    } else if (userInfo.role === "HOD" && status === "approved") {
+    } else if (userInfo.role === "hod" && status === "approved") {
       finalStatus = "Pending for GM";
-    } else if (userInfo.role === "GM" && status === "approved") {
+    } else if (userInfo.role === "gm" && status === "approved") {
       finalStatus = "Pending for CEO";
-    } else if (userInfo.role === "CEO" && status === "approved") {
+    } else if (userInfo.role === "ceo" && status === "approved") {
       finalStatus = "Approved";
     } else if (status === "review") {
       finalStatus = "review";
@@ -189,14 +190,14 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
               sharedTableData.formData.status == "Pending for GM") &&
             !errormessage && (
               <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-                ✅ You have Approved this MR!
+                ✅ You have Approved this Statement!
               </div>
             )}{" "}
           {showToast &&
             sharedTableData.formData.status == "Rejected" &&
             !errormessage && (
               <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-                ❌ You have Rejected this MR!
+                <RxCross1 /> You have Rejected this Statement!
               </div>
             )}
           {showToast && lastAction == "review" && !errormessage && (

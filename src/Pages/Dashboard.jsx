@@ -9,7 +9,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../Components/Context";
 import fetchStatments from "../APIs/StatementsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
 import Alerts from "../Components/Alerts";
 import { REACT_SERVER_URL } from "../../config/ENV";
@@ -19,8 +19,11 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import galfarlogo from "../assets/Images/logo-new.png";
 import { IoWarningOutline } from "react-icons/io5";
-import useToggleAsset from "../store/assetStore";
+import { useToggleAsset } from "../store/assetStore";
 import { useDeleteStatement } from "../store/statementStore";
+import { useDashboardType } from "../store/logisticsStore";
+import DashboardButton from "../Components/DashboardButton";
+import { is_logistics, is_plant } from "../Helpers/dept_helper";
 const Dashboard = () => {
   const {
     receipts,
@@ -41,6 +44,12 @@ const Dashboard = () => {
   const { deleted, resetDeleted, setDeleted } = useDeleteStatement();
   const [searchcs, setSearchCS] = useState("");
   const userInfo = useUserInfo();
+  const { dashboardType, setDashboardType, resetDashboardType } =
+    useDashboardType();
+
+  const isLogistics = is_logistics(userInfo?.dept_code);
+
+  const isPlant = is_plant(userInfo?.dept_code);
   const statusProgress = {
     "Pending For HOD": 20,
     "Pending for GM": 40,
@@ -51,7 +60,7 @@ const Dashboard = () => {
   };
 
   const statusMapping = {
-    InitA: [
+    inita: [
       "Pending for HOD",
       "Pending for GM",
       "Pending for CEO",
@@ -59,7 +68,7 @@ const Dashboard = () => {
       "Rejected",
       "",
     ],
-    InitH: [
+    inith: [
       "Pending for HOD",
       "Pending for GM",
       "Pending for CEO",
@@ -67,21 +76,21 @@ const Dashboard = () => {
       "Rejected",
       "",
     ],
-    HOD: [
+    hod: [
       "Pending For HOD",
       "Pending For GM",
       "Pending For CEO",
       "Rejected",
       "Approved",
     ],
-    GM: [
+    gm: [
       "Pending For HOD",
       "Pending for GM",
       "Pending for CEO",
       "Approved",
       "Rejected",
     ],
-    CEO: [
+    ceo: [
       "Pending For HOD",
       "Pending for GM",
       "Pending for CEO",
@@ -253,8 +262,10 @@ const Dashboard = () => {
 
     tableData.forEach((row, index) => {
       if (index === 0) return;
-      if (row.particulars?.trim().toUpperCase() === "RATING") return;
-
+      if (
+        ["RATING", "ICV SCORE"].includes(row.particulars?.trim().toUpperCase())
+      )
+        return;
       Object.entries(row.vendors).forEach(([_, val], vIdx) => {
         const value = parseFloat(val) || 0;
         totals[vIdx] += qty > 0 ? value * qty : value;
@@ -626,6 +637,7 @@ const Dashboard = () => {
     columnHelper.accessor((row) => row?.formData?.hiringname, {
       id: "hiring.name",
       header: "Hiring/Asset Name",
+      meta: { className: "w-80 max-w-xs whitespace-pre-wrap break-words" },
       cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.formData?.qty, {
@@ -680,11 +692,6 @@ const Dashboard = () => {
         );
       },
     }),
-    // columnHelper.accessor((row) => row?.formData.selectedvendorreason, {
-    //   id: "Recommendation",
-    //   header: "Recommended Reason",
-    //   cell: (info) => info.getValue() || "-",
-    // }),
     columnHelper.accessor(
       (row) => {
         const commentsArray = row?.formData?.approverdetails?.approverDetails
@@ -783,16 +790,23 @@ const Dashboard = () => {
             );
           }
         )}
-        <div className="mb-1 ml-auto">
-          <label className="  ml-auto text-sm font-medium text-gray-700 ">
-            CS Number:
-          </label>
-          <input
-            type="text"
-            name="search"
-            className="border  h-8 flex border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={handleSearch}
-          />
+        <div className="flex justify-between ml-auto">
+          {isLogistics && isPlant && (
+            <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
+              <DashboardButton />
+            </div>
+          )}
+          <div className="mb-1 ml-auto">
+            <label className="  ml-auto text-sm font-medium text-gray-700 ">
+              CS Number:
+            </label>
+            <input
+              type="text"
+              name="search"
+              className="border  h-8 flex border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleSearch}
+            />
+          </div>
         </div>
       </div>
       <div

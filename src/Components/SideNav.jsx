@@ -11,16 +11,26 @@ import { FiMenu } from "react-icons/fi";
 import { AiFillCaretUp } from "react-icons/ai";
 import { AiFillCaretDown } from "react-icons/ai";
 import { FaSignInAlt } from "react-icons/fa";
+import { FaTruck } from "react-icons/fa";
+import { is_logistics, is_plant } from "../Helpers/dept_helper";
+import { GiCrane } from "react-icons/gi";
+import { useDashboardType } from "../store/logisticsStore";
+
+// import scaffolding from "../assets/Images/scaffolding.png";
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const { setStatusFilter, setMultiStatusFilter } = useContext(AppContext);
   const [submenuOpen, setSubmenuOpen] = useState(false);
-
+  const [submenu1Open, setSubmenu1Open] = useState(false);
+  const { setDashboardType } = useDashboardType();
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
     navigate("/login");
   };
   const userInfo = useUserInfo();
+  const isLogistics = is_logistics(userInfo?.dept_code);
+  const isPlant = is_plant(userInfo?.dept_code);
+
   return (
     <div
       ref={ref}
@@ -54,34 +64,42 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
       <nav className={`p-4  ${!isOpen ? "space-y-7" : "space-y-4"}`}>
         <Link
           to="/"
-          className="flex gap-2 items-center min-h-10 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+          className={`flex items-center gap-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700
+      h-10 px-2
+      ${!isOpen ? "justify-center w-10" : "justify-start w-full"}
+    `}
         >
-          <FaHome />
-          {isOpen && <span>Home</span>}
+          <FaHome className="text-lg" />
+          {isOpen && <span className="whitespace-nowrap">Home</span>}
         </Link>
         <button
           onClick={() => setSubmenuOpen(!submenuOpen)}
           className="flex min-h-10 p-2  items-center gap-2  rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
         >
-          <IoDocumentText />
-
+          <GiCrane className="text-xl" />
           {isOpen && (
-            <span className="flex flex-1 items-center gap-2 w-1xs">
-              <span className=" break-words">Comparative Statements</span>
-              <span className="ml-auto text-gray-500 dark:text-gray-300 cursor-pointer">
+            <span className="flex flex-1 items-center gap-2">
+              <span className=" break-words">Plant - CS </span>
+              <span className="ml-auto flex gap-2 text-gray-500 dark:text-gray-300 cursor-pointer">
                 {submenuOpen ? <AiFillCaretUp /> : <AiFillCaretDown />}
+                {!isPlant ? <FaLock /> : ""}
               </span>
             </span>
           )}
         </button>
-        {submenuOpen && (
+        {isOpen && submenuOpen && (
           <div className="ml-6 mt-2 space-y-2">
             <Link
               to="/dashboard"
-              className="flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700  ${
+                !isPlant
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
               onClick={() => {
                 setStatusFilter("All");
                 setMultiStatusFilter([]);
+                setDashboardType("plant");
               }}
             >
               <MdSpaceDashboard />
@@ -89,9 +107,9 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             </Link>
 
             <Link
-              to="/particulars"
+              to="/particulars/1"
               className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !userInfo?.is_admin
+                !userInfo?.is_admin || !isPlant
                   ? "pointer-events-none opacity-50 cursor-not-allowed"
                   : ""
               }`}
@@ -104,10 +122,81 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
 
             <Link
               to="/receipts"
-              className="flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                !isPlant
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
             >
               <IoDocumentText />
-              {isOpen && <span>Statements</span>}
+              {isOpen && <span>Comparative Statements</span>}
+            </Link>
+          </div>
+        )}
+
+        <button
+          onClick={() => setSubmenu1Open(!submenu1Open)}
+          className="flex min-h-10 p-2  items-center gap-2  rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
+        >
+          <FaTruck />
+
+          {isOpen && (
+            <span className="flex flex-1 items-center gap-2 w-1xs">
+              <span className=" break-words">Logistics - CS</span>
+              <span className="ml-auto flex gap-2 text-gray-500 dark:text-gray-300 cursor-pointer">
+                {submenu1Open ? <AiFillCaretUp /> : <AiFillCaretDown />}
+                {!isLogistics ? <FaLock /> : ""}
+              </span>
+            </span>
+          )}
+        </button>
+        {isOpen && submenu1Open && (
+          <div className="ml-6 mt-2 space-y-2">
+            <Link
+              to="/dashboardlg"
+              className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                !isLogistics
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+              onClick={() => {
+                // setStatusFilter("All");
+                // setMultiStatusFilter([]);
+                setDashboardType("logistics");
+              }}
+            >
+              <MdSpaceDashboard />
+              {isOpen && <span>Dashboard</span>}
+            </Link>
+
+            <Link
+              to="/particulars/2"
+              className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                !userInfo?.is_admin
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }${
+                !isLogistics
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+            >
+              <HiDocumentText />
+              {isOpen && (
+                <>Particulars {!userInfo?.is_admin ? <FaLock /> : ""}</>
+              )}
+            </Link>
+
+            <Link
+              to="/lstatements"
+              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                !isLogistics
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+            >
+              <IoDocumentText />
+              {isOpen && <span>Comparative Statements</span>}
             </Link>
           </div>
         )}

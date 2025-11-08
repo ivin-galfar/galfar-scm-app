@@ -19,6 +19,7 @@ import { REACT_SERVER_URL } from "../../config/ENV";
 import Alerts from "../Components/Alerts";
 import { useStatementupdated } from "../store/statementStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
+import { useParams } from "react-router-dom";
 
 const Particulars = () => {
   const { particulars, setParticulars } = useContext(AppContext);
@@ -31,16 +32,17 @@ const Particulars = () => {
   const { showupdated, setshowupdated, resetshowupdated } =
     useStatementupdated();
   const userInfo = useUserInfo();
+  const { dept_id } = useParams();
 
   useEffect(() => {
     const loadParticulars = async () => {
       try {
-        const particulars = await fetchParticulars(userInfo);
+        const particulars = await fetchParticulars(userInfo, dept_id);
         setParticulars(particulars.Particulars);
       } catch (error) {}
     };
     loadParticulars();
-  }, [showupdated]);
+  }, [showupdated, dept_id]);
 
   const columnHelper = createColumnHelper();
   const columns = [
