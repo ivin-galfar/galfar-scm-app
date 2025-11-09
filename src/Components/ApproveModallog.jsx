@@ -179,7 +179,10 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
             )}{" "}
           {showtoast && formData.status == "rejected" && !errormessage && (
             <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-              <RxCross1 /> You have Rejected this Statement!
+              <div className="flex items-center gap-2">
+                <RxCross1 />
+                <span>You have Rejected this Statement!</span>
+              </div>
             </div>
           )}
           {/* {showtoast && lastAction == "review" && !errormessage && (
