@@ -477,9 +477,9 @@ const Dashboard = () => {
     const spacing = 10;
 
     const roleDisplayMap = {
-      HOD: "Mr.Pramoj.R",
-      GM: "Mr.Vijayan.C",
-      CEO: "Mr.Sridhar. C",
+      hod: "Mr.Pramoj.R",
+      gm: "Mr.Vijayan.C",
+      ceo: "Mr.Sridhar. C",
     };
     const approvalsStatus =
       formData?.approverdetails?.approverDetails?.reduce((acc, d) => {
@@ -487,7 +487,7 @@ const Dashboard = () => {
         return acc;
       }, {}) || {};
 
-    const rolesToShow = ["HOD", "GM", "CEO"];
+    const rolesToShow = ["hod", "gm", "ceo"];
     rolesToShow.forEach((dbRole, index) => {
       const rawStatus =
         approvalsStatus[dbRole] == "review"
@@ -496,7 +496,7 @@ const Dashboard = () => {
       const status =
         rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
       const displayName = roleDisplayMap[dbRole] || dbRole;
-      const displayRole = `(${dbRole})`;
+      const displayRole = `(${dbRole.toUpperCase()})`;
 
       const labelX = 20 + index * (labelWidth + spacing);
       const labelY = startYLabel + 25;
