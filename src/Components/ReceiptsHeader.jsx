@@ -458,18 +458,20 @@ const TableHeader = ({ isAdmin }) => {
                   </div>
                 ) : (
                   <div className="relative flex flex-wrap gap-2 max-w-full">
-                    {sharedTableData.formData.file?.map((fileurl, index) => (
-                      <a
-                        key={index}
-                        href={fileurl}
-                        target="_blank"
-                        download
-                        className="flex items-center gap-10 text-xs bg-blue-100 text-blue-700 px-2 py-1 max-w-[48%] rounded-md cursor-pointer hover:bg-blue-200 transition-all flex-shrink min-w-0 truncate"
-                      >
-                        <span>Attachment {index + 1}</span>
-                        <FaFileDownload size={16} />
-                      </a>
-                    ))}
+                    {sharedTableData.formData.file
+                      ?.slice(0, 4)
+                      .map((fileurl, index) => (
+                        <a
+                          key={index}
+                          href={fileurl}
+                          target="_blank"
+                          download
+                          className="flex items-center gap-10 text-xs bg-blue-100 text-blue-700 px-2 py-1 max-w-[48%] rounded-md cursor-pointer hover:bg-blue-200 transition-all flex-shrink min-w-0 truncate"
+                        >
+                          <span>Attachment {index + 1}</span>
+                          <FaFileDownload size={16} />
+                        </a>
+                      ))}
                     <span className="absolute -top-6 -right-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-bounce z-10">
                       {sharedTableData.formData.file?.length}
                     </span>

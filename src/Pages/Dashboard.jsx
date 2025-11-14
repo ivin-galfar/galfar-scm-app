@@ -536,11 +536,12 @@ const Dashboard = () => {
       doc.text(displayName, roleX, labelY + offsetY + 6);
       doc.text(displayRole, roleX + 5, labelY + offsetY + 12);
     });
-
+    const rightText = `Generated on: ${new Date().toLocaleString()}`;
     const footerPadding = 6;
     const pageCount = doc.internal.getNumberOfPages();
     const pageHeight = doc.internal.pageSize.height;
-    const extraSpacing = 10;
+    const rightWidth = doc.getTextWidth(rightText);
+
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(9);
@@ -550,12 +551,12 @@ const Dashboard = () => {
       doc.text(
         `System Generated Comparative Statement `,
         14,
-        pageHeight - footerPadding - extraSpacing
+        pageHeight - footerPadding
       );
 
       doc.text(
-        `Generated on: ${new Date().toLocaleString()}`,
-        14,
+        rightText,
+        pageWidth - rightWidth - 48,
         pageHeight - footerPadding
       );
 
