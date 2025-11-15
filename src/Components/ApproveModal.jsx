@@ -100,10 +100,12 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
         setShowToast(true);
         setComments("");
         setErrormessage("");
+        // setTimeout(() => {
+        //   setShowmodal(false);
+
+        // }, 500);
         setTimeout(() => {
           setShowmodal(false);
-        }, 500);
-        setTimeout(() => {
           setShowToast(false);
         }, 1500);
       } else {
