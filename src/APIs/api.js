@@ -53,28 +53,32 @@ export const feedReceipt = async ({ sharedTableData, userInfo }) => {
 
 export const updateReceipt = async ({
   sharedTableData,
-  selectedvendorindex,
-  selectedvendorreason,
+  selectedVendorIndex,
+  selectedVendorReason,
   userInfo,
 }) => {
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${userInfo.token}`,
-    },
-  };
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
 
-  const { data } = await axios.put(
-    `${REACT_SERVER_URL}/receipts/updatereceipt/${sharedTableData.formData.id}`,
-    {
-      formData: sharedTableData.formData,
-      tableData: sharedTableData["tableData"],
-      selectedIndex: selectedvendorindex,
-      selectedReason: selectedvendorreason,
-    },
-    config
-  );
-  return data;
+    const { data } = await axios.put(
+      `${REACT_SERVER_URL}/receipts/updatereceipt/${sharedTableData.formData.id}`,
+      {
+        formData: sharedTableData.formData,
+        tableData: sharedTableData["tableData"],
+        selectedIndex: selectedVendorIndex,
+        selectedReason: selectedVendorReason,
+      },
+      config
+    );
+    return data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const feedlgstatement = async ({ formData, tableData, userInfo }) => {

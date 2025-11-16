@@ -43,6 +43,8 @@ const AppContextProvider = ({ children }) => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [multiStatusFilter, setMultiStatusFilter] = useState([]);
   const [approverDetails, setApproverDetails] = useState([]);
+  const [editing, setEditing] = useState(false);
+
   return (
     <AppContext.Provider
       value={{
@@ -82,6 +84,8 @@ const AppContextProvider = ({ children }) => {
         setStatusFilter,
         approverDetails,
         setApproverDetails,
+        editing,
+        setEditing,
       }}
     >
       {children}

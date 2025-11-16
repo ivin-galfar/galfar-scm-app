@@ -11,18 +11,25 @@ import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { TiTick } from "react-icons/ti";
 import { RxCrossCircled } from "react-icons/rx";
-import { FaFileUpload } from "react-icons/fa";
+import { FaEdit, FaFileUpload } from "react-icons/fa";
 import { FaFileDownload } from "react-icons/fa";
 import fetchParticulars from "../APIs/ParticularsApi";
 import { FaTrash } from "react-icons/fa";
 import Alerts from "../Components/Alerts";
 import { useNavigate, useParams } from "react-router-dom";
+import { LiaSaveSolid } from "react-icons/lia";
+
 import {
   useClearStatementTable,
   useDeleteStatement,
+  useEdit,
+  userevertrequest,
   useSortVendors,
+  useUpdate,
   useUpdateQuantity,
 } from "../store/statementStore";
+import { updateReceipt } from "../APIs/api";
+import { useMutation } from "@tanstack/react-query";
 
 const TableHeader = ({ isAdmin }) => {
   const inputRef = useRef(null);
@@ -43,11 +50,15 @@ const TableHeader = ({ isAdmin }) => {
     newMr,
     setfreezeQuantity,
     freezequantity,
+    editing,
+    setEditing,
+    selectedVendorIndex,
+    selectedVendorReason,
   } = useContext(AppContext);
 
   const formData = sharedTableData?.formData;
   const userInfo = useUserInfo();
-  const [editing, setEditing] = useState(false);
+  // const [editing, setEditing] = useState(false);
   const [errormessage, setErrormessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [triggerdelete, setTriggerdelete] = useState(false);
@@ -57,7 +68,10 @@ const TableHeader = ({ isAdmin }) => {
   const { setSortVendors, resetSortVendors } = useSortVendors();
   const { setClearTable } = useClearStatementTable();
   const { deleted, resetDeleted, setDeleted } = useDeleteStatement();
-
+  const { isEdit, setIsEdit, resetIsEdit } = useEdit();
+  const { isReverted, setIsReverted, resetIsReverted } = userevertrequest();
+  // const [update, setUpdate] = useState(false);
+  const { isupdated, setIsupdated, revertisupdated } = useUpdate();
   const Asset =
     userInfo.role == "inita" || formData.type == "asset" ? true : false;
 
@@ -144,7 +158,10 @@ const TableHeader = ({ isAdmin }) => {
           formData: receipt.formData || {},
           tableData: receipt.tableData || [],
         });
-        setfreezeQuantity(receipt.formData?.status !== "review");
+        setfreezeQuantity(
+          receipt.formData?.status == "review" ||
+            receipt.formData?.status == "Pending For HOD"
+        );
       } catch (error) {
         console.log(error);
       }
@@ -190,7 +207,7 @@ const TableHeader = ({ isAdmin }) => {
         tableData: [],
       });
     }
-  }, [mrnumber]);
+  }, [mrnumber, isEdit]);
 
   let statusLogo = null;
   const status = sharedTableData.formData.status ?? null;
@@ -228,6 +245,99 @@ const TableHeader = ({ isAdmin }) => {
   } else {
     statusLogo = "";
   }
+  const updateReceiptMutation = useMutation({
+    mutationFn: updateReceipt,
+    onMutate: () => {
+      setErrormessage("");
+      setfreezeQuantity(false);
+    },
+    onSuccess: (data) => {
+      setfreezeQuantity(true);
+      setIsupdated();
+      setShowToast(true);
+      resetSortVendors();
+      setIsMRSelected(true);
+      setNewMr(false);
+      setParticularName([]);
+      setTimeout(() => {
+        setShowToast(false);
+        resetIsEdit();
+      }, 1500);
+
+      setSharedTableData((prev) => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          receiptupdated: new Date().toISOString(),
+        },
+      }));
+    },
+    onError: (error) => {
+      setShowToast(true);
+      let message = error?.response?.data?.message;
+      setErrormessage(message ? message : error.message);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 1500);
+    },
+  });
+
+  useEffect(() => {
+    if (isupdated) {
+      const updatedData = {
+        ...sharedTableData,
+        formData: {
+          ...sharedTableData.formData,
+          status: null,
+          sentforapproval: "pending",
+        },
+      };
+      setSharedTableData(updatedData);
+      updateReceiptMutation.mutate({
+        sharedTableData: updatedData,
+        selectedVendorIndex,
+        selectedVendorReason,
+        userInfo,
+      });
+    }
+  }, [isupdated]);
+  const handleEdit = async (cs_id, approvalstatus, status) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+      await axios.put(
+        `${REACT_SERVER_URL}/receipts/initiator/${cs_id}`,
+        { approvalstatus, status },
+        config
+      );
+      setSharedTableData((prev) => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          sentforapproval: "pending",
+          status: "reverted",
+        },
+      }));
+      setIsEdit();
+      setShowToast(true);
+      setIsReverted();
+      setErrormessage("");
+      setTimeout(() => {
+        setShowToast(false);
+        resetIsReverted();
+        revertisupdated();
+      }, 1500);
+    } catch (error) {
+      console.log(error);
+      let message = error?.response?.data?.message;
+      setErrormessage(message ? message : error.message);
+    }
+  };
 
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -259,6 +369,10 @@ const TableHeader = ({ isAdmin }) => {
           filename: [...(prev.formData.filename || []), ...newFileNames],
         },
       }));
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 1500);
     } catch (error) {
       setShowToast(true);
       setErrormessage(error.message);
@@ -407,7 +521,13 @@ const TableHeader = ({ isAdmin }) => {
             <div className="flex items-center gap-2">
               <label
                 htmlFor="receiptfile"
-                className={`flex items-center gap-2 text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-200 transition-all`}
+                className={`flex items-center gap-2 text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg ${
+                  sharedTableData.formData?.created_at != null &&
+                  sharedTableData.formData?.status != "review" &&
+                  !isEdit
+                    ? "cursor-auto"
+                    : "cursor-pointer"
+                } hover:bg-blue-200 transition-all`}
               >
                 Upload File
                 <FaFileUpload size={20} />
@@ -427,7 +547,8 @@ const TableHeader = ({ isAdmin }) => {
                   onChange={handleFileUpload}
                   disabled={
                     sharedTableData.formData?.created_at != null &&
-                    sharedTableData.formData?.status != "review"
+                    sharedTableData.formData?.status != "review" &&
+                    !isEdit
                   }
                   // disabled={sharedTableData.formData?.file?.length > 0}
                 />
@@ -567,7 +688,13 @@ const TableHeader = ({ isAdmin }) => {
               min={0}
               step={1}
               value={formData?.qty ?? ""}
-              disabled={freezequantity}
+              // disabled={freezequantity && !isEdit}
+              disabled={
+                (freezequantity &&
+                  !isEdit &&
+                  sharedTableData.formData.status != "review") ||
+                (sharedTableData.formData.status == null && isupdated)
+              }
               onChange={handleChange("qty")}
               className="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm 
       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -596,6 +723,12 @@ const TableHeader = ({ isAdmin }) => {
                 type="text"
                 value={formData?.hiringname ?? ""}
                 ref={inputRef}
+                disabled={
+                  (freezequantity &&
+                    !isEdit &&
+                    sharedTableData.formData.status != "review") ||
+                  (sharedTableData.formData.status == null && isupdated)
+                }
                 onChange={handleChange("hiringname")}
                 className="border-b border-gray-500 outline-none text-sm font-medium text-center px-2 py-1"
               />
@@ -609,18 +742,38 @@ const TableHeader = ({ isAdmin }) => {
         </div>
         <div className="w-1/3 flex justify-end">
           {isAdmin &&
+            formData.status != "review" &&
             selectedmr !== "" &&
             selectedmr !== null &&
             selectedmr !== "default" && (
-              <button
-                onClick={() => setTriggerdelete(true)}
-                aria-label="Delete selected MR"
-                className="flex items-center px-2 py-0.5 bg-red-500 text-white text-sm rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition cursor-pointer"
-                type="button"
-              >
-                <FaTrash className="mr-1" size={14} />
-                Delete Statement
-              </button>
+              <div className="flex gap-2">
+                <button
+                  className={`flex items-center px-2 py-0.5 text-sm rounded transition focus:outline-none focus:ring-2 ${isEdit ? "bg-blue-500 text-white hover:bg-blue-700 focus:ring-blue-500 cursor-pointer" : "bg-blue-400 text-white opacity-60 cursor-not-allowed"}`}
+                  type="button"
+                  disabled={
+                    formData.status != "Pending For HOD" &&
+                    formData.status !== "reverted" &&
+                    !isEdit
+                  }
+                  onClick={setIsupdated}
+                >
+                  <LiaSaveSolid className="mr-1" size={14} />
+                  Update
+                </button>
+                <button
+                  onClick={() => handleEdit(formData.id, "pending", "reverted")}
+                  className={`flex items-center px-2 py-0.5 bg-cyan-500 text-white text-sm rounded hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition ${formData.status !== "review" && formData.status !== "reverted" && formData.status !== null && formData.status != "Pending For HOD" ? "bg-blue-400 text-white opacity-60 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-700 focus:ring-blue-500 cursor-pointer"}`}
+                  disabled={
+                    formData.status !== null &&
+                    formData.status != "Pending For HOD" &&
+                    formData.status !== "reverted"
+                  }
+                  type="button"
+                >
+                  <FaEdit className="mr-1" size={14} />
+                  Edit/Revert
+                </button>
+              </div>
             )}
         </div>
       </div>
@@ -636,6 +789,12 @@ const TableHeader = ({ isAdmin }) => {
                   value={formData?.projectvalue ?? ""}
                   onChange={handleChange("projectvalue")}
                   className="border-b border-gray-400 outline-none px-1 text-sm"
+                  disabled={
+                    (freezequantity &&
+                      !isEdit &&
+                      sharedTableData.formData.status != "review") ||
+                    (sharedTableData.formData.status == null && isupdated)
+                  }
                 />
               ) : (
                 formData?.projectvalue
@@ -649,6 +808,12 @@ const TableHeader = ({ isAdmin }) => {
                     type="text"
                     value={formData?.locationvalue ?? ""}
                     onChange={handleChange("locationvalue")}
+                    disabled={
+                      (freezequantity &&
+                        !isEdit &&
+                        sharedTableData.formData.status != "review") ||
+                      (sharedTableData.formData.status == null && isupdated)
+                    }
                     className="border-b border-gray-400 outline-none px-1 text-sm"
                   />
                 ) : (
@@ -665,6 +830,12 @@ const TableHeader = ({ isAdmin }) => {
                 <input
                   type="text"
                   value={formData?.equipmrnovalue ?? ""}
+                  disabled={
+                    (freezequantity &&
+                      !isEdit &&
+                      sharedTableData.formData.status != "review") ||
+                    (sharedTableData.formData.status == null && isupdated)
+                  }
                   onChange={handleChange("equipmrnovalue")}
                   className="border-b border-gray-400 outline-none px-1 text-sm"
                 />
@@ -678,6 +849,12 @@ const TableHeader = ({ isAdmin }) => {
                 <input
                   type="text"
                   value={formData?.emrefnovalue ?? ""}
+                  disabled={
+                    (freezequantity &&
+                      !isEdit &&
+                      sharedTableData.formData.status != "review") ||
+                    (sharedTableData.formData.status == null && isupdated)
+                  }
                   onChange={handleChange("emrefnovalue")}
                   className="border-b border-gray-400 outline-none px-1 text-sm"
                 />
@@ -703,6 +880,12 @@ const TableHeader = ({ isAdmin }) => {
                       : ""
                   }
                   onChange={handleChange("requireddatevalue")}
+                  disabled={
+                    (freezequantity &&
+                      !isEdit &&
+                      sharedTableData.formData.status != "review") ||
+                    (sharedTableData.formData.status == null && isupdated)
+                  }
                   className="border-b border-gray-400 outline-none px-1 text-sm w-full max-w-[160px]"
                 />
               ) : (
@@ -724,6 +907,12 @@ const TableHeader = ({ isAdmin }) => {
                 <input
                   type="text"
                   value={formData?.requirementdurationvalue ?? ""}
+                  disabled={
+                    (freezequantity &&
+                      !isEdit &&
+                      sharedTableData.formData.status != "review") ||
+                    (sharedTableData.formData.status == null && isupdated)
+                  }
                   onChange={handleChange("requirementdurationvalue")}
                   className="border-b border-gray-400 outline-none px-1 text-sm w-full max-w-[160px]"
                 />
@@ -734,9 +923,16 @@ const TableHeader = ({ isAdmin }) => {
           </div>
         </div>
       )}
-      {showToast && !errormessage && (
+      {showToast && !errormessage && isReverted && isEdit && (
         <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-          ✅ Attachments uploaded!
+          ✅ Statement Reverted Successfully!
+        </div>
+      )}
+      {showToast && !errormessage && !isReverted && (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+          {!isEdit
+            ? "✅ Attachments uploaded!"
+            : "Statement is Successfully updated!"}
         </div>
       )}
       {showToast && errormessage && (

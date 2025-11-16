@@ -309,16 +309,22 @@ const Dashboard = () => {
         { align: "center" }
       );
     }
-    if (formData.type == "asset") {
-      doc.text(
-        `COMPARATIVE STATEMENT - ${formData.hiringname}`,
-        105,
-        formData.type == "asset" ? 35 : 25,
-        { align: "center" }
-      );
-      doc.text(`Asset Purchase`, 105, formData.type == "asset" ? 45 : 25, {
-        align: "center",
-      });
+    if (formData.type === "asset") {
+      const title = `COMPARATIVE STATEMENT - ${formData.hiringname}`;
+      const subtitle = `Asset Purchase`;
+
+      const maxWidth = 120;
+
+      const wrappedTitle = doc.splitTextToSize(title, maxWidth);
+      const wrappedSubtitle = doc.splitTextToSize(subtitle, maxWidth);
+
+      const centerX = 105;
+
+      const titleY = 35;
+      const subtitleY = titleY + wrappedTitle.length * 7 + 1;
+
+      doc.text(wrappedTitle, centerX, titleY, { align: "center" });
+      doc.text(wrappedSubtitle, centerX, subtitleY, { align: "center" });
     }
     doc.setFontSize(10);
     if (formData.type != "asset") {

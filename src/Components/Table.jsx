@@ -14,7 +14,9 @@ import VendorSelectionTooltip from "./VendorSelectionTooltip";
 import Currency from "../Helpers/Currency";
 import {
   useClearStatementTable,
+  useEdit,
   useSortVendors,
+  useUpdate,
 } from "../store/statementStore";
 
 export default function VerticalTable({ showcalc }) {
@@ -36,6 +38,8 @@ export default function VerticalTable({ showcalc }) {
   const [particular, setParticular] = useState([]);
   const { cleartable, resetCleartable } = useClearStatementTable();
   const { sortvendors } = useSortVendors();
+  const { isEdit } = useEdit();
+  const { isupdated } = useUpdate();
 
   useEffect(() => {
     if (sharedTableData.formData.sentforapproval !== "pending") {
@@ -277,7 +281,12 @@ export default function VerticalTable({ showcalc }) {
                       : value
                   }
                   placeholder={getPlaceholder()}
-                  disabled={freezequantity}
+                  disabled={
+                    (freezequantity &&
+                      !isEdit &&
+                      sharedTableData.formData.status != "review") ||
+                    (sharedTableData.formData.status == null && isupdated)
+                  }
                   onChange={(e) =>
                     handleInputChange(row.index, vendorKey, e.target.value)
                   }
@@ -310,6 +319,7 @@ export default function VerticalTable({ showcalc }) {
     selectedmr == "default" ||
     selectedmr == "" ||
     selectedmr === null ||
+    isEdit ||
     sharedTableData.formData?.status == "review"
       ? ""
       : vendorInfoWithTotal,
@@ -546,6 +556,7 @@ export default function VerticalTable({ showcalc }) {
           </tr>
 
           {(sharedTableData.formData.sentforapproval == "yes" ||
+            sharedTableData.formData.sentforapproval == "pending" ||
             !userInfo?.is_admin ||
             sortvendors) &&
             vendorTotals.some((val) => val > 0) && (
@@ -568,7 +579,8 @@ export default function VerticalTable({ showcalc }) {
                     <label
                       className={`relative group inline-block select-none ${
                         sharedTableData.formData.sentforapproval === "yes" &&
-                        sharedTableData.formData?.status !== "review"
+                        sharedTableData.formData?.status !== "review" &&
+                        sharedTableData.formData?.status !== "reverted"
                           ? "cursor-auto"
                           : "cursor-pointer"
                       }`}
@@ -581,7 +593,10 @@ export default function VerticalTable({ showcalc }) {
                           if (
                             sharedTableData.formData.sentforapproval !==
                               "yes" ||
-                            sharedTableData.formData?.status === "review"
+                            sharedTableData.formData?.status === "review" ||
+                            sharedTableData.formData?.status === "reverted" ||
+                            sharedTableData.formData?.status ===
+                              "Pending For HOD"
                           ) {
                             setSelectedVendorIndex(index);
                           }
@@ -599,7 +614,7 @@ export default function VerticalTable({ showcalc }) {
                           selectedVendorIndex === index
                             ? "bg-green-500 text-white"
                             : "bg-gray-200 text-gray-700  hover:bg-gray-300"
-                        } ${sharedTableData.formData.sentforapproval === "yes" && sharedTableData.formData?.status !== "review" ? "cursor-auto" : ""}`}
+                        } ${sharedTableData.formData.sentforapproval === "yes" && sharedTableData.formData?.status !== "review" && sharedTableData.formData?.status !== "reverted" ? "cursor-auto" : ""}`}
                       >
                         {selectedVendorIndex === index ? (
                           <span className="flex  items-center ">
@@ -624,7 +639,7 @@ export default function VerticalTable({ showcalc }) {
                           </span>
                         ) : (
                           <span
-                            className={`${sharedTableData.formData.sentforapproval === "yes" && sharedTableData.formData?.status !== "review" ? "cursor-not-allowed" : ""}`}
+                            className={`${sharedTableData.formData.sentforapproval === "yes" && sharedTableData.formData?.status !== "review" && sharedTableData.formData?.status !== "reverted" && sharedTableData.formData?.status !== "Pending For HOD" ? "cursor-not-allowed" : ""}`}
                           >
                             Select
                           </span>

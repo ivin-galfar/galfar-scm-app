@@ -12,7 +12,7 @@ const ReasonForSelection = ({
   setreqApprovalstatus,
   selectedVendorIndex,
 }) => {
-  const { setSharedTableData, selectedVendorReason, sharedTableData } =
+  const { setSharedTableData, setfreezeQuantity, sharedTableData } =
     useContext(AppContext);
   const userInfo = useUserInfo();
 
@@ -25,7 +25,7 @@ const ReasonForSelection = ({
 
   const reqApproval = async (cs_id) => {
     let effectiveId = cs_id;
-
+    setfreezeQuantity(true);
     if (!effectiveId) {
       try {
         const config = {
@@ -39,7 +39,7 @@ const ReasonForSelection = ({
           config
         );
         const receipts = response.data?.receipts || [];
-        const lastReceipt = receipts.at(-1); // cleaner than slice(-1)[0]
+        const lastReceipt = receipts.at(-1);
         effectiveId = lastReceipt?.formData?.id;
       } catch (error) {
         console.error("Failed to fetch receipts:", error);

@@ -9,7 +9,8 @@ import ReasonForSelection from "./ReasonForSelection";
 import fetchStatments from "../APIs/StatementsApi";
 import { useMutation } from "@tanstack/react-query";
 import { feedReceipt, updateReceipt } from "../APIs/api";
-import { useSortVendors } from "../store/statementStore";
+import { useEdit, useSortVendors } from "../store/statementStore";
+import { useNavigate } from "react-router-dom";
 
 const Receipts = () => {
   const userInfo = useUserInfo();
@@ -17,7 +18,8 @@ const Receipts = () => {
   const [errormessage, setErrormessage] = useState("");
   const [showcalc, setShowcalc] = useState(false);
   const [showmodal, setShowmodal] = useState(false);
-
+  const { isEdit, resetIsEdit } = useEdit();
+  const navigate = useNavigate();
   const {
     sharedTableData,
     setSharedTableData,
@@ -35,6 +37,7 @@ const Receipts = () => {
     setfreezeQuantity,
     selectedVendorReason,
     setSelectedVendorReason,
+    freezequantity,
   } = useContext(AppContext);
   const Asset = userInfo.role == "inita" ? true : false;
 
@@ -59,6 +62,7 @@ const Receipts = () => {
       setTimeout(() => {
         setShowToast(false);
       }, 1500);
+      navigate(`/receipts/${data.receipt.receipt.id}`, { replace: true });
     },
     onError: (error) => {
       setShowToast(true);
@@ -77,6 +81,7 @@ const Receipts = () => {
       setfreezeQuantity(false);
     },
     onSuccess: (data) => {
+      resetIsEdit();
       setShowToast(true);
       resetSortVendors();
       setIsMRSelected(true);
@@ -213,21 +218,33 @@ const Receipts = () => {
     (isStatusSet == "Pending for CEO" && userInfo.role != "ceo") ||
     (isStatusSet == "Pending for GM" && userInfo.role != "gm") ||
     (isStatusSet == "Pending For HOD" && userInfo.role != "hod") ||
-    (isStatusSet == "Pending For HOD" && userInfo.role == "initiator") ||
+    (isStatusSet == "reverted" &&
+      userInfo.role !== "inita" &&
+      userInfo.role !== "inith") ||
     isStatusSet == "Approved" ||
     isStatusSet == "Rejected"
   ) {
     statusclass = "bg-gray-400 cursor-not-allowed";
   }
+
   const buttonClass = isSentForApproval
-    ? statusclass || "bg-blue-600  cursor-pointer"
+    ? statusclass
+      ? statusclass
+      : sharedTableData.formData.status !== "reverted"
+        ? "bg-blue-600 cursor-pointer"
+        : ""
     : sharedTableData.formData?.type !== null &&
         isStatusSet !== undefined &&
         isStatusSet !== "review"
-      ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-      : sharedTableData.formData.receiptupdated != null
+      ? !isEdit
+        ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+        : ""
+      : sharedTableData.formData.receiptupdated != null &&
+          isStatusSet !== "review"
         ? "bg-blue-600 rounded shadow  cursor-pointer"
-        : "";
+        : !isEdit && sharedTableData?.formData?.status !== undefined
+          ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+          : "";
 
   const buttonText = isSentForApproval
     ? isStatusSet
@@ -235,11 +252,15 @@ const Receipts = () => {
         ? "Approve / Reject"
         : sharedTableData.formData.status === "approved"
           ? "Approved"
-          : sharedTableData.formData.status
+          : sharedTableData.formData.status !== "reverted"
+            ? sharedTableData.formData.status
+            : ""
       : "Already Requested"
     : sharedTableData.tableData.length == 0
       ? ""
-      : "Request Approval";
+      : !isEdit
+        ? "Request Approval"
+        : "";
   const isReview = sharedTableData.formData.status === "review";
 
   return (
@@ -273,8 +294,12 @@ const Receipts = () => {
                     >
                       <button
                         onClick={() => handleRemoveFile(index)}
-                        disabled={sharedTableData.formData?.created_at != null}
-                        className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${sharedTableData.formData?.created_at != null ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                        disabled={
+                          sharedTableData.formData?.created_at != null &&
+                          !isEdit &&
+                          sharedTableData.formData?.status != "review"
+                        }
+                        className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${sharedTableData.formData?.created_at != null && !isEdit && sharedTableData.formData?.status != "review" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                         title="Remove file"
                       >
                         ✕
@@ -409,7 +434,9 @@ const Receipts = () => {
             >
               {sharedTableData.formData.status !== "review"
                 ? "Create"
-                : "Update"}
+                : !isEdit
+                  ? "update"
+                  : ""}
             </button>
             <button
               onClick={handleReset}

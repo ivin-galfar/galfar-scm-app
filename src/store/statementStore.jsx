@@ -28,3 +28,21 @@ export const useSortVendors = create((set) => ({
   setSortVendors: () => set(() => ({ sortvendors: true })),
   resetSortVendors: () => set(() => ({ sortvendors: false })),
 }));
+
+export const useEdit = create((set) => ({
+  isEdit: false,
+  setIsEdit: () => set(() => ({ isEdit: true })),
+  resetIsEdit: () => set(() => ({ isEdit: false })),
+}));
+
+export const userevertrequest = create((set) => ({
+  isReverted: false,
+  setIsReverted: () => set(() => ({ isReverted: true })),
+  resetIsReverted: () => set(() => ({ isReverted: false })),
+}));
+
+export const useUpdate = create((set) => ({
+  isupdated: false,
+  setIsupdated: () => set(() => ({ isupdated: true })),
+  revertisupdated: () => set(() => ({ isupdated: false })),
+}));
