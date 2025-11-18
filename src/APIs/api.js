@@ -210,7 +210,7 @@ export const fetchallstatements = async (userInfo) => {
 };
 
 export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
-  const { project, cargo_details, status } = formData;
+  const { project, cargo_details, status, shipment_no, rejectedby } = formData;
 
   let project_code = 1;
   if (project != "plant") {
@@ -233,6 +233,8 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
         },
         project_code,
         cargo_details,
+        shipment_no,
+        rejectedby,
       },
       config
     );

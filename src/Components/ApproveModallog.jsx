@@ -69,30 +69,12 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
         config
       );
 
-      if (updatedstatus.toLowerCase() == "review") {
+      if (updatedstatus.toLowerCase() == "rejected") {
         updatedFormData = {
-          cargo_details: "",
-          gross_weight: "",
-          chargeable_weight: "",
-          description: "",
-          supplier: "",
-          scopeofwork: "",
-          mode: "",
-          date: "",
-          po: "",
-          project: "",
-          shipment_no: "",
-          status: "",
-          sentforapproval: "",
-          recommendation_reason: "",
-          file: [],
-          filename: [],
-          created_at: "",
-          edited_count: 0,
-          lastupdated: null,
+          ...formData,
+          rejectedby: userInfo.role,
+          status: updatedstatus,
         };
-        setTableData([]);
-        navigate(`/lstatements`, { replace: true });
       }
 
       setFormData(updatedFormData);
@@ -178,8 +160,10 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
               </div>
             )}{" "}
           {showtoast && formData.status == "rejected" && !errormessage && (
-            <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-              <RxCross1 /> You have Rejected this Statement!
+            <div className="fixed  top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+              <div className="flex gap-2 justify-center items-center">
+                <RxCross1 /> You have Rejected this Statement!
+              </div>
             </div>
           )}
           {/* {showtoast && lastAction == "review" && !errormessage && (

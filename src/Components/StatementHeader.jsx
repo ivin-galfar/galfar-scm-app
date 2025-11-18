@@ -129,20 +129,42 @@ const StatementHeader = () => {
               : "";
           }
         }
-
+        const allForwarderColumns = new Set();
         const normalizedTableData = filteredresponse.data?.tableData.map(
           (table) => ({
             id: table.id,
-            r_id: table.particulars.r_id,
-            particulars: table.particulars.particulars,
-            forwarders: table.particulars.forwarders || {},
+            r_id: table.row_id,
+            particulars: table.particulars,
+            forwarders: table.forwarders || {},
+            vendorcol: table.vendorcol,
           })
         );
-        setTableData(normalizedTableData);
+        normalizedTableData.forEach((row) => {
+          Object.keys(row.forwarders || {}).forEach((key) =>
+            allForwarderColumns.add(key)
+          );
+        });
+        //for avoid collapsing if empty cell is there in first row
+        const sortedColumns = [...allForwarderColumns].sort();
+        const fullyNormalized = normalizedTableData.map((row) => {
+          const orderedForwarders = {};
+          [...sortedColumns].forEach((col) => {
+            orderedForwarders[col] = row.forwarders[col] ?? "";
+          });
+          return {
+            ...row,
+            forwarders: orderedForwarders,
+          };
+        });
+        // console.log(fullyNormalized);
+        console.log(fullyNormalized);
+
+        setTableData(fullyNormalized);
         setFormData(filteredresponse.data?.formData);
         const fetchedparticular = response.data.tableData.map(
-          (table) => table.particulars.particulars
+          (table) => table.particulars
         );
+        console.log(tableData);
 
         setParticularValue(fetchedparticular);
       } catch (error) {
@@ -176,6 +198,8 @@ const StatementHeader = () => {
         filename: [],
         created_at: "",
         lastupdated: null,
+        rejectedby: "",
+        createdby: "",
       });
     }
   };
@@ -205,6 +229,8 @@ const StatementHeader = () => {
         filename: [],
         created_at: "",
         lastupdated: null,
+        rejectedby: "",
+        createdby: "",
       });
     }
   }, [cs_no]);
@@ -320,6 +346,8 @@ const StatementHeader = () => {
                   filename: [],
                   lastupdated: null,
                   created_at: "",
+                  rejectedby: "",
+                  createdby: "",
                 });
                 navigate(`/lstatements`, { replace: true });
               }}
@@ -513,7 +541,7 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Supplier:</label>
+                  <label htmlFor={field.name}>Supplier: M/S.</label>
                   <input
                     id={field.name}
                     name={field.name}

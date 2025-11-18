@@ -84,7 +84,6 @@ const LogisticsTable = () => {
     const requiredFields = {
       cargo_details: "Cargo Details",
       gross_weight: "Gross Weight",
-      chargeable_weight: "Chargeable Weight",
       description: "Description",
       supplier: "Supplier",
       scopeofwork: "Scope of Work",
@@ -127,6 +126,7 @@ const LogisticsTable = () => {
     const updatedFormData = {
       ...formData,
       status: "created",
+      createdby: userInfo?.email,
       sentforapproval: true,
     };
 
@@ -149,6 +149,7 @@ const LogisticsTable = () => {
   };
   const getIndex = (id) => id?.split("_")[1];
   const handleChange = (rowIndex, colIndex, value, particular, column) => {
+    const vendorKey = `vendor_${colIndex}`;
     setTableData((prev) => {
       const exists = prev.some(
         (row) => getIndex(row.r_id) === getIndex(rowIndex)
@@ -159,7 +160,11 @@ const LogisticsTable = () => {
             ? {
                 ...row,
                 particulars: particular,
-                forwarders: { ...row.forwarders, [column]: value },
+                forwarders: { ...row.forwarders, [vendorKey]: value },
+                vendorcols: {
+                  ...(row.vendorcols ?? {}),
+                  [vendorKey]: column,
+                },
               }
             : row
         );
@@ -169,7 +174,10 @@ const LogisticsTable = () => {
           {
             r_id: rowIndex,
             particulars: particular,
-            forwarders: { [column]: value },
+            forwarders: { [vendorKey]: value },
+            vendorcols: {
+              [vendorKey]: column,
+            },
           },
         ];
       }
@@ -178,26 +186,13 @@ const LogisticsTable = () => {
 
   useEffect(() => {
     if ((csselected && !newstatement) || cs_no) {
-      const fetchedColumns = tableData?.map((t) => t.forwarders ?? {});
-
+      const fetchedColumns = tableData?.map((t) => t.vendorcol ?? {});
       const columnNames =
-        fetchedColumns?.length > 0
-          ? [
-              ...new Set(
-                fetchedColumns.flatMap((obj) => Object.keys(obj ?? {}))
-              ),
-            ]
-          : [];
-
+        fetchedColumns?.length > 0 ? [...new Set(fetchedColumns.flat())] : [];
       setColumns(["Forwarder", ...columnNames]);
-      // const columnValues =
-      //   fetchedColumns.length > 0
-      //     ? fetchedColumns.map((obj) => Object.values(obj))
-      //     : [];
-
-      // setColumnvalues(columnValues);
     }
   }, [tableData]);
+
   const removeColumn = (column, index) => {
     const updatedColumns = columns.filter((col) => col != column);
     setColumns(updatedColumns);
@@ -337,11 +332,14 @@ const LogisticsTable = () => {
             <SiTicktick /> Statement Created successfully!
           </div>
         )}
-      {showtoast && !errormessage && formData.edited_count > 0 && (
-        <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
-          <SiTicktick /> Statement Edited successfully!
-        </div>
-      )}
+      {showtoast &&
+        !errormessage &&
+        formData.edited_count > 0 &&
+        formData.status !== "rejected" && (
+          <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
+            <SiTicktick /> Statement Edited successfully!
+          </div>
+        )}
 
       {showtoast && errormessage && (
         <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
@@ -414,38 +412,41 @@ const LogisticsTable = () => {
               return (
                 <tr key={index} className="border-b text-center">
                   <td className="px-4 py-2">{particular}</td>
-                  {columns.slice(1).map((column, colIndex) => (
-                    <td key={colIndex} className="px-4 py-2 border-l">
-                      {userInfo.is_admin ? (
-                        <input
-                          type="text"
-                          disabled={formData.sentforapproval || isFreeze}
-                          value={
-                            tableData.find((r) => r?.r_id === rowIndex)
-                              ?.forwarders?.[column] ?? ""
-                          }
-                          className={`w-1/2 px-2 py-1 text-center  font-semibold border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all placeholder:text-gray-400`}
-                          onChange={(e) =>
-                            handleChange(
-                              rowIndex,
-                              colIndex,
-                              e.target.value,
-                              particular,
-                              column
-                            )
-                          }
-                        />
-                      ) : (
-                        <>
-                          {" "}
-                          <div className="max-w-2xl px-2 py-1 text-center break-words whitespace-normal ">
-                            {tableData.find((r) => r?.r_id === rowIndex)
-                              ?.forwarders?.[column] ?? "-"}
-                          </div>
-                        </>
-                      )}
-                    </td>
-                  ))}
+                  {columns.slice(1).map((column, colIndex) => {
+                    const columnIndex = `vendor_${colIndex}`;
+                    return (
+                      <td key={colIndex} className="px-4 py-2 border-l">
+                        {userInfo.is_admin ? (
+                          <input
+                            type="text"
+                            disabled={formData.sentforapproval || isFreeze}
+                            value={
+                              tableData.find((r) => r?.r_id === rowIndex)
+                                ?.forwarders?.[columnIndex] ?? ""
+                            }
+                            className={`w-1/2 px-2 py-1 text-center  font-semibold border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all placeholder:text-gray-400`}
+                            onChange={(e) =>
+                              handleChange(
+                                rowIndex,
+                                colIndex,
+                                e.target.value,
+                                particular,
+                                column
+                              )
+                            }
+                          />
+                        ) : (
+                          <>
+                            {" "}
+                            <div className="max-w-2xl px-2 py-1 text-center break-words whitespace-normal ">
+                              {tableData.find((r) => r?.r_id === rowIndex)
+                                ?.forwarders?.[columnIndex] ?? "-"}
+                            </div>
+                          </>
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}
@@ -516,8 +517,8 @@ const LogisticsTable = () => {
                         onClick={() =>
                           handleRemoveFile(index, formData, setFormData)
                         }
-                        disabled={formData?.created_at != ""}
-                        className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${formData?.created_at != "" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                        disabled={formData?.created_at != "" && !isEditing}
+                        className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${formData?.created_at != "" && !isEditing ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                         title="Remove file"
                       >
                         ✕
