@@ -12,6 +12,8 @@ export const expectedstatus = (currentrole) => {
     statustext = "pending for ceo";
   } else if (currentrole == "ceo") {
     statustext = "approved";
+  } else {
+    statustext = "rejected";
   }
 
   return statustext;

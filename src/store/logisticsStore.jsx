@@ -45,18 +45,11 @@ export const useStatement = create((set) => ({
     filename: [],
     created_at: "",
     lastupdated: null,
+    rejectedby: "",
+    createdby: "",
   },
   tableData: [],
 
-  // setFormData: (data) =>
-  // set((state) => ({ formData: { ...state.formData, ...data } })),
-  // setFormData: (updater) =>
-  //   set((state) => ({
-  //     formData:
-  //       typeof updater === "function"
-  //         ? updater(state.formData)
-  //         : { ...state.formData, ...updater },
-  //   })),
   setFormData: (updater) =>
     set((state) => ({
       formData:
@@ -65,7 +58,6 @@ export const useStatement = create((set) => ({
           : { ...state.formData, ...updater },
     })),
 
-  // setTableData: (data) => set({ tableData: data }),
   setTableData: (updater) =>
     set((state) => ({
       tableData:
@@ -93,6 +85,8 @@ export const useStatement = create((set) => ({
         filename: [],
         created_at: "",
         lastupdated: null,
+        rejectedby: "",
+        createdby: "",
       },
       tableData: [],
     }),

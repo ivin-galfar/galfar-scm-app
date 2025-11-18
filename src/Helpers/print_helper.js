@@ -3,7 +3,9 @@ import galfarlogo from "../assets/Images/logo-new.png";
 import { autoTable } from "jspdf-autotable";
 
 export const handlePrint = (formData, tableData) => {
-  const doc = new jsPDF();
+  const doc = new jsPDF({
+    orientation: "landscape",
+  });
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const logoWidth = 60;
@@ -16,7 +18,9 @@ export const handlePrint = (formData, tableData) => {
 
   doc.setFontSize(12);
 
-  doc.text(`LOGISTICS COMPARISON STATEMENT`, 105, 22, { align: "center" });
+  doc.text(`LOGISTICS COMPARISON STATEMENT`, pageWidth / 2, 22, {
+    align: "center",
+  });
 
   doc.setFontSize(10);
   const labelXleft = 14;
@@ -34,10 +38,10 @@ export const handlePrint = (formData, tableData) => {
   doc.text("Gross Weight:", labelXleft, 57);
   doc.text(String(formData.gross_weight), valueXleft, 57);
 
-  const startX = 90;
-  const valueXcenter = 115;
-  doc.text("Supplier:", startX, 39);
-  doc.text(formData.supplier, valueXcenter, 39);
+  const startX = 120;
+  const valueXcenter = 150;
+  doc.text("Supplier: M/S.", startX, 38);
+  doc.text(formData.supplier, valueXcenter, 38);
 
   doc.text("Description:", startX, 45);
   doc.text(formData.description, valueXcenter, 45);
@@ -48,34 +52,36 @@ export const handlePrint = (formData, tableData) => {
   doc.text("Mode:", startX, 57);
   doc.text(formData.mode, valueXcenter, 57);
 
-  const labelX = 160;
-  const valueX = 175;
+  const labelX = 230;
+  const valueX = 250;
 
-  doc.text("Date:", labelX, 40);
-  doc.text(new Date(formData.date).toLocaleDateString(), valueX, 40);
+  doc.text("CS No.:", labelX, 38);
+  doc.text(formData.id.toString(), valueX, 38);
 
-  doc.text("Po:", labelX, 45);
-  doc.text(formData.po, valueX, 45);
+  doc.text("Date:", labelX, 45);
+  doc.text(new Date(formData.date).toLocaleDateString(), valueX, 45);
 
-  doc.text("Project:", labelX, 50);
-  doc.text(formData.project, valueX, 50);
+  doc.text("Po:", labelX, 51);
+  doc.text(formData.po, valueX, 51);
 
-  const vendorNames = Array.from(
-    new Set(
-      tableData?.flatMap((r) => Object.keys(r.particulars.forwarders)) || {}
-    )
-  );
+  doc.text("Project:", labelX, 57);
+  doc.text(formData.project, valueX, 57);
+
+  const vendorNames = tableData
+    .map((vendor) => vendor.vendorcol)
+    .reduce((max, arr) => (arr.length > max.length ? arr : max));
 
   const headerRow1 = [
     { content: "Forwarders", rowSpan: 1 },
     ...vendorNames.map((name) => name),
   ];
   const tableBody = tableData.map((row) => {
-    const forwarders = row.particulars.particulars;
-    const forwarderValues = vendorNames.map(
-      (name) => row.particulars.forwarders[name] || 0
+    const forwarderValues = Object.keys(row.forwarders || {}).map(
+      (key) => row.forwarders[key] ?? 0
     );
-    return [forwarders, ...forwarderValues];
+    const particulars = row.particulars;
+
+    return [particulars, ...forwarderValues];
   });
   const selected_vendor_index = formData.selected_vendor_index;
   const tableHead = [headerRow1];
@@ -104,7 +110,7 @@ export const handlePrint = (formData, tableData) => {
 
   tableBody.push(selectedRow);
   autoTable(doc, {
-    startY: 80,
+    startY: 65,
     head: tableHead,
     body: tableBody,
     margin: { left: 10, right: 10 },
@@ -112,8 +118,9 @@ export const handlePrint = (formData, tableData) => {
     styles: {
       fontSize: 10,
       overflow: "linebreak",
-      cellPadding: { top: 3, right: 1, bottom: 3, left: 0.5 },
+      cellPadding: { top: 2, right: 1, bottom: 2, left: 0.5 },
       cellWidth: "wrap",
+      halign: "center",
     },
     headStyles: { fillColor: [200, 200, 200], textColor: 0 },
     columnStyles: {
@@ -124,19 +131,43 @@ export const handlePrint = (formData, tableData) => {
   const startYNotes =
     doc.previousAutoTable?.finalY || doc.lastAutoTable?.finalY || 65;
   const notesX = 14;
-  const notesWidth = 185;
 
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(0);
+  doc.setFont("helvetica", "normal");
+  doc.text("Notes:", notesX, startYNotes + 5);
 
-  doc.setFont("helvetica", "bold");
-  doc.text("Notes:", notesX, startYNotes + 18);
+  const defaultNotesRaw =
+    "1- Above rates are after negotiation. 2- MOFAIC charges, BOE charges and other government charges shall be at actual.3- The above rates are based on current estimation and there shall be changes subject to final weight and dimension.";
 
+  const defaultNotes = defaultNotesRaw
+    .split(/\d-\s*/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const bulletX = notesX + 4;
+
+  let y = startYNotes + 12;
+  const maxWidth = 200;
+  const lineHeight = 6;
+  let totalLines = 0;
+
+  defaultNotes.forEach((note) => {
+    const wrapped = doc.splitTextToSize(`• ${note}`, maxWidth);
+    doc.text(wrapped, bulletX, y);
+    y += wrapped.length * lineHeight;
+    totalLines += wrapped.length;
+  });
   doc.setFont("helvetica", "normal");
   const notesText = formData.recommendation_reason || "";
-  const splitNotes = doc.splitTextToSize(notesText, notesWidth - 4);
-  doc.text(splitNotes, notesX, startYNotes + 25);
+  const splitNotes = doc.splitTextToSize(notesText, maxWidth);
+
+  splitNotes.some((line) => line.trim() != "") &&
+    splitNotes.forEach((line) => {
+      doc.text(`• ${line}`, bulletX, y);
+      y += lineHeight;
+      totalLines += 1;
+    });
 
   const pageHeight = doc.internal.pageSize.height;
   const roleDisplayMap = {
@@ -147,7 +178,7 @@ export const handlePrint = (formData, tableData) => {
     ceo: "Mr.Sridhar. C",
   };
 
-  const rolesToShow = ["Incharge", "PM", "GM", "FM", "CEO"];
+  const rolesToShow = ["incharge", "pm", "gm", "fm", "ceo"];
 
   const status = {};
   const currentStatus = formData.status?.toLowerCase() || "";
@@ -189,14 +220,27 @@ export const handlePrint = (formData, tableData) => {
   const spacing1 = sectionWidth / (totalApprovers - 1);
   const baseX = 30;
   const approverStartY1 = pageHeight - 100;
-  const offsetY = 8;
+  let offsetY = 60;
+
+  if (totalLines >= 8) {
+    offsetY = 80;
+  } else if (totalLines >= 6) {
+    offsetY = 70;
+  } else if (totalLines >= 5) {
+    offsetY = 65;
+  } else {
+    offsetY = 50;
+  }
 
   rolesToShow.forEach((dbRole, index) => {
     const roleStatus = status[dbRole];
     if (!roleStatus) return;
 
     const displayName = roleDisplayMap[dbRole] || dbRole;
-    const displayRole = `(${dbRole})`;
+    const displayRole =
+      dbRole !== "incharge"
+        ? `(${dbRole.toUpperCase()})`
+        : "(Logistics Incharge)";
 
     const centerX = baseX + index * spacing1;
     const statusWidth = doc.getTextWidth(roleStatus);
@@ -239,29 +283,22 @@ export const handlePrint = (formData, tableData) => {
     );
   });
 
-  const footerPadding = 6;
+  const footerPadding = 2;
   const pageCount = doc.internal.getNumberOfPages();
-  const extraSpacing = 10;
+
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.setFontSize(9);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
 
     doc.text(
       `System Generated Comparative Statement `,
       14,
-      pageHeight - footerPadding - extraSpacing
-    );
-
-    doc.text(
-      `Generated on: ${new Date().toLocaleString()}`,
-      14,
       pageHeight - footerPadding
     );
-
     doc.text(
-      `Page ${i} of ${pageCount}`,
+      `Prepared By ${formData?.createdby?.split("@")[0]}`,
       pageWidth - 14,
       pageHeight - footerPadding,
       {

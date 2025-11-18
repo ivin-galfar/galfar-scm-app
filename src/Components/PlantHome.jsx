@@ -102,7 +102,6 @@ const PlantHome = () => {
           s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase())
       )
     : expectedStatuses.filter((s) => s.startsWith("pending"));
-  console.log(expectedStatuses);
 
   useEffect(() => {
     const fetchStatementsdetails = async () => {
