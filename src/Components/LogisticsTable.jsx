@@ -461,7 +461,7 @@ const LogisticsTable = () => {
               {columns.slice(1).map((column, colIndex) => (
                 <td key={colIndex} className="px-4 py-2 border-l border-t">
                   <label
-                    className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || !formData.status?.includes("pending") ? "cursor-pointer" : "cursor-auto"} `}
+                    className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || (!formData.status?.includes("pending") && isEditing) ? "cursor-pointer" : "cursor-auto"} `}
                   >
                     <input
                       type="radio"
