@@ -296,16 +296,12 @@ const Dashboard = () => {
 
     doc.setFontSize(12);
     if (formData.type != "asset") {
-      doc.text(
-        `COMPARATIVE STATEMENT - ${formData.hiringname}`,
-        105,
-        formData.type == "asset" ? 35 : 25,
-        { align: "center" }
-      );
+      doc.text(`COMPARATIVE STATEMENT `, 105, 22, { align: "center" });
+      doc.text(` ${formData.hiringname}`, 105, 30, { align: "center" });
       doc.text(
         `(${formData?.type?.charAt(0).toUpperCase() + formData?.type?.slice(1)})`,
         105,
-        formData.type == "hiring" ? 32 : 22,
+        formData.type == "hiring" ? 35 : 22,
         { align: "center" }
       );
     }
@@ -333,10 +329,10 @@ const Dashboard = () => {
     }
     doc.text(`Quantity: ${formData.qty}`, 14, 40);
     if (formData.type != "asset") {
-      doc.text(`EQUIP MR NO: ${formData.equipmrnovalue}`, 105, 40, {
+      doc.text(`EQUIP MR NO: ${formData.equipmrnovalue}`, 105, 42, {
         align: "center",
       });
-      doc.text(`EM REF NO: ${formData.emrefnovalue}`, 105, 46, {
+      doc.text(`EM REF NO: ${formData.emrefnovalue}`, 105, 48, {
         align: "center",
       });
       doc.text(
