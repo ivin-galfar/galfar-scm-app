@@ -461,7 +461,7 @@ const LogisticsTable = () => {
               {columns.slice(1).map((column, colIndex) => (
                 <td key={colIndex} className="px-4 py-2 border-l border-t">
                   <label
-                    className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || (!formData.status?.includes("pending") && isEditing) ? "cursor-pointer" : "cursor-auto"} `}
+                    className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || (!formData.status?.includes("pending") && isEditing) || userInfo.is_admin ? "cursor-pointer" : "cursor-auto"} `}
                   >
                     <input
                       type="radio"
@@ -560,10 +560,21 @@ const LogisticsTable = () => {
           >
             Notes:
           </label>
+          <ul className="list-disc ml-6 text-gray-600 mb-2">
+            <li>Above Rates are after Negotiation.</li>
+            <li>
+              MOFAIC charges, BOE charges and other government charges shall be
+              at the actual.
+            </li>
+            <li>
+              The above rates are based on current estimation and there shall be
+              changes subject to final weight and dimension.
+            </li>
+          </ul>
           <textarea
             id="notes"
             className=" w-full border h-32 border-gray-300 focus:ring-2 p-2 rounded-md focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-            placeholder="Add your notes here..."
+            placeholder="Additional notes here..."
             onChange={(e) =>
               setFormData({
                 ...formData,
