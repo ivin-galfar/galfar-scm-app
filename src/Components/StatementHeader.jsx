@@ -156,15 +156,12 @@ const StatementHeader = () => {
             forwarders: orderedForwarders,
           };
         });
-        // console.log(fullyNormalized);
-        console.log(fullyNormalized);
 
         setTableData(fullyNormalized);
         setFormData(filteredresponse.data?.formData);
         const fetchedparticular = response.data.tableData.map(
           (table) => table.particulars
         );
-        console.log(tableData);
 
         setParticularValue(fetchedparticular);
       } catch (error) {
@@ -313,6 +310,9 @@ const StatementHeader = () => {
       });
     }
   };
+  const inputClass = userInfo.is_admin
+    ? "border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-64"
+    : "border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-64";
 
   return (
     <div>
@@ -432,7 +432,7 @@ const StatementHeader = () => {
                         shipment_no: value,
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -455,13 +455,13 @@ const StatementHeader = () => {
                     type="text"
                     onChange={(e) => {
                       const value = e.target.value;
-                      field.handleChange(value); // updates react-form state
+                      field.handleChange(value);
                       setFormData((prev) => ({
                         ...prev,
-                        cargo_details: value, // updates Zustand state
+                        cargo_details: value,
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -490,7 +490,7 @@ const StatementHeader = () => {
                         gross_weight: value,
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -519,7 +519,7 @@ const StatementHeader = () => {
                         chargeable_weight: value,
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -531,7 +531,7 @@ const StatementHeader = () => {
           <div className="top-0 text-center  font-semibold mb-5">
             Logistics Comparison Statement
           </div>
-          <div className="flex flex-col ">
+          <div className="flex flex-col w-96">
             <form.Field
               name="supplier"
               validators={{
@@ -555,7 +555,7 @@ const StatementHeader = () => {
                         supplier: value, // updates Zustand state
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -584,7 +584,7 @@ const StatementHeader = () => {
                         scopeofwork: value,
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -613,7 +613,7 @@ const StatementHeader = () => {
                         description: value,
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -642,7 +642,7 @@ const StatementHeader = () => {
                         mode: value,
                       }));
                     }}
-                    className="border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -675,7 +675,7 @@ const StatementHeader = () => {
                         date: value, // updates Zustand state
                       }));
                     }}
-                    className="border-b-2 w-36 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -704,7 +704,7 @@ const StatementHeader = () => {
                         po: value,
                       }));
                     }}
-                    className="border-b-2 w-36 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -733,7 +733,7 @@ const StatementHeader = () => {
                         project: value,
                       }));
                     }}
-                    className="border-b-2 w-36 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200"
+                    className={inputClass}
                     disabled={isFreeze}
                   />
                 </div>
@@ -778,14 +778,16 @@ const StatementHeader = () => {
                     <MdModeEdit />
                     Edit Statement
                   </button>
-
-                  <IoMdSave
-                    className={`text-xl text-gray-600 cursor-pointer hover:text-gray-800 ${formData.created_at == "" || formData.status != "created" ? "invisible" : ""}`}
+                  <button
+                    className={`text-xl text-gray-600 ${isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at == "" || formData.status != "created" ? "invisible" : ""}`}
                     onClick={() => {
                       handleSave();
                       resetIsEditing();
                     }}
-                  />
+                    disabled={!isEditing}
+                  >
+                    <IoMdSave />
+                  </button>
                 </div>
               </div>
             ) : (

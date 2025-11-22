@@ -148,7 +148,7 @@ export const handlePrint = (formData, tableData) => {
   const bulletX = notesX + 4;
 
   let y = startYNotes + 12;
-  const maxWidth = 200;
+  const maxWidth = 220;
   const lineHeight = 6;
   let totalLines = 0;
 
@@ -160,14 +160,26 @@ export const handlePrint = (formData, tableData) => {
   });
   doc.setFont("helvetica", "normal");
   const notesText = formData.recommendation_reason || "";
-  const splitNotes = doc.splitTextToSize(notesText, maxWidth);
 
-  splitNotes.some((line) => line.trim() != "") &&
-    splitNotes.forEach((line) => {
-      doc.text(`• ${line}`, bulletX, y);
+  let sentences = notesText
+    .split(/(?<=\."|\n)/g)
+    .map((s) => s.trim())
+    .filter((s) => s !== "");
+
+  sentences.forEach((sentence) => {
+    const wrapped = doc.splitTextToSize(sentence, maxWidth);
+
+    wrapped.forEach((line, index) => {
+      if (index === 0) {
+        doc.text(`• ${line}`, bulletX, y);
+      } else {
+        doc.text(line, bulletX + 4, y);
+      }
+
       y += lineHeight;
       totalLines += 1;
     });
+  });
 
   const pageHeight = doc.internal.pageSize.height;
   const roleDisplayMap = {
@@ -288,7 +300,7 @@ export const handlePrint = (formData, tableData) => {
 
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.setFontSize(7);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
 

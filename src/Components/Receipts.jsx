@@ -9,7 +9,7 @@ import ReasonForSelection from "./ReasonForSelection";
 import fetchStatments from "../APIs/StatementsApi";
 import { useMutation } from "@tanstack/react-query";
 import { feedReceipt, updateReceipt } from "../APIs/api";
-import { useEdit, useSortVendors } from "../store/statementStore";
+import { useEdit, useSortVendors, useUpdate } from "../store/statementStore";
 import { useNavigate } from "react-router-dom";
 
 const Receipts = () => {
@@ -40,6 +40,7 @@ const Receipts = () => {
     freezequantity,
   } = useContext(AppContext);
   const Asset = userInfo.role == "inita" ? true : false;
+  const { setIsupdated } = useUpdate();
 
   const { setSortVendors, resetSortVendors } = useSortVendors();
   const ReceiptMutation = useMutation({
@@ -81,6 +82,7 @@ const Receipts = () => {
       setfreezeQuantity(false);
     },
     onSuccess: (data) => {
+      setIsupdated();
       resetIsEdit();
       setShowToast(true);
       resetSortVendors();
@@ -243,7 +245,9 @@ const Receipts = () => {
           isStatusSet !== "review"
         ? "bg-blue-600 rounded shadow  cursor-pointer"
         : !isEdit && sharedTableData?.formData?.status !== undefined
-          ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+          ? isStatusSet == "review"
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
           : "";
 
   const buttonText = isSentForApproval
@@ -259,7 +263,9 @@ const Receipts = () => {
     : sharedTableData.tableData.length == 0
       ? ""
       : !isEdit
-        ? "Request Approval"
+        ? sharedTableData.formData.status !== "review"
+          ? "Request Approval"
+          : "under Review"
         : "";
   const isReview = sharedTableData.formData.status === "review";
 
@@ -359,7 +365,7 @@ const Receipts = () => {
                       setShowmodal(true);
                     }}
                     disabled={statusclass != ""}
-                    className={`px-4 py-2 ${buttonText == "Approved" || buttonText == "Rejected" ? "ml-96" : "ml-80"} max-h-10 text-white font-semibold  ${
+                    className={`px-4 py-2 ${buttonText == "Approved" || buttonText == "Rejected" ? "ml-96" : buttonText == "under Review" ? "ml-90" : "ml-80"} max-h-10 text-white font-semibold  ${
                       buttonClass
                     } ${buttonText == "Already Requested" ? "cursor-not-allowed" : ""} focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75  transition duration-300 ease-in-out"
                   `}
@@ -454,7 +460,7 @@ const Receipts = () => {
           {errormessage}
         </div>
       )}
-      {showToast && isMRSelected && !errormessage && (
+      {showToast && isMRSelected && !errormessage && !isReview && (
         <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ Receipt details added successfully!
         </div>

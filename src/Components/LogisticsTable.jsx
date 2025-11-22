@@ -161,8 +161,8 @@ const LogisticsTable = () => {
                 ...row,
                 particulars: particular,
                 forwarders: { ...row.forwarders, [vendorKey]: value },
-                vendorcols: {
-                  ...(row.vendorcols ?? {}),
+                vendorcol: {
+                  ...(row.vendorcol ?? {}),
                   [vendorKey]: column,
                 },
               }
@@ -175,7 +175,7 @@ const LogisticsTable = () => {
             r_id: rowIndex,
             particulars: particular,
             forwarders: { [vendorKey]: value },
-            vendorcols: {
+            vendorcol: {
               [vendorKey]: column,
             },
           },
@@ -185,7 +185,7 @@ const LogisticsTable = () => {
   };
 
   useEffect(() => {
-    if ((csselected && !newstatement) || cs_no) {
+    if ((csselected && !newstatement) || (cs_no && !isEditing)) {
       const fetchedColumns = tableData?.map((t) => t.vendorcol ?? {});
       const columnNames =
         fetchedColumns?.length > 0 ? [...new Set(fetchedColumns.flat())] : [];
@@ -346,7 +346,7 @@ const LogisticsTable = () => {
           <MdOutlineErrorOutline /> {errormessage}
         </div>
       )}
-      {newstatement && (
+      {(newstatement || isEditing) && (
         <div className="flex gap-2 mb-2 text-center items-center">
           <div className="flex flex-col  w-64">
             <input
@@ -461,7 +461,7 @@ const LogisticsTable = () => {
               {columns.slice(1).map((column, colIndex) => (
                 <td key={colIndex} className="px-4 py-2 border-l border-t">
                   <label
-                    className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || (!formData.status?.includes("pending") && isEditing) || userInfo.is_admin ? "cursor-pointer" : "cursor-auto"} `}
+                    className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || (!formData.status?.includes("pending") && isEditing) || (userInfo.is_admin && !formData.status?.includes("pending")) ? "cursor-pointer" : "cursor-auto"} `}
                   >
                     <input
                       type="radio"
