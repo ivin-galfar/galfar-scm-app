@@ -37,7 +37,6 @@ const StatementHeader = () => {
   const { setErrorMessage, clearErrorMessage } = useErrorMessage();
   const { setShowToast, resetshowtoast } = useToast();
   const { setCsSelected } = useSelectCS();
-  // const { csselectedval, setCsSelectedval } = useSelectCSValue();
   const { columns, resetcolumns } = usecolumns();
   const { cs_no } = useParams();
   const navigate = useNavigate();
@@ -822,8 +821,8 @@ const StatementHeader = () => {
                           download
                           className="flex items-center gap-10 text-xs bg-blue-100 text-blue-700 px-2 py-1 max-w-[48%] rounded-md cursor-pointer hover:bg-blue-200 transition-all flex-shrink min-w-0 truncate"
                         >
-                          <span>Attachment {index + 1}</span>
-                          <FaFileDownload size={16} />
+                          <span>Download Attachment {index + 1}</span>
+                          <FaFileDownload size={16} className="relative" />
                         </a>
                       ))}
                       <span className="absolute -top-5 right-0 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-bounce z-10">

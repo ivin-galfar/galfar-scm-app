@@ -473,28 +473,38 @@ const TableHeader = ({ isAdmin }) => {
             className={`flex items-center gap-2 ${!newMr ? "invisible" : ""}`}
           >
             {
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <label
                   htmlFor="templateSelect"
-                  className="text-sm font-medium text-gray-700 ml-5"
+                  className="text-sm font-medium text-gray-700"
                 >
                   Choose Template:
                 </label>{" "}
-                <div className="w-full max-w-xs">
+                <div className="w-full max-w-42">
                   {" "}
                   <select
                     id="templateSelect"
                     value={particularname}
                     onChange={(e) => setParticularName(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white overflow-hidden"
+                    className="block w-full px-2 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white overflow-hidden"
                   >
                     <option value="">Select Template</option>
                     {Array.isArray(particulars) &&
-                      particulars.map((template, index) => (
-                        <option key={template.id} value={template.id}>
-                          {template.template}
-                        </option>
-                      ))}
+                      particulars.map((template, index) => {
+                        const displayText =
+                          template.template.length > 30
+                            ? template.template.slice(0, 20) + "..."
+                            : template.template;
+                        return (
+                          <option
+                            key={template.id}
+                            value={template.id}
+                            className="w-10"
+                          >
+                            {displayText}
+                          </option>
+                        );
+                      })}
                   </select>
                 </div>
               </div>
@@ -502,7 +512,7 @@ const TableHeader = ({ isAdmin }) => {
           </div>
         </div>
         <div className="flex-1 flex justify-center mr-35">
-          <h2 className="text-xl font-medium uppercase text-center p-2 ml-25">
+          <h2 className="text-xl font-medium uppercase text-center p-2 ml-5">
             GALFAR ENGINEERING & CONTRACTING WLL EMIRATES
           </h2>
         </div>
@@ -511,10 +521,11 @@ const TableHeader = ({ isAdmin }) => {
       </div>
       <div className="flex justify-between items-center w-full relative">
         <div className="w-1/3" />
-
-        <h3 className="text-md font-medium text-center absolute left-1/2 transform -translate-x-1/2 italic">
-          COMPARATIVE STATEMENT
-        </h3>
+        <div className="flex w-1/4">
+          <h3 className="text-md font-medium text-center left-1/2 ml-10 absolute transform -translate-x-1/2 italic">
+            COMPARATIVE STATEMENT
+          </h3>
+        </div>
 
         <div className="flex w-1/4 justify-between">
           {userInfo?.is_admin ? (

@@ -281,3 +281,69 @@ export const fetchStatement = async (userInfo, cs_id) => {
     throw message;
   }
 };
+
+export const fetchReceipt = async (id, userInfo) => {
+  if (id && id != "default") {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+      const response = await axios.get(
+        `${REACT_SERVER_URL}/receipts/${id}`,
+        config
+      );
+      const receipt = response.data;
+      return receipt;
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    return [];
+  }
+};
+
+export const fetchReceiptCount = async ({
+  expectedStatuses,
+  userInfo,
+  status,
+  multiStatus,
+  searchcs,
+}) => {
+  let type = null;
+
+  if (userInfo?.is_admin) {
+    type = userInfo?.role == "inita" ? "asset" : "hiring";
+  }
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/receipts/totalreceipts/`,
+      {
+        ...config,
+        params: {
+          type,
+          expectedStatuses: expectedStatuses?.length
+            ? expectedStatuses.join(",")
+            : null,
+          statusfilter: status != "All" ? status : null,
+          multiStatus: multiStatus?.length ? multiStatus.join(",") : null,
+          searchcs,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

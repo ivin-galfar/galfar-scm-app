@@ -46,3 +46,20 @@ export const useUpdate = create((set) => ({
   setIsupdated: () => set(() => ({ isupdated: true })),
   revertisupdated: () => set(() => ({ isupdated: false })),
 }));
+
+export const usePagination = create((set) => ({
+  pagination: { pageIndex: 0, pageSize: 20 },
+  setPageIndex: (pageIndex) =>
+    set((state) => ({
+      pagination: { ...state.pagination, pageIndex },
+    })),
+  setPageSize: (pageSize) =>
+    set((state) => ({
+      pagination: { ...state.pagination, pageSize },
+    })),
+}));
+
+export const usetotalReceipts = create((set) => ({
+  receiptscount: 0,
+  setReceiptsCount: (count) => set({ receiptscount: count }),
+}));

@@ -13,6 +13,7 @@ import { IoDocumentText, IoWarningOutline } from "react-icons/io5";
 import fetchParticulars from "../APIs/ParticularsApi";
 import { RxCross1 } from "react-icons/rx";
 import { useDashboardType } from "../store/logisticsStore";
+import { usePagination } from "../store/statementStore";
 
 const PlantHome = () => {
   const {
@@ -30,6 +31,8 @@ const PlantHome = () => {
     setfreezeQuantity,
   } = useContext(AppContext);
   const userInfo = useUserInfo();
+  const { setPageSize } = usePagination();
+
   const statusMapping = {
     inita: [
       "Pending for HOD",
@@ -37,6 +40,8 @@ const PlantHome = () => {
       "Pending for CEO",
       "Approved",
       "Rejected",
+      "review",
+      "reverted",
       "",
     ],
     inith: [
@@ -45,33 +50,27 @@ const PlantHome = () => {
       "Pending for CEO",
       "Approved",
       "Rejected",
-      "",
-    ],
-    initlg: [
-      "Pending for HOD",
-      "Pending for GM",
-      "Pending for CEO",
-      "Approved",
-      "Rejected",
+      "review",
+      "reverted",
       "",
     ],
     hod: [
-      "Pending for HOD",
-      "Pending for GM",
-      "Pending for CEO",
+      "Pending For HOD",
+      "Pending For GM",
+      "Pending For CEO",
       "Rejected",
       "Approved",
     ],
     gm: [
+      "Pending For HOD",
       "Pending for GM",
-      "Pending for HOD",
       "Pending for CEO",
       "Approved",
       "Rejected",
     ],
     ceo: [
+      "Pending For HOD",
       "Pending for GM",
-      "Pending for HOD",
       "Pending for CEO",
       "Approved",
       "Rejected",
@@ -171,9 +170,11 @@ const PlantHome = () => {
               if (userInfo?.is_admin) {
                 setStatusFilter("review");
                 setMultiStatusFilter([]);
+                setPageSize(20);
               } else {
                 setStatusFilter("");
                 setMultiStatusFilter(pendingStatuses);
+                setPageSize(20);
               }
             }}
           >
@@ -201,6 +202,7 @@ const PlantHome = () => {
                   onClick={() => {
                     setStatusFilter("review");
                     setMultiStatusFilter([]);
+                    setPageSize(20);
                   }}
                 >
                   <div className="flex items-center gap-4">
@@ -238,6 +240,7 @@ const PlantHome = () => {
                 onClick={() => {
                   setStatusFilter("Approved");
                   setMultiStatusFilter([]);
+                  setPageSize(20);
                 }}
               >
                 <div className="flex items-center gap-4">
@@ -255,6 +258,7 @@ const PlantHome = () => {
                 onClick={() => {
                   setStatusFilter("Rejected");
                   setMultiStatusFilter([]);
+                  setPageSize(20);
                 }}
               >
                 <div className="flex items-center gap-4">
@@ -272,6 +276,7 @@ const PlantHome = () => {
                 onClick={() => {
                   setStatusFilter("All");
                   setMultiStatusFilter([]);
+                  setPageSize(20);
                 }}
               >
                 <div className="flex items-center gap-4">
@@ -359,7 +364,7 @@ const PlantHome = () => {
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500 italic">No recent receipts</p>
+            <p className="text-sm text-gray-500 italic">No recent Statements</p>
           )}
         </ul>
       </div>
