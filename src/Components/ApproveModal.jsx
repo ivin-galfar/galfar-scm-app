@@ -199,7 +199,9 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
             sharedTableData.formData.status == "Rejected" &&
             !errormessage && (
               <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-                <RxCross1 /> You have Rejected this Statement!
+                <div className="flex gap-2 justify-center items-center">
+                  <RxCross1 /> You have Rejected this Statement!
+                </div>
               </div>
             )}
           {showToast && lastAction == "review" && !errormessage && (

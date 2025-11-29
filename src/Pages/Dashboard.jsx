@@ -9,7 +9,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../Components/Context";
 import fetchStatments from "../APIs/StatementsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
 import Alerts from "../Components/Alerts";
 import { REACT_SERVER_URL } from "../../config/ENV";
@@ -20,10 +20,20 @@ import { autoTable } from "jspdf-autotable";
 import galfarlogo from "../assets/Images/logo-new.png";
 import { IoWarningOutline } from "react-icons/io5";
 import { useToggleAsset } from "../store/assetStore";
-import { useDeleteStatement } from "../store/statementStore";
+import {
+  useDeleteStatement,
+  usePagination,
+  usetotalReceipts,
+} from "../store/statementStore";
 import { useDashboardType } from "../store/logisticsStore";
 import DashboardButton from "../Components/DashboardButton";
 import { is_logistics, is_plant } from "../Helpers/dept_helper";
+import {
+  fetchReceipt,
+  fetchReceiptCount,
+  fetchStatement,
+  loginUser,
+} from "../APIs/api";
 const Dashboard = () => {
   const {
     receipts,
@@ -46,9 +56,11 @@ const Dashboard = () => {
   const userInfo = useUserInfo();
   const { dashboardType, setDashboardType, resetDashboardType } =
     useDashboardType();
+  const { pagination, setPageIndex, setPageSize } = usePagination();
 
   const isLogistics = is_logistics(userInfo?.dept_code);
-
+  const location = useLocation();
+  const { receiptscount, setReceiptsCount } = usetotalReceipts();
   const isPlant = is_plant(userInfo?.dept_code);
   const statusProgress = {
     "Pending For HOD": 20,
@@ -66,6 +78,8 @@ const Dashboard = () => {
       "Pending for CEO",
       "Approved",
       "Rejected",
+      "review",
+      "reverted",
       "",
     ],
     inith: [
@@ -74,6 +88,8 @@ const Dashboard = () => {
       "Pending for CEO",
       "Approved",
       "Rejected",
+      "review",
+      "reverted",
       "",
     ],
     hod: [
@@ -121,8 +137,23 @@ const Dashboard = () => {
           await fetchStatments({
             expectedStatuses,
             userInfo,
+            module: location.pathname,
+            page: pagination.pageIndex,
+            limit: pagination.pageSize,
+            status: statusFilter,
+            multiStatus: multiStatusFilter,
+            search: searchcs,
           });
 
+        const totalcount = await fetchReceiptCount({
+          expectedStatuses,
+          userInfo,
+          status: statusFilter,
+          multiStatus: multiStatusFilter,
+          searchcs: searchcs,
+        });
+
+        setReceiptsCount(totalcount.receipts_count);
         setAllReceipts(filteredReceipts);
         setReqMrno(reqMrValues);
         setReceipts(categorizedReceipts);
@@ -134,96 +165,105 @@ const Dashboard = () => {
     };
 
     fetchReceipts();
-  }, [deleted]);
-  useEffect(() => {
-    if (!Array.isArray(allreceipts) || allreceipts.length === 0) return;
-    if (!userInfo?.token) return;
-
-    const needsEnrichment = allreceipts.some((r) => {
-      const details = r.formData?.approverdetails;
-      return !Array.isArray(details) || details.length === 0;
-    });
-
-    if (!needsEnrichment) return;
-
-    const fetchApproversComments = async () => {
-      try {
-        const settledResults = await Promise.allSettled(
-          allreceipts.map(async (receipt) => {
-            if (receipt?.formData?.comments_count > 0) {
-              try {
-                const config = {
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${userInfo.token}`,
-                  },
-                };
-                const res = await axios.get(
-                  `${REACT_SERVER_URL}/receipts/approverdetails/${receipt.formData.id}`,
-                  config
-                );
-                return {
-                  ...receipt,
-                  formData: {
-                    ...receipt.formData,
-                    approverdetails: res.data || [],
-                  },
-                };
-              } catch (err) {
-                console.error(
-                  `Error fetching approver for ${receipt.formData.id}`,
-                  err
-                );
-                return {
-                  ...receipt,
-                  formData: { ...receipt.formData, approverdetails: [] },
-                };
-              }
-            }
-            return {
-              ...receipt,
-              formData: { ...receipt.formData, approverdetails: [] },
-            };
-          })
-        );
-
-        const enrichedReceipts = settledResults.map((res, i) =>
-          res.status === "fulfilled"
-            ? res.value
-            : {
-                ...allreceipts[i],
-                formData: { ...allreceipts[i].formData, approverdetails: [] },
-              }
-        );
-        setAllReceipts(enrichedReceipts);
-        setReceipts((prevReceipts) =>
-          prevReceipts.map((r) => {
-            const enriched = enrichedReceipts.find(
-              (er) => er?.formData?.id === r?.formData?.id
-            );
-            return {
-              ...r,
-              formData: {
-                ...r.formData,
-                approverdetails: enriched?.formData?.approverdetails || [],
-              },
-            };
-          })
-        );
-        setApproverDetails(enrichedReceipts);
-        setApproversFetched(true);
-      } catch (err) {
-        console.error("Error enriching receipts:", err);
-      }
-    };
-
-    fetchApproversComments();
   }, [
+    deleted,
+    pagination.pageSize,
+    pagination.pageIndex,
     statusFilter,
-    userInfo,
-    approversFetched,
-    !approversFetched ? allreceipts : "",
+    multiStatusFilter,
+    searchcs,
   ]);
+
+  // useEffect(() => {
+  //   if (!Array.isArray(allreceipts) || allreceipts.length === 0) return;
+  //   if (!userInfo?.token) return;
+
+  //   const needsEnrichment = allreceipts.some((r) => {
+  //     const details = r.formData?.approverdetails;
+  //     return !Array.isArray(details) || details.length === 0;
+  //   });
+
+  //   if (!needsEnrichment) return;
+
+  //   const fetchApproversComments = async () => {
+  //     try {
+  //       const settledResults = await Promise.allSettled(
+  //         allreceipts.map(async (receipt) => {
+  //           if (receipt?.formData?.comments_count > 0) {
+  //             try {
+  //               const config = {
+  //                 headers: {
+  //                   "Content-Type": "application/json",
+  //                   Authorization: `Bearer ${userInfo.token}`,
+  //                 },
+  //               };
+  //               const res = await axios.get(
+  //                 `${REACT_SERVER_URL}/receipts/approverdetails/${receipt.formData.id}`,
+  //                 config
+  //               );
+  //               return {
+  //                 ...receipt,
+  //                 formData: {
+  //                   ...receipt.formData,
+  //                   approverdetails: res.data || [],
+  //                 },
+  //               };
+  //             } catch (err) {
+  //               console.error(
+  //                 `Error fetching approver for ${receipt.formData.id}`,
+  //                 err
+  //               );
+  //               return {
+  //                 ...receipt,
+  //                 formData: { ...receipt.formData, approverdetails: [] },
+  //               };
+  //             }
+  //           }
+  //           return {
+  //             ...receipt,
+  //             formData: { ...receipt.formData, approverdetails: [] },
+  //           };
+  //         })
+  //       );
+  //       console.log(settledResults.map((res, i) => res));
+
+  //       const enrichedReceipts = settledResults.map((res, i) =>
+  //         res.status === "fulfilled"
+  //           ? res.value
+  //           : {
+  //               ...allreceipts[i],
+  //               formData: { ...allreceipts[i].formData, approverdetails: [] },
+  //             }
+  //       );
+  //       setAllReceipts(enrichedReceipts);
+  //       setReceipts((prevReceipts) =>
+  //         prevReceipts.map((r) => {
+  //           const enriched = enrichedReceipts.find(
+  //             (er) => er?.formData?.id === r?.formData?.id
+  //           );
+  //           return {
+  //             ...r,
+  //             formData: {
+  //               ...r.formData,
+  //               approverdetails: enriched?.formData?.approverdetails || [],
+  //             },
+  //           };
+  //         })
+  //       );
+  //       setApproverDetails(enrichedReceipts);
+  //       setApproversFetched(true);
+  //     } catch (err) {
+  //       console.error("Error enriching receipts:", err);
+  //     }
+  //   };
+
+  //   fetchApproversComments();
+  // }, [
+  //   statusFilter,
+  //   userInfo,
+  //   approversFetched,
+  //   !approversFetched ? allreceipts : "",
+  // ]);
 
   const handleDelete = async (mr) => {
     try {
@@ -281,9 +321,24 @@ const Dashboard = () => {
     return { totals, vats, netPrices };
   };
 
-  const handlePrint = (printcontents, totals, vats, netPrices, currency) => {
+  const handlePrint = async (
+    printcontents
+    // totals,
+    // vats,
+    // netPrices,
+    // currency
+  ) => {
     const doc = new jsPDF();
-    const { formData, tableData } = printcontents;
+    let { formData } = printcontents;
+
+    const { formData: updatedFormData, tableData } = await fetchReceipt(
+      formData.id,
+      userInfo
+    );
+    const { totals, vats, netPrices } = calculateTotals(
+      tableData,
+      updatedFormData.qty
+    );
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const logoWidth = 60;
@@ -295,18 +350,18 @@ const Dashboard = () => {
     doc.addImage(galfarlogo, "PNG", logoX, logoY, logoWidth, logoHeight);
 
     doc.setFontSize(12);
-    if (formData.type != "asset") {
+    if (updatedFormData.type != "asset") {
       doc.text(`COMPARATIVE STATEMENT `, 105, 22, { align: "center" });
-      doc.text(` ${formData.hiringname}`, 105, 30, { align: "center" });
+      doc.text(` ${updatedFormData.hiringname}`, 105, 30, { align: "center" });
       doc.text(
-        `(${formData?.type?.charAt(0).toUpperCase() + formData?.type?.slice(1)})`,
+        `(${updatedFormData?.type?.charAt(0).toUpperCase() + updatedFormData?.type?.slice(1)})`,
         105,
-        formData.type == "hiring" ? 35 : 22,
+        updatedFormData.type == "hiring" ? 35 : 22,
         { align: "center" }
       );
     }
-    if (formData.type === "asset") {
-      const title = `COMPARATIVE STATEMENT - ${formData.hiringname}`;
+    if (updatedFormData.type === "asset") {
+      const title = `COMPARATIVE STATEMENT - ${updatedFormData.hiringname}`;
       const subtitle = `Asset Purchase`;
 
       const maxWidth = 120;
@@ -323,26 +378,26 @@ const Dashboard = () => {
       doc.text(wrappedSubtitle, centerX, subtitleY, { align: "center" });
     }
     doc.setFontSize(10);
-    if (formData.type != "asset") {
-      doc.text(`Project: ${formData.projectvalue}`, 14, 52);
-      doc.text(`Location: ${formData.locationvalue}`, 14, 46);
+    if (updatedFormData.type != "asset") {
+      doc.text(`Project: ${updatedFormData.projectvalue}`, 14, 52);
+      doc.text(`Location: ${updatedFormData.locationvalue}`, 14, 46);
     }
-    doc.text(`Quantity: ${formData.qty}`, 14, 40);
-    if (formData.type != "asset") {
-      doc.text(`EQUIP MR NO: ${formData.equipmrnovalue}`, 105, 42, {
+    doc.text(`Quantity: ${updatedFormData.qty}`, 14, 40);
+    if (updatedFormData.type != "asset") {
+      doc.text(`EQUIP MR NO: ${updatedFormData.equipmrnovalue}`, 105, 42, {
         align: "center",
       });
-      doc.text(`EM REF NO: ${formData.emrefnovalue}`, 105, 48, {
+      doc.text(`EM REF NO: ${updatedFormData.emrefnovalue}`, 105, 48, {
         align: "center",
       });
       doc.text(
-        `Required date: ${new Date(formData.requireddatevalue).toLocaleDateString()}`,
+        `Required date: ${new Date(updatedFormData.requireddatevalue).toLocaleDateString()}`,
         200,
         46,
         { align: "right" }
       );
       doc.text(
-        `Required Duration: ${formData.requirementdurationvalue}`,
+        `Required Duration: ${updatedFormData.requirementdurationvalue}`,
         200,
         52,
         {
@@ -350,11 +405,11 @@ const Dashboard = () => {
         }
       );
     }
-    doc.text(`CS NO: ${formData.id}`, 200, 32, {
+    doc.text(`CS NO: ${updatedFormData.id}`, 200, 32, {
       align: "right",
     });
     doc.text(
-      `Date: ${new Date(formData.datevalue).toLocaleDateString()}`,
+      `Date: ${new Date(updatedFormData.datevalue).toLocaleDateString()}`,
       200,
       40,
       { align: "right" }
@@ -373,15 +428,27 @@ const Dashboard = () => {
     ];
     const headerRow2 = vendorHeaders;
     const tableHead = [headerRow1, headerRow2];
-
+    //  const vendors = Object.values(row.vendors || {});
+    //     let rowvalues = [];
+    //     if (row.particulars === "Recommendation (If Any)") {
+    //       Object.entries(row.vendors || {}).forEach(([key, value]) => {
+    //         const vendorIndex = Number(key.split("_")[1]);
+    //         if (vendorIndex === updatedFormData.selectedvendorindex) {
+    //           rowvalues.push(updatedFormData.selectedvendorreason);
+    //         } else {
+    //           rowvalues.push(value == 0 ? "--" : value);
+    //         }
+    //       });
+    //     }
     const tableBody = tableData
-      .filter(
-        (row, idx) => idx !== 0 && row.particulars != "Recommendation (If Any)"
-      )
-      .map((row) => {
+      .filter((row, idx) => idx !== 0)
+      .map((row, i) => {
+        let rowvalues = [];
         const vendors = Object.values(row.vendors || {});
-        const rowValues = activeVendorIndexes.map((i) => vendors[i] || 0);
-        return [row.particulars, ...rowValues];
+
+        rowvalues = activeVendorIndexes.map((i) => vendors[i] || 0);
+
+        return [row.particulars, ...rowvalues];
       });
     const vendorRanks = activeVendorIndexes
       .map((i) => ({ index: i, value: totals[i] }))
@@ -426,15 +493,15 @@ const Dashboard = () => {
 
     tableBody.push(
       [
-        `Total (Excl. VAT) ${currency ?? ""}`,
+        `Total (Excl. VAT) ${updatedFormData.currency ?? ""}`,
         ...activeVendorIndexes.map((i) => totals[i].toFixed(2)),
       ],
       [
-        `VAT @5% ${currency ?? ""}`,
+        `VAT @5% ${updatedFormData.currency ?? ""}`,
         ...activeVendorIndexes.map((i) => vats[i].toFixed(2)),
       ],
       [
-        `Net Price (Incl. VAT) ${currency ?? ""}`,
+        `Net Price (Incl. VAT) ${updatedFormData.currency ?? ""}`,
         ...activeVendorIndexes.map((i) => netPrices[i].toFixed(2)),
       ],
       ["Rating", ...activeVendorIndexes.map((i) => getRankLabel(i))],
@@ -444,23 +511,26 @@ const Dashboard = () => {
           styles: { fontStyle: "bold" },
         },
         ...activeVendorIndexes.map((_, idx) => ({
-          content: idx === formData.selectedvendorindex ? "Yes" : "--",
+          content: idx === updatedFormData.selectedvendorindex ? "Yes" : "--",
           styles: {
-            fontStyle: idx === formData.selectedvendorindex ? "bold" : "normal",
+            fontStyle:
+              idx === updatedFormData.selectedvendorindex ? "bold" : "normal",
             textColor:
-              idx === formData.selectedvendorindex ? [0, 128, 0] : [0, 0, 0],
-            fontSize: idx === formData.selectedvendorindex ? 9 : 8,
+              idx === updatedFormData.selectedvendorindex
+                ? [0, 128, 0]
+                : [0, 0, 0],
+            fontSize: idx === updatedFormData.selectedvendorindex ? 9 : 8,
           },
         })),
-      ],
-      [
-        "Recommendation",
-        ...activeVendorIndexes.map((_, idx) =>
-          idx == formData.selectedvendorindex
-            ? formData.selectedvendorreason
-            : "--"
-        ),
       ]
+      // [
+      //   "Recommendation",
+      //   ...activeVendorIndexes.map((_, idx) =>
+      //     idx == updatedFormData.selectedvendorindex
+      //       ? updatedFormData.selectedvendorreason
+      //       : "--"
+      //   ),
+      // ]
     );
     autoTable(doc, {
       startY: 65,
@@ -484,7 +554,7 @@ const Dashboard = () => {
       ceo: "Mr.Sridhar. C",
     };
     const approvalsStatus =
-      formData?.approverdetails?.approverDetails?.reduce((acc, d) => {
+      formData?.approverdetails?.reduce((acc, d) => {
         acc[d.role] = d.action;
         return acc;
       }, {}) || {};
@@ -582,38 +652,39 @@ const Dashboard = () => {
     (setSearchCS(e.target.value),
       setStatusFilter("All"),
       setMultiStatusFilter([]));
+    setPageIndex(0);
   };
-  const filteredReceiptsOnstatus = useMemo(() => {
-    if (!Array.isArray(allreceipts)) return [];
-    let filteredreceipts = receipts;
-    if (statusFilter !== "All" && searchcs == "") {
-      if (statusFilter === "review") {
-        filteredreceipts = receipts.filter(
-          (r) => r.formData.status == "review"
-        );
-      }
-      if (multiStatusFilter && multiStatusFilter.length > 0) {
-        filteredreceipts = receipts.filter((r) =>
-          multiStatusFilter
-            .filter((status) => status !== "Approved" && status !== "Rejected")
-            .map((status) => status?.toLowerCase())
-            .includes(r?.formData?.status?.toLowerCase())
-        );
-      } else {
-        filteredreceipts = receipts.filter(
-          (r) =>
-            r?.formData?.status?.toLowerCase() === statusFilter?.toLowerCase()
-        );
-      }
-    }
-
-    if (searchcs.trim() !== "") {
-      filteredreceipts = receipts.filter((r) =>
-        r.formData.id?.toString().includes(searchcs)
-      );
-    }
-    return filteredreceipts;
-  }, [allreceipts, statusFilter, multiStatusFilter, searchcs]);
+  // const filteredReceiptsOnstatus = async(() => {
+  //   // const respose = await;
+  //   // if (!Array.isArray(allreceipts)) return [];
+  //   // let filteredreceipts = receipts;
+  //   // if (statusFilter !== "All" && searchcs == "") {
+  //   //   if (statusFilter === "review") {
+  //   //     filteredreceipts = receipts.filter(
+  //   //       (r) => r.formData.status == "review"
+  //   //     );
+  //   //   }
+  //   //   if (multiStatusFilter && multiStatusFilter.length > 0) {
+  //   //     filteredreceipts = receipts.filter((r) =>
+  //   //       multiStatusFilter
+  //   //         .filter((status) => status !== "Approved" && status !== "Rejected")
+  //   //         .map((status) => status?.toLowerCase())
+  //   //         .includes(r?.formData?.status?.toLowerCase())
+  //   //     );
+  //   //   } else {
+  //   //     filteredreceipts = receipts.filter(
+  //   //       (r) =>
+  //   //         r?.formData?.status?.toLowerCase() === statusFilter?.toLowerCase()
+  //   //     );
+  //   //   }
+  //   // }
+  //   // if (searchcs.trim() !== "") {
+  //   //   filteredreceipts = receipts.filter((r) =>
+  //   //     r.formData.id?.toString().includes(searchcs)
+  //   //   );
+  //   // }
+  //   // return filteredreceipts;
+  // }, [allreceipts, statusFilter, multiStatusFilter, searchcs]);
 
   const columnHelper = createColumnHelper();
   const columns = [
@@ -653,6 +724,16 @@ const Dashboard = () => {
       header: "Status",
       cell: (info) => {
         const status = info.getValue() || "";
+        const rowData = info.row.original.formData || {};
+        const approverDetails = rowData.approverdetails || [];
+
+        const rejectedby =
+          approverDetails.length > 0 &&
+          approverDetails
+            .map((rej) => rej.rejectedby)
+            .filter((r) => r && r.trim() !== "" && r !== null && r.length > 0)
+            .filter((r) => r.length > 0);
+
         const progress = statusProgress[status] || 0;
 
         const progressColor =
@@ -678,8 +759,12 @@ const Dashboard = () => {
                   <IoWarningOutline className="text-yellow-500" size={18} />
                   <span>To be Reviewed</span>
                 </>
+              ) : status === "Rejected" &&
+                rejectedby &&
+                typeof rejectedby === "string" ? (
+                <span>{"Rejected By " + rejectedby.toUpperCase()}</span>
               ) : (
-                status || "Not Sent For Approval"
+                <span>{status || "Not Sent For Approval"}</span>
               )}
             </span>
 
@@ -697,12 +782,19 @@ const Dashboard = () => {
     }),
     columnHelper.accessor(
       (row) => {
-        const commentsArray = row?.formData?.approverdetails?.approverDetails
+        const commentsArray = row?.formData.approverdetails
           ?.filter((item) => item.comments && item.comments.trim() !== "{}")
           ?.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-          .map((item) => `${item.role}: ${item.comments}`);
+          .map((item) => {
+            return (
+              <span key={item.id} className="block">
+                <span className="font-bold ">{item.role.toUpperCase()}</span>:{" "}
+                {item.comments}
+              </span>
+            );
+          });
 
-        return commentsArray?.length ? commentsArray.join("\n") : "-";
+        return commentsArray?.length > 0 ? commentsArray : "-";
       },
       {
         id: "comments",
@@ -716,11 +808,16 @@ const Dashboard = () => {
   ];
 
   const table = useReactTable({
-    data: filteredReceiptsOnstatus || [],
+    data: receipts || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
+    state: { pagination },
+    manualPagination: true,
+    onPaginationChange: setPageSize,
+    pageCount: Math.ceil(receiptscount / pagination.pageSize),
     getExpandedRowModel: getExpandedRowModel(),
   });
+  console.log(pagination.pageIndex);
 
   return (
     <div className="w-full px-5 flex-grow">
@@ -765,22 +862,27 @@ const Dashboard = () => {
                     case "All":
                       setStatusFilter("All");
                       setMultiStatusFilter([]);
+                      setPageIndex(0);
                       break;
                     case "Approved":
                       setStatusFilter("Approved");
                       setMultiStatusFilter([]);
+                      setPageIndex(0);
                       break;
                     case "Rejected":
                       setStatusFilter("Rejected");
                       setMultiStatusFilter([]);
+                      setPageIndex(0);
                       break;
                     case "Pending":
                       setStatusFilter("");
                       setMultiStatusFilter(pendingStatuses);
+                      setPageIndex(0);
                       break;
                     case "Under Review":
                       setStatusFilter("review");
                       setMultiStatusFilter([]);
+                      setPageIndex(0);
                       break;
                   }
                 }}
@@ -887,16 +989,16 @@ const Dashboard = () => {
                         }`}
                         size={25}
                         onClick={() => {
-                          const { totals, vats, netPrices } = calculateTotals(
-                            row.original.tableData,
-                            row.original.formData.qty
-                          );
+                          // const { totals, vats, netPrices } = calculateTotals(
+                          //   row.original.tableData,
+                          //   row.original.formData.qty
+                          // );
                           handlePrint(
-                            row.original,
-                            totals,
-                            vats,
-                            netPrices,
-                            row.original.formData.currency
+                            row.original
+                            // totals,
+                            // vats,
+                            // netPrices,
+                            // row.original.formData.currency
                           );
                         }}
                       />
@@ -926,6 +1028,101 @@ const Dashboard = () => {
             )}
           </tbody>
         </table>
+        <div className={`flex justify-between`}>
+          <div className="ml-2 flex items-center text-sm text-gray-700 font-medium">
+            Total Number of Records: {receiptscount}
+          </div>
+
+          <div className="flex items-center gap-2 p-2 justify-end ">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Rows per page:</span>
+              <select
+                value={pagination.pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPageIndex(0);
+                }}
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                {[5, 10, 20, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2 ">
+              <button
+                onClick={() => setPageIndex(0)}
+                disabled={pagination.pageIndex == 0}
+                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 cursor-pointer ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
+              >
+                «
+              </button>
+
+              <button
+                onClick={() => setPageIndex(pagination.pageIndex - 1)}
+                disabled={pagination.pageIndex == 0}
+                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
+              >
+                ‹ Prev
+              </button>
+
+              <span className="text-sm px-2">
+                Page{" "}
+                <strong>
+                  {receiptscount != 0 ? pagination.pageIndex + 1 : 0}
+                </strong>{" "}
+                of{" "}
+                <strong>
+                  {Math.ceil(receiptscount / pagination.pageSize)}
+                </strong>
+              </span>
+
+              <button
+                onClick={() => setPageIndex(pagination.pageIndex + 1)}
+                disabled={
+                  pagination.pageIndex + 1 >=
+                  Math.ceil(receiptscount / pagination.pageSize)
+                }
+                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                  pagination.pageIndex + 1 >=
+                  Math.ceil(receiptscount / pagination.pageSize)
+                    ? "cursor-auto"
+                    : "cursor-pointer"
+                }`}
+              >
+                Next ›
+              </button>
+
+              <button
+                onClick={() =>
+                  setPageIndex(
+                    Math.ceil(receiptscount / pagination.pageSize) - 1
+                  )
+                }
+                disabled={
+                  pagination.pageIndex ==
+                  Math.max(
+                    Math.ceil(receiptscount / pagination.pageSize) - 1,
+                    0
+                  )
+                }
+                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                  pagination.pageIndex ==
+                  Math.max(
+                    Math.ceil(receiptscount / pagination.pageSize) - 1,
+                    0
+                  )
+                    ? "cursor-auto"
+                    : "cursor-pointer"
+                }`}
+              >
+                »
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       {triggerdelete && (
         <Alerts

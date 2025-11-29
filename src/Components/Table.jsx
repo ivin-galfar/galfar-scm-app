@@ -264,22 +264,13 @@ export default function VerticalTable({ showcalc }) {
                   className={`max-w-2xl px-2 py-1 text-center break-words whitespace-normal ${isCompanyname ? "font-bold" : ""}`}
                   style={{ maxWidth: "150px" }}
                 >
-                  {index === sharedTableData.formData.selectedvendorindex &&
-                  isRecommendation
-                    ? sharedTableData.formData.selectedvendorreason
-                    : value}
+                  {value}
                 </div>
               ) : (
                 <input
                   key={`${row.id}_${vendorKey}`}
                   type="text"
-                  value={
-                    index === sharedTableData.formData.selectedvendorindex &&
-                    isRecommendation &&
-                    sharedTableData.formData.status != "review"
-                      ? sharedTableData.formData.selectedvendorreason
-                      : value
-                  }
+                  value={value}
                   placeholder={getPlaceholder()}
                   disabled={
                     (freezequantity &&
@@ -320,7 +311,8 @@ export default function VerticalTable({ showcalc }) {
     selectedmr == "" ||
     selectedmr === null ||
     isEdit ||
-    sharedTableData.formData?.status == "review"
+    sharedTableData.formData?.status == "review" ||
+    sharedTableData.formData?.status == null
       ? ""
       : vendorInfoWithTotal,
   ]);

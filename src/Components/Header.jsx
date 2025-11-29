@@ -7,6 +7,7 @@ import UserDropdown from "./UserDropdown";
 import { AppContext } from "./Context";
 import { is_logistics, is_plant } from "../Helpers/dept_helper";
 import { useDashboardType } from "../store/logisticsStore";
+import { usePagination } from "../store/statementStore";
 
 const Header = () => {
   const userInfo = useUserInfo();
@@ -28,6 +29,7 @@ const Header = () => {
     return `text-gray-700 hover:text-blue-600 ${isActive ? "border-b-2 border-blue-500 text-blue-600" : ""}`;
   };
   const { dashboardType, setDashboardType } = useDashboardType();
+  const { setPageSize } = usePagination();
 
   const location = useLocation();
   const path = location.pathname;
@@ -68,6 +70,7 @@ const Header = () => {
                     setMultiStatusFilter([]);
                     if (isPlant) {
                       setDashboardType("plant");
+                      setPageSize(20);
                     } else {
                       setDashboardType("logistics");
                     }

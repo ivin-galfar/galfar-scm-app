@@ -10,7 +10,7 @@ import fetchStatments from "../APIs/StatementsApi";
 import { useMutation } from "@tanstack/react-query";
 import { feedReceipt, updateReceipt } from "../APIs/api";
 import { useEdit, useSortVendors, useUpdate } from "../store/statementStore";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Receipts = () => {
   const userInfo = useUserInfo();
@@ -41,6 +41,7 @@ const Receipts = () => {
   } = useContext(AppContext);
   const Asset = userInfo.role == "inita" ? true : false;
   const { setIsupdated } = useUpdate();
+  const location = useLocation();
 
   const { setSortVendors, resetSortVendors } = useSortVendors();
   const ReceiptMutation = useMutation({
@@ -182,10 +183,47 @@ const Receipts = () => {
     window.location.reload();
   };
   const statusMapping = {
-    initiator: [],
-    hod: ["Pending For HOD", "Approved", "Rejected"],
-    gm: ["Pending for GM", "Approved", "Rejected"],
-    ceo: ["Pending for CEO", "Approved", "Rejected"],
+    inita: [
+      "Pending for HOD",
+      "Pending for GM",
+      "Pending for CEO",
+      "Approved",
+      "Rejected",
+      "review",
+      "reverted",
+      "",
+    ],
+    inith: [
+      "Pending for HOD",
+      "Pending for GM",
+      "Pending for CEO",
+      "Approved",
+      "Rejected",
+      "review",
+      "reverted",
+      "",
+    ],
+    hod: [
+      "Pending For HOD",
+      "Pending For GM",
+      "Pending For CEO",
+      "Rejected",
+      "Approved",
+    ],
+    gm: [
+      "Pending For HOD",
+      "Pending for GM",
+      "Pending for CEO",
+      "Approved",
+      "Rejected",
+    ],
+    ceo: [
+      "Pending For HOD",
+      "Pending for GM",
+      "Pending for CEO",
+      "Approved",
+      "Rejected",
+    ],
   };
 
   const expectedStatuses =
@@ -197,6 +235,7 @@ const Receipts = () => {
         const { reqMrValues, mrValues } = await fetchStatments({
           expectedStatuses,
           userInfo,
+          module: location.pathname,
         });
 
         setReqMrno(reqMrValues);

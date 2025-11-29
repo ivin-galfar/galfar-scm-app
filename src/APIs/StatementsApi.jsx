@@ -1,7 +1,16 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 
-const fetchStatments = async ({ expectedStatuses, userInfo }) => {
+const fetchStatments = async ({
+  expectedStatuses,
+  userInfo,
+  module,
+  page,
+  limit,
+  status,
+  multiStatus,
+  search,
+}) => {
   try {
     const config = {
       headers: {
@@ -10,23 +19,39 @@ const fetchStatments = async ({ expectedStatuses, userInfo }) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    const response = await axios.get(`${REACT_SERVER_URL}/receipts`, config);
+    let type = null;
+    if (userInfo?.is_admin) {
+      type = userInfo?.role == "inita" ? "asset" : "hiring";
+    }
 
-    const receipts = response.data.receipts.sort(
-      (a, b) =>
-        new Date(b.formData.created_at) - new Date(a.formData.created_at)
-    );
+    const response = await axios.get(`${REACT_SERVER_URL}/receipts/`, {
+      ...config,
+      params: {
+        type: type ?? "",
+        module,
+        page: page,
+        limit: limit,
+        statusfilter: status != "All" ? status : null,
+        multiStatus: multiStatus?.join(","),
+        search,
+        expectedStatuses: expectedStatuses?.length
+          ? expectedStatuses.join(",")
+          : null,
+      },
+    });
+
+    const receipts = response.data.receipts;
 
     let categorizedReceipts = receipts;
-    if (userInfo?.is_admin) {
-      const type = userInfo?.role == "inita" ? "asset" : "hiring";
-      categorizedReceipts = receipts.filter((r) => r.formData.type == type);
-    } else {
-      categorizedReceipts = receipts.filter((receipt) => {
-        const status = receipt.formData?.status?.toLowerCase();
-        return expectedStatuses.map((s) => s.toLowerCase()).includes(status);
-      });
-    }
+    // if (userInfo?.is_admin) {
+    //   const type = userInfo?.role == "inita" ? "asset" : "hiring";
+    //   categorizedReceipts = receipts.filter((r) => r.formData.type == type);
+    // } else {
+    //   categorizedReceipts = receipts.filter((receipt) => {
+    //     const status = receipt.formData?.status?.toLowerCase();
+    //     return expectedStatuses.map((s) => s.toLowerCase()).includes(status);
+    //   });
+    // }
 
     const mrValues = categorizedReceipts
       .map((receipt) => receipt.formData?.id)

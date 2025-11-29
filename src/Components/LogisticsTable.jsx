@@ -415,7 +415,7 @@ const LogisticsTable = () => {
                   {columns.slice(1).map((column, colIndex) => {
                     const columnIndex = `vendor_${colIndex}`;
                     return (
-                      <td key={colIndex} className="px-4 py-2 border-l">
+                      <td key={colIndex} className="px-2 py-2 border-l">
                         {userInfo.is_admin ? (
                           <input
                             type="text"
