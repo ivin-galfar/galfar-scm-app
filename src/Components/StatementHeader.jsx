@@ -311,7 +311,7 @@ const StatementHeader = () => {
   };
   const inputClass = userInfo.is_admin
     ? "border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-64"
-    : "border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-64";
+    : "border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-76";
 
   return (
     <div>
@@ -417,7 +417,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Shipment No:</label>
+                  <label htmlFor={field.name} className="p-1">
+                    Shipment No:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -446,7 +448,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Cargo Details:</label>
+                  <label htmlFor={field.name} className="p-1">
+                    Cargo Details:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -475,7 +479,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Gross Weight:</label>
+                  <label htmlFor={field.name} className="p-1">
+                    Gross Weight:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -504,7 +510,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Chargeable Weight:</label>
+                  <label htmlFor={field.name} className="p-1">
+                    Chargeable Weight:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -530,7 +538,7 @@ const StatementHeader = () => {
           <div className="top-0 text-center  font-semibold mb-5">
             Logistics Comparison Statement
           </div>
-          <div className="flex flex-col w-96">
+          <div className="flex flex-col w-100">
             <form.Field
               name="supplier"
               validators={{
@@ -539,8 +547,10 @@ const StatementHeader = () => {
               }}
             >
               {(field) => (
-                <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Supplier: M/S.</label>
+                <div className="flex items-end justify-between text-sm font-medium gap-3">
+                  <label htmlFor={field.name} className="text-nowrap p-1">
+                    Supplier: M/S.
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -569,7 +579,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Scope of work:</label>
+                  <label htmlFor={field.name} className="text-nowrap p-1">
+                    Scope of work:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -597,8 +609,10 @@ const StatementHeader = () => {
               }}
             >
               {(field) => (
-                <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Description:</label>
+                <div className="flex items-end justify-between text-sm font-medium gap-7">
+                  <label htmlFor={field.name} className="text-nowrap p-1">
+                    Description:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -626,8 +640,10 @@ const StatementHeader = () => {
               }}
             >
               {(field) => (
-                <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Mode:</label>
+                <div className="flex items-end justify-between text-sm font-medium gap-16">
+                  <label htmlFor={field.name} className="text-nowrap p-1">
+                    Mode:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -660,7 +676,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Date:</label>
+                  <label htmlFor={field.name} className="text-nowrap p-1">
+                    Date:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -689,7 +707,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>PO:</label>
+                  <label htmlFor={field.name} className="text-nowrap p-1">
+                    PO:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -718,7 +738,9 @@ const StatementHeader = () => {
             >
               {(field) => (
                 <div className="flex items-end justify-between   text-sm font-medium gap-2">
-                  <label htmlFor={field.name}>Project:</label>
+                  <label htmlFor={field.name} className="text-nowrap p-1">
+                    Project:
+                  </label>
                   <input
                     id={field.name}
                     name={field.name}

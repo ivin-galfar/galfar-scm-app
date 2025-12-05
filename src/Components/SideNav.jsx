@@ -201,20 +201,19 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             </Link>
           </div>
         )}
-        <a
-          href="https://www.notion.so/Galfar-Intranet-2a592f8cf63380d5b90ff24cad08c79e"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`flex items-center gap-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700
-      h-10 px-2
-      ${!isOpen ? "justify-center w-10" : "justify-start w-full"}
-    `}
-        >
-          <IoHelpCircleSharp className="text-lg" />
-          {isOpen && (
-            <span className="whitespace-nowrap">Help & Resources</span>
-          )}
-        </a>
+        <button>
+          <Link
+            to="https://www.notion.so/Galfar-Intranet-2a592f8cf63380d5b90ff24cad08c79e"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`}
+          >
+            <IoHelpCircleSharp className="text-lg" />
+            {isOpen && (
+              <span className="whitespace-nowrap">Help & Resources</span>
+            )}
+          </Link>
+        </button>
 
         <button
           className="flex gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
