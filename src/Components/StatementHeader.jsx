@@ -311,7 +311,7 @@ const StatementHeader = () => {
   };
   const inputClass = userInfo.is_admin
     ? "border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-64"
-    : "border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-76";
+    : "border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-70";
 
   return (
     <div>
@@ -549,7 +549,7 @@ const StatementHeader = () => {
               {(field) => (
                 <div className="flex items-end justify-between text-sm font-medium gap-3">
                   <label htmlFor={field.name} className="text-nowrap p-1">
-                    Supplier: M/S.
+                    Supplier:
                   </label>
                   <input
                     id={field.name}
@@ -825,7 +825,7 @@ const StatementHeader = () => {
                           download
                           className="flex items-center gap-2 text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-200 transition-all"
                         >
-                          Download Attachment {index + 1}
+                          View Attachment {index + 1}
                           <FaFileDownload size={20} className="relative" />
                         </a>
                       ))}

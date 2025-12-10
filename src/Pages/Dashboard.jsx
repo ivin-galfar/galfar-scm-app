@@ -817,7 +817,6 @@ const Dashboard = () => {
     pageCount: Math.ceil(receiptscount / pagination.pageSize),
     getExpandedRowModel: getExpandedRowModel(),
   });
-  console.log(pagination.pageIndex);
 
   return (
     <div className="w-full px-5 flex-grow">

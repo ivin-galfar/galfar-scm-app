@@ -538,7 +538,7 @@ const LogisticsTable = () => {
                         download
                         className="text-xs text-blue-600 hover:underline mt-1"
                       >
-                        Download
+                        View & Download
                       </a>
                     </div>
                   );

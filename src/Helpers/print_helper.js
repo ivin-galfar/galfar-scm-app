@@ -40,7 +40,7 @@ export const handlePrint = (formData, tableData) => {
 
   const startX = 120;
   const valueXcenter = 150;
-  doc.text("Supplier: M/S.", startX, 38);
+  doc.text("Supplier:", startX, 38);
   doc.text(formData.supplier, valueXcenter, 38);
 
   doc.text("Description:", startX, 45);
