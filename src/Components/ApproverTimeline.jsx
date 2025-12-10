@@ -107,7 +107,7 @@ const ApproverTimeline = ({ approverhistory }) => {
                         <div
                           className={`mt-2 mb-1 inline-block  px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full items-center justify-center  `}
                         >
-                          {info[index].datetime}
+                          {new Date(info[index].datetime).toLocaleString()}
                         </div>
                       )}
                       <div>{comment}</div>
