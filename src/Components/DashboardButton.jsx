@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { useDashboardType } from "../store/logisticsStore";
+import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 
 const DashboardButton = () => {
   const { dashboardType, setDashboardType } = useDashboardType();
-
+  const { resetStatusFilter } = useStatusFilter();
   const dashboards = [
     { key: "plant", label: "Plant", color: "blue", path: "/dashboard" },
     {
@@ -19,7 +19,10 @@ const DashboardButton = () => {
         <Link
           key={dash.key}
           to={dash.path}
-          onClick={() => setDashboardType(dash.key)}
+          onClick={() => {
+            setDashboardType(dash.key);
+            resetStatusFilter();
+          }}
           className={`
         px-4 py-2 text-sm font-bold transition-colors duration-200
         border-b-2

@@ -144,3 +144,15 @@ export const useDashboardType = create((set) => ({
   setDashboardType: (selected) => set({ dashboardType: selected }),
   resetDashboardType: () => set({ dashboardType: "" }),
 }));
+
+export const useIdHistory = create((set) => ({
+  selectedId: null,
+  setSelectedId: (selected) => set({ selectedId: selected }),
+  resetSelectedId: () => set({ selectedId: null }),
+}));
+
+export const useHistoryData = create((set) => ({
+  approverhistory: null,
+  setApproverHistory: (data) => set({ approverhistory: data }),
+  resetApproverHistory: () => set({ approverhistory: null }),
+}));

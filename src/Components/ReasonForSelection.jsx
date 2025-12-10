@@ -83,7 +83,7 @@ const ReasonForSelection = ({
           },
           config
         )
-        .then((res) => console.log("✅ Email sent:", res.data.emailInfo))
+        .then((res) => console.log("✅ Email sent:", res.data))
         .catch((err) =>
           console.error("❌ Email send failed:", err.response.data.message)
         );

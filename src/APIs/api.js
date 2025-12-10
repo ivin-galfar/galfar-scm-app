@@ -240,8 +240,6 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -341,6 +339,24 @@ export const fetchReceiptCount = async ({
           searchcs,
         },
       }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchApproverDetails = async (userInfo, cs_id) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/logistics/statements/approverdetails/${cs_id}`,
+      config
     );
     return response.data;
   } catch (error) {

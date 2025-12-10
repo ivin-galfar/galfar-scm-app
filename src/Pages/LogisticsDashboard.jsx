@@ -1,6 +1,10 @@
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { fetchallstatements, fetchStatement } from "../APIs/api";
+import {
+  fetchallstatements,
+  fetchApproverDetails,
+  fetchStatement,
+} from "../APIs/api";
 import {
   createColumnHelper,
   flexRender,
@@ -10,6 +14,8 @@ import {
 } from "@tanstack/react-table";
 import {
   useDashboardType,
+  useHistoryData,
+  useIdHistory,
   useMultiStatusFilter,
   useStatusFilter,
 } from "../store/logisticsStore";
@@ -27,12 +33,16 @@ import { useToast } from "../store/toastStore";
 import { SiTicktick } from "react-icons/si";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { handlePrint } from "../Helpers/print_helper";
+import { FaHistory } from "react-icons/fa";
+import ApprovalHistory from "../Components/ApprovalHistory";
+
 const LogisticsDashboard = () => {
   const userInfo = useUserInfo();
   const { setStatusFilter, statusfilter, resetStatusFilter } =
     useStatusFilter();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
-
+  const { approverhistory, setApproverHistory, resetApproverHistory } =
+    useHistoryData();
   const { dashboardType, setDashboardType } = useDashboardType();
   const isLogistics = is_logistics(userInfo?.dept_code);
   const [searchcs, setSearchCS] = useState("");
@@ -44,6 +54,7 @@ const LogisticsDashboard = () => {
     open: false,
   });
   const isPlant = is_plant(userInfo?.dept_code);
+  const { selectedId, resetSelectedId } = useIdHistory();
 
   const { data: allstatements } = useQuery({
     queryKey: ["csid"],
@@ -55,9 +66,14 @@ const LogisticsDashboard = () => {
     if (!allstatements) return [];
 
     let filtered = allstatements;
+    if (statusfilter === "All") {
+      filtered = allstatements.filter(
+        (statement) => statement.status !== "rejected"
+      );
+    }
     if (searchcs !== "") {
       filtered = allstatements.filter((statements) =>
-        statements.id.toString().includes(searchcs)
+        statements.shipment_no?.toString().includes(searchcs)
       );
     }
 
@@ -136,6 +152,21 @@ const LogisticsDashboard = () => {
     }
   };
 
+  const handleApprovalHistory = async (cs_id) => {
+    setStatusFilter("Approval History");
+    const Approvals = await fetchApproverDetails(userInfo, cs_id);
+    setApproverHistory(Approvals);
+    resetSelectedId();
+  };
+
+  useEffect(() => {
+    if (!selectedId) return;
+    if (selectedId == "default") {
+      resetApproverHistory();
+    }
+    handleApprovalHistory(selectedId);
+  }, [selectedId]);
+
   const columnHelper = createColumnHelper();
   const statusProgress = {
     "Pending For Incharge": 20,
@@ -152,14 +183,14 @@ const LogisticsDashboard = () => {
       header: "Sl. No.",
       cell: ({ row }) => row.index + 1,
     }),
+    columnHelper.accessor((row) => row?.shipment_no, {
+      id: "shipment",
+      header: "Shipment No.",
+      cell: (info) => info.getValue() || "-",
+    }),
     columnHelper.accessor((row) => row?.id, {
       id: "csno",
       header: "CS NO",
-      cell: (info) => info.getValue() || "-",
-    }),
-    columnHelper.accessor((row) => row?.shipment_no, {
-      id: "shipment",
-      header: "shipment No.",
       cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.project, {
@@ -220,9 +251,12 @@ const LogisticsDashboard = () => {
               )}
             </span>
 
-            <div className="relative max-w-2/3 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+            <div
+              className="relative max-w-2/3 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner cursor-pointer"
+              onClick={() => handleApprovalHistory(info.row.original.id)}
+            >
               <div
-                className={`h-2 ${progressColor} rounded-full transition-all duration-500`}
+                className={`h-2 ${progressColor} rounded-full transition-all duration-500 `}
                 style={{
                   width: `${progress}%`,
                 }}
@@ -274,7 +308,7 @@ const LogisticsDashboard = () => {
             Object.keys(comments).length > 0
           ) {
             return (
-              <div className="space-y-1  ">
+              <div className="space-y-1 overflow-y-auto max-h-30 ">
                 {Object.entries(comments).map(([key, value]) => (
                   <div key={key}>
                     <strong className="capitalize">{key}:</strong> {value}
@@ -299,63 +333,70 @@ const LogisticsDashboard = () => {
   return (
     <div className="flex-grow w-full px-5">
       <div className="flex border-b  border-gray-300 mb-4">
-        {["All", "Approved", "Rejected", "Pending"].map((tab) => {
-          if (tab == "Under Review" && !userInfo?.is_admin) return null;
-          const isActive =
-            (tab === "All" && statusfilter === "All") ||
-            (tab === "Approved" && statusfilter === "Approved") ||
-            (tab === "Rejected" && statusfilter === "Rejected") ||
-            (tab === "Pending" && statusfilter === "Pending");
+        {["All", "Approved", "Rejected", "Pending", "Approval History"].map(
+          (tab) => {
+            const isActive =
+              (tab === "All" && statusfilter === "All") ||
+              (tab === "Approved" && statusfilter === "Approved") ||
+              (tab === "Rejected" && statusfilter === "Rejected") ||
+              (tab === "Pending" && statusfilter === "Pending") ||
+              (tab === "Approval History" &&
+                statusfilter === "Approval History");
 
-          let activeColor = "border-blue-500 text-blue-600";
-          let inactiveColor =
-            "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+            let activeColor = "border-blue-500 text-blue-600";
+            let inactiveColor =
+              "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
 
-          if (tab === "Approved") {
-            activeColor = "border-green-500 text-green-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-green-500";
-          } else if (tab === "Rejected") {
-            activeColor = "border-red-500 text-red-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-red-500";
-          } else if (tab === "Pending") {
-            activeColor = "border-yellow-500 text-yellow-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-yellow-500";
-          } else if (tab === "Under Review") {
-            activeColor = "border-cyan-500 text-cyan-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-cyan-500";
+            if (tab === "Approved") {
+              activeColor = "border-green-500 text-green-600";
+              inactiveColor =
+                "border-transparent text-gray-500 hover:text-green-500";
+            } else if (tab === "Rejected") {
+              activeColor = "border-red-500 text-red-600";
+              inactiveColor =
+                "border-transparent text-gray-500 hover:text-red-500";
+            } else if (tab === "Pending") {
+              activeColor = "border-yellow-500 text-yellow-600";
+              inactiveColor =
+                "border-transparent text-gray-500 hover:text-yellow-500";
+            } else if (tab === "Approval History") {
+              activeColor = "border-cyan-500 text-cyan-600";
+              inactiveColor =
+                "border-transparent text-gray-500 hover:text-cyan-500";
+            }
+
+            return (
+              <button
+                key={tab}
+                onClick={() => {
+                  switch (tab) {
+                    case "All":
+                      setStatusFilter("All");
+                      break;
+                    case "Approved":
+                      setStatusFilter("Approved");
+                      break;
+                    case "Rejected":
+                      setStatusFilter("Rejected");
+                      break;
+                    case "Pending":
+                      setStatusFilter("Pending");
+                      break;
+                    case "Approval History":
+                      setStatusFilter("Approval History");
+                      break;
+                  }
+                }}
+                className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
+                  isActive ? activeColor : inactiveColor
+                }`}
+              >
+                {tab}
+              </button>
+            );
           }
+        )}
 
-          return (
-            <button
-              key={tab}
-              onClick={() => {
-                switch (tab) {
-                  case "All":
-                    setStatusFilter("All");
-                    break;
-                  case "Approved":
-                    setStatusFilter("Approved");
-                    break;
-                  case "Rejected":
-                    setStatusFilter("Rejected");
-                    break;
-                  case "Pending":
-                    setStatusFilter("Pending");
-                    break;
-                }
-              }}
-              className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                isActive ? activeColor : inactiveColor
-              }`}
-            >
-              {tab}
-            </button>
-          );
-        })}
         <div className="flex justify-between ml-auto">
           {isLogistics && isPlant && (
             <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
@@ -364,7 +405,7 @@ const LogisticsDashboard = () => {
           )}
           <div className="mb-1 ml-auto">
             <label className="  ml-auto text-sm font-medium text-gray-700 ">
-              CS Number:
+              Shipment Number:
             </label>
             <input
               type="text"
@@ -375,117 +416,132 @@ const LogisticsDashboard = () => {
           </div>
         </div>
       </div>
-      <div
-        className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
-        style={{ height: `calc(93vh - 140px)` }}
-      >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="top-0 z-10 sticky  bg-gray-50">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="border-b border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : header.column.columnDef.header}
-                  </th>
-                ))}
-                <th className=" border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
-                  Action
-                </th>
-                <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
-                  Created On
-                </th>
-              </tr>
-            ))}
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={columns.length + 1}
-                  className="text-center py-4 text-gray-500"
-                >
-                  No Statements found
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 "
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className}`}
+      {statusfilter !== "Approval History" && (
+        <div
+          className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
+          style={{ height: `calc(93vh - 140px)` }}
+        >
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="top-0 z-10 sticky  bg-gray-50">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="border-b border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700"
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
+                      {header.isPlaceholder
+                        ? null
+                        : header.column.columnDef.header}
+                    </th>
                   ))}
-
-                  <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                    <div className="flex items-center justify-center gap-4">
-                      <Link
-                        className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
-                        to={`/lstatements/${row.original?.id}`}
-                      >
-                        View <FaArrowCircleRight />
-                      </Link>
-                      <IoPrint
-                        className={` ${
-                          !userInfo?.is_admin
-                            ? "text-gray-400 pointer-events-none cursor-not-allowed"
-                            : "text-black cursor-pointer"
-                        }`}
-                        size={25}
-                        onClick={async () => {
-                          const { formData, tableData } = await getstatement(
-                            row.original?.id
-                          );
-
-                          handlePrint(formData, tableData);
-                        }}
-                      />
-                      <FaTrash
-                        className={`mr-1 text-red-500  ${!userInfo?.is_admin ? "hidden" : row.original.status === "Approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
-                        size={16}
-                        onClick={() => {
-                          if (row.original.status === "Approved") return;
-                          // setdeleteMr(row.original.formData.id);
-                          setDeleteStatement({
-                            id: row.original.id,
-                            open: true,
-                          });
-                        }}
-                      />
-                    </div>
-                  </td>
-
-                  <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                    {row.original.created_at
-                      ? new Date(row.original.created_at).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )
-                      : ""}
+                  <th className=" border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                    Action
+                  </th>
+                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                    Created On
+                  </th>
+                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                    {" "}
+                    Approvals
+                  </th>
+                </tr>
+              ))}
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length + 1}
+                    className="text-center py-4 text-gray-500"
+                  >
+                    No Statements found
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 "
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className || ""}`}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+
+                    <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
+                      <div className="flex items-center justify-center gap-4">
+                        <Link
+                          className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
+                          to={`/lstatements/${row.original?.id}`}
+                        >
+                          View <FaArrowCircleRight />
+                        </Link>
+                        <IoPrint
+                          className={` ${
+                            !userInfo?.is_admin
+                              ? "text-gray-400 pointer-events-none cursor-not-allowed"
+                              : "text-black cursor-pointer"
+                          }`}
+                          size={25}
+                          onClick={async () => {
+                            const { formData, tableData } = await getstatement(
+                              row.original?.id
+                            );
+
+                            handlePrint(formData, tableData);
+                          }}
+                        />
+                        <FaTrash
+                          className={`mr-1 text-red-500  ${!userInfo?.is_admin ? "hidden" : row.original.status === "Approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
+                          size={16}
+                          onClick={() => {
+                            if (row.original.status === "Approved") return;
+                            // setdeleteMr(row.original.formData.id);
+                            setDeleteStatement({
+                              id: row.original.id,
+                              open: true,
+                            });
+                          }}
+                        />
+                      </div>
+                    </td>
+
+                    <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
+                      {row.original.created_at
+                        ? new Date(row.original.created_at).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )
+                        : ""}
+                    </td>
+                    <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
+                      <div className="flex items-center justify-center cursor-pointer">
+                        <FaHistory
+                          onClick={() => handleApprovalHistory(row.original.id)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {statusfilter === "Approval History" && <ApprovalHistory />}
+
       {deletestatement.open && (
         <Alerts
           message="Are you sure you want to Delete the Selected statement?"
