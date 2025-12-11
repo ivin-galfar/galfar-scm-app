@@ -485,11 +485,11 @@ const LogisticsDashboard = () => {
                           View <FaArrowCircleRight />
                         </Link>
                         <IoPrint
-                          className={` ${
-                            !userInfo?.is_admin
-                              ? "text-gray-400 pointer-events-none cursor-not-allowed"
-                              : "text-black cursor-pointer"
-                          }`}
+                          className={
+                            userInfo?.is_admin || userInfo.role === "incharge"
+                              ? "text-black cursor-pointer"
+                              : "text-gray-400 pointer-events-none cursor-not-allowed"
+                          }
                           size={25}
                           onClick={async () => {
                             const { formData, tableData } = await getstatement(
