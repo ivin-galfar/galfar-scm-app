@@ -82,7 +82,7 @@ const ApproverTimeline = ({ approverhistory }) => {
 
               {index !== roles.length - 1 && (
                 <div
-                  className={`absolute left-1/2 top-20 w-0.5 ${ap == "fm" ? "h-40" : "h-50"}  bg-gray-300 z-0`}
+                  className={`absolute left-1/2 top-20 w-0.5 ${ap == "fm" ? "h-20" : "h-60"}  bg-gray-300 z-0`}
                 ></div>
               )}
 
