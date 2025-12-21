@@ -18,6 +18,8 @@ const ApproverTimeline = ({ approverhistory }) => {
     rejectedindex = info?.length - 1;
   }
 
+  const approved = approverhistory?.status === "approved" || "";
+
   const colorMap = roles.map((r, index) => {
     let color = "bg-blue-300";
 
@@ -34,6 +36,9 @@ const ApproverTimeline = ({ approverhistory }) => {
       if (index < rejectedindex) {
         return "bg-green-600";
       }
+    }
+    if (approved) {
+      color = "bg-green-600";
     }
     return color;
   });
