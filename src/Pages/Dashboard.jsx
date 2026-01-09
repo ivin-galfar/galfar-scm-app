@@ -543,10 +543,17 @@ const Dashboard = () => {
       columnStyles,
     });
 
-    const startYLabel =
+    let startYLabel =
       doc.previousAutoTable?.finalY || doc.lastAutoTable?.finalY || 65;
+    const pageHeight = doc.internal.pageSize.height;
     const labelWidth = 60;
     const spacing = 10;
+    const approvalHeight = 60; // approximate space needed for approvals
+    // If not enough space on current page, add a new page
+    if (startYLabel + approvalHeight > pageHeight) {
+      doc.addPage();
+      startYLabel = 10; // top margin for new page
+    }
 
     const roleDisplayMap = {
       hod: "Mr.Pramoj.R",
@@ -611,7 +618,6 @@ const Dashboard = () => {
     const rightText = `Generated on: ${new Date().toLocaleString()}`;
     const footerPadding = 6;
     const pageCount = doc.internal.getNumberOfPages();
-    const pageHeight = doc.internal.pageSize.height;
     const rightWidth = doc.getTextWidth(rightText);
 
     for (let i = 1; i <= pageCount; i++) {
