@@ -565,13 +565,12 @@ const Dashboard = () => {
         acc[d.role] = d.action;
         return acc;
       }, {}) || {};
+    console.log(approvalsStatus);
+    console.log(formData);
 
     const rolesToShow = ["hod", "gm", "ceo"];
     rolesToShow.forEach((dbRole, index) => {
-      const rawStatus =
-        approvalsStatus[dbRole] == "review"
-          ? "--"
-          : approvalsStatus[dbRole] || "--";
+      const rawStatus = approvalsStatus[dbRole] || "--";
       const status =
         rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
       const displayName = roleDisplayMap[dbRole] || dbRole;
