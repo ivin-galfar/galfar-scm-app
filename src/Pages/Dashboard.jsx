@@ -562,11 +562,11 @@ const Dashboard = () => {
     };
     const approvalsStatus =
       formData?.approverdetails?.reduce((acc, d) => {
-        acc[d.role] = d.action;
+        if (d.action !== "review") {
+          acc[d.role] = d.action;
+        }
         return acc;
       }, {}) || {};
-    console.log(approvalsStatus);
-    console.log(formData);
 
     const rolesToShow = ["hod", "gm", "ceo"];
     rolesToShow.forEach((dbRole, index) => {
