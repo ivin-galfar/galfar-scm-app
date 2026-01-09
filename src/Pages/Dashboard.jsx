@@ -552,7 +552,7 @@ const Dashboard = () => {
     // If not enough space on current page, add a new page
     if (startYLabel + approvalHeight > pageHeight) {
       doc.addPage();
-      startYLabel = 10; // top margin for new page
+      startYLabel = 2; // top margin for new page
     }
 
     const roleDisplayMap = {
