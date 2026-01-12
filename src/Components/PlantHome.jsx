@@ -58,6 +58,7 @@ const PlantHome = () => {
       "Pending For HOD",
       "Pending For GM",
       "Pending For CEO",
+      "review",
       "Rejected",
       "Approved",
     ],
@@ -65,6 +66,7 @@ const PlantHome = () => {
       "Pending For HOD",
       "Pending for GM",
       "Pending for CEO",
+      "review",
       "Approved",
       "Rejected",
     ],
@@ -72,6 +74,7 @@ const PlantHome = () => {
       "Pending For HOD",
       "Pending for GM",
       "Pending for CEO",
+      "review",
       "Approved",
       "Rejected",
     ],
@@ -194,28 +197,24 @@ const PlantHome = () => {
           </Link>
         </div>
         <ul className="p-2 space-y-3 ">
-          {userInfo?.is_admin ? (
-            <li>
-              <Link to="/dashboard">
-                <button
-                  className="w-full flex text-left px-3 py-2 justify-between bg-cyan-300 hover:bg-cyan-400 rounded font-medium cursor-pointer"
-                  onClick={() => {
-                    setStatusFilter("review");
-                    setMultiStatusFilter([]);
-                    setPageSize(20);
-                  }}
-                >
-                  <div className="flex items-center gap-4">
-                    <IoWarningOutline size={18} />
-                    <span>Under Review</span>
-                  </div>
-                  <p>{reviewReceipts?.length}</p>
-                </button>
-              </Link>
-            </li>
-          ) : (
-            ""
-          )}
+          <li>
+            <Link to="/dashboard">
+              <button
+                className="w-full flex text-left px-3 py-2 justify-between bg-cyan-300 hover:bg-cyan-400 rounded font-medium cursor-pointer"
+                onClick={() => {
+                  setStatusFilter("review");
+                  setMultiStatusFilter([]);
+                  setPageSize(20);
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <IoWarningOutline size={18} />
+                  <span>Under Review</span>
+                </div>
+                <p>{reviewReceipts?.length}</p>
+              </button>
+            </Link>
+          </li>
           <li>
             <Link to="/dashboard">
               <button
