@@ -3,6 +3,7 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import {
   fetchallstatements,
   fetchApproverDetails,
+  fetchCsCount,
   fetchStatement,
 } from "../APIs/api";
 import {
@@ -35,7 +36,7 @@ import { MdOutlineErrorOutline } from "react-icons/md";
 import { handlePrint } from "../Helpers/print_helper";
 import { FaHistory } from "react-icons/fa";
 import ApprovalHistory from "../Components/ApprovalHistory";
-
+import { usePagination, usetotalReceipts } from "../store/statementStore";
 const LogisticsDashboard = () => {
   const userInfo = useUserInfo();
   const { setStatusFilter, statusfilter, resetStatusFilter } =
@@ -48,6 +49,8 @@ const LogisticsDashboard = () => {
   const [searchcs, setSearchCS] = useState("");
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
+  const { receiptscount, setReceiptsCount } = usetotalReceipts();
+  const { pagination, setPageIndex, setPageSize } = usePagination();
   const queryClient = useQueryClient();
   const [deletestatement, setDeleteStatement] = useState({
     id: null,
@@ -55,53 +58,62 @@ const LogisticsDashboard = () => {
   });
   const isPlant = is_plant(userInfo?.dept_code);
   const { selectedId, resetSelectedId } = useIdHistory();
-
   const { data: allstatements } = useQuery({
-    queryKey: ["csid"],
-    queryFn: () => fetchallstatements(userInfo),
+    queryKey: [
+      "csid",
+      pagination.pageSize,
+      statusfilter,
+      pagination.pageIndex,
+      searchcs,
+    ],
+    queryFn: () =>
+      fetchallstatements(
+        statusfilter,
+        userInfo,
+        pagination.pageSize,
+        pagination.pageIndex,
+        searchcs
+      ),
     enabled: !!userInfo,
+    keepPreviousData: true,
   });
 
-  const filteredStatements = useMemo(() => {
-    if (!allstatements) return [];
+  // const filteredStatements = useMemo(() => {
+  //   if (!allstatements) return [];
 
-    let filtered = allstatements;
-    if (statusfilter === "All") {
-      filtered = allstatements.filter(
-        (statement) => statement.status !== "rejected"
-      );
-    }
-    if (searchcs !== "") {
-      filtered = allstatements.filter((statements) =>
-        statements.shipment_no?.toString().includes(searchcs)
-      );
-    }
+  //   let filtered = allstatements;
+  //   if (searchcs !== "") {
+  //     filtered = allstatements.filter((statements) =>
+  //       statements.shipment_no?.toString().includes(searchcs)
+  //     );
+  //   }
 
-    if (searchcs == "") {
-      if (statusfilter === "Approved") {
-        filtered = allstatements.filter(
-          (statement) => statement.status === "approved"
-        );
-      } else if (statusfilter === "Pending") {
-        if (!userInfo.is_admin) {
-          filtered = allstatements.filter((statement) =>
-            statement.status?.includes(userInfo?.role?.toLocaleLowerCase())
-          );
-        } else {
-          filtered = allstatements.filter((statement) =>
-            statement.status?.includes("pending")
-          );
-        }
-      } else if (statusfilter === "Rejected") {
-        filtered = allstatements.filter(
-          (statement) => statement.status === "rejected"
-        );
-      }
-    }
-    return filtered;
-  }, [allstatements, statusfilter, searchcs]);
+  //   if (searchcs == "") {
+  //     if (statusfilter === "Approved") {
+  //       filtered = allstatements.filter(
+  //         (statement) => statement.status === "approved"
+  //       );
+  //     } else if (statusfilter === "Pending") {
+  //       if (!userInfo.is_admin) {
+  //         filtered = allstatements.filter((statement) =>
+  //           statement.status?.includes(userInfo?.role?.toLocaleLowerCase())
+  //         );
+  //       } else {
+  //         filtered = allstatements.filter((statement) =>
+  //           statement.status?.includes("pending")
+  //         );
+  //       }
+  //     } else if (statusfilter === "Rejected") {
+  //       filtered = allstatements.filter(
+  //         (statement) => statement.status === "rejected"
+  //       );
+  //     }
+  //   }
+  //   return filtered;
+  // }, [allstatements, statusfilter, searchcs]);
 
   const handleSearch = (e) => {
+    setPageIndex(0);
     (setSearchCS(e.target.value), setStatusFilter("All"));
   };
 
@@ -166,6 +178,19 @@ const LogisticsDashboard = () => {
     }
     handleApprovalHistory(selectedId);
   }, [selectedId]);
+
+  useEffect(() => {
+    const fetchStatments = async () => {
+      try {
+        const totalcount = await fetchCsCount(userInfo, statusfilter, searchcs);
+        setReceiptsCount(totalcount.receipts_count);
+      } catch (error) {
+        const message = error?.response?.data?.message || error.message;
+        console.error("Fetch receipts error:", message);
+      }
+    };
+    fetchStatments();
+  }, [statusfilter, searchcs]);
 
   const columnHelper = createColumnHelper();
   const statusProgress = {
@@ -324,9 +349,13 @@ const LogisticsDashboard = () => {
     ),
   ];
   const table = useReactTable({
-    data: filteredStatements || [],
+    data: allstatements || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
+    state: { pagination },
+    manualPagination: true,
+    onPaginationChange: setPageSize,
+    pageCount: Math.ceil(receiptscount / pagination.pageSize),
     getExpandedRowModel: getExpandedRowModel(),
   });
 
@@ -372,18 +401,23 @@ const LogisticsDashboard = () => {
                   switch (tab) {
                     case "All":
                       setStatusFilter("All");
+                      setPageIndex(0);
                       break;
                     case "Approved":
                       setStatusFilter("Approved");
+                      setPageIndex(0);
                       break;
                     case "Rejected":
                       setStatusFilter("Rejected");
+                      setPageIndex(0);
                       break;
                     case "Pending":
                       setStatusFilter("Pending");
+                      setPageIndex(0);
                       break;
                     case "Approval History":
                       setStatusFilter("Approval History");
+                      setPageIndex(0);
                       break;
                   }
                 }}
@@ -538,6 +572,101 @@ const LogisticsDashboard = () => {
               )}
             </tbody>
           </table>
+          <div className={`flex justify-between`}>
+            <div className="ml-2 flex items-center text-sm text-gray-700 font-medium">
+              Total Number of Records: {receiptscount}
+            </div>
+
+            <div className="flex items-center gap-2 p-2 justify-end ">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Rows per page:</span>
+                <select
+                  value={pagination.pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPageIndex(0);
+                  }}
+                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                >
+                  {[5, 10, 20, 50].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2 ">
+                <button
+                  onClick={() => setPageIndex(0)}
+                  disabled={pagination.pageIndex == 0}
+                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 cursor-pointer ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
+                >
+                  «
+                </button>
+
+                <button
+                  onClick={() => setPageIndex(pagination.pageIndex - 1)}
+                  disabled={pagination.pageIndex == 0}
+                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
+                >
+                  ‹ Prev
+                </button>
+
+                <span className="text-sm px-2">
+                  Page{" "}
+                  <strong>
+                    {receiptscount != 0 ? pagination.pageIndex + 1 : 0}
+                  </strong>{" "}
+                  of{" "}
+                  <strong>
+                    {Math.ceil(receiptscount / pagination.pageSize)}
+                  </strong>
+                </span>
+
+                <button
+                  onClick={() => setPageIndex(pagination.pageIndex + 1)}
+                  disabled={
+                    pagination.pageIndex + 1 >=
+                    Math.ceil(receiptscount / pagination.pageSize)
+                  }
+                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                    pagination.pageIndex + 1 >=
+                    Math.ceil(receiptscount / pagination.pageSize)
+                      ? "cursor-auto"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  Next ›
+                </button>
+
+                <button
+                  onClick={() =>
+                    setPageIndex(
+                      Math.ceil(receiptscount / pagination.pageSize) - 1
+                    )
+                  }
+                  disabled={
+                    pagination.pageIndex ==
+                    Math.max(
+                      Math.ceil(receiptscount / pagination.pageSize) - 1,
+                      0
+                    )
+                  }
+                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                    pagination.pageIndex ==
+                    Math.max(
+                      Math.ceil(receiptscount / pagination.pageSize) - 1,
+                      0
+                    )
+                      ? "cursor-auto"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       {statusfilter === "Approval History" && <ApprovalHistory />}

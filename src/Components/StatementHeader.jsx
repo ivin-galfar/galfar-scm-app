@@ -21,7 +21,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchallid, updatelgstatement } from "../APIs/api";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { MdModeEdit } from "react-icons/md";
 import { IoMdSave } from "react-icons/io";
 
@@ -41,6 +41,7 @@ const StatementHeader = () => {
   const { cs_no } = useParams();
   const navigate = useNavigate();
   const { isFreeze, setFreeze, resetFreeze } = useFreeze();
+  const location = useLocation();
 
   const form = useForm({
     defaultValues: {
@@ -94,7 +95,7 @@ const StatementHeader = () => {
 
   const { data: csid } = useQuery({
     queryKey: ["csid", formData.status],
-    queryFn: () => fetchallid(userInfo),
+    queryFn: () => fetchallid(userInfo, location.pathname),
     enabled: !newstatement,
   });
 

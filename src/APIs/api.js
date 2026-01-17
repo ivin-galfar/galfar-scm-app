@@ -127,7 +127,7 @@ export const updatelgstatement = async ({ formData, tableData, userInfo }) => {
   }
 };
 
-export const fetchallid = async (userInfo) => {
+export const fetchallid = async (userInfo, module) => {
   try {
     const config = {
       headers: {
@@ -135,10 +135,10 @@ export const fetchallid = async (userInfo) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/logistics/allcs`,
-      config
-    );
+    const response = await axios.get(`${REACT_SERVER_URL}/logistics/allcs`, {
+      ...config,
+      params: { module },
+    });
     let cs = response.data
       .filter(
         (d) =>
@@ -168,7 +168,13 @@ export const fetchallid = async (userInfo) => {
   }
 };
 
-export const fetchallstatements = async (userInfo) => {
+export const fetchallstatements = async (
+  statusfilter,
+  userInfo,
+  pageSize,
+  pageIndex,
+  searchcs
+) => {
   try {
     const config = {
       headers: {
@@ -178,13 +184,19 @@ export const fetchallstatements = async (userInfo) => {
     };
     const response = await axios.get(
       `${REACT_SERVER_URL}/logistics/statements`,
-      config
+      {
+        ...config,
+        params: {
+          statusfilter,
+          searchcs,
+          pageIndex,
+          pageSize,
+          role: userInfo.role,
+        },
+      }
     );
     let cs = response.data
-      .filter(
-        (d) =>
-          d.status !== null && d.status !== "created" && d.status !== "review"
-      )
+      .filter((d) => d.status !== null)
       .sort((a, b) => b.id - a.id);
     if (userInfo.role == "initlg") {
       cs = response.data.sort((a, b) => b.id - a.id);
@@ -360,6 +372,30 @@ export const fetchApproverDetails = async (userInfo, cs_id) => {
     );
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchCsCount = async (userInfo, statusfilter, searchcs) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/logistics/totalreceipts/`,
+      {
+        ...config,
+        params: { statusfilter, role: userInfo.role, searchcs },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+
     throw error;
   }
 };

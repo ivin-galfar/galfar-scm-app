@@ -4,14 +4,16 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useHistoryData, useIdHistory } from "../store/logisticsStore";
 import ApproverTimeline from "./ApproverTimeline";
 import TimelineGraph from "./TimelineGraph";
+import { useLocation } from "react-router-dom";
 
 const ApprovalHistory = () => {
   const [allids, setAllids] = useState(null);
   const userInfo = useUserInfo();
   const { selectedId, setSelectedId } = useIdHistory();
   const { approverhistory } = useHistoryData();
+  const location = useLocation();
   const fetchallids = async () => {
-    const ids = await fetchallid(userInfo);
+    const ids = await fetchallid(userInfo, location.pathname);
     setAllids(ids);
   };
 

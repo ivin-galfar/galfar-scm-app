@@ -31,7 +31,7 @@ const PlantHome = () => {
     setfreezeQuantity,
   } = useContext(AppContext);
   const userInfo = useUserInfo();
-  const { setPageSize } = usePagination();
+  const { setPageSize, setPageIndex } = usePagination();
 
   const statusMapping = {
     inita: [
@@ -173,10 +173,12 @@ const PlantHome = () => {
               if (userInfo?.is_admin) {
                 setStatusFilter("review");
                 setMultiStatusFilter([]);
+                setPageIndex(0);
                 setPageSize(20);
               } else {
                 setStatusFilter("");
                 setMultiStatusFilter(pendingStatuses);
+                setPageIndex(0);
                 setPageSize(20);
               }
             }}
@@ -204,6 +206,7 @@ const PlantHome = () => {
                 onClick={() => {
                   setStatusFilter("review");
                   setMultiStatusFilter([]);
+                  setPageIndex(0);
                   setPageSize(20);
                 }}
               >
@@ -221,6 +224,7 @@ const PlantHome = () => {
                 className="w-full flex text-left px-3 py-2 justify-between bg-blue-200 hover:bg-blue-300 rounded font-medium cursor-pointer"
                 onClick={() => {
                   setStatusFilter("");
+                  setPageIndex(0);
                   setMultiStatusFilter(pendingStatuses);
                 }}
               >
@@ -239,6 +243,7 @@ const PlantHome = () => {
                 onClick={() => {
                   setStatusFilter("Approved");
                   setMultiStatusFilter([]);
+                  setPageIndex(0);
                   setPageSize(20);
                 }}
               >
@@ -257,6 +262,7 @@ const PlantHome = () => {
                 onClick={() => {
                   setStatusFilter("Rejected");
                   setMultiStatusFilter([]);
+                  setPageIndex(0);
                   setPageSize(20);
                 }}
               >
@@ -275,6 +281,7 @@ const PlantHome = () => {
                 onClick={() => {
                   setStatusFilter("All");
                   setMultiStatusFilter([]);
+                  setPageIndex(0);
                   setPageSize(20);
                 }}
               >

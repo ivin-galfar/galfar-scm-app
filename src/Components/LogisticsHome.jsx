@@ -3,7 +3,7 @@ import { fetchallid } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { SiQuicktime } from "react-icons/si";
 import { GrDocumentStore } from "react-icons/gr";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
 import { MdOutlinePendingActions } from "react-icons/md";
@@ -16,6 +16,7 @@ import {
   useStatement,
   useStatusFilter,
 } from "../store/logisticsStore";
+import { usePagination } from "../store/statementStore";
 
 const LogisticsHome = () => {
   const userInfo = useUserInfo();
@@ -23,8 +24,9 @@ const LogisticsHome = () => {
   const { resetData } = useStatement();
   const { setNewStatement } = useNewStatement();
   const { resetparticularvalue } = useParticularValues();
-  const navigate = useNavigate();
+  const { setPageIndex } = usePagination();
 
+  const navigate = useNavigate();
   const { data: cs_id } = useQuery({
     queryKey: ["csid"],
     queryFn: () => fetchallid(userInfo),
@@ -104,6 +106,7 @@ const LogisticsHome = () => {
               <button
                 className="w-full flex text-left px-3 py-2 justify-between bg-blue-200 hover:bg-blue-300 rounded font-medium cursor-pointer"
                 onClick={() => {
+                  setPageIndex(0);
                   setStatusFilter("Pending");
                 }}
               >
@@ -120,6 +123,7 @@ const LogisticsHome = () => {
               <button
                 className="w-full text-left px-3 py-2 justify-between flex bg-green-200 hover:bg-green-300 rounded font-medium cursor-pointer"
                 onClick={() => {
+                  setPageIndex(0);
                   setStatusFilter("Approved");
                 }}
               >
@@ -136,6 +140,7 @@ const LogisticsHome = () => {
               <button
                 className="w-full text-left px-3 py-2 justify-between flex bg-red-200 hover:bg-red-300 rounded font-medium cursor-pointer"
                 onClick={() => {
+                  setPageIndex(0);
                   setStatusFilter("Rejected");
                 }}
               >
@@ -152,6 +157,7 @@ const LogisticsHome = () => {
               <button
                 className="w-full text-left px-3 py-2 bg-gray-100 justify-between flex hover:bg-gray-200 rounded font-medium cursor-pointer"
                 onClick={() => {
+                  setPageIndex(0);
                   setStatusFilter("All");
                 }}
               >
