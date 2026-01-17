@@ -177,97 +177,6 @@ const Dashboard = () => {
     searchcs,
   ]);
 
-  // useEffect(() => {
-  //   if (!Array.isArray(allreceipts) || allreceipts.length === 0) return;
-  //   if (!userInfo?.token) return;
-
-  //   const needsEnrichment = allreceipts.some((r) => {
-  //     const details = r.formData?.approverdetails;
-  //     return !Array.isArray(details) || details.length === 0;
-  //   });
-
-  //   if (!needsEnrichment) return;
-
-  //   const fetchApproversComments = async () => {
-  //     try {
-  //       const settledResults = await Promise.allSettled(
-  //         allreceipts.map(async (receipt) => {
-  //           if (receipt?.formData?.comments_count > 0) {
-  //             try {
-  //               const config = {
-  //                 headers: {
-  //                   "Content-Type": "application/json",
-  //                   Authorization: `Bearer ${userInfo.token}`,
-  //                 },
-  //               };
-  //               const res = await axios.get(
-  //                 `${REACT_SERVER_URL}/receipts/approverdetails/${receipt.formData.id}`,
-  //                 config
-  //               );
-  //               return {
-  //                 ...receipt,
-  //                 formData: {
-  //                   ...receipt.formData,
-  //                   approverdetails: res.data || [],
-  //                 },
-  //               };
-  //             } catch (err) {
-  //               console.error(
-  //                 `Error fetching approver for ${receipt.formData.id}`,
-  //                 err
-  //               );
-  //               return {
-  //                 ...receipt,
-  //                 formData: { ...receipt.formData, approverdetails: [] },
-  //               };
-  //             }
-  //           }
-  //           return {
-  //             ...receipt,
-  //             formData: { ...receipt.formData, approverdetails: [] },
-  //           };
-  //         })
-  //       );
-  //       console.log(settledResults.map((res, i) => res));
-
-  //       const enrichedReceipts = settledResults.map((res, i) =>
-  //         res.status === "fulfilled"
-  //           ? res.value
-  //           : {
-  //               ...allreceipts[i],
-  //               formData: { ...allreceipts[i].formData, approverdetails: [] },
-  //             }
-  //       );
-  //       setAllReceipts(enrichedReceipts);
-  //       setReceipts((prevReceipts) =>
-  //         prevReceipts.map((r) => {
-  //           const enriched = enrichedReceipts.find(
-  //             (er) => er?.formData?.id === r?.formData?.id
-  //           );
-  //           return {
-  //             ...r,
-  //             formData: {
-  //               ...r.formData,
-  //               approverdetails: enriched?.formData?.approverdetails || [],
-  //             },
-  //           };
-  //         })
-  //       );
-  //       setApproverDetails(enrichedReceipts);
-  //       setApproversFetched(true);
-  //     } catch (err) {
-  //       console.error("Error enriching receipts:", err);
-  //     }
-  //   };
-
-  //   fetchApproversComments();
-  // }, [
-  //   statusFilter,
-  //   userInfo,
-  //   approversFetched,
-  //   !approversFetched ? allreceipts : "",
-  // ]);
-
   const handleDelete = async (mr) => {
     try {
       const config = {
@@ -431,18 +340,7 @@ const Dashboard = () => {
     ];
     const headerRow2 = vendorHeaders;
     const tableHead = [headerRow1, headerRow2];
-    //  const vendors = Object.values(row.vendors || {});
-    //     let rowvalues = [];
-    //     if (row.particulars === "Recommendation (If Any)") {
-    //       Object.entries(row.vendors || {}).forEach(([key, value]) => {
-    //         const vendorIndex = Number(key.split("_")[1]);
-    //         if (vendorIndex === updatedFormData.selectedvendorindex) {
-    //           rowvalues.push(updatedFormData.selectedvendorreason);
-    //         } else {
-    //           rowvalues.push(value == 0 ? "--" : value);
-    //         }
-    //       });
-    //     }
+
     const tableBody = tableData
       .filter((row, idx) => idx !== 0)
       .map((row, i) => {
@@ -526,14 +424,6 @@ const Dashboard = () => {
           },
         })),
       ]
-      // [
-      //   "Recommendation",
-      //   ...activeVendorIndexes.map((_, idx) =>
-      //     idx == updatedFormData.selectedvendorindex
-      //       ? updatedFormData.selectedvendorreason
-      //       : "--"
-      //   ),
-      // ]
     );
     autoTable(doc, {
       startY: 65,
@@ -662,37 +552,6 @@ const Dashboard = () => {
       setMultiStatusFilter([]));
     setPageIndex(0);
   };
-  // const filteredReceiptsOnstatus = async(() => {
-  //   // const respose = await;
-  //   // if (!Array.isArray(allreceipts)) return [];
-  //   // let filteredreceipts = receipts;
-  //   // if (statusFilter !== "All" && searchcs == "") {
-  //   //   if (statusFilter === "review") {
-  //   //     filteredreceipts = receipts.filter(
-  //   //       (r) => r.formData.status == "review"
-  //   //     );
-  //   //   }
-  //   //   if (multiStatusFilter && multiStatusFilter.length > 0) {
-  //   //     filteredreceipts = receipts.filter((r) =>
-  //   //       multiStatusFilter
-  //   //         .filter((status) => status !== "Approved" && status !== "Rejected")
-  //   //         .map((status) => status?.toLowerCase())
-  //   //         .includes(r?.formData?.status?.toLowerCase())
-  //   //     );
-  //   //   } else {
-  //   //     filteredreceipts = receipts.filter(
-  //   //       (r) =>
-  //   //         r?.formData?.status?.toLowerCase() === statusFilter?.toLowerCase()
-  //   //     );
-  //   //   }
-  //   // }
-  //   // if (searchcs.trim() !== "") {
-  //   //   filteredreceipts = receipts.filter((r) =>
-  //   //     r.formData.id?.toString().includes(searchcs)
-  //   //   );
-  //   // }
-  //   // return filteredreceipts;
-  // }, [allreceipts, statusFilter, multiStatusFilter, searchcs]);
 
   const columnHelper = createColumnHelper();
   const columns = [

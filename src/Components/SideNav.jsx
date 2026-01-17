@@ -17,7 +17,6 @@ import { GiCrane } from "react-icons/gi";
 import { useDashboardType } from "../store/logisticsStore";
 import { IoHelpCircleSharp } from "react-icons/io5";
 
-// import scaffolding from "../assets/Images/scaffolding.png";
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const { setStatusFilter, setMultiStatusFilter } = useContext(AppContext);
   const [submenuOpen, setSubmenuOpen] = useState(false);
@@ -161,8 +160,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                   : ""
               }`}
               onClick={() => {
-                // setStatusFilter("All");
-                // setMultiStatusFilter([]);
                 setDashboardType("logistics");
               }}
             >

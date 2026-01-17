@@ -6,7 +6,6 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import axios from "axios";
 import { expectedstatus, role_finder } from "../Helpers/statusfinder";
-import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { EmailAlert } from "../APIs/api";
 import { is_logistics } from "../Helpers/dept_helper";
@@ -18,7 +17,6 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const { formData, setFormData, setTableData } = useStatement();
   const [comments, setComments] = useState("");
   const userInfo = useUserInfo();
-  const navigate = useNavigate();
   const dept = is_logistics ? "logistics" : "";
 
   const submitApproval = async (cs_id, status) => {

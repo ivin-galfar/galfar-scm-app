@@ -78,40 +78,6 @@ const LogisticsDashboard = () => {
     keepPreviousData: true,
   });
 
-  // const filteredStatements = useMemo(() => {
-  //   if (!allstatements) return [];
-
-  //   let filtered = allstatements;
-  //   if (searchcs !== "") {
-  //     filtered = allstatements.filter((statements) =>
-  //       statements.shipment_no?.toString().includes(searchcs)
-  //     );
-  //   }
-
-  //   if (searchcs == "") {
-  //     if (statusfilter === "Approved") {
-  //       filtered = allstatements.filter(
-  //         (statement) => statement.status === "approved"
-  //       );
-  //     } else if (statusfilter === "Pending") {
-  //       if (!userInfo.is_admin) {
-  //         filtered = allstatements.filter((statement) =>
-  //           statement.status?.includes(userInfo?.role?.toLocaleLowerCase())
-  //         );
-  //       } else {
-  //         filtered = allstatements.filter((statement) =>
-  //           statement.status?.includes("pending")
-  //         );
-  //       }
-  //     } else if (statusfilter === "Rejected") {
-  //       filtered = allstatements.filter(
-  //         (statement) => statement.status === "rejected"
-  //       );
-  //     }
-  //   }
-  //   return filtered;
-  // }, [allstatements, statusfilter, searchcs]);
-
   const handleSearch = (e) => {
     setPageIndex(0);
     (setSearchCS(e.target.value), setStatusFilter("All"));
