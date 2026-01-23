@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
-import { useStatement } from "../store/logisticsStore";
+import { useStatement, useStatusFilter } from "../store/logisticsStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import axios from "axios";
@@ -9,6 +9,7 @@ import { expectedstatus, role_finder } from "../Helpers/statusfinder";
 import { RxCross1 } from "react-icons/rx";
 import { EmailAlert } from "../APIs/api";
 import { is_logistics } from "../Helpers/dept_helper";
+import { useNavigate } from "react-router-dom";
 
 const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const { setErrorMessage, errormessage, clearErrorMessage } =
@@ -18,6 +19,8 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const [comments, setComments] = useState("");
   const userInfo = useUserInfo();
   const dept = is_logistics ? "logistics" : "";
+  const navigate = useNavigate();
+  const { setStatusFilter } = useStatusFilter();
 
   const submitApproval = async (cs_id, status) => {
     let definedprojects = [
@@ -80,6 +83,8 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
       setTimeout(() => {
         setShowmodal(false);
         resetshowtoast();
+        navigate("/dashboardlg", { replace: true });
+        setStatusFilter("Pending");
       }, 1500);
       setComments("");
     } catch (error) {

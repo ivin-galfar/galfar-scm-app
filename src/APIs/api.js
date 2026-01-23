@@ -12,7 +12,7 @@ export const loginUser = async ({ email, password }) => {
       email,
       password,
     },
-    config
+    config,
   );
   return data;
 };
@@ -28,7 +28,7 @@ export const registerUser = async ({ email, password }) => {
       email,
       password,
     },
-    config
+    config,
   );
   return data;
 };
@@ -46,7 +46,7 @@ export const feedReceipt = async ({ sharedTableData, userInfo }) => {
       formData: sharedTableData.formData,
       tableData: sharedTableData["tableData"],
     },
-    config
+    config,
   );
   return data;
 };
@@ -73,7 +73,7 @@ export const updateReceipt = async ({
         selectedIndex: selectedVendorIndex,
         selectedReason: selectedVendorReason,
       },
-      config
+      config,
     );
     return data;
   } catch (error) {
@@ -95,7 +95,7 @@ export const feedlgstatement = async ({ formData, tableData, userInfo }) => {
         formData,
         tableData,
       },
-      config
+      config,
     );
     return response;
   } catch (error) {
@@ -119,7 +119,7 @@ export const updatelgstatement = async ({ formData, tableData, userInfo }) => {
         formData,
         tableData,
       },
-      config
+      config,
     );
     return response;
   } catch (error) {
@@ -142,7 +142,7 @@ export const fetchallid = async (userInfo, module) => {
     let cs = response.data
       .filter(
         (d) =>
-          d.status !== null && d.status !== "created" && d.status !== "review"
+          d.status !== null && d.status !== "created" && d.status !== "review",
       )
       .sort((a, b) => b.id - a.id);
     if (userInfo.role == "initlg") {
@@ -151,13 +151,13 @@ export const fetchallid = async (userInfo, module) => {
     if (userInfo.role == "pm") {
       if (userInfo.pr_code.includes(1)) {
         cs = response.data.filter(
-          (d) => d.project == "plant" && d.status !== "created"
+          (d) => d.project == "plant" && d.status !== "created",
         );
       } else {
         cs = response.data.filter(
           (d) =>
             userInfo.pr_code.includes(Number(d.project)) &&
-            d.status !== "created"
+            d.status !== "created",
         );
       }
     }
@@ -173,7 +173,7 @@ export const fetchallstatements = async (
   userInfo,
   pageSize,
   pageIndex,
-  searchcs
+  searchcs,
 ) => {
   try {
     const config = {
@@ -193,7 +193,7 @@ export const fetchallstatements = async (
           pageSize,
           role: userInfo.role,
         },
-      }
+      },
     );
     let cs = response.data
       .filter((d) => d.status !== null)
@@ -204,13 +204,13 @@ export const fetchallstatements = async (
     if (userInfo.role == "pm") {
       if (userInfo.pr_code.includes(1)) {
         cs = response.data.filter(
-          (d) => d.project == "plant" && d.status !== "created"
+          (d) => d.project == "plant" && d.status !== "created",
         );
       } else {
         cs = response.data.filter(
           (d) =>
             userInfo.pr_code.includes(Number(d.project)) &&
-            d.status !== "created"
+            d.status !== "created",
         );
       }
     }
@@ -248,7 +248,7 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
         shipment_no,
         rejectedby,
       },
-      config
+      config,
     );
     return response.data;
   } catch (error) {
@@ -267,7 +267,7 @@ export const fetchStatement = async (userInfo, cs_id) => {
     };
     const response = await axios.get(
       `${REACT_SERVER_URL}/logistics/${cs_id}`,
-      config
+      config,
     );
     let filteredresponse = response;
 
@@ -279,12 +279,14 @@ export const fetchStatement = async (userInfo, cs_id) => {
         filteredresponse = response;
       } else {
         filteredresponse = userInfo.pr_code.includes(
-          Number(response.data?.formData?.project)
+          Number(response.data?.formData?.project),
         )
           ? response
           : "";
       }
     }
+    console.log(filteredresponse);
+
     return filteredresponse;
   } catch (error) {
     const message = error?.response?.data || error.message;
@@ -304,7 +306,7 @@ export const fetchReceipt = async (id, userInfo) => {
       };
       const response = await axios.get(
         `${REACT_SERVER_URL}/receipts/${id}`,
-        config
+        config,
       );
       const receipt = response.data;
       return receipt;
@@ -350,7 +352,7 @@ export const fetchReceiptCount = async ({
           multiStatus: multiStatus?.length ? multiStatus.join(",") : null,
           searchcs,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -368,7 +370,7 @@ export const fetchApproverDetails = async (userInfo, cs_id) => {
     };
     const response = await axios.get(
       `${REACT_SERVER_URL}/logistics/statements/approverdetails/${cs_id}`,
-      config
+      config,
     );
     return response.data;
   } catch (error) {
@@ -389,13 +391,41 @@ export const fetchCsCount = async (userInfo, statusfilter, searchcs) => {
       {
         ...config,
         params: { statusfilter, role: userInfo.role, searchcs },
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
     console.log(error);
 
+    throw error;
+  }
+};
+
+export const recallStatementValues = async (
+  userInfo,
+  cs_id,
+  recalled_times,
+) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    await axios.post(
+      `${REACT_SERVER_URL}/logistics/updatestatement/${cs_id}`,
+      {
+        updatedstatus: "created",
+        sentforapproval: null,
+        recalled_times,
+      },
+      config,
+    );
+  } catch (error) {
+    console.log(error);
     throw error;
   }
 };

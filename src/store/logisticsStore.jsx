@@ -47,6 +47,7 @@ export const useStatement = create((set) => ({
     lastupdated: null,
     rejectedby: "",
     createdby: "",
+    recalled_times: 0,
   },
   tableData: [],
 
@@ -87,6 +88,7 @@ export const useStatement = create((set) => ({
         lastupdated: null,
         rejectedby: "",
         createdby: "",
+        recalled_times: 0,
       },
       tableData: [],
     }),
@@ -155,4 +157,10 @@ export const useHistoryData = create((set) => ({
   approverhistory: null,
   setApproverHistory: (data) => set({ approverhistory: data }),
   resetApproverHistory: () => set({ approverhistory: null }),
+}));
+
+export const useRecallStatement = create((set) => ({
+  isRecalled: false,
+  setIsRecalled: () => set({ isRecalled: true }),
+  resetIsRecalled: () => set({ isRecalled: false }),
 }));
