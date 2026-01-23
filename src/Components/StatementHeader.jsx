@@ -9,6 +9,7 @@ import {
   useNewStatement,
   useParticular,
   useParticularValues,
+  useRecallStatement,
   useSelectCS,
   useSelectCSValue,
   useStatement,
@@ -18,12 +19,17 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { fetchallid, updatelgstatement } from "../APIs/api";
+import {
+  fetchallid,
+  recallStatementValues,
+  updatelgstatement,
+} from "../APIs/api";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { MdModeEdit } from "react-icons/md";
 import { IoMdSave } from "react-icons/io";
+import { GrRevert } from "react-icons/gr";
 
 const StatementHeader = () => {
   const { formData, setFormData, setTableData, resetData, tableData } =
@@ -42,6 +48,7 @@ const StatementHeader = () => {
   const navigate = useNavigate();
   const { isFreeze, setFreeze, resetFreeze } = useFreeze();
   const location = useLocation();
+  const { setIsRecalled, resetIsRecalled, isRecalled } = useRecallStatement();
 
   const form = useForm({
     defaultValues: {
@@ -75,7 +82,7 @@ const StatementHeader = () => {
         };
         const response = await axios.get(
           `${REACT_SERVER_URL}/particulars/${particular}`,
-          config
+          config,
         );
         setParticularValue(response.data.particular.particulars);
       } catch (error) {
@@ -111,7 +118,7 @@ const StatementHeader = () => {
         };
         const response = await axios.get(
           `${REACT_SERVER_URL}/logistics/${cs_id}`,
-          config
+          config,
         );
         let filteredresponse = response;
 
@@ -123,7 +130,7 @@ const StatementHeader = () => {
             filteredresponse = response;
           } else {
             filteredresponse = userInfo.pr_code.includes(
-              Number(response.data?.formData?.project)
+              Number(response.data?.formData?.project),
             )
               ? response
               : "";
@@ -137,11 +144,11 @@ const StatementHeader = () => {
             particulars: table.particulars,
             forwarders: table.forwarders || {},
             vendorcol: table.vendorcol,
-          })
+          }),
         );
         normalizedTableData.forEach((row) => {
           Object.keys(row.forwarders || {}).forEach((key) =>
-            allForwarderColumns.add(key)
+            allForwarderColumns.add(key),
           );
         });
         //for avoid collapsing if empty cell is there in first row
@@ -160,7 +167,7 @@ const StatementHeader = () => {
         setTableData(fullyNormalized);
         setFormData(filteredresponse.data?.formData);
         const fetchedparticular = response.data.tableData.map(
-          (table) => table.particulars
+          (table) => table.particulars,
         );
 
         setParticularValue(fetchedparticular);
@@ -197,6 +204,7 @@ const StatementHeader = () => {
         lastupdated: null,
         rejectedby: "",
         createdby: "",
+        recalled_times: 0,
       });
     }
   };
@@ -228,6 +236,7 @@ const StatementHeader = () => {
         lastupdated: null,
         rejectedby: "",
         createdby: "",
+        recalled_times: 0,
       });
     }
   }, [cs_no]);
@@ -247,12 +256,12 @@ const StatementHeader = () => {
       const response = await axios.post(
         `${REACT_SERVER_URL}/receipts/file`,
         formData,
-        config
+        config,
       );
 
       const newFiles = response.data.uploadedFiles.map((file) => file.fileUrl);
       const newFileNames = response.data.uploadedFiles.map(
-        (file) => file.fileName
+        (file) => file.fileName,
       );
 
       setFormData((prev) => ({
@@ -298,7 +307,7 @@ const StatementHeader = () => {
       const updatedFormData = {
         ...formData,
         status: "created",
-        edited_count: formData.edited_count + 1,
+        edited_count: Number(formData.edited_count) + 1,
         lastupdated: new Date().toISOString(),
       };
 
@@ -310,6 +319,18 @@ const StatementHeader = () => {
       });
     }
   };
+
+  const recallStatement = () => {
+    setIsRecalled();
+    setIsEditing();
+    recallStatementValues(userInfo, formData.id, formData.recalled_times + 1);
+    resetFreeze();
+    setShowToast();
+    setTimeout(() => {
+      resetshowtoast();
+    }, 1500);
+  };
+
   const inputClass = userInfo.is_admin
     ? "border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-64"
     : "border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-70";
@@ -348,6 +369,7 @@ const StatementHeader = () => {
                   created_at: "",
                   rejectedby: "",
                   createdby: "",
+                  recalled_times: 0,
                 });
                 navigate(`/lstatements`, { replace: true });
               }}
@@ -791,7 +813,7 @@ const StatementHeader = () => {
                 <div className="pt-5 flex items-center gap-4">
                   <button
                     type="button"
-                    className={`p-2 px-4 py-2 rounded-lg flex items-center gap-2 bg-blue-50 cursor-pointer hover:bg-blue-100 active:bg-blue-200 ${formData.created_at == "" || formData.status != "created" ? "invisible" : ""} `}
+                    className={`p-2 px-4 py-2 rounded-lg flex items-center gap-2 bg-blue-50 cursor-pointer hover:bg-blue-100 active:bg-blue-200 ${formData.created_at == "" || formData.status != "created" || isRecalled ? "invisible" : ""} `}
                     onClick={() => {
                       resetFreeze();
                       setIsEditing();
@@ -801,15 +823,21 @@ const StatementHeader = () => {
                     Edit Statement
                   </button>
                   <button
-                    className={`text-xl text-gray-600 ${isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at == "" || formData.status != "created" ? "invisible" : ""}`}
+                    className={`text-xl text-gray-600 ${isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${(formData.created_at == "" || formData.status != "created") && !isRecalled ? "invisible" : ""}`}
                     onClick={() => {
                       handleSave();
                       resetIsEditing();
+                      resetIsRecalled();
                     }}
                     disabled={!isEditing}
                   >
-                    <IoMdSave />
+                    <IoMdSave size={30} />
                   </button>
+                  <GrRevert
+                    className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "rejected" ? "visible" : "invisible"}`}
+                    size={30}
+                    onClick={recallStatement}
+                  />
                 </div>
               </div>
             ) : (

@@ -5,6 +5,7 @@ import {
   useIsEditing,
   useNewStatement,
   useParticularValues,
+  useRecallStatement,
   useSelectCS,
   useSelectCSValue,
   useStatement,
@@ -50,6 +51,7 @@ const LogisticsTable = () => {
   const { cs_no } = useParams();
   const navigate = useNavigate();
   const { isFreeze } = useFreeze();
+  const { isRecalled } = useRecallStatement();
 
   // const [selectedVendor, setSelectedVendor] = useState(0);
   // const { selectedindex, setSelectedIndex } = useSelectedIndex();
@@ -152,7 +154,7 @@ const LogisticsTable = () => {
     const vendorKey = `vendor_${colIndex}`;
     setTableData((prev) => {
       const exists = prev.some(
-        (row) => getIndex(row.r_id) === getIndex(rowIndex)
+        (row) => getIndex(row.r_id) === getIndex(rowIndex),
       );
       if (exists) {
         return prev.map((row) =>
@@ -160,13 +162,19 @@ const LogisticsTable = () => {
             ? {
                 ...row,
                 particulars: particular,
-                forwarders: { ...row.forwarders, [vendorKey]: value },
-                vendorcol: {
-                  ...(row.vendorcol ?? {}),
-                  [vendorKey]: column,
+                forwarders: {
+                  ...row.forwarders,
+                  [vendorKey]: value,
                 },
+                vendorcol: (() => {
+                  const arr = Array.isArray(row.vendorcol)
+                    ? [...row.vendorcol]
+                    : [column];
+                  arr[colIndex] = column;
+                  return arr;
+                })(),
               }
-            : row
+            : row,
         );
       } else {
         return [
@@ -213,7 +221,7 @@ const LogisticsTable = () => {
     updatedstatus,
     sentforapproval,
     selected_vendor_index,
-    recommendation_reason
+    recommendation_reason,
   ) => {
     const updatedFormData = {
       ...formData,
@@ -240,7 +248,7 @@ const LogisticsTable = () => {
           selected_vendor_index,
           recommendation_reason,
         },
-        config
+        config,
       );
 
       clearErrorMessage();
@@ -267,7 +275,7 @@ const LogisticsTable = () => {
         cs_id,
         userInfo,
         dept,
-        updatedFormData
+        updatedFormData,
       );
     } catch (error) {
       const message =
@@ -324,6 +332,11 @@ const LogisticsTable = () => {
             <SiTicktick /> Sent for approval Successfully!
           </div>
         )}
+      {showtoast && isRecalled && (
+        <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
+          <SiTicktick /> Statement Recalled Successfully!!
+        </div>
+      )}
       {showtoast &&
         !errormessage &&
         showmodal &&
@@ -335,9 +348,10 @@ const LogisticsTable = () => {
       {showtoast &&
         !errormessage &&
         formData.edited_count > 0 &&
+        !isRecalled &&
         formData.status !== "rejected" && (
           <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
-            <SiTicktick /> Statement Edited successfully!
+            <SiTicktick /> Statement Saved successfully!
           </div>
         )}
 
@@ -419,7 +433,10 @@ const LogisticsTable = () => {
                         {userInfo.is_admin ? (
                           <input
                             type="text"
-                            disabled={formData.sentforapproval || isFreeze}
+                            disabled={
+                              (formData.sentforapproval && !isRecalled) ||
+                              isFreeze
+                            }
                             value={
                               tableData.find((r) => r?.r_id === rowIndex)
                                 ?.forwarders?.[columnIndex] ?? ""
@@ -431,7 +448,7 @@ const LogisticsTable = () => {
                                 colIndex,
                                 e.target.value,
                                 particular,
-                                column
+                                column,
                               )
                             }
                           />
@@ -661,7 +678,7 @@ const LogisticsTable = () => {
               changestatus,
               true,
               formData.selected_vendor_index,
-              formData.recommendation_reason
+              formData.recommendation_reason,
             )
           }
         />
