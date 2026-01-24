@@ -133,7 +133,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             </Link>
           </div>
         )}
-
+        <hr className="border-0 h-px bg-gray-200 my-1 mx-2" />
         <button
           onClick={() => setSubmenu1Open(!submenu1Open)}
           className="flex min-h-10 p-2  items-center gap-2  rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
@@ -198,6 +198,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             </Link>
           </div>
         )}
+        <hr className="border-0 h-px bg-gray-200 my-1 mx-2" />
         <button>
           <Link
             to="https://www.notion.so/Galfar-Intranet-2a592f8cf63380d5b90ff24cad08c79e"
