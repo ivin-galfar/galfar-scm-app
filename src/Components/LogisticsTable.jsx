@@ -456,8 +456,15 @@ const LogisticsTable = () => {
                           <>
                             {" "}
                             <div className="max-w-2xl px-2 py-1 text-center break-words whitespace-normal ">
-                              {tableData.find((r) => r?.r_id === rowIndex)
-                                ?.forwarders?.[columnIndex] ?? "-"}
+                              {(() => {
+                                const value = tableData.find(
+                                  (r) => r?.r_id === rowIndex,
+                                )?.forwarders?.[columnIndex];
+                                const numberValue = Number(value);
+                                return isNaN(numberValue)
+                                  ? value
+                                  : numberValue.toLocaleString();
+                              })()}
                             </div>
                           </>
                         )}

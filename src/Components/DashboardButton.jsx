@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
+import { usePagination } from "../store/statementStore";
 
 const DashboardButton = () => {
   const { dashboardType, setDashboardType } = useDashboardType();
   const { resetStatusFilter } = useStatusFilter();
+  const { setPageIndex } = usePagination();
+
   const dashboards = [
     { key: "plant", label: "Plant", color: "blue", path: "/dashboard" },
     {
@@ -22,6 +25,7 @@ const DashboardButton = () => {
           onClick={() => {
             setDashboardType(dash.key);
             resetStatusFilter();
+            setPageIndex(0);
           }}
           className={`
         px-4 py-2 text-sm font-bold transition-colors duration-200
