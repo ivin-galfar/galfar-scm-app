@@ -80,7 +80,7 @@ const TableHeader = ({ isAdmin }) => {
       try {
         const particulars = await fetchParticulars(
           userInfo,
-          userInfo?.dept_code?.[0]
+          userInfo?.dept_code?.[0],
         );
         setParticulars(particulars.Particulars);
         setfreezeQuantity(false);
@@ -151,7 +151,7 @@ const TableHeader = ({ isAdmin }) => {
         };
         const response = await axios.get(
           `${REACT_SERVER_URL}/receipts/${receiptid}`,
-          config
+          config,
         );
         const receipt = response.data;
         setSharedTableData({
@@ -160,7 +160,7 @@ const TableHeader = ({ isAdmin }) => {
         });
         setfreezeQuantity(
           receipt.formData?.status == "review" ||
-            receipt.formData?.status == "Pending For HOD"
+            receipt.formData?.status == "Pending For HOD",
         );
       } catch (error) {
         console.log(error);
@@ -313,7 +313,7 @@ const TableHeader = ({ isAdmin }) => {
       await axios.put(
         `${REACT_SERVER_URL}/receipts/initiator/${cs_id}`,
         { approvalstatus, status },
-        config
+        config,
       );
       setSharedTableData((prev) => ({
         ...prev,
@@ -354,12 +354,12 @@ const TableHeader = ({ isAdmin }) => {
       const response = await axios.post(
         `${REACT_SERVER_URL}/receipts/file`,
         formData,
-        config
+        config,
       );
 
       const newFiles = response.data.uploadedFiles.map((file) => file.fileUrl);
       const newFileNames = response.data.uploadedFiles.map(
-        (file) => file.fileName
+        (file) => file.fileName,
       );
       setSharedTableData((prev) => ({
         ...prev,
@@ -393,7 +393,7 @@ const TableHeader = ({ isAdmin }) => {
       const response = await axios.post(
         `${REACT_SERVER_URL}/receipts/${mr}`,
         {},
-        config
+        config,
       );
       setShowToast(true);
       setErrormessage("");
@@ -492,7 +492,7 @@ const TableHeader = ({ isAdmin }) => {
                     {Array.isArray(particulars) &&
                       particulars.map((template, index) => {
                         const displayText =
-                          template.template.length > 30
+                          template.template.length > 40
                             ? template.template.slice(0, 20) + "..."
                             : template.template;
                         return (
