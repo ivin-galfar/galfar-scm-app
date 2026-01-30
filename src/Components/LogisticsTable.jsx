@@ -460,10 +460,23 @@ const LogisticsTable = () => {
                                 const value = tableData.find(
                                   (r) => r?.r_id === rowIndex,
                                 )?.forwarders?.[columnIndex];
-                                const numberValue = Number(value);
-                                return isNaN(numberValue)
-                                  ? value
-                                  : numberValue.toLocaleString();
+                                if (!value) return value;
+
+                                const match = String(value).match(
+                                  /^([A-Za-z]+)?\s*([\d,.]+)$/,
+                                );
+                                console.log(match);
+
+                                if (!match) return value;
+
+                                const [, currency, amount] = match;
+                                const formatted = Number(
+                                  amount.replace(/,/g, ""),
+                                ).toLocaleString();
+
+                                return currency
+                                  ? `${currency} ${formatted}`
+                                  : formatted;
                               })()}
                             </div>
                           </>
