@@ -6,10 +6,10 @@ const ApproverTimeline = ({ approverhistory }) => {
   let definedpm = getPmName(approverhistory?.project);
   let pmname = info?.find((pm) => pm?.role == "pm")?.pm || definedpm;
 
-  let roles = ["initiator", "incharge", "pm", "gm", "fm", "ceo"];
+  let roles = ["initlg", "incharge", "pm", "gm", "fm", "ceo"];
   const createdBy = approverhistory?.createdby?.split("@")[0];
   const pendingindex = roles.findIndex((role) =>
-    approverhistory?.status?.includes(role)
+    approverhistory?.status?.includes(role),
   );
   let rejectedindex = null;
   const rejected = approverhistory?.status == "rejected" || "";
@@ -42,7 +42,9 @@ const ApproverTimeline = ({ approverhistory }) => {
     }
     return color;
   });
-
+  const getDatetimeByRole = (role) => {
+    return info?.find((r) => r.role == role)?.datetime;
+  };
   const getComment = (role, approverhistory) => {
     switch (role) {
       case "incharge":
@@ -68,7 +70,7 @@ const ApproverTimeline = ({ approverhistory }) => {
           const name =
             ap === "pm"
               ? pmname
-              : ap === "initiator"
+              : ap === "initlg"
                 ? createdBy
                 : getApproverName(ap);
           const circleColor = colorMap[index];
@@ -110,11 +112,9 @@ const ApproverTimeline = ({ approverhistory }) => {
                     <div
                       className={`relative mt-1 text-xs text-gray-600 italic  text-wrap ${isLeft ? "text-left " : ""}`}
                     >
-                      {info?.[index]?.datetime && (
-                        <div
-                          className={`mt-2 mb-1 inline-block  px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full items-center justify-center  `}
-                        >
-                          {new Date(info[index].datetime).toLocaleString()}
+                      {getDatetimeByRole(ap) && (
+                        <div className="mt-2 mb-1 inline-block px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">
+                          {new Date(getDatetimeByRole(ap)).toLocaleString()}
                         </div>
                       )}
                       {comment && (
