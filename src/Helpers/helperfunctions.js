@@ -81,3 +81,8 @@ export const getPmName = (projectcode) => {
       return "Unknown PM";
   }
 };
+
+export const formatDateDDMMYYYY = (date) =>
+  new Date(date).toLocaleDateString("en-GB", {
+    timeZone: "UTC",
+  });

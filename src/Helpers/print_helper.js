@@ -1,8 +1,11 @@
 import jsPDF from "jspdf";
 import galfarlogo from "../assets/Images/logo-new.png";
 import { autoTable } from "jspdf-autotable";
+import { formatDateDDMMYYYY } from "./helperfunctions";
 
 export const handlePrint = (formData, tableData) => {
+  console.log(formData.date);
+
   const doc = new jsPDF({
     orientation: "landscape",
   });
@@ -59,7 +62,7 @@ export const handlePrint = (formData, tableData) => {
   doc.text(formData.id.toString(), valueX, 38);
 
   doc.text("Date:", labelX, 45);
-  doc.text(new Date(formData.date).toLocaleDateString(), valueX, 45);
+  doc.text(formatDateDDMMYYYY(formData.date), valueX, 45);
 
   doc.text("Po:", labelX, 51);
   doc.text(formData.po, valueX, 51);
@@ -77,7 +80,7 @@ export const handlePrint = (formData, tableData) => {
   ];
   const tableBody = tableData.map((row) => {
     const forwarderValues = Object.keys(row.forwarders || {}).map(
-      (key) => row.forwarders[key] ?? 0
+      (key) => row.forwarders[key] ?? 0,
     );
     const particulars = row.particulars;
 
@@ -200,14 +203,14 @@ export const handlePrint = (formData, tableData) => {
   if (currentStatus.startsWith("pending for")) {
     const pendingRole = currentStatus.replace("pending for ", "").trim();
     pendingIndex = rolesToShow.findIndex(
-      (r) => r.toLowerCase() === pendingRole
+      (r) => r.toLowerCase() === pendingRole,
     );
   }
 
   rolesToShow.forEach((role, i) => {
     if (rejectedRole) {
       const rejectedIndex = rolesToShow.findIndex(
-        (r) => r.toLowerCase() === rejectedRole.toLowerCase()
+        (r) => r.toLowerCase() === rejectedRole.toLowerCase(),
       );
       if (i < rejectedIndex) {
         status[role] = "Approved";
@@ -277,7 +280,7 @@ export const handlePrint = (formData, tableData) => {
       centerX - lineWidth / 2,
       approverStartY1 + offsetY + 1.5,
       centerX + lineWidth / 2,
-      approverStartY1 + offsetY + 1.5
+      approverStartY1 + offsetY + 1.5,
     );
 
     doc.setFont("helvetica", "bold");
@@ -286,12 +289,12 @@ export const handlePrint = (formData, tableData) => {
     doc.text(
       displayName,
       centerX - nameWidth / 2,
-      approverStartY1 + offsetY + 6
+      approverStartY1 + offsetY + 6,
     );
     doc.text(
       displayRole,
       centerX - roleWidth / 2,
-      approverStartY1 + offsetY + 12
+      approverStartY1 + offsetY + 12,
     );
   });
 
@@ -307,7 +310,7 @@ export const handlePrint = (formData, tableData) => {
     doc.text(
       `System Generated Comparative Statement `,
       14,
-      pageHeight - footerPadding
+      pageHeight - footerPadding,
     );
     doc.text(
       `Prepared By ${formData?.createdby?.split("@")[0]}`,
@@ -315,7 +318,7 @@ export const handlePrint = (formData, tableData) => {
       pageHeight - footerPadding,
       {
         align: "right",
-      }
+      },
     );
 
     doc.setDrawColor(200);
