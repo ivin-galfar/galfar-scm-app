@@ -1,3 +1,6 @@
+import axios from "axios";
+import { REACT_SERVER_URL } from "../../config/ENV";
+
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
   const updatedFiles = [...formData.file];
@@ -86,3 +89,44 @@ export const formatDateDDMMYYYY = (date) =>
   new Date(date).toLocaleDateString("en-GB", {
     timeZone: "UTC",
   });
+
+export const formatPrice = (value) => {
+  return Math.round(value || 0).toLocaleString();
+};
+
+export const handleFileUpload = async (files, userInfo, setFormData) => {
+  try {
+    const formData = new FormData();
+
+    Array.from(files).forEach((file) => {
+      formData.append("file", file);
+    });
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/receipts/file`,
+      formData,
+      config,
+    );
+
+    const newFiles = response.data.uploadedFiles.map((file) => file.fileUrl);
+    const newFileNames = response.data.uploadedFiles.map(
+      (file) => file.fileName,
+    );
+    console.log(newFileNames);
+
+    setFormData((prev) => ({
+      ...prev,
+      file: [...(prev.file || []), ...newFiles],
+      file_name: [...(prev.file_name || []), ...newFileNames],
+    }));
+  } catch (error) {
+    console.log(error);
+
+    return error;
+  }
+};

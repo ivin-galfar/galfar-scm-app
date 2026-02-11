@@ -5,7 +5,7 @@ import SideNav from "./SideNav";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserDropdown from "./UserDropdown";
 import { AppContext } from "./Context";
-import { is_logistics, is_plant } from "../Helpers/dept_helper";
+import { is_logistics, is_plant, is_fm } from "../Helpers/dept_helper";
 import { useDashboardType } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
 
@@ -16,6 +16,7 @@ const Header = () => {
   const canvasRef = useRef(null);
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
+  const isfm = is_fm(userInfo?.role);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (canvasRef.current && !canvasRef.current.contains(event.target)) {
@@ -55,11 +56,18 @@ const Header = () => {
                   Home
                 </NavLink>
                 <NavLink
-                  to={isPlant ? "/dashboard" : "/dashboardlg"}
+                  to={
+                    isfm
+                      ? "/dashboardbr"
+                      : isPlant
+                        ? "/dashboard"
+                        : "/dashboardlg"
+                  }
                   className={() => {
                     const isActive =
                       path.startsWith("/dashboard") ||
-                      path.startsWith("/dashboardlg");
+                      path.startsWith("/dashboardlg") ||
+                      path.startsWith("/dashboardbr");
 
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
@@ -68,7 +76,9 @@ const Header = () => {
                   onClick={() => {
                     setStatusFilter("All");
                     setMultiStatusFilter([]);
-                    if (isPlant) {
+                    if (isfm) {
+                      setDashboardType("plantbr");
+                    } else if (isPlant) {
                       setDashboardType("plant");
                       setPageSize(20);
                     } else {
@@ -80,11 +90,18 @@ const Header = () => {
                 </NavLink>
                 {(isPlant || isLogistics) && (
                   <NavLink
-                    to={isPlant ? "/receipts" : "/lstatements"}
+                    to={
+                      isfm
+                        ? "/brstatement"
+                        : isPlant
+                          ? "/receipts"
+                          : "/lstatements"
+                    }
                     className={() => {
                       const isActive =
                         path.startsWith("/receipts") ||
-                        path.startsWith("/lstatements");
+                        path.startsWith("/lstatements") ||
+                        path.startsWith("/brstatement");
 
                       return `text-gray-700 hover:text-blue-600 ${
                         isActive

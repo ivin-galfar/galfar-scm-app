@@ -54,6 +54,16 @@ const PlantHome = () => {
       "reverted",
       "",
     ],
+    initbr: [
+      "Pending for HOD",
+      "Pending for GM",
+      "Pending for CEO",
+      "Approved",
+      "Rejected",
+      "review",
+      "reverted",
+      "",
+    ],
     hod: [
       "Pending For HOD",
       "Pending For GM",
@@ -84,7 +94,7 @@ const PlantHome = () => {
       try {
         const particulars = await fetchParticulars(
           userInfo,
-          userInfo?.dept_code?.[0]
+          userInfo?.dept_code?.[0],
         );
         setParticulars(particulars.Particulars);
         setfreezeQuantity(false);
@@ -96,12 +106,12 @@ const PlantHome = () => {
   }, []);
 
   const expectedStatuses = (statusMapping[userInfo?.role] || []).map((s) =>
-    s.toLowerCase()
+    s.toLowerCase(),
   );
   const pendingStatuses = !userInfo?.is_admin
     ? expectedStatuses.filter(
         (s) =>
-          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase())
+          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase()),
       )
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 
@@ -126,11 +136,11 @@ const PlantHome = () => {
   }, []);
 
   const approvedReceipts = allreceipts?.filter(
-    (r) => r?.formData?.status == "Approved"
+    (r) => r?.formData?.status == "Approved",
   );
 
   const rejectedReceipts = allreceipts?.filter(
-    (r) => r?.formData?.status == "Rejected"
+    (r) => r?.formData?.status == "Rejected",
   );
   const pendingReceipts = !userInfo?.is_admin
     ? allreceipts?.filter(
@@ -138,14 +148,14 @@ const PlantHome = () => {
           r?.formData?.status?.toLowerCase().startsWith("pending") &&
           r?.formData?.status
             ?.toLowerCase()
-            .includes(userInfo?.role.toLowerCase())
+            .includes(userInfo?.role.toLowerCase()),
       )
     : allreceipts?.filter((r) =>
-        r?.formData?.status?.toLowerCase().startsWith("pending")
+        r?.formData?.status?.toLowerCase().startsWith("pending"),
       );
 
   const reviewReceipts = allreceipts?.filter(
-    (r) => r?.formData?.status == "review"
+    (r) => r?.formData?.status == "review",
   );
 
   const today = new Date();
@@ -153,7 +163,7 @@ const PlantHome = () => {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(today.getDate() - 7);
 
-  const recentReceipts = receipts.filter((r) => {
+  const recentReceipts = receipts?.filter((r) => {
     const created = new Date(r.formData?.created_at);
     return created >= sevenDaysAgo;
   });

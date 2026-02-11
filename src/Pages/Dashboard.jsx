@@ -9,7 +9,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../Components/Context";
 import fetchStatments from "../APIs/StatementsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
 import Alerts from "../Components/Alerts";
 import { REACT_SERVER_URL } from "../../config/ENV";
@@ -27,7 +27,13 @@ import {
 } from "../store/statementStore";
 import { useDashboardType } from "../store/logisticsStore";
 import DashboardButton from "../Components/DashboardButton";
-import { is_logistics, is_plant } from "../Helpers/dept_helper";
+import {
+  is_asset,
+  is_buyvsrent,
+  is_logistics,
+  is_plant,
+  is_fm,
+} from "../Helpers/dept_helper";
 import {
   fetchReceipt,
   fetchReceiptCount,
@@ -59,6 +65,9 @@ const Dashboard = () => {
   const { pagination, setPageIndex, setPageSize } = usePagination();
 
   const isLogistics = is_logistics(userInfo?.dept_code);
+  const isasset = is_asset(userInfo?.role);
+  const isbuyvsrent = is_buyvsrent(userInfo?.role);
+  const isfm = is_fm(userInfo?.role);
   const location = useLocation();
   const { receiptscount, setReceiptsCount } = usetotalReceipts();
   const isPlant = is_plant(userInfo?.dept_code);
@@ -83,6 +92,16 @@ const Dashboard = () => {
       "",
     ],
     inith: [
+      "Pending for HOD",
+      "Pending for GM",
+      "Pending for CEO",
+      "Approved",
+      "Rejected",
+      "review",
+      "reverted",
+      "",
+    ],
+    initbr: [
       "Pending for HOD",
       "Pending for GM",
       "Pending for CEO",
@@ -123,19 +142,29 @@ const Dashboard = () => {
   const [showToast, setShowToast] = useState(false);
   const [deleteMr, setdeleteMr] = useState("");
   const expectedStatuses = (statusMapping[userInfo?.role] || []).map((s) =>
-    s.toLowerCase()
+    s.toLowerCase(),
   );
 
   const pendingStatuses = !userInfo?.is_admin
     ? expectedStatuses.filter(
         (s) =>
-          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase())
+          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase()),
       )
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 
   useEffect(() => {
     const fetchReceipts = async () => {
       try {
+        // FM users should not fetch receipts
+        if (isfm) {
+          setReceiptsCount(0);
+          setAllReceipts([]);
+          setReqMrno([]);
+          setReceipts([]);
+          setMrno([]);
+          return;
+        }
+
         const { filteredReceipts, reqMrValues, categorizedReceipts, mrValues } =
           await fetchStatments({
             expectedStatuses,
@@ -189,7 +218,7 @@ const Dashboard = () => {
       const response = await axios.post(
         `${REACT_SERVER_URL}/receipts/${mr}`,
         {},
-        config
+        config,
       );
       setShowToast(true);
       setErrormessage("");
@@ -227,14 +256,14 @@ const Dashboard = () => {
     const vatRate = sharedTableData.formData.vatRate ?? 0.05;
     const vats = totals.map((t) => parseFloat((t * vatRate).toFixed(2)));
     const netPrices = totals.map((t, idx) =>
-      parseFloat((t + vats[idx]).toFixed(2))
+      parseFloat((t + vats[idx]).toFixed(2)),
     );
 
     return { totals, vats, netPrices };
   };
 
   const handlePrint = async (
-    printcontents
+    printcontents,
     // totals,
     // vats,
     // netPrices,
@@ -245,11 +274,11 @@ const Dashboard = () => {
 
     const { formData: updatedFormData, tableData } = await fetchReceipt(
       formData.id,
-      userInfo
+      userInfo,
     );
     const { totals, vats, netPrices } = calculateTotals(
       tableData,
-      updatedFormData.qty
+      updatedFormData.qty,
     );
 
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -269,7 +298,7 @@ const Dashboard = () => {
         `(${updatedFormData?.type?.charAt(0).toUpperCase() + updatedFormData?.type?.slice(1)})`,
         105,
         updatedFormData.type == "hiring" ? 35 : 22,
-        { align: "center" }
+        { align: "center" },
       );
     }
     if (updatedFormData.type === "asset") {
@@ -306,7 +335,7 @@ const Dashboard = () => {
         `Required date: ${new Date(updatedFormData.requireddatevalue).toLocaleDateString()}`,
         200,
         46,
-        { align: "right" }
+        { align: "right" },
       );
       doc.text(
         `Required Duration: ${updatedFormData.requirementdurationvalue}`,
@@ -314,7 +343,7 @@ const Dashboard = () => {
         52,
         {
           align: "right",
-        }
+        },
       );
     }
     doc.text(`CS NO: ${updatedFormData.id}`, 200, 32, {
@@ -324,7 +353,7 @@ const Dashboard = () => {
       `Date: ${new Date(updatedFormData.datevalue).toLocaleDateString()}`,
       200,
       40,
-      { align: "right" }
+      { align: "right" },
     );
 
     const activeVendorIndexes = totals
@@ -372,11 +401,11 @@ const Dashboard = () => {
 
     let particularsWidth = Math.min(
       desiredParticulars,
-      Math.max(minParticulars, availableWidth - vendorCount * 22)
+      Math.max(minParticulars, availableWidth - vendorCount * 22),
     );
 
     let vendorWidth = Math.floor(
-      (availableWidth - particularsWidth) / Math.max(1, vendorCount)
+      (availableWidth - particularsWidth) / Math.max(1, vendorCount),
     );
 
     const minVendorWidth = 22;
@@ -384,7 +413,7 @@ const Dashboard = () => {
       vendorWidth = minVendorWidth;
       particularsWidth = Math.max(
         minParticulars,
-        availableWidth - vendorCount * minVendorWidth
+        availableWidth - vendorCount * minVendorWidth,
       );
     }
 
@@ -423,7 +452,7 @@ const Dashboard = () => {
             fontSize: idx === updatedFormData.selectedvendorindex ? 9 : 8,
           },
         })),
-      ]
+      ],
     );
     autoTable(doc, {
       startY: 65,
@@ -498,7 +527,7 @@ const Dashboard = () => {
         labelX,
         labelY + offsetY + 1.5,
         labelX + lineWidth,
-        labelY + offsetY + 1.5
+        labelY + offsetY + 1.5,
       );
       const roleX = labelX + (lineWidth - roleWidth) / 2;
       doc.setFont("helvetica", "bold");
@@ -521,13 +550,13 @@ const Dashboard = () => {
       doc.text(
         `System Generated Comparative Statement `,
         14,
-        pageHeight - footerPadding
+        pageHeight - footerPadding,
       );
 
       doc.text(
         rightText,
         pageWidth - rightWidth - 48,
-        pageHeight - footerPadding
+        pageHeight - footerPadding,
       );
 
       doc.text(
@@ -536,7 +565,7 @@ const Dashboard = () => {
         pageHeight - footerPadding,
         {
           align: "right",
-        }
+        },
       );
 
       doc.setDrawColor(200);
@@ -572,7 +601,7 @@ const Dashboard = () => {
         id: "type",
         header: "Statement Type",
         cell: (info) => info.getValue() || "-",
-      }
+      },
     ),
 
     columnHelper.accessor((row) => row?.formData?.hiringname, {
@@ -613,9 +642,9 @@ const Dashboard = () => {
                 : status === "Pending For HOD"
                   ? "bg-yellow-400"
                   : status === "Pending for GM"
-                    ? "bg-yellow-500"
+                    ? "bg-amber-500"
                     : status === "Pending for CEO"
-                      ? "bg-yellow-600"
+                      ? "bg-violet-600"
                       : "bg-gray-300";
 
         return (
@@ -668,9 +697,13 @@ const Dashboard = () => {
         header: "Comments",
         meta: { className: "w-80 max-w-xs whitespace-pre-wrap break-words" },
         cell: (info) => (
-          <span className="whitespace-pre-wrap">{info.getValue() || "-"}</span>
+          <div className="space-y-1 overflow-y-auto max-h-30 ">
+            <span className="whitespace-pre-wrap">
+              {info.getValue() || "-"}
+            </span>
+          </div>
         ),
-      }
+      },
     ),
   ];
 
@@ -759,10 +792,10 @@ const Dashboard = () => {
                 {tab}
               </button>
             );
-          }
+          },
         )}
         <div className="flex justify-between ml-auto">
-          {isLogistics && isPlant && (
+          {(isLogistics || isasset || isbuyvsrent) && isPlant && (
             <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
               <DashboardButton />
             </div>
@@ -830,7 +863,7 @@ const Dashboard = () => {
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </td>
                   ))}
@@ -860,7 +893,7 @@ const Dashboard = () => {
                           //   row.original.formData.qty
                           // );
                           handlePrint(
-                            row.original
+                            row.original,
                             // totals,
                             // vats,
                             // netPrices,
@@ -882,7 +915,7 @@ const Dashboard = () => {
                   </td>
                   <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                     {new Date(
-                      row.original.formData?.created_at
+                      row.original.formData?.created_at,
                     ).toLocaleDateString("en-GB", {
                       day: "2-digit",
                       month: "short",
@@ -964,21 +997,21 @@ const Dashboard = () => {
               <button
                 onClick={() =>
                   setPageIndex(
-                    Math.ceil(receiptscount / pagination.pageSize) - 1
+                    Math.ceil(receiptscount / pagination.pageSize) - 1,
                   )
                 }
                 disabled={
                   pagination.pageIndex ==
                   Math.max(
                     Math.ceil(receiptscount / pagination.pageSize) - 1,
-                    0
+                    0,
                   )
                 }
                 className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
                   pagination.pageIndex ==
                   Math.max(
                     Math.ceil(receiptscount / pagination.pageSize) - 1,
-                    0
+                    0,
                   )
                     ? "cursor-auto"
                     : "cursor-pointer"

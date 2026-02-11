@@ -4,8 +4,6 @@ import { autoTable } from "jspdf-autotable";
 import { formatDateDDMMYYYY } from "./helperfunctions";
 
 export const handlePrint = (formData, tableData) => {
-  console.log(formData.date);
-
   const doc = new jsPDF({
     orientation: "landscape",
   });

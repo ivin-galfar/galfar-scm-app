@@ -13,6 +13,8 @@ import Contact from "./Pages/Contact";
 import LogisticsStatement from "./Pages/LogisticsStatement";
 import LogisticsDashboard from "./Pages/LogisticsDashboard";
 import { Suspense } from "react";
+import BrStatement from "./Pages/BrStatement";
+import BRDashboards from "./Pages/BRDashboards";
 
 const App = () => {
   const location = useLocation();
@@ -84,7 +86,10 @@ const App = () => {
           />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboardlg" element={<LogisticsDashboard />} />
+          <Route path="/dashboardbr" element={<BRDashboards />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/brstatement" element={<BrStatement />} />
+          <Route path="/brstatement/:cs_no" element={<BrStatement />} />
         </Routes>
       </Suspense>
       {!isLoginPage && <Footer />}

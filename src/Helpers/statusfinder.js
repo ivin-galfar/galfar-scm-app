@@ -34,3 +34,22 @@ export const role_finder = (currentrole) => {
   }
   return role;
 };
+
+export const expectedstatusplant = (currentrole) => {
+  let statustext = "";
+  if (currentrole == "initbr") {
+    statustext = "pending for hod";
+  } else if (currentrole == "hod") {
+    statustext = "pending for fm";
+  } else if (currentrole == "fm") {
+    statustext = "pending for gm";
+  } else if (currentrole == "gm") {
+    statustext = "pending for ceo";
+  } else if (currentrole == "ceo") {
+    statustext = "approved";
+  } else {
+    statustext = "rejected";
+  }
+
+  return statustext;
+};
