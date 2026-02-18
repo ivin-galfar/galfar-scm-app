@@ -339,7 +339,7 @@ const StatementHeader = () => {
     <div>
       <form className="flex max-w-full h-1/4 p-5">
         <div className="absolute w-1/3  gap-10 flex ">
-          {userInfo.role == "initlg" && (
+          {userInfo?.role == "initlg" && (
             <span
               className="flex   justify-center font-semibold text-sm px-2 py-2 gap-2 h-10 bg-blue-600 rounded-2xl text-white items-center cursor-pointer"
               onClick={() => {
@@ -833,11 +833,13 @@ const StatementHeader = () => {
                   >
                     <IoMdSave size={30} />
                   </button>
-                  <GrRevert
+                  <button
+                    type="button"
                     className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "rejected" ? "visible" : "invisible"}`}
-                    size={30}
                     onClick={recallStatement}
-                  />
+                  >
+                    <GrRevert size={30} />
+                  </button>
                 </div>
               </div>
             ) : (

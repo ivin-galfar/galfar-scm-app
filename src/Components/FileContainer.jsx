@@ -1,45 +1,98 @@
-import { FaFileDownload } from "react-icons/fa";
-import { useBrTableData } from "../store/brStore";
+import { IoSave } from "react-icons/io5";
+import { useBrTableData, useImageSaved } from "../store/brStore";
+import { handleRemoveBrFile } from "../Helpers/helperfunctions";
+import { useState } from "react";
+import { updatebrstatementImages } from "../APIs/api";
+import { useMutation } from "@tanstack/react-query";
+import useUserInfo from "../CustomHooks/useUserInfo";
+import { useToast } from "../store/toastStore";
 
 const FileContainer = () => {
   const { brtabledata, setbrtabledata } = useBrTableData();
 
+  const { imagesaved, setImageSaved, resetImageSaved } = useImageSaved();
+  const userInfo = useUserInfo();
+  const { showtoast, setShowToast, resetshowtoast } = useToast();
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const { mutate: updateStatement } = useMutation({
+    mutationFn: updatebrstatementImages,
+    onSuccess: (data) => {
+      setShowToast();
+      setImageSaved(true);
+      setTimeout(() => {
+        resetshowtoast();
+        setImageSaved(false);
+        setHasChanges(false);
+        resetImageSaved();
+      }, 1000);
+    },
+    onError: (error) => {
+      const message = error?.response?.data.message || error.message;
+      setShowToast();
+      setErrorMessage(message);
+    },
+  });
+  const handleSaveImage = () => {
+    updateStatement({ brtabledata, userInfo });
+  };
+
   return (
     <>
-      {brtabledata?.file?.length > 0 && (
-        <div className="w-1/3 p-6 bg-gray-50 rounded-xl shadow-inner overflow-y-auto max-h-[40vh]">
-          <h2 className="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">
-            Uploaded Files{" "}
-            {brtabledata?.file_name?.length > 0
-              ? `(${brtabledata?.file_name?.length})`
+      {brtabledata?.file?.length > 0 || hasChanges ? (
+        <div className="w-1/3 p-4  bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[45vh]">
+          <div className="text-base flex font-bold mb-4 text-gray-800 border-b-2 border-blue-500 pb-2 justify-between">
+            📎 Uploaded Files{" "}
+            {brtabledata?.filename?.length > 0
+              ? `(${brtabledata?.filename?.length})`
               : ""}
-          </h2>
+            {(brtabledata.status == "created" ||
+              brtabledata.status == "reverted") &&
+              hasChanges && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={handleSaveImage}
+                    className="cursor-pointer"
+                  >
+                    <IoSave />
+                  </button>
+                </div>
+              )}
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {brtabledata?.file || brtabledata?.file_name?.length > 0 ? (
-              brtabledata?.file_name?.map((file, index) => {
+            {brtabledata?.file?.length > 0 ? (
+              brtabledata?.filename?.map((file, index) => {
                 const url = brtabledata.file?.[index];
                 return (
                   <div
                     key={index}
-                    className="relative flex flex-col items-center justify-center bg-white p-3 rounded-lg shadow hover:shadow-md transition-all border border-gray-200"
+                    className="relative flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-200 hover:border-blue-400"
                   >
-                    {/* <button
-                      onClick={() =>
-                        handleRemoveFile(index, brtabledata, setbrtabledata)
-                      }
-                      disabled={brtabledata?.created_at != ""}
-                      className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold cursor-pointer"}`}
-                      title="Remove file"
-                    >
-                      ✕
-                    </button> */}
+                    {(brtabledata.status == "created" ||
+                      brtabledata.status == "reverted") && (
+                      <button
+                        onClick={() =>
+                          handleRemoveBrFile(
+                            index,
+                            brtabledata,
+                            setbrtabledata,
+                            setHasChanges,
+                          )
+                        }
+                        className={`absolute top-2 right-2 text-gray-400 hover:text-red-500 text-sm font-bold cursor-pointer transition-colors`}
+                        title="Remove file"
+                      >
+                        ✕
+                      </button>
+                    )}
 
-                    <div className="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg">
+                    <div className="w-14 h-10 flex items-center justify-center bg-blue-600 text-white rounded-lg shadow-md">
                       📄
                     </div>
 
-                    <p className="text-xs mt-2 text-gray-600 text-center truncate w-full">
+                    <p className="text-xs mt-3 text-gray-700 text-center truncate w-full font-medium">
                       {file}
                     </p>
 
@@ -47,19 +100,26 @@ const FileContainer = () => {
                       href={url}
                       target="_blank"
                       download
-                      className="text-xs text-blue-600 hover:underline mt-1"
+                      className="text-xs text-blue-600 hover:text-blue-800 font-semibold mt-2 transition-colors"
                     >
-                      View & Download
+                      View/ Download
                     </a>
                   </div>
                 );
               })
             ) : (
-              <div className="col-span-2 text-center text-gray-500 text-sm">
+              <div className="col-span-2 text-center text-gray-400 text-sm py-4">
                 No files uploaded yet
               </div>
             )}
           </div>
+        </div>
+      ) : (
+        <span className="text-gray-400 text-sm">No Files Attached</span>
+      )}
+      {showtoast && imagesaved && (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+          ✅ You have successfully updated the image!
         </div>
       )}
     </>

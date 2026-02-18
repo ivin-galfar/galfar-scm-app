@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
@@ -6,13 +6,18 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { fetchbrstatements, fetchbrstatementscount } from "../APIs/api";
+import {
+  fetchbrstatement,
+  fetchbrstatements,
+  fetchbrstatementscount,
+} from "../APIs/api";
 import { Link, useLocation } from "react-router-dom";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useStatusFilter } from "../store/logisticsStore";
 import {
   is_asset,
   is_buyvsrent,
+  is_hod,
   is_logistics,
   is_plant,
 } from "../Helpers/dept_helper";
@@ -21,6 +26,15 @@ import DashboardButton from "../Components/DashboardButton";
 import { useNewStatement, usetotalBRstatements } from "../store/brStore";
 import { usePagination } from "../store/statementStore";
 import { useEffect, useState } from "react";
+import { IoPrint, IoWarningOutline } from "react-icons/io5";
+import Alerts from "../Components/Alerts";
+import { REACT_SERVER_URL } from "../../config/ENV";
+import { useErrorMessage } from "../store/errorStore";
+import { useToast } from "../store/toastStore";
+import axios from "axios";
+import { SiTicktick } from "react-icons/si";
+import { MdOutlineError } from "react-icons/md";
+import { handleBrPrint, handlePrint } from "../Helpers/print_helper";
 
 const BRDashboards = () => {
   const location = useLocation();
@@ -29,10 +43,18 @@ const BRDashboards = () => {
   const isLogistics = is_logistics(userinfo?.dept_code);
   const isasset = is_asset(userinfo?.role);
   const isbuyvsrent = is_buyvsrent(userinfo?.role);
-
+  const ishod = is_hod(userinfo?.role);
+  const [deletestatement, setDeleteStatement] = useState({
+    id: null,
+    open: false,
+  });
+  const { errormessage, setErrorMessage, clearErrorMessage } =
+    useErrorMessage();
+  const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { resetNewStatement } = useNewStatement();
   const { pagination, setPageIndex, setPageSize } = usePagination();
   const [searchcs, setSearchCS] = useState("");
+  const queryClient = useQueryClient();
 
   const { setStatusFilter, statusfilter, resetStatusFilter } =
     useStatusFilter();
@@ -58,20 +80,58 @@ const BRDashboards = () => {
     enabled: !!userinfo,
     keepPreviousData: true,
   });
-  // useEffect(() => {
-  //   const fetchStatments = async () => {
-  //     try {
 
-  //     } catch (error) {
-  //       const message = error?.response?.data?.message || error.message;
-  //       console.error("Fetch receipts error:", message);
-  //     }
-  //   };
-  //   fetchStatments();
-  // }, [statusfilter, searchcs]);
   const handleSearch = (e) => {
     setPageIndex(0);
     (setSearchCS(e.target.value), setStatusFilter("All"));
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${userinfo.token}`,
+        },
+      };
+      await axios.post(
+        `${REACT_SERVER_URL}/brstatement/delete/${id}`,
+        {},
+        config,
+      );
+      setShowToast();
+      setTimeout(() => {
+        resetshowtoast();
+        clearErrorMessage();
+      }, 1000);
+      queryClient.invalidateQueries(["csid"]);
+      setDeleteStatement({ open: false });
+    } catch (error) {
+      const message = error?.response?.data.message || error.message;
+      setShowToast();
+      setErrorMessage(message);
+      setTimeout(() => {
+        resetshowtoast();
+        clearErrorMessage();
+      }, 1000);
+    }
+  };
+
+  const getstatement = async (cs_id) => {
+    try {
+      let response = await fetchbrstatement(cs_id, userinfo);
+
+      return response;
+    } catch (error) {
+      const message = error?.response?.data.message || error.message;
+      setShowToast();
+      setErrorMessage(message);
+      setTimeout(() => {
+        resetshowtoast();
+        clearErrorMessage();
+      }, 1000);
+    }
   };
 
   useEffect(() => {
@@ -186,8 +246,6 @@ const BRDashboards = () => {
     columnHelper.accessor(
       (row) => {
         const comments = row.approver_info ?? "";
-        console.log(Object.entries(comments));
-
         return comments;
       },
       {
@@ -203,12 +261,22 @@ const BRDashboards = () => {
           ) {
             return (
               <div className="space-y-1 overflow-y-auto max-h-30 ">
-                {Object.entries(comments).map(([key, value]) => (
-                  <div key={key}>
-                    <strong className="capitalize">{key}:</strong>{" "}
-                    {value.comment}
-                  </div>
-                ))}
+                {Object.entries(comments)
+                  .reverse()
+                  .map(([key, value]) =>
+                    value.comment?.trim() ? (
+                      <div key={key}>
+                        {value.comment !== "" && (
+                          <>
+                            <strong className="capitalize">
+                              {value.role + ":"}
+                            </strong>{" "}
+                            {value.comment}
+                          </>
+                        )}
+                      </div>
+                    ) : null,
+                  )}
               </div>
             );
           } else {
@@ -219,7 +287,7 @@ const BRDashboards = () => {
     ),
   ];
   const table = useReactTable({
-    data: brstatements || [],
+    data: brstatements?.rows || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: { pagination },
@@ -302,7 +370,7 @@ const BRDashboards = () => {
           )}
 
           <div className="flex justify-between ml-auto">
-            {(isLogistics || isbuyvsrent) && isPlant && (
+            {(isLogistics || isasset || isbuyvsrent || ishod) && isPlant && (
               <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
                 <DashboardButton />
               </div>
@@ -385,26 +453,25 @@ const BRDashboards = () => {
                           >
                             View <FaArrowAltCircleRight />
                           </Link>
-                          {/* <IoPrint
+                          <IoPrint
                             className={
-                              userinfo?.is_admin || userinfo.role === "incharge"
+                              userinfo?.is_admin || userinfo.role === "initbr"
                                 ? "text-black cursor-pointer"
                                 : "text-gray-400 pointer-events-none cursor-not-allowed"
                             }
                             size={25}
                             onClick={async () => {
-                              const { formData, tableData } =
-                                await getstatement(row.original?.id);
-
-                              handlePrint(formData, tableData);
+                              const formData = await getstatement(
+                                row.original?.id,
+                              );
+                              handleBrPrint(formData);
                             }}
-                          /> */}
+                          />
                           <FaTrash
-                            className={`mr-1 text-red-500  ${!userinfo?.is_admin ? "hidden" : row.original.status === "Approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
+                            className={`mr-1 text-red-500  ${!userinfo?.is_admin ? "hidden" : row.original.status === "approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
                             size={16}
                             onClick={() => {
-                              if (row.original.status === "Approved") return;
-                              // setdeleteMr(row.original.formData.id);
+                              if (row.original.status === "approved") return;
                               setDeleteStatement({
                                 id: row.original.id,
                                 open: true,
@@ -518,7 +585,7 @@ const BRDashboards = () => {
           </div>
         }
 
-        {/* {deletestatement.open && (
+        {deletestatement.open && (
           <Alerts
             message="Are you sure you want to Delete the Selected statement?"
             onCancel={() => setDeleteStatement({ open: false })}
@@ -535,9 +602,9 @@ const BRDashboards = () => {
         )}
         {showtoast && errormessage && (
           <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
-            <MdOutlineErrorOutline /> {errormessage}
+            <MdOutlineError /> {errormessage}
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

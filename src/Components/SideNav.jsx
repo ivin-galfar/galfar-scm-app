@@ -12,7 +12,7 @@ import { AiFillCaretUp } from "react-icons/ai";
 import { AiFillCaretDown } from "react-icons/ai";
 import { FaSignInAlt } from "react-icons/fa";
 import { FaTruck } from "react-icons/fa";
-import { is_logistics, is_plant } from "../Helpers/dept_helper";
+import { is_fm, is_logistics, is_plant } from "../Helpers/dept_helper";
 import { GiCrane } from "react-icons/gi";
 import { useDashboardType } from "../store/logisticsStore";
 import { IoHelpCircleSharp } from "react-icons/io5";
@@ -33,6 +33,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
   const isplanthire = userInfo?.role == "inith";
+  const isfm = is_fm(userInfo?.role);
 
   return (
     <div
@@ -92,7 +93,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
         </button>
         {isOpen && submenuOpen && (
           <div className="ml-6 mt-2 space-y-2">
-            <Link
+            {/* <Link
               to="/dashboard"
               className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700  ${
                 !isPlant
@@ -107,7 +108,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             >
               <MdSpaceDashboard />
               {isOpen && <span>Dashboard</span>}
-            </Link>
+            </Link> */}
 
             <Link
               to="/particulars/1"
@@ -123,17 +124,19 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               )}
             </Link>
 
-            <Link
-              to="/receipts"
-              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !isPlant
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-            >
-              <PiFireTruckLight />
-              {isOpen && <span> Hiring/Asset</span>}
-            </Link>
+            {!isfm && (
+              <Link
+                to="/dashboard"
+                className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                  !isPlant
+                    ? "pointer-events-none opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                <PiFireTruckLight />
+                {isOpen && <span> Hiring/Asset</span>}
+              </Link>
+            )}
             <Link
               to="/brstatement"
               className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${

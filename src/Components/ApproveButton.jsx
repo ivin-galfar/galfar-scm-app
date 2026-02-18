@@ -56,7 +56,9 @@ const ApproveButton = () => {
     (buttontxt?.toLowerCase().includes("pending") &&
       nextstatus != "Approve/Reject") ||
     buttontxt == "approved" ||
-    buttontxt == "rejected"
+    buttontxt == "rejected" ||
+    buttontxt == "review" ||
+    buttontxt == "reverted"
       ? "px-10 py-2  bg-gray-400 cursor-not-allowed"
       : buttontxt != ""
         ? "px-10 py-2 bg-blue-600  hover:bg-blue-700 cursor-pointer"
@@ -64,6 +66,8 @@ const ApproveButton = () => {
   const isDisabled =
     buttonclass.includes("bg-gray-400") ||
     buttontxt == "approved" ||
+    buttontxt == "review" ||
+    buttontxt == "reverted" ||
     buttontxt == "rejected";
 
   const changestatus = expectedstatusplant(userInfo?.role.toLowerCase());

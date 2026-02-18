@@ -9,7 +9,7 @@ const FileUpload = () => {
 
   return (
     <div>
-      <div className="flex  gap-2 pl-10">
+      <div className="flex  gap-2 ">
         <div className="block gap-2">
           <label
             htmlFor="receiptfile"

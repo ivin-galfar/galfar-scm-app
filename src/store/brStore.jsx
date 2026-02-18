@@ -10,14 +10,15 @@ export const useBrStatement = create((set) => ({
     maint_yearly: 0,
     dp_year: "",
     dp_rate: "",
-    monthly_rental: "",
+    monthly_rental: 0,
     op_cost: 0,
     op_cost_rent: 0,
     maintain_cost_rent: 0,
     is_included_maintain_cost_rent: false,
     is_included_op_cost_rent: false,
     file: [],
-    file_name: [],
+    filename: [],
+    currency: "",
   },
   setFormData: (updater) =>
     set((state) => ({
@@ -37,14 +38,15 @@ export const useBrStatement = create((set) => ({
         maint_yearly: 0,
         dp_rate: "",
         dp_year: "",
-        monthly_rental: "",
+        monthly_rental: 0,
         op_cost: 0,
         op_cost_rent: 0,
         maintain_cost_rent: 0,
         is_included_maintain_cost_rent: false,
         is_included_op_cost_rent: false,
         file: [],
-        file_name: [],
+        filename: [],
+        currency: "",
       },
     }),
 }));
@@ -76,13 +78,15 @@ export const useBrTableData = create((set) => ({
         dp_year: "",
         dp_rate: "",
         monthly_rental: "",
+        status: "",
         op_cost: 0,
         op_cost_rent: 0,
         maintain_cost_rent: 0,
         is_included_maintain_cost_rent: false,
         is_included_op_cost_rent: false,
         file: [],
-        file_name: [],
+        filename: [],
+        currency: "",
       },
     })),
 }));
@@ -108,4 +112,10 @@ export const useNewStatement = create((set) => ({
 export const usetotalBRstatements = create((set) => ({
   brcount: 0,
   setBRCount: (count) => set({ brcount: count }),
+}));
+
+export const useImageSaved = create((set) => ({
+  imagesaved: 0,
+  setImageSaved: () => set({ imagesaved: true }),
+  resetImageSaved: () => set({ imagesaved: false }),
 }));

@@ -13,6 +13,7 @@ import { useToast } from "../store/toastStore";
 import { useErrorMessage } from "../store/errorStore";
 import FileUpload from "./FileUpload";
 import { useIsEditing } from "../store/helperStore";
+import { useNavigate } from "react-router-dom";
 
 const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
   const { formData, setFormData, resetFormData } = useBrStatement();
@@ -21,13 +22,14 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
     useErrorMessage();
   const [selectedyr, setSelectedyr] = useState(0);
   const { setDataSaved, resetDataSaved, datasaved } = useDatasaved();
-  const { resetNewStatement } = useNewStatement();
+  const { newstatement } = useNewStatement();
   const form = useForm({
     defaultValues: {
       ...formData,
     },
   });
-  const { brtabledata } = useBrTableData();
+  const { brtabledata, setbrtabledata } = useBrTableData();
+  const navigate = useNavigate();
 
   const userInfo = useUserInfo();
   const { isedit, resetIsEdit } = useIsEditing();
@@ -35,10 +37,9 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
   const { mutate: feedstatement, isPending: isLoading } = useMutation({
     mutationFn: feedbrstatement,
     onSuccess: (data) => {
-      setFormData((prev) => ({
-        ...prev,
-        status: "created",
-      }));
+      navigate(`/brstatement/${data.data.id}`, {
+        replace: true,
+      });
       setShowToast();
       setIsopen(false);
       setDataSaved();
@@ -50,6 +51,8 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
       resetFormData();
     },
     onError: (error) => {
+      console.log(error);
+
       const message = error?.response?.data.message || error.message;
       setShowToast();
       setErrorMessage(message);
@@ -59,10 +62,6 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
   const { mutate: updateStatement } = useMutation({
     mutationFn: updatebrstatement,
     onSuccess: (data) => {
-      setFormData((prev) => ({
-        ...prev,
-        status: "created",
-      }));
       setShowToast();
       setIsopen(false);
       setDataSaved();
@@ -117,7 +116,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
     console.log(test);
 
     return test
-      .filter(([key]) => key !== "file" && key !== "file_name")
+      .filter(([key]) => key !== "file" && key !== "filename")
       .some(
         ([_, value]) => value === "" || value === null || value === undefined,
       );
@@ -139,7 +138,6 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
       feedstatement({ formData: updatedFormData, userInfo });
     }
   };
-  console.log(brtabledata);
 
   useEffect(() => {
     if (isedit) {
@@ -160,7 +158,8 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
         is_included_maintain_cost_rent: brtabledata.included_maintain_cost_rent,
         is_included_op_cost_rent: brtabledata.included_op_cost_rent,
         file: brtabledata.file,
-        file_name: brtabledata.file_name,
+        filename: brtabledata.filename,
+        currency: brtabledata.currency,
       });
     }
   }, [isedit]);
@@ -308,7 +307,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                   />
                   {clickedsave && formData.int_rate == "" && (
                     <span className="text-sm text-red-500 mt-1">
-                      {"Enter the Unit Price"}
+                      {"Enter the Interest Rate"}
                     </span>
                   )}{" "}
                 </div>
@@ -353,7 +352,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                     htmlFor={field.name}
                     className="text-sm font-medium text-gray-700 mb-1"
                   >
-                    Maintenance (Yearly)
+                    Maintenance (Yearly) [%]
                   </label>
                   <input
                     id={field.name}
@@ -481,58 +480,11 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                     }}
                     className={inputClass}
                   />
-                  {clickedsave && formData.monthly_rental == "" && (
+                  {clickedsave && formData.monthly_rental === "" && (
                     <span className="text-sm text-red-500 mt-1">
                       {"Enter the Monthly Rental value"}
                     </span>
                   )}{" "}
-                  <div className="flex justify-between items-center">
-                    <div className="block mt-2">
-                      <label className="gap-3 flex">
-                        <input
-                          type="checkbox"
-                          name="includeMaintenance"
-                          checked={formData.is_included_maintain_cost_rent}
-                          onChange={(e) => {
-                            const value = e.target.checked
-                              ? 0
-                              : formData.maint_yearly;
-                            setFormData((prev) => ({
-                              ...prev,
-                              maintain_cost_rent: value,
-                              is_included_maintain_cost_rent: e.target.checked
-                                ? true
-                                : false,
-                            }));
-                          }}
-                        />
-                        Included Maintenance
-                      </label>{" "}
-                      <label className="gap-3 flex">
-                        <input
-                          type="checkbox"
-                          checked={formData.is_included_op_cost_rent}
-                          name="includeOperational"
-                          onChange={(e) => {
-                            const value = e.target.checked
-                              ? 0
-                              : formData.op_cost;
-                            setFormData((prev) => ({
-                              ...prev,
-                              op_cost_rent: value,
-                              is_included_op_cost_rent: e.target.checked
-                                ? true
-                                : false,
-                            }));
-                          }}
-                        />
-                        Included Operational Cost
-                      </label>
-                    </div>
-                    <div className=" flex justify-end items-end ">
-                      <FileUpload />
-                    </div>
-                  </div>
                 </div>
               )}
             </form.Field>
@@ -571,6 +523,97 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                 </div>
               )}
             </form.Field>
+            <form.Field name="currency">
+              {(field) => (
+                <div className="flex flex-col">
+                  <label
+                    htmlFor={field.name}
+                    className="text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Currency
+                  </label>
+                  <select
+                    className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    value={formData.currency}
+                    onChange={(e) => {
+                      console.log(e.target);
+
+                      setFormData((prev) => ({
+                        ...prev,
+                        currency: e.target.value,
+                      }));
+                    }}
+                  >
+                    <option value="">Choose Currency</option>
+                    <option value="USD - $">USD - $</option>
+                    <option value="EUR - €">EUR - €</option>
+                    <option value="GBP - £">GBP - £</option>
+                    <option value="AED - د.إ">AED - د.إ</option>
+                    <option value="INR - ₹">INR - ₹</option>
+                  </select>
+                  {clickedsave && formData.currency == "" && (
+                    <span className="text-sm text-red-500 mt-1">
+                      {"Choose appropriate currency"}
+                    </span>
+                  )}{" "}
+                </div>
+              )}
+            </form.Field>
+            <form.Field name="op_cost">
+              {(field) => (
+                <div className="flex flex-col">
+                  <label
+                    htmlFor={field.name}
+                    className="text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Documents Required
+                  </label>
+                  <FileUpload />
+                </div>
+              )}
+            </form.Field>
+            <div className="flex justify-between items-center">
+              <div className="block mt-2">
+                <label className="gap-3 flex">
+                  <input
+                    type="checkbox"
+                    name="includeMaintenance"
+                    checked={formData.is_included_maintain_cost_rent}
+                    onChange={(e) => {
+                      const value = e.target.checked
+                        ? 0
+                        : formData.maint_yearly;
+                      setFormData((prev) => ({
+                        ...prev,
+                        maintain_cost_rent: value,
+                        is_included_maintain_cost_rent: e.target.checked
+                          ? true
+                          : false,
+                      }));
+                    }}
+                  />
+                  Included Maintenance
+                </label>{" "}
+                <label className="gap-3 flex">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_included_op_cost_rent}
+                    name="includeOperational"
+                    onChange={(e) => {
+                      const value = e.target.checked ? 0 : formData.op_cost;
+                      setFormData((prev) => ({
+                        ...prev,
+                        op_cost_rent: value,
+                        is_included_op_cost_rent: e.target.checked
+                          ? true
+                          : false,
+                      }));
+                    }}
+                  />
+                  Included Operational Cost
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -590,9 +633,11 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
           <button
             type="submit"
             className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
-            onClick={() => submitForm(isedit ? "edit" : "save")}
+            onClick={() =>
+              submitForm(isedit && !newstatement ? "edit" : "save")
+            }
           >
-            {isedit ? "Update" : "Save"}
+            {isedit && !newstatement ? "Update" : "Save"}
           </button>
         </div>
         {/* </form> */}

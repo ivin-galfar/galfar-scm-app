@@ -22,7 +22,7 @@ const ApprovalModalBR = () => {
     onSuccess: () => {
       setShowToast();
       setTimeout(() => {
-        // resetshowtoast();
+        resetshowtoast();
         resetShowModal();
         resetComments();
       }, 1500);
@@ -50,10 +50,13 @@ const ApprovalModalBR = () => {
       }));
     } else {
       updatedstatus = "review";
+      setbrtabledata((prev) => ({
+        ...prev,
+        status: updatedstatus,
+      }));
     }
     updatestatement({ cs_id, status: updatedstatus, userInfo, comments });
   };
-  console.log(data);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 ">
@@ -95,6 +98,11 @@ const ApprovalModalBR = () => {
             <LuRotateCcwSquare /> Send For Review
           </button>
         </div>
+        {showtoast && !errormessage && data.status == "review" && (
+          <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ You have send this Statement for review!
+          </div>
+        )}{" "}
         {showtoast &&
           !errormessage &&
           data.status !== "rejected" &&

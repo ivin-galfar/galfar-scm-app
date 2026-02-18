@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
-import { is_asset, is_buyvsrent, is_fm } from "../Helpers/dept_helper";
+import { is_asset, is_buyvsrent, is_fm, is_hod } from "../Helpers/dept_helper";
 import useUserInfo from "../CustomHooks/useUserInfo";
 
 const DashboardButton = () => {
@@ -12,6 +12,7 @@ const DashboardButton = () => {
   const isasset = is_asset(userInfo?.role);
   const isbuyvsrent = is_buyvsrent(userInfo?.role);
   const isfm = is_fm(userInfo?.role);
+  const ishod = is_hod(userInfo?.role);
 
   const colorMap = {
     plant: {
@@ -24,7 +25,7 @@ const DashboardButton = () => {
       text: "text-emerald-600",
       hover: "hover:text-emerald-700",
     },
-    plantbr: {
+    brplant: {
       border: "border-amber-500",
       text: "text-amber-600",
       hover: "hover:text-amber-700",
@@ -38,7 +39,7 @@ const DashboardButton = () => {
       path: "/dashboard",
     },
     {
-      key: "plantbr",
+      key: "brplant",
       label: "Buy Vs Rent",
       path: "/dashboardbr",
     },

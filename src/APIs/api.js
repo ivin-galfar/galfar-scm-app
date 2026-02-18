@@ -478,6 +478,27 @@ export const updatebrstatement = async ({ formData, userInfo }) => {
   }
 };
 
+export const updatebrstatementImages = async ({ brtabledata, userInfo }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/brstatement/updatebrimages/${brtabledata?.id}`,
+      {
+        brtabledata,
+      },
+      config,
+    );
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const fetchbrstatement = async (cs_id, userInfo) => {
   try {
     const config = {

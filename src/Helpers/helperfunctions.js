@@ -1,5 +1,6 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
+import { categoryapprovers, roles } from "./roles_helper";
 
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
@@ -9,6 +10,25 @@ export const handleRemoveFile = (index, formData, setFormData) => {
   updatedFiles.splice(index, 1);
 
   setFormData((prev) => ({
+    ...prev,
+    filename: updatedFilenames,
+    file: updatedFiles,
+  }));
+};
+
+export const handleRemoveBrFile = (
+  index,
+  brtabledata,
+  setbrtabledata,
+  setHasChanges,
+) => {
+  const updatedFilenames = [...brtabledata.filename];
+  const updatedFiles = [...brtabledata.file];
+
+  updatedFilenames.splice(index, 1);
+  updatedFiles.splice(index, 1);
+  setHasChanges(true);
+  setbrtabledata((prev) => ({
     ...prev,
     filename: updatedFilenames,
     file: updatedFiles,
@@ -122,11 +142,22 @@ export const handleFileUpload = async (files, userInfo, setFormData) => {
     setFormData((prev) => ({
       ...prev,
       file: [...(prev.file || []), ...newFiles],
-      file_name: [...(prev.file_name || []), ...newFileNames],
+      filename: [...(prev.filename || []), ...newFileNames],
     }));
   } catch (error) {
     console.log(error);
 
     return error;
   }
+};
+
+export const getApproverNames = (category, dept) => {
+  const flow = categoryapprovers[category] || [];
+  return flow.flatMap((role) => {
+    if (role == "INITIATOR") {
+      return roles.INITIATOR[dept];
+    }
+
+    return roles[role] ? [roles[role]] : [];
+  });
 };

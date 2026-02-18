@@ -3,6 +3,7 @@ import Accounting from "./Accounting";
 import CashFlow from "./cashFlow";
 import PaybackPeriod from "./Payback";
 import Summary from "./Summary";
+import FileContainer from "./FileContainer";
 
 import { formatPrice } from "../Helpers/helperfunctions";
 import ApproveButton from "./ApproveButton";
@@ -10,10 +11,27 @@ import ApproveButton from "./ApproveButton";
 const BrTable = () => {
   const { brtabledata } = useBrTableData();
   const data = brtabledata;
-  console.log(data);
-
+  const operation_cost_tenure = formatPrice(data.op_cost_tenure);
+  const maintainenece_cost_tenure = formatPrice(data.maintenance_cost_tenure);
+  const operation_cost_rent = formatPrice(data.op_cost_rental);
+  const maintainence_cost_rental = formatPrice(data.maint_rental);
   return (
-    <div className="w-3/4 rounded-xl ">
+    <div className="rounded-xl border border-gray-300 p-2">
+      <div className="flex items-center gap-2 text-sm pb-2">
+        {
+          <div className="flex items-center gap-2 bg-gray-50  border border-gray-200 rounded-md px-3 py-1.5 text-sm">
+            <span>💱</span>
+            <span className="text-gray-800">Currency In</span>
+            {data.currency ? (
+              <span className="font-semibold text-blue-600">
+                {data.currency}
+              </span>
+            ) : (
+              "--"
+            )}
+          </div>
+        }
+      </div>
       <div className="border border-gray-400 mb-6 flex rounded">
         <div className="w-1/3 bg-gray-200 font-semibold p-2 flex ">Item</div>
         <div className=" w-full items-center justify-center flex text-center font-bold p-2">
@@ -89,13 +107,17 @@ const BrTable = () => {
               <tr>
                 <td className="p-2">Operation Cost for the Tenure</td>
                 <td className="p-2 text-right">
-                  {formatPrice(data.op_cost_tenure)}
+                  {operation_cost_tenure && operation_cost_tenure !== "0"
+                    ? operation_cost_tenure
+                    : "--"}
                 </td>
               </tr>
               <tr>
                 <td className="p-2">Maintenance Cost for the Tenure</td>
                 <td className="p-2 text-right">
-                  {formatPrice(data.maintenance_cost_tenure)}
+                  {maintainenece_cost_tenure !== "0"
+                    ? maintainenece_cost_tenure
+                    : "--"}
                 </td>
               </tr>
 
@@ -154,15 +176,17 @@ const BrTable = () => {
               </tr>
 
               <tr>
-                <td className="p-2">Operation Cost for the Tenure</td>
+                <td className="p-2">Operation Cost</td>
                 <td className="p-2 text-right">
-                  {formatPrice(data.op_cost_rental)}
+                  {operation_cost_rent !== "0" ? operation_cost_rent : "--"}
                 </td>
               </tr>
               <tr>
-                <td className="p-2">Maintenance Cost for the Tenure</td>
+                <td className="p-2">Maintenance Cost</td>
                 <td className="p-2 text-right">
-                  {formatPrice(data.maint_rental)}
+                  {maintainence_cost_rental != "0"
+                    ? maintainence_cost_rental
+                    : "--"}
                 </td>
               </tr>
               <tr>
@@ -195,11 +219,13 @@ const BrTable = () => {
       <div className="flex justify-between items-center">
         <h2 className="flex items-center space-x-1">
           {data.created_at && (
-            <>
+            <div className="my-4 text-gray-700">
               <span>Recommendation for</span>
-              <span className="font-semibold">{data.chosentype}</span>
-              <span>As on</span>
-              <span className="font-semibold">
+              <span className="ml-1 px-2 py-1 bg-blue-100 text-blue-800 font-semibold rounded-md">
+                {data.chosentype.trim()}
+              </span>
+              <span className="ml-2">As on</span>
+              <span className="ml-1 font-semibold">
                 {new Date(data.created_at).toLocaleString("en-AE", {
                   timeZone: "Asia/Dubai",
                   day: "2-digit",
@@ -207,10 +233,17 @@ const BrTable = () => {
                   year: "numeric",
                 })}
               </span>
-            </>
+            </div>
           )}
         </h2>
-        <ApproveButton />
+      </div>
+      <div className="mt-6 border-t border-gray-300 pt-6">
+        <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 flex items-end gap-4">
+          <FileContainer />
+          <div className="ml-auto">
+            <ApproveButton />
+          </div>
+        </div>
       </div>
     </div>
   );

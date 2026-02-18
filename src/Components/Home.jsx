@@ -1,194 +1,76 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import galfarlogo from "../assets/Images/banner_2.jpg";
-import { AppContext } from "./Context";
-import fetchStatments from "../APIs/StatementsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { Link } from "react-router-dom";
-import { MdOutlinePendingActions } from "react-icons/md";
-import { TiTick } from "react-icons/ti";
-import { ImCross } from "react-icons/im";
-import {
-  FaBell,
-  FaBuilding,
-  FaTruck,
-  FaUsers,
-  FaWarehouse,
-} from "react-icons/fa";
-import { GrDocumentStore } from "react-icons/gr";
-import { SiQuicktime } from "react-icons/si";
-import { IoDocumentText, IoWarningOutline } from "react-icons/io5";
-import fetchParticulars from "../APIs/ParticularsApi";
+import { FaTruck } from "react-icons/fa";
+import { GiClamp } from "react-icons/gi";
 import { LuFactory } from "react-icons/lu";
 import { useSelectedDept } from "../store/userStore";
-import { is_logistics, is_plant } from "../Helpers/dept_helper";
+import {
+  is_asset,
+  is_buyvsrent,
+  is_ceo,
+  is_fm,
+  is_gm,
+  is_hod,
+  is_logistics,
+  is_plant,
+} from "../Helpers/dept_helper";
 import PlantHome from "./PlantHome";
 import LogisticsHome from "./LogisticsHome";
 import { useDashboardType } from "../store/logisticsStore";
+import { getDeptConfig } from "../Helpers/Permissions";
+import HomeContainer from "./HomeContainer";
 
 const Home = () => {
-  // const {
-  //   setReceipts,
-  //   receipts,
-  //   setMrno,
-  //   setAllReceipts,
-  //   allreceipts,
-  //   setStatusFilter,
-  //   setMultiStatusFilter,
-  //   particulars,
-  //   setNewMr,
-  //   setParticulars,
-  //   setParticularName,
-  //   setfreezeQuantity,
-  // } = useContext(AppContext);
-  // const userInfo = useUserInfo();
-  // const statusMapping = {
-  //   inita: [
-  //     "Pending for HOD",
-  //     "Pending for GM",
-  //     "Pending for CEO",
-  //     "Approved",
-  //     "Rejected",
-  //     "",
-  //   ],
-  //   Inith: [
-  //     "Pending for HOD",
-  //     "Pending for GM",
-  //     "Pending for CEO",
-  //     "Approved",
-  //     "Rejected",
-  //     "",
-  //   ],
-  //   hod: [
-  //     "Pending for HOD",
-  //     "Pending for GM",
-  //     "Pending for CEO",
-  //     "Rejected",
-  //     "Approved",
-  //   ],
-  //   gm: [
-  //     "Pending for GM",
-  //     "Pending for HOD",
-  //     "Pending for CEO",
-  //     "Approved",
-  //     "Rejected",
-  //   ],
-  //   ceo: [
-  //     "Pending for GM",
-  //     "Pending for HOD",
-  //     "Pending for CEO",
-  //     "Approved",
-  //     "Rejected",
-  //   ],
-  // };
-  // useEffect(() => {
-  //   const loadParticulars = async () => {
-  //     try {
-  //       const particulars = await fetchParticulars(
-  //         userInfo,
-  //         userInfo?.dept_code?.[0]
-  //       );
-  //       setParticulars(particulars.Particulars);
-  //       setfreezeQuantity(false);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   loadParticulars();
-  // }, []);
-  // const expectedStatuses = (statusMapping[userInfo?.role] || []).map((s) =>
-  //   s.toLowerCase()
-  // );
-  // const pendingStatuses = !userInfo?.is_admin
-  //   ? expectedStatuses.filter(
-  //       (s) =>
-  //         s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase())
-  //     )
-  //   : expectedStatuses.filter((s) => s.startsWith("pending"));
-
-  // useEffect(() => {
-  //   const fetchStatementsdetails = async () => {
-  //     try {
-  //       const { filteredReceipts, categorizedReceipts, mrValues } =
-  //         await fetchStatments({
-  //           expectedStatuses,
-  //           userInfo,
-  //         });
-
-  //       setAllReceipts(filteredReceipts);
-  //       setReceipts(categorizedReceipts);
-  //       setMrno(mrValues);
-  //     } catch (error) {
-  //       const message = error?.response?.data?.message || error.message;
-  //       console.error("Fetch receipts error:", message);
-  //     }
-  //   };
-  //   fetchStatementsdetails();
-  // }, []);
-
-  // const approvedReceipts = allreceipts?.filter(
-  //   (r) => r?.formData?.status == "Approved"
-  // );
-  // const rejectedReceipts = allreceipts?.filter(
-  //   (r) => r?.formData?.status == "Rejected"
-  // );
-  // const pendingReceipts = !userInfo?.is_admin
-  //   ? allreceipts?.filter(
-  //       (r) =>
-  //         r?.formData?.status?.toLowerCase().startsWith("pending") &&
-  //         r?.formData?.status
-  //           ?.toLowerCase()
-  //           .includes(userInfo?.role.toLowerCase())
-  //     )
-  //   : allreceipts?.filter((r) =>
-  //       r?.formData?.status?.toLowerCase().startsWith("pending")
-  //     );
-
-  // const reviewReceipts = allreceipts?.filter(
-  //   (r) => r?.formData?.status == "review"
-  // );
-
-  // const today = new Date();
-
-  // const sevenDaysAgo = new Date();
-  // sevenDaysAgo.setDate(today.getDate() - 7);
-
-  // const recentReceipts = receipts.filter((r) => {
-  //   const created = new Date(r.formData?.created_at);
-  //   return created >= sevenDaysAgo;
-  // });
   const userInfo = useUserInfo();
 
   const { selectedDept, setSelectedDept } = useSelectedDept();
   const { setDashboardType } = useDashboardType();
 
   const isLogistics = is_logistics(userInfo?.dept_code);
-
+  const isasset = is_asset(userInfo?.role);
+  const isbuyvsrent = is_buyvsrent(userInfo?.role);
+  const isfm = is_fm(userInfo?.role);
+  const ishod = is_hod(userInfo?.role);
+  const isgm = is_gm(userInfo?.role);
+  const isceo = is_ceo(userInfo?.role);
   const isPlant = is_plant(userInfo?.dept_code);
   const departments = [
-    { key: "plant", name: "Plant & Equipment", icon: <LuFactory size={18} /> },
+    { key: "plant", name: "Hiring / Asset", icon: <LuFactory size={18} /> },
+    { key: "brplant", name: "Buy vs Rent", icon: <GiClamp size={18} /> },
     { key: "logistics", name: "Logistics", icon: <FaTruck size={18} /> },
   ];
+
+  const { defaultDept, activeDept, allowedDept } = getDeptConfig({
+    isLogistics,
+    isPlant,
+    isfm,
+    isbuyvsrent,
+    isasset,
+    ishod,
+    isceo,
+    isgm,
+  });
+  console.log(selectedDept);
+
   useEffect(() => {
-    if (isLogistics || isPlant) {
-      setSelectedDept(isPlant ? departments[0].key : departments[1].key);
-      setDashboardType(isPlant ? departments[0].key : departments[1].key);
-    }
-  }, []);
+    if (!userInfo) return;
+    setSelectedDept(defaultDept);
+    setDashboardType(defaultDept);
+  }, [userInfo, isLogistics, isbuyvsrent, isfm, isPlant]);
 
-  const activeDeptKey = isPlant ? "plant" : isLogistics ? "logistics" : null;
-
-  const orderedDepartments = activeDeptKey
+  const orderedDepartments = activeDept
     ? [
-        ...departments.filter((d) => d.key === activeDeptKey),
-        ...departments.filter((d) => d.key !== activeDeptKey),
+        ...departments.filter((d) => d.key === activeDept),
+        ...departments.filter(
+          (d) => d.key !== activeDept && allowedDept.includes(d.key),
+        ),
+        ...departments.filter(
+          (d) => d.key !== activeDept && !allowedDept.includes(d.key),
+        ),
       ]
     : departments;
-  const isDeptDisabled = (deptKey) => {
-    const alloweddept = [];
-    if (isLogistics) alloweddept.push("logistics");
-    if (isPlant) alloweddept.push("plant");
-    return !alloweddept.includes(deptKey);
-  };
+  const isDeptDisabled = (deptKey) => !allowedDept?.includes(deptKey);
 
   return (
     <div className="flex flex-col  min-h-screen relative">
@@ -231,6 +113,8 @@ const Home = () => {
       <div className=" flex-grow gap-6 ml-10 ">
         {isPlant && selectedDept === "plant" && <PlantHome />}
         {isLogistics && selectedDept === "logistics" && <LogisticsHome />}
+        {(isbuyvsrent || isasset || isfm || ishod || isceo || isgm) &&
+          selectedDept === "brplant" && <HomeContainer />}
       </div>
     </div>
   );

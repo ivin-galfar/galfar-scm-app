@@ -6,12 +6,13 @@ import BrHeader from "../Components/BrHeader";
 import BrTable from "../Components/BrTable";
 import BrDropdown from "../Components/BrDropdown";
 import EditStatement from "../Components/EditStatement";
-import { useBrCsIds, useBrTableData } from "../store/brStore";
+import { useBrCsIds, useBrTableData, useImageSaved } from "../store/brStore";
 import { fetchbrstatements } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import FileContainer from "../Components/FileContainer";
 import { useIsEditing } from "../store/helperStore";
 import { useNewStatement } from "../store/brStore";
+import { useNavigate } from "react-router-dom";
 
 const BrStatement = () => {
   const [isOpen, setIsopen] = useState(false);
@@ -23,6 +24,7 @@ const BrStatement = () => {
   const { isedit } = useIsEditing();
   const { newstatement, setNewStatement, resetNewStatement } =
     useNewStatement();
+  const { imagesaved } = useImageSaved();
   useEffect(() => {
     const fetchAllIds = async () => {
       try {
@@ -30,7 +32,7 @@ const BrStatement = () => {
           userinfo,
           module: "/brstatement",
         });
-        setBrCs_ids(allids);
+        setBrCs_ids(allids.rows);
       } catch (error) {
         console.log(error);
       }
@@ -39,43 +41,65 @@ const BrStatement = () => {
   }, [userinfo, clickedsave]);
 
   return (
-    <div className="w-full px-5 flex-grow ">
-      <div className="absolute w-1/3 py-2 gap-10 flex p-6">
-        <span className="flex  justify-center font-semibold text-sm px-2 py-2  gap-2 h-10 bg-blue-600 rounded-2xl text-white items-center cursor-pointer">
-          {" "}
-          <FaPlus />
-          <button
-            data-modal-target="crud-modal"
-            data-modal-toggle="crud-modal"
-            className="text-white bg-brand border border-transparent hover:bg-brand-strong shadow-xs font-medium leading-5 rounded-lg text-sm px-4 py-2.5  focus:outline-none cursor-pointer"
-            type="button"
-            onClick={() => {
-              setIsopen(true);
-              resetbrtabledata();
-              setNewStatement();
-            }}
-          >
-            Create Statement
-          </button>
-        </span>
-      </div>
-      <BrHeader />
-      <div className="flex justify-between">
-        <BrDropdown />
-        {userinfo?.is_admin && brtabledata.id && (
-          <EditStatement onClick={() => setIsopen(true)} />
-        )}
-      </div>
-      {showtoast && userinfo?.is_admin && !isedit && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-          ✅ You have successfully created the Statement!
+    <div className="w-full px-5 flex-grow  ">
+      {userinfo?.is_admin && (
+        <div className="absolute w-1/3 py-2 gap-10 flex p-6 ">
+          <span className="flex  justify-center font-semibold text-sm px-2 py-2  gap-2 h-10 bg-blue-600 rounded-2xl text-white items-center cursor-pointer">
+            {" "}
+            <FaPlus />
+            <button
+              data-modal-target="crud-modal"
+              data-modal-toggle="crud-modal"
+              className="text-white bg-brand border border-transparent hover:bg-brand-strong shadow-xs font-medium leading-5 rounded-lg text-sm px-4 py-2.5  focus:outline-none cursor-pointer"
+              type="button"
+              onClick={() => {
+                setIsopen(true);
+                // resetbrtabledata();
+                setNewStatement();
+              }}
+            >
+              Create Statement
+            </button>
+          </span>
         </div>
       )}
+      <BrHeader />
 
-      <div className="flex p-6 gap-6 ">
-        <BrTable />
-        <FileContainer />
+      {showtoast &&
+        userinfo?.is_admin &&
+        !isedit &&
+        !imagesaved &&
+        brtabledata.status == "created" && (
+          <div className="fixed top-5 z-70 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ You have successfully created the Statement!
+          </div>
+        )}
+      {showtoast && userinfo?.is_admin && brtabledata.status == "reverted" && (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+          ✅ You have successfully Recalled the Statement!
+        </div>
+      )}
+      {showtoast &&
+        userinfo?.is_admin &&
+        brtabledata.status == "pending for hod" && (
+          <div className="fixed top-5 left-1/2 z-60 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ You have requested the Statement for approval!
+          </div>
+        )}
+
+      <div className="max-w-7xl mx-auto items-center flex-col  flex justify-center">
+        <div className="w-full flex flex-col ">
+          <div className="flex justify-between items-center w-full mb-3">
+            <BrDropdown />
+            {userinfo?.is_admin && brtabledata.id && (
+              <EditStatement onClick={() => setIsopen(true)} />
+            )}
+          </div>
+
+          <BrTable />
+        </div>
       </div>
+
       {isOpen && (
         <NewBrModal
           setIsopen={setIsopen}
@@ -83,15 +107,19 @@ const BrStatement = () => {
           setClickedSave={setClickedSave}
         />
       )}
-      {showtoast && userinfo?.is_admin && isedit && (
-        <div
-          className="fixed top-5 left-1/2 transform -translate-x-1/2 
+      {showtoast &&
+        userinfo?.is_admin &&
+        isedit &&
+        !imagesaved &&
+        brtabledata.status != "reverted" && (
+          <div
+            className="fixed top-5 left-1/2 transform -translate-x-1/2 
                   bg-green-500 text-white px-6 py-3 rounded shadow-lg 
                   transition-all duration-300 animate-slide-in z-[9999]"
-        >
-          ✅ You have successfully Updated the Statement!
-        </div>
-      )}
+          >
+            ✅ You have successfully Updated the Statement!
+          </div>
+        )}
     </div>
   );
 };

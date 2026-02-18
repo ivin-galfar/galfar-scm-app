@@ -5,7 +5,12 @@ import SideNav from "./SideNav";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserDropdown from "./UserDropdown";
 import { AppContext } from "./Context";
-import { is_logistics, is_plant, is_fm } from "../Helpers/dept_helper";
+import {
+  is_logistics,
+  is_plant,
+  is_fm,
+  is_buyvsrent,
+} from "../Helpers/dept_helper";
 import { useDashboardType } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
 
@@ -16,6 +21,7 @@ const Header = () => {
   const canvasRef = useRef(null);
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
+  const isbuyvsrent = is_buyvsrent(userInfo?.role);
   const isfm = is_fm(userInfo?.role);
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -34,6 +40,7 @@ const Header = () => {
 
   const location = useLocation();
   const path = location.pathname;
+
   return (
     <div>
       <header className="bg-white shadow-md">
@@ -57,7 +64,7 @@ const Header = () => {
                 </NavLink>
                 <NavLink
                   to={
-                    isfm
+                    isfm || isbuyvsrent
                       ? "/dashboardbr"
                       : isPlant
                         ? "/dashboard"
@@ -77,10 +84,15 @@ const Header = () => {
                     setStatusFilter("All");
                     setMultiStatusFilter([]);
                     if (isfm) {
-                      setDashboardType("plantbr");
+                      setDashboardType("brplant");
                     } else if (isPlant) {
-                      setDashboardType("plant");
-                      setPageSize(20);
+                      if (isbuyvsrent) {
+                        setDashboardType("brplant");
+                        setPageSize(20);
+                      } else {
+                        setDashboardType("plant");
+                        setPageSize(20);
+                      }
                     } else {
                       setDashboardType("logistics");
                     }

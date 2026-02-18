@@ -3,7 +3,7 @@ import { fetchallid } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { SiQuicktime } from "react-icons/si";
 import { GrDocumentStore } from "react-icons/gr";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
 import { MdOutlinePendingActions } from "react-icons/md";
@@ -28,10 +28,11 @@ const LogisticsHome = () => {
 
   const navigate = useNavigate();
   const { data: cs_id } = useQuery({
-    queryKey: ["csid"],
+    queryKey: ["cs_id"],
     queryFn: () => fetchallid(userInfo),
     enabled: !!userInfo,
   });
+
   const pendingstatements = cs_id?.filter((item) => {
     if (userInfo.is_admin) {
       return item.status?.includes("pending");
@@ -65,8 +66,17 @@ const LogisticsHome = () => {
             Quick Links
           </h2>
           <Link
-            to="/dashboard"
+            to="/dashboardlg"
             className="relative inline-flex ml-auto cursor-pointer"
+            onClick={() => {
+              if (userInfo?.is_admin) {
+                setPageIndex(0);
+                setStatusFilter("review");
+              } else {
+                setPageIndex(0);
+                setStatusFilter("Pending");
+              }
+            }}
           >
             <FaBell size={22} className="text-gray-700" />
             {pendingstatements?.length > 0 && (
@@ -80,27 +90,6 @@ const LogisticsHome = () => {
           </Link>
         </div>
         <ul className="p-2 space-y-3 ">
-          {/* {userInfo?.is_admin ? (
-            <li>
-              <Link to="/dashboard">
-                <button
-                  className="w-full flex text-left px-3 py-2 justify-between bg-cyan-300 hover:bg-cyan-400 rounded font-medium cursor-pointer"
-                  onClick={() => {
-                    setStatusFilter("review");
-                    setMultiStatusFilter([]);
-                  }}
-                >
-                  <div className="flex items-center gap-4">
-                    <IoWarningOutline size={18} />
-                    <span>Under Review</span>
-                  </div>
-                  <p>{reviewstatements?.length}</p>
-                </button>
-              </Link>
-            </li>
-          ) : (
-            ""
-          )} */}
           <li>
             <Link to="/dashboardlg">
               <button
@@ -247,14 +236,15 @@ const LogisticsHome = () => {
                     : r.status
                         ?.split(" ")
                         .map(
-                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                          (word) =>
+                            word.charAt(0).toUpperCase() + word.slice(1),
                         )
                         .join(" ") || "--"}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500 italic">No recent receipts</p>
+            <p className="text-sm text-gray-500 italic">No recent Statements</p>
           )}
         </ul>
       </div>

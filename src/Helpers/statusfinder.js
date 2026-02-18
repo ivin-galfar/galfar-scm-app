@@ -47,7 +47,7 @@ export const expectedstatusplant = (currentrole) => {
     statustext = "pending for ceo";
   } else if (currentrole == "ceo") {
     statustext = "approved";
-  } else {
+  } else { 
     statustext = "rejected";
   }
 

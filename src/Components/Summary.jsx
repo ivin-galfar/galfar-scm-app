@@ -13,14 +13,18 @@ const Summary = ({ data }) => {
         <tbody>
           <tr>
             <td className="p-2">Cash flow benefit in</td>
-            <td className="p-2 ">{formatPrice(data.fin_tenure)} years</td>
+            <td className="p-2 ">
+              {formatPrice(data.fin_tenure)} <span className="ml-3">Years</span>
+            </td>
             <td className="p-2">Cash flow benefit in</td>
             <td className="p-2 font-semibold">{data.chosentype}</td>
             <td className="p-2 "> {formatPrice(data.benefit)}</td>
           </tr>
           <tr>
             <td className="p-2">Accounting Gains in </td>
-            <td className="p-2 ">{formatPrice(data.fin_tenure)}</td>
+            <td className="p-2 ">
+              {formatPrice(data.fin_tenure)} <span className="ml-3">Years</span>
+            </td>
             <td className="p-2">Accounting Gain/Loss</td>
             <td className="p-2 font-semibold ">{data.chosentype}</td>
             <td className="p-2 ">
@@ -33,7 +37,8 @@ const Summary = ({ data }) => {
             <td className="p-2 ">
               {formatPrice(
                 data.cost_in_buying_with_main / data.total_monthly_rental,
-              )}
+              )}{" "}
+              <span className="ml-2">Months</span>
             </td>
           </tr>
         </tbody>
