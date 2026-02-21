@@ -3,22 +3,41 @@ import { useBrTableData, useToggleModal } from "../store/brStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import ApprovalModalBR from "./ApprovalModalBR";
 import Alerts from "./Alerts";
-import { updatebrstatements } from "../APIs/api";
+import { BrEmailAlert, updatebrstatements } from "../APIs/api";
 import { expectedstatusplant } from "../Helpers/statusfinder";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
+import { is_buyrent } from "../Helpers/dept_helper";
 
 const ApproveButton = () => {
   const { brtabledata, setbrtabledata } = useBrTableData();
 
   const userInfo = useUserInfo();
   const { showmodal, setShowModal, resetShowModal } = useToggleModal();
-  const { setErrorMessage, errormessage, clearErrorMessage } =
-    useErrorMessage();
-  const { showtoast, setShowToast, resetshowtoast } = useToast();
+  const { setErrorMessage, clearErrorMessage } = useErrorMessage();
+  const { setShowToast, resetshowtoast } = useToast();
+  const dept = is_buyrent(userInfo?.dept_code) ? "buyvsrent" : "";
+
   const updateStatement = async (cs_id, changestatus) => {
+    let file = "";
+    let filename = "";
+    if (brtabledata.file != "") {
+      file = brtabledata.file;
+      filename = brtabledata.filename;
+    }
     try {
-      await updatebrstatements({ cs_id, status: changestatus, userInfo });
+      await updatebrstatements({
+        cs_id,
+        status: changestatus,
+        userInfo,
+        file,
+        filename,
+      });
+      BrEmailAlert(cs_id, userInfo, dept, brtabledata).catch((err) => {
+        const message = err?.response?.data || err?.message || "Email failed";
+        setErrorMessage(message);
+      });
+
       setShowToast();
       setbrtabledata((prev) => ({
         ...prev,

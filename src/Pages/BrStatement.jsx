@@ -13,6 +13,7 @@ import FileContainer from "../Components/FileContainer";
 import { useIsEditing } from "../store/helperStore";
 import { useNewStatement } from "../store/brStore";
 import { useNavigate } from "react-router-dom";
+import { is_hod } from "../Helpers/dept_helper";
 
 const BrStatement = () => {
   const [isOpen, setIsopen] = useState(false);
@@ -25,6 +26,8 @@ const BrStatement = () => {
   const { newstatement, setNewStatement, resetNewStatement } =
     useNewStatement();
   const { imagesaved } = useImageSaved();
+  const ishod = is_hod(userinfo?.role);
+
   useEffect(() => {
     const fetchAllIds = async () => {
       try {
@@ -54,7 +57,7 @@ const BrStatement = () => {
               type="button"
               onClick={() => {
                 setIsopen(true);
-                // resetbrtabledata();
+                resetbrtabledata();
                 setNewStatement();
               }}
             >
@@ -91,7 +94,7 @@ const BrStatement = () => {
         <div className="w-full flex flex-col ">
           <div className="flex justify-between items-center w-full mb-3">
             <BrDropdown />
-            {userinfo?.is_admin && brtabledata.id && (
+            {(userinfo?.is_admin || ishod) && brtabledata.id && (
               <EditStatement onClick={() => setIsopen(true)} />
             )}
           </div>
@@ -108,7 +111,7 @@ const BrStatement = () => {
         />
       )}
       {showtoast &&
-        userinfo?.is_admin &&
+        (userinfo?.is_admin || ishod) &&
         isedit &&
         !imagesaved &&
         brtabledata.status != "reverted" && (

@@ -44,20 +44,26 @@ const Accounting = ({ data }) => {
           <tr>
             <td className="p-2">Total Expenses - Rentals</td>
             <td className="p-2 text-right">
-              {formatPrice(data.cash_outflow_renting)}
+              {formatPrice(data.total_rental_cost)}
             </td>
           </tr>
           <tr>
             <td className="p-2 bg-gray-200">
               Accounting Gain/Loss
               {data.chosentype && (
-                <span className="font-semibold bg-green-100 text-green-800 px-2 py-0.5 rounded-md mx-1">
+                <span
+                  className={`font-semibold ${
+                    data.chosentype.trim() === "Buying"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  } px-2 py-0.5 rounded-md mx-1`}
+                >
                   [{data.chosentype?.trim()}]
                 </span>
               )}
             </td>
             <td className="p-2 text-right  bg-gray-200">
-              {formatPrice(data.cash_outflow_renting - accounting_buying)}
+              {formatPrice(data.total_rental_cost - accounting_buying)}
             </td>
           </tr>
         </tbody>

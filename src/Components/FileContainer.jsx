@@ -6,36 +6,15 @@ import { updatebrstatementImages } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useToast } from "../store/toastStore";
+import { is_hod } from "../Helpers/dept_helper";
 
 const FileContainer = () => {
   const { brtabledata, setbrtabledata } = useBrTableData();
-
   const { imagesaved, setImageSaved, resetImageSaved } = useImageSaved();
   const userInfo = useUserInfo();
+  const ishod = is_hod(userInfo?.role);
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const [hasChanges, setHasChanges] = useState(false);
-
-  const { mutate: updateStatement } = useMutation({
-    mutationFn: updatebrstatementImages,
-    onSuccess: (data) => {
-      setShowToast();
-      setImageSaved(true);
-      setTimeout(() => {
-        resetshowtoast();
-        setImageSaved(false);
-        setHasChanges(false);
-        resetImageSaved();
-      }, 1000);
-    },
-    onError: (error) => {
-      const message = error?.response?.data.message || error.message;
-      setShowToast();
-      setErrorMessage(message);
-    },
-  });
-  const handleSaveImage = () => {
-    updateStatement({ brtabledata, userInfo });
-  };
 
   return (
     <>
@@ -46,19 +25,6 @@ const FileContainer = () => {
             {brtabledata?.filename?.length > 0
               ? `(${brtabledata?.filename?.length})`
               : ""}
-            {(brtabledata.status == "created" ||
-              brtabledata.status == "reverted") &&
-              hasChanges && (
-                <div>
-                  <button
-                    type="button"
-                    onClick={handleSaveImage}
-                    className="cursor-pointer"
-                  >
-                    <IoSave />
-                  </button>
-                </div>
-              )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -71,7 +37,8 @@ const FileContainer = () => {
                     className="relative flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-200 hover:border-blue-400"
                   >
                     {(brtabledata.status == "created" ||
-                      brtabledata.status == "reverted") && (
+                      brtabledata.status == "reverted" ||
+                      (ishod && brtabledata.status == "pending for hod")) && (
                       <button
                         onClick={() =>
                           handleRemoveBrFile(

@@ -14,6 +14,7 @@ import { useErrorMessage } from "../store/errorStore";
 import FileUpload from "./FileUpload";
 import { useIsEditing } from "../store/helperStore";
 import { useNavigate } from "react-router-dom";
+import { is_hod } from "../Helpers/dept_helper";
 
 const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
   const { formData, setFormData, resetFormData } = useBrStatement();
@@ -51,8 +52,6 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
       resetFormData();
     },
     onError: (error) => {
-      console.log(error);
-
       const message = error?.response?.data.message || error.message;
       setShowToast();
       setErrorMessage(message);
@@ -77,6 +76,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
       const message = error?.response?.data.message || error.message;
       setShowToast();
       setErrorMessage(message);
+      console.log(error);
     },
   });
 
@@ -113,7 +113,6 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
 
   const hasEmptyRequiredFields = () => {
     let test = Object.entries(formData);
-    console.log(test);
 
     return test
       .filter(([key]) => key !== "file" && key !== "filename")
@@ -121,15 +120,18 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
         ([_, value]) => value === "" || value === null || value === undefined,
       );
   };
-
   const submitForm = (action) => {
     setClickedSave(true);
     if (hasEmptyRequiredFields()) {
       return;
     }
+    let status = formData.status;
+    if (formData.status != "pending for hod") {
+      status = "created";
+    }
     const updatedFormData = {
       ...formData,
-      status: "created",
+      status: status,
     };
 
     if (action != "save") {
@@ -160,6 +162,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
         file: brtabledata.file,
         filename: brtabledata.filename,
         currency: brtabledata.currency,
+        status: brtabledata.status,
       });
     }
   }, [isedit]);
@@ -234,7 +237,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                     value={formData.no_of_units ?? ""}
                     onChange={(e) => {
                       const value =
-                        e.target.value === "" ? null : Number(e.target.value);
+                        e.target.value === "" ? "" : Number(e.target.value);
                       field.handleChange(value);
                       setFormData((prev) => ({
                         ...prev,
@@ -534,10 +537,8 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                   </label>
                   <select
                     className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={formData.currency}
+                    value={formData.currency ?? ""}
                     onChange={(e) => {
-                      console.log(e.target);
-
                       setFormData((prev) => ({
                         ...prev,
                         currency: e.target.value,
@@ -545,11 +546,11 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                     }}
                   >
                     <option value="">Choose Currency</option>
+                    <option value="AED - د.إ">AED - د.إ</option>
                     <option value="USD - $">USD - $</option>
+                    <option value="INR - ₹">INR - ₹</option>
                     <option value="EUR - €">EUR - €</option>
                     <option value="GBP - £">GBP - £</option>
-                    <option value="AED - د.إ">AED - د.إ</option>
-                    <option value="INR - ₹">INR - ₹</option>
                   </select>
                   {clickedsave && formData.currency == "" && (
                     <span className="text-sm text-red-500 mt-1">

@@ -395,10 +395,13 @@ export const handleBrPrint = (formData) => {
     ["Operation Cost (Tenure)", formatP(formData.op_cost_tenure)],
     ["Maintenance Cost (Tenure)", formatP(formData.maintenance_cost_tenure)],
     [
-      { content: "Total Cost Outflow", styles: { fontStyle: "bold" } },
+      {
+        content: "Total Cost Outflow",
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+      },
       {
         content: formatP(formData.cash_outflow_buying),
-        styles: { fontStyle: "bold" },
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
       },
     ],
   ];
@@ -416,10 +419,13 @@ export const handleBrPrint = (formData) => {
     ["", ""],
     ["", ""],
     [
-      { content: "Total Cost Outflow", styles: { fontStyle: "bold" } },
+      {
+        content: "Total Cost Outflow",
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+      },
       {
         content: formatP(formData.cash_outflow_renting),
-        styles: { fontStyle: "bold" },
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
       },
     ],
   ];
@@ -467,10 +473,34 @@ export const handleBrPrint = (formData) => {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
+
   const currencyCode = (formData.currency || "AED").split(" - ")[0].trim();
 
-  const benefitLine = `Cash flow benefit in Buying with benefit of (${currencyCode}) ${formatPrice(formData.benefit)} in ${formatP(formData.fin_tenure)} Years`;
-  doc.text(benefitLine, 14, y);
+  const part1cash = "Cash flow benefit in ";
+  const part2cash = formData.chosentype || ""; // highlighted
+  const part3cash = ` with benefit of (${currencyCode}) ${formatPrice(
+    formData.benefit,
+  )} in ${formatP(formData.fin_tenure)} Years`;
+
+  let xcash = 14;
+
+  // part 1
+  doc.setTextColor(0, 0, 0);
+  doc.text(part1cash, xcash, y);
+  xcash += doc.getTextWidth(part1cash);
+
+  // highlight chosentype
+  const textWidthcash = doc.getTextWidth(part2cash);
+  doc.setFillColor(255, 255, 0);
+  doc.rect(xcash - 0.5, y - 3.5, textWidthcash + 1, 4.5, "F");
+
+  doc.setTextColor(0, 128, 0);
+  doc.text(part2cash, xcash, y);
+  xcash += textWidthcash;
+
+  // part 3
+  doc.setTextColor(0, 0, 0);
+  doc.text(part3cash, xcash, y);
 
   y += 8;
 
@@ -501,7 +531,7 @@ export const handleBrPrint = (formData) => {
         },
         {
           content: formatP(formData.accounting_gain_loss),
-          styles: { fontStyle: "bold" },
+          styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
         },
       ],
     ],
@@ -606,18 +636,22 @@ export const handleBrPrint = (formData) => {
 
   let x = 14;
 
-  // First part
   const part1 = "Recommended for: ";
   doc.text(part1, x, y);
   x += doc.getTextWidth(part1);
-
   doc.setTextColor(0, 128, 0);
+
   const part2 = formData.chosentype || "";
+  const textWidthtype = doc.getTextWidth(part2);
+
+  doc.setFillColor(255, 255, 0);
+  doc.rect(x - 0.5, y - 3.5, textWidthtype + 1, 4.5, "F");
+
   doc.text(part2, x, y);
-  x += doc.getTextWidth(part2);
+
+  x += textWidthtype;
 
   doc.setTextColor(0, 0, 0);
-
   const part3 = `   As on ${dateStr}`;
   doc.text(part3, x, y);
 
@@ -627,7 +661,7 @@ export const handleBrPrint = (formData) => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.text("(HOD)", col * 0.65, footerY + 5.5, { align: "center" });
-  doc.text("(FM)", col * 1.5, footerY + 5.5, { align: "center" });
+  doc.text("(SFM)", col * 1.5, footerY + 5.5, { align: "center" });
   doc.text("(GM)", col * 2.4, footerY + 5.5, { align: "center" });
   doc.text("(CEO)", col * 3.3, footerY + 5.5, { align: "center" });
   const names = getApproverNames("BUYRENT", "BUYRENT");
@@ -641,13 +675,13 @@ export const handleBrPrint = (formData) => {
     const name = names[index] || "";
     const role = approvers[index]?.toLowerCase();
 
-    const lastApprover = approvals[approvals.length - 1];
+    const lastApprover = approvals?.[approvals.length - 1];
     const lastRole = lastApprover?.role.toUpperCase() ?? "";
 
     const status =
-      approvals.findLast((a) => a.role.toLowerCase() === role)?.status ?? "--";
+      approvals?.findLast((a) => a.role.toLowerCase() === role)?.status ?? "--";
     const formattedstatus = status.charAt(0).toUpperCase() + status.slice(1);
-    const isRejected = approvals.some(
+    const isRejected = approvals?.some(
       (a) => a.status?.toLowerCase() === "rejected",
     );
     const nextPending = !isRejected ? nextRole(lastRole) : null;

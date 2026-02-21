@@ -29,7 +29,7 @@ const Summary = ({ data }) => {
             <td className="p-2 font-semibold ">{data.chosentype}</td>
             <td className="p-2 ">
               {" "}
-              {formatPrice(data.cash_outflow_renting - accounting_buying)}
+              {formatPrice(data.total_rental_cost - accounting_buying)}
             </td>
           </tr>
           <tr>

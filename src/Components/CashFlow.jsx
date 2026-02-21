@@ -5,7 +5,9 @@ const CashFlow = ({ data }) => {
     <div className="my-6 p-4 border border-gray-300 rounded bg-gray-50 text-gray-700 leading-relaxed">
       Cash flow benefit in
       {data?.chosentype && (
-        <span className="font-semibold bg-green-100 text-green-800 px-2 py-0.5 rounded-md mx-1">
+        <span
+          className={`font-semibold ${data.chosentype.trim() == "Buying" ? "bg-green-100 text-green-800" : " bg-red-100 text-red-800"} px-2 py-0.5 rounded-md mx-1`}
+        >
           {data?.chosentype?.trim()}
         </span>
       )}

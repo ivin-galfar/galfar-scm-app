@@ -449,8 +449,6 @@ export const feedbrstatement = async ({ formData, userInfo }) => {
     );
     return response;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -472,8 +470,6 @@ export const updatebrstatement = async ({ formData, userInfo }) => {
     );
     return response;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -514,7 +510,6 @@ export const fetchbrstatement = async (cs_id, userInfo) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -545,7 +540,6 @@ export const fetchbrstatements = async ({
         searchcs,
       },
     });
-
     return response.data;
   } catch (error) {
     throw error;
@@ -587,6 +581,8 @@ export const updatebrstatements = async ({
   status,
   userInfo,
   comments,
+  file,
+  filename,
 }) => {
   try {
     const config = {
@@ -601,6 +597,36 @@ export const updatebrstatements = async ({
         status,
         comments,
         role: userInfo.role,
+        file,
+        filename,
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
+      {
+        id: data.id,
+        userInfo: {
+          role: userInfo.role,
+        },
+        type: data.chosentype,
+        date: data.created_at,
+        status: data.status,
+        item: data.item,
       },
       config,
     );

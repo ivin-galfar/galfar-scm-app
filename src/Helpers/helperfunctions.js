@@ -24,7 +24,12 @@ export const handleRemoveBrFile = (
 ) => {
   const updatedFilenames = [...brtabledata.filename];
   const updatedFiles = [...brtabledata.file];
+  let status = brtabledata.status;
+  console.log(status);
 
+  if (brtabledata.status != "pending for hod") {
+    status = "created";
+  }
   updatedFilenames.splice(index, 1);
   updatedFiles.splice(index, 1);
   setHasChanges(true);
@@ -32,6 +37,7 @@ export const handleRemoveBrFile = (
     ...prev,
     filename: updatedFilenames,
     file: updatedFiles,
+    status: status,
   }));
 };
 
@@ -137,7 +143,6 @@ export const handleFileUpload = async (files, userInfo, setFormData) => {
     const newFileNames = response.data.uploadedFiles.map(
       (file) => file.fileName,
     );
-    console.log(newFileNames);
 
     setFormData((prev) => ({
       ...prev,

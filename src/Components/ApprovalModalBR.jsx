@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { updatebrstatements } from "../APIs/api";
+import { BrEmailAlert, updatebrstatements } from "../APIs/api";
 import { useBrTableData, useToggleModal } from "../store/brStore";
 import { LuRotateCcwSquare } from "react-icons/lu";
 import { RxCross1 } from "react-icons/rx";
@@ -8,6 +8,7 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useErrorMessage } from "../store/errorStore";
 import { expectedstatusplant } from "../Helpers/statusfinder";
 import { useComments } from "../store/helperStore";
+import { is_buyrent } from "../Helpers/dept_helper";
 
 const ApprovalModalBR = () => {
   const { setShowModal, resetShowModal } = useToggleModal();
@@ -16,11 +17,18 @@ const ApprovalModalBR = () => {
   const userInfo = useUserInfo();
   const { brtabledata: data, setbrtabledata } = useBrTableData();
   const { comments, setComments, resetComments } = useComments();
-
+  const dept = is_buyrent(userInfo?.dept_code) ? "buyvsrent" : "";
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatebrstatements,
-    onSuccess: () => {
+    onSuccess: (data) => {
       setShowToast();
+      BrEmailAlert(data.id, userInfo, dept, data).catch((err) => {
+        console.log(err);
+
+        const message =
+          err?.response?.data.error || err?.message || "Email failed";
+        setErrorMessage(message);
+      });
       setTimeout(() => {
         resetshowtoast();
         resetShowModal();
@@ -34,8 +42,14 @@ const ApprovalModalBR = () => {
     },
   });
 
-  const submitApproval = (cs_id, status) => {
+  const submitApproval = async (cs_id, status) => {
     let updatedstatus = "";
+    let file = "";
+    let filename = "";
+    if (data.file != "") {
+      file = data.file;
+      filename = data.filename;
+    }
     if (status == "approved") {
       updatedstatus = expectedstatusplant(userInfo?.role);
       setbrtabledata((prev) => ({
@@ -55,7 +69,14 @@ const ApprovalModalBR = () => {
         status: updatedstatus,
       }));
     }
-    updatestatement({ cs_id, status: updatedstatus, userInfo, comments });
+    updatestatement({
+      cs_id,
+      status: updatedstatus,
+      userInfo,
+      comments,
+      file,
+      filename,
+    });
   };
 
   return (

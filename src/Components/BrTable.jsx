@@ -221,7 +221,9 @@ const BrTable = () => {
           {data.created_at && (
             <div className="my-4 text-gray-700">
               <span>Recommendation for</span>
-              <span className="ml-1 px-2 py-1 bg-blue-100 text-blue-800 font-semibold rounded-md">
+              <span
+                className={`ml-1 px-2 py-1 ${data.chosentype.trim() == "Buying" ? "bg-green-100 text-green-800" : " bg-red-100 text-red-800"} font-semibold rounded-md`}
+              >
                 {data.chosentype.trim()}
               </span>
               <span className="ml-2">As on</span>
