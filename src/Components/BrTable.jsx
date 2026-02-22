@@ -1,6 +1,6 @@
-import { useBrStatement, useBrTableData } from "../store/brStore";
+import { useBrTableData } from "../store/brStore";
 import Accounting from "./Accounting";
-import CashFlow from "./cashFlow";
+import CashFlow from "./CashFlow";
 import PaybackPeriod from "./Payback";
 import Summary from "./Summary";
 import FileContainer from "./FileContainer";
@@ -15,6 +15,7 @@ const BrTable = () => {
   const maintainenece_cost_tenure = formatPrice(data.maintenance_cost_tenure);
   const operation_cost_rent = formatPrice(data.op_cost_rental);
   const maintainence_cost_rental = formatPrice(data.maint_rental);
+
   return (
     <div className="rounded-xl border border-gray-300 p-2">
       <div className="flex items-center gap-2 text-sm pb-2">
