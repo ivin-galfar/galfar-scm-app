@@ -18,7 +18,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const { formData, setFormData, setTableData } = useStatement();
   const [comments, setComments] = useState("");
   const userInfo = useUserInfo();
-  const dept = is_logistics ? "logistics" : "";
+  const dept = is_logistics(userInfo?.dept_code) ? "logistics" : "";
   const navigate = useNavigate();
   const { setStatusFilter } = useStatusFilter();
 
@@ -30,7 +30,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
     if (!definedprojects.includes(project)) {
       setShowToast();
       setErrorMessage(
-        "Mentioned Project not found. Please contact initiator!!"
+        "Mentioned Project not found. Please contact initiator!!",
       );
       setTimeout(() => {
         resetshowtoast();
@@ -67,7 +67,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
           [comments_role]: comments,
           rejectedby: updatedstatus === "rejected" ? userInfo.role : undefined,
         },
-        config
+        config,
       );
 
       if (updatedstatus.toLowerCase() == "rejected") {

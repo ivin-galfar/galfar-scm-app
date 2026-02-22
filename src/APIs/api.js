@@ -285,7 +285,6 @@ export const fetchStatement = async (userInfo, cs_id) => {
           : "";
       }
     }
-    console.log(filteredresponse);
 
     return filteredresponse;
   } catch (error) {
@@ -328,7 +327,10 @@ export const fetchReceiptCount = async ({
   let type = null;
 
   if (userInfo?.is_admin) {
-    type = userInfo?.role == "inita" ? "asset" : "hiring";
+    type =
+      userInfo?.role == "inita" || userInfo?.role == "initbr"
+        ? "asset"
+        : "hiring";
   }
   try {
     const config = {
@@ -426,6 +428,210 @@ export const recallStatementValues = async (
     );
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+export const feedbrstatement = async ({ formData, userInfo }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/brstatement`,
+      {
+        formData,
+      },
+      config,
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatebrstatement = async ({ formData, userInfo }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/brstatement/updatebrstatementvalues/${formData.id}`,
+      {
+        formData,
+      },
+      config,
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatebrstatementImages = async ({ brtabledata, userInfo }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/brstatement/updatebrimages/${brtabledata?.id}`,
+      {
+        brtabledata,
+      },
+      config,
+    );
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const fetchbrstatement = async (cs_id, userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/brstatement/${cs_id}`,
+
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchbrstatements = async ({
+  userinfo,
+  statusfilter,
+  searchcs,
+  page,
+  limit,
+  module,
+}) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userinfo.token}`,
+      },
+    };
+    const response = await axios.get(`${REACT_SERVER_URL}/brstatement/`, {
+      ...config,
+      params: {
+        module,
+        role: userinfo.role,
+        statusfilter,
+        page,
+        limit,
+        searchcs,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchbrstatementscount = async (
+  userInfo,
+  statusfilter,
+  searchcs,
+  page,
+  limit,
+) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/brstatement/totalstatements`,
+      {
+        ...config,
+        params: { statusfilter, role: userInfo.role, searchcs, page, limit },
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+
+    throw error;
+  }
+};
+
+export const updatebrstatements = async ({
+  cs_id,
+  status,
+  userInfo,
+  comments,
+  file,
+  filename,
+}) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/brstatement/updatebrstatement/${cs_id}`,
+      {
+        status,
+        comments,
+        role: userInfo.role,
+        file,
+        filename,
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
+      {
+        id: data.id,
+        userInfo: {
+          role: userInfo.role,
+        },
+        type: data.chosentype,
+        date: data.created_at,
+        status: data.status,
+        item: data.item,
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };

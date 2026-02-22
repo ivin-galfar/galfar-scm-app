@@ -1,3 +1,7 @@
+import axios from "axios";
+import { REACT_SERVER_URL } from "../../config/ENV";
+import { categoryapprovers, roles } from "./roles_helper";
+
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
   const updatedFiles = [...formData.file];
@@ -9,6 +13,31 @@ export const handleRemoveFile = (index, formData, setFormData) => {
     ...prev,
     filename: updatedFilenames,
     file: updatedFiles,
+  }));
+};
+
+export const handleRemoveBrFile = (
+  index,
+  brtabledata,
+  setbrtabledata,
+  setHasChanges,
+) => {
+  const updatedFilenames = [...brtabledata.filename];
+  const updatedFiles = [...brtabledata.file];
+  let status = brtabledata.status;
+  console.log(status);
+
+  if (brtabledata.status != "pending for hod") {
+    status = "created";
+  }
+  updatedFilenames.splice(index, 1);
+  updatedFiles.splice(index, 1);
+  setHasChanges(true);
+  setbrtabledata((prev) => ({
+    ...prev,
+    filename: updatedFilenames,
+    file: updatedFiles,
+    status: status,
   }));
 };
 
@@ -86,3 +115,54 @@ export const formatDateDDMMYYYY = (date) =>
   new Date(date).toLocaleDateString("en-GB", {
     timeZone: "UTC",
   });
+
+export const formatPrice = (value) => {
+  return Math.round(value || 0).toLocaleString();
+};
+
+export const handleFileUpload = async (files, userInfo, setFormData) => {
+  try {
+    const formData = new FormData();
+
+    Array.from(files).forEach((file) => {
+      formData.append("file", file);
+    });
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/receipts/file`,
+      formData,
+      config,
+    );
+
+    const newFiles = response.data.uploadedFiles.map((file) => file.fileUrl);
+    const newFileNames = response.data.uploadedFiles.map(
+      (file) => file.fileName,
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      file: [...(prev.file || []), ...newFiles],
+      filename: [...(prev.filename || []), ...newFileNames],
+    }));
+  } catch (error) {
+    console.log(error);
+
+    return error;
+  }
+};
+
+export const getApproverNames = (category, dept) => {
+  const flow = categoryapprovers[category] || [];
+  return flow.flatMap((role) => {
+    if (role == "INITIATOR") {
+      return roles.INITIATOR[dept];
+    }
+
+    return roles[role] ? [roles[role]] : [];
+  });
+};

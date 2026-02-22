@@ -20,7 +20,10 @@ const AppContextProvider = ({ children }) => {
       selectedvendorreason: "",
       status: "",
       receiptupdated: null,
-      type: userInfo?.role == "inita" ? "asset" : "hiring",
+      type:
+        userInfo?.role == "inita" || userInfo?.role == "initbr"
+          ? "asset"
+          : "hiring",
       file: [],
       filename: [],
     },

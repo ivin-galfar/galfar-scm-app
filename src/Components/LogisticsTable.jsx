@@ -465,7 +465,6 @@ const LogisticsTable = () => {
                                 const match = String(value).match(
                                   /^([A-Za-z]+)?\s*([\d,.]+)$/,
                                 );
-                                console.log(match);
 
                                 if (!match) return value;
 

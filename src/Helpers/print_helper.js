@@ -1,11 +1,15 @@
 import jsPDF from "jspdf";
 import galfarlogo from "../assets/Images/logo-new.png";
 import { autoTable } from "jspdf-autotable";
-import { formatDateDDMMYYYY } from "./helperfunctions";
+import {
+  formatDateDDMMYYYY,
+  formatPrice,
+  getApproverNames,
+} from "./helperfunctions";
+import { categoryapprovers, nextRole } from "./roles_helper";
+import { expectedstatusplant } from "./statusfinder";
 
 export const handlePrint = (formData, tableData) => {
-  console.log(formData.date);
-
   const doc = new jsPDF({
     orientation: "landscape",
   });
@@ -324,6 +328,387 @@ export const handlePrint = (formData, tableData) => {
     doc.setDrawColor(200);
     doc.setLineWidth(0.2);
   }
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  window.open(blobUrl);
+};
+
+export const handleBrPrint = (formData) => {
+  const doc = new jsPDF("portrait", "mm", "a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let y = 10;
+
+  const formatP = (val) => (val != 0 ? formatPrice(val) : "--");
+
+  /* =========================
+      1. HEADER & HIGHLIGHTED ITEM
+  ========================= */
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text(
+    "Galfar Engineering & Contracting WLL Emirates, UAE",
+    pageWidth / 2,
+    y,
+    { align: "center" },
+  );
+
+  y += 6;
+  doc.setFontSize(12);
+  doc.text("Comparison of Buy Vs Rental Analysis", pageWidth / 2, y, {
+    align: "center",
+  });
+
+  y += 6;
+  const itemText = `Item: ${formData.item}`;
+  const textWidth = doc.getTextWidth(itemText);
+  doc.setFillColor(245, 245, 245);
+  doc.rect(pageWidth / 2 - textWidth / 2 - 2, y - 4, textWidth + 4, 6, "F");
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(44, 62, 80);
+  doc.text(itemText, pageWidth / 2, y, { align: "center" });
+
+  doc.setTextColor(0);
+  y += 7;
+
+  /* =========================
+      2. CASH FLOW TABLES (SIDE BY SIDE)
+  ========================= */
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text("Cash flow Gain/(loss)", 14, y);
+  y += 4;
+
+  const buyingBody = [
+    ["Unit Price", formatP(formData.unit_price)],
+    ["No of Units", formData.units_no],
+    ["Total Principal Cost", formatP(formData.principal_cost)],
+    ["Interest Rate", `${formData.int_rate}%`],
+    ["Tenure-Years", formatP(formData.fin_tenure)],
+    ["Tenure-Months", formatP(formData.tenure_months)],
+    ["Monthly Instalment", formatP(formData.monthly_installment)],
+    ["Total Interest Cost", formatP(formData.total_interest_cost)],
+    [
+      "Total Principal + Interest",
+      formatP(formData.principal_with_interest_buy),
+    ],
+    ["Operation Cost (Tenure)", formatP(formData.op_cost_tenure)],
+    ["Maintenance Cost (Tenure)", formatP(formData.maintenance_cost_tenure)],
+    [
+      {
+        content: "Total Cost Outflow",
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+      },
+      {
+        content: formatP(formData.cash_outflow_buying),
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+      },
+    ],
+  ];
+
+  const rentingBody = [
+    ["Unit Rental", formatP(formData.monthly_rent)],
+    ["No of Units", formData.units_no],
+    ["Tenure-Years", formatP(formData.fin_tenure)],
+    ["Tenure-Months", formatP(formData.tenure_months)],
+    ["Monthly Rent", formatP(formData.total_monthly_rental)],
+    ["Total Rental", formatP(formData.total_rental_cost)],
+    ["Operation Cost", formatP(formData.op_cost_rental)],
+    ["Maintenance Cost", formatP(formData.maint_rental)],
+    ["", ""],
+    ["", ""],
+    ["", ""],
+    [
+      {
+        content: "Total Cost Outflow",
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+      },
+      {
+        content: formatP(formData.cash_outflow_renting),
+        styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+      },
+    ],
+  ];
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: 14 },
+    tableWidth: 89,
+    head: [
+      [
+        {
+          content: "Buying",
+          styles: { halign: "center", fillColor: [46, 204, 113] },
+        },
+        "",
+      ],
+    ],
+    body: buyingBody,
+    theme: "grid",
+    styles: { fontSize: 9, cellPadding: 1.2 },
+    columnStyles: { 1: { halign: "right" } },
+  });
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: 107 },
+    tableWidth: 89,
+    head: [
+      [
+        {
+          content: "Renting",
+          styles: { halign: "center", fillColor: [52, 152, 219] },
+        },
+        "",
+      ],
+    ],
+    body: rentingBody,
+    theme: "grid",
+    styles: { fontSize: 9, cellPadding: 1.2 },
+    columnStyles: { 1: { halign: "right" } },
+  });
+
+  // FIX: Dynamically set Y to the bottom of the tables before drawing benefit line
+  y = doc.lastAutoTable.finalY + 6;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+
+  const currencyCode = (formData.currency || "AED").split(" - ")[0].trim();
+
+  const part1cash = "Cash flow benefit in ";
+  const part2cash = formData.chosentype || ""; // highlighted
+  const part3cash = ` with benefit of (${currencyCode}) ${formatPrice(
+    formData.benefit,
+  )} in ${formatP(formData.fin_tenure)} Years`;
+
+  let xcash = 14;
+
+  // part 1
+  doc.setTextColor(0, 0, 0);
+  doc.text(part1cash, xcash, y);
+  xcash += doc.getTextWidth(part1cash);
+
+  // highlight chosentype
+  const textWidthcash = doc.getTextWidth(part2cash);
+  doc.setFillColor(255, 255, 0);
+  doc.rect(xcash - 0.5, y - 3.5, textWidthcash + 1, 4.5, "F");
+
+  doc.setTextColor(0, 128, 0);
+  doc.text(part2cash, xcash, y);
+  xcash += textWidthcash;
+
+  // part 3
+  doc.setTextColor(0, 0, 0);
+  doc.text(part3cash, xcash, y);
+
+  y += 8;
+
+  /* =========================
+      3. ACCOUNTING GAIN/LOSS
+  ========================= */
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text("Accounting Gain/Loss", 14, y);
+  y += 4;
+
+  autoTable(doc, {
+    startY: y,
+    body: [
+      ["Depreciation Rate", `${formData.dp_rate || 0}%`],
+      ["Depreciation Cost", formatP(formData.depreciation_cost)],
+      ["Interest Cost", formatP(formData.total_interest_cost)],
+      [
+        "Operation & Maintenance Cost",
+        formatP(formData.maintenance_cost_tenure),
+      ],
+      ["Total Expenses - BUYING", formatP(formData.total_expenses_buying)],
+      ["Total Expenses - RENTALS", formatP(formData.total_rental_cost)],
+      [
+        {
+          content: `Accounting Gain/Loss (${formData.chosentype})`,
+          styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+        },
+        {
+          content: formatP(formData.accounting_gain_loss),
+          styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
+        },
+      ],
+    ],
+    theme: "grid",
+    styles: { fontSize: 9, cellPadding: 1.2 },
+    columnStyles: { 1: { halign: "right" } },
+  });
+
+  y = doc.lastAutoTable.finalY + 6;
+
+  /* =========================
+      4. PAYBACK PERIOD
+  ========================= */
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text("Payback period", 14, y);
+  y += 4;
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Metric", "Without Maint", "Incl Maint"]],
+    body: [
+      [
+        "Total Cost in Buying",
+        formatP(formData.principal_with_interest_buy),
+        formatP(formData.cash_outflow_buying),
+      ],
+      [
+        "Monthly Rentals",
+        formatP(formData.total_monthly_rental),
+        formatP(formData.total_monthly_rental),
+      ],
+      [
+        { content: "Payback period - Months", styles: { fontStyle: "bold" } },
+        formatP(
+          formData.cost_in_buying_without_main / formData.total_monthly_rental,
+        ),
+        formatP(
+          formData.cost_in_buying_with_main / formData.total_monthly_rental,
+        ),
+      ],
+    ],
+    theme: "grid",
+    styles: { fontSize: 9, cellPadding: 1.2 },
+    headStyles: { fillColor: [230, 126, 34] },
+    columnStyles: { 1: { halign: "right" }, 2: { halign: "right" } },
+  });
+
+  y = doc.lastAutoTable.finalY + 6;
+
+  /* =========================
+      5. SUMMARY SECTION
+  ========================= */
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text("Summary", 14, y);
+  y += 4;
+
+  autoTable(doc, {
+    startY: y,
+    body: [
+      [
+        "Cash flow benefit in",
+        `${formatP(formData.fin_tenure)} Years`,
+        formData.chosentype,
+        { content: formatP(formData.benefit), styles: { fontStyle: "bold" } },
+      ],
+      [
+        "Accounting Gains in",
+        `${formatP(formData.fin_tenure)} Years`,
+        formData.chosentype,
+        {
+          content: formatP(formData.accounting_gain_loss),
+          styles: { fontStyle: "bold" },
+        },
+      ],
+      [
+        "With Payback period of",
+        `${formatP(formData.cost_in_buying_with_main / formData.total_monthly_rental)} Months`,
+        "",
+        "",
+      ],
+    ],
+    theme: "grid",
+    styles: { fontSize: 10, cellPadding: 1.5 },
+    columnStyles: { 0: { fontStyle: "bold" }, 3: { halign: "right" } },
+  });
+
+  y = doc.lastAutoTable.finalY + 8;
+
+  /* =========================
+      6. RECOMMENDATION
+  ========================= */
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+
+  doc.setTextColor(0, 0, 0);
+
+  const dateStr = formData.created_at
+    ? formData.created_at.split("T")[0]
+    : new Date().toISOString().split("T")[0];
+
+  let x = 14;
+
+  const part1 = "Recommended for: ";
+  doc.text(part1, x, y);
+  x += doc.getTextWidth(part1);
+  doc.setTextColor(0, 128, 0);
+
+  const part2 = formData.chosentype || "";
+  const textWidthtype = doc.getTextWidth(part2);
+
+  doc.setFillColor(255, 255, 0);
+  doc.rect(x - 0.5, y - 3.5, textWidthtype + 1, 4.5, "F");
+
+  doc.text(part2, x, y);
+
+  x += textWidthtype;
+
+  doc.setTextColor(0, 0, 0);
+  const part3 = `   As on ${dateStr}`;
+  doc.text(part3, x, y);
+
+  const footerY = 280;
+  const col = pageWidth / 4;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("(HOD)", col * 0.65, footerY + 5.5, { align: "center" });
+  doc.text("(SFM)", col * 1.5, footerY + 5.5, { align: "center" });
+  doc.text("(GM)", col * 2.4, footerY + 5.5, { align: "center" });
+  doc.text("(CEO)", col * 3.3, footerY + 5.5, { align: "center" });
+  const names = getApproverNames("BUYRENT", "BUYRENT");
+  const approvers = categoryapprovers.BUYRENT;
+  const approvals = formData.approver_info;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  const lineY = footerY - 7;
+  [0.65, 1.5, 2.4, 3.3].forEach((m, index) => {
+    const name = names[index] || "";
+    const role = approvers[index]?.toLowerCase();
+
+    const lastApprover = approvals?.[approvals.length - 1];
+    const lastRole = lastApprover?.role.toUpperCase() ?? "";
+
+    const status =
+      approvals?.findLast((a) => a.role.toLowerCase() === role)?.status ?? "--";
+    const formattedstatus = status.charAt(0).toUpperCase() + status.slice(1);
+    const isRejected = approvals?.some(
+      (a) => a.status?.toLowerCase() === "rejected",
+    );
+    const nextPending = !isRejected ? nextRole(lastRole) : null;
+
+    // Display logic
+    const displayStatus =
+      nextPending && role.toLowerCase() === nextPending.toLowerCase()
+        ? "(Pending)"
+        : formattedstatus;
+
+    let color = [128, 128, 128];
+    if (status.toLowerCase() === "approved") color = [0, 128, 0];
+    else if (status.toLowerCase() === "rejected") color = [200, 0, 0];
+    if (displayStatus.toLowerCase() === "(pending)") color = [255, 165, 0];
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...color);
+
+    doc.line(col * m - 20, lineY, col * m + 20, lineY);
+    doc.text(displayStatus, col * m, lineY - 4, { align: "center" });
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(name, col * m, footerY, { align: "center" });
+  });
+
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
   window.open(blobUrl);

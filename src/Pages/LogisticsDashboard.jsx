@@ -72,7 +72,7 @@ const LogisticsDashboard = () => {
         userInfo,
         pagination.pageSize,
         pagination.pageIndex,
-        searchcs
+        searchcs,
       ),
     enabled: !!userInfo,
     keepPreviousData: true,
@@ -110,7 +110,7 @@ const LogisticsDashboard = () => {
       await axios.post(
         `${REACT_SERVER_URL}/logistics/delete/${id}`,
         {},
-        config
+        config,
       );
       setShowToast();
       setTimeout(() => {
@@ -204,7 +204,7 @@ const LogisticsDashboard = () => {
           .split(" ")
           .map(
             (word) =>
-              word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase()
+              word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase(),
           )
           .join(" ");
 
@@ -311,7 +311,7 @@ const LogisticsDashboard = () => {
             return "-";
           }
         },
-      }
+      },
     ),
   ];
   const table = useReactTable({
@@ -394,7 +394,7 @@ const LogisticsDashboard = () => {
                 {tab}
               </button>
             );
-          }
+          },
         )}
 
         <div className="flex justify-between ml-auto">
@@ -471,7 +471,7 @@ const LogisticsDashboard = () => {
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </td>
                     ))}
@@ -493,7 +493,7 @@ const LogisticsDashboard = () => {
                           size={25}
                           onClick={async () => {
                             const { formData, tableData } = await getstatement(
-                              row.original?.id
+                              row.original?.id,
                             );
 
                             handlePrint(formData, tableData);
@@ -522,7 +522,7 @@ const LogisticsDashboard = () => {
                               day: "2-digit",
                               month: "short",
                               year: "numeric",
-                            }
+                            },
                           )
                         : ""}
                     </td>
@@ -608,21 +608,21 @@ const LogisticsDashboard = () => {
                 <button
                   onClick={() =>
                     setPageIndex(
-                      Math.ceil(receiptscount / pagination.pageSize) - 1
+                      Math.ceil(receiptscount / pagination.pageSize) - 1,
                     )
                   }
                   disabled={
                     pagination.pageIndex ==
                     Math.max(
                       Math.ceil(receiptscount / pagination.pageSize) - 1,
-                      0
+                      0,
                     )
                   }
                   className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
                     pagination.pageIndex ==
                     Math.max(
                       Math.ceil(receiptscount / pagination.pageSize) - 1,
-                      0
+                      0,
                     )
                       ? "cursor-auto"
                       : "cursor-pointer"
