@@ -7,25 +7,29 @@ const PaybackPeriod = ({ data }) => {
       <table className="w-full border border-gray-400">
         <tbody>
           <tr>
-            <td className="p-2"></td>
-            <td className="p-2 text-right font-semibold">Without Maint</td>
-            <td className="p-2 text-right font-semibold">Incl Maint</td>
+            <td className="p-2 border-l border-b border-gray-400"></td>
+            <td className="p-2 text-right font-semibold border-l border-b border-gray-400">
+              Without Maint
+            </td>
+            <td className="p-2 text-right font-semibold border-l border-b border-gray-400">
+              Incl Maint
+            </td>
           </tr>
           <tr>
             <td className="p-2">Total Cost in Buying</td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.cost_in_buying_without_main)}
             </td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.cost_in_buying_with_main)}
             </td>
           </tr>
           <tr>
             <td className="p-2">Monthly Rentals</td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.total_monthly_rental)}
             </td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.total_monthly_rental)}
             </td>
           </tr>

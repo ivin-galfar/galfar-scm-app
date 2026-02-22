@@ -14,23 +14,25 @@ const Accounting = ({ data }) => {
         <tbody>
           <tr>
             <td className="p-2">Depreciation Rate</td>
-            <td className="p-2 text-right">{data.dp_rate}.00 %</td>
+            <td className="p-2 text-right border-l border-gray-400 w-40 ">
+              {data.dp_rate}.00 %
+            </td>
           </tr>
           <tr>
             <td className="p-2">Depreciation Cost</td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.depreciation_cost)}
             </td>
           </tr>
           <tr>
             <td className="p-2">Interest Cost</td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.total_interest_cost)}
             </td>
           </tr>
           <tr>
             <td className="p-2">Operation & Maintenance Cost</td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(
                 Number(data.op_cost_tenure) +
                   Number(data.maintenance_cost_tenure),
@@ -39,11 +41,13 @@ const Accounting = ({ data }) => {
           </tr>
           <tr>
             <td className="p-2">Total Expenses - Buying</td>
-            <td className="p-2 text-right">{formatPrice(accounting_buying)}</td>
+            <td className="p-2 text-right border-l border-gray-400">
+              {formatPrice(accounting_buying)}
+            </td>
           </tr>
           <tr>
             <td className="p-2">Total Expenses - Rentals</td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.total_rental_cost)}
             </td>
           </tr>
@@ -62,7 +66,7 @@ const Accounting = ({ data }) => {
                 </span>
               )}
             </td>
-            <td className="p-2 text-right  bg-gray-200">
+            <td className="p-2 text-right border-l border-gray-400  bg-gray-200">
               {formatPrice(data.total_rental_cost - accounting_buying)}
             </td>
           </tr>
