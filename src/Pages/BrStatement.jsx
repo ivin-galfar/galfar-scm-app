@@ -45,7 +45,7 @@ const BrStatement = () => {
 
   return (
     <div className="w-full px-5 flex-grow  ">
-      {userinfo?.is_admin && (
+      {userinfo?.is_admin && userinfo.role == "initbr" && (
         <div className="absolute w-1/3 py-2 gap-10 flex p-6 ">
           <span className="flex  justify-center font-semibold text-sm px-2 py-2  gap-2 h-10 bg-blue-600 rounded-2xl text-white items-center cursor-pointer">
             {" "}
