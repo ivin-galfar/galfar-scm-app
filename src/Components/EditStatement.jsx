@@ -64,6 +64,7 @@ const EditStatement = ({ onClick }) => {
         brtabledata.status != "created" &&
         brtabledata.status != "approved" &&
         brtabledata.status !== "review" &&
+        userInfo.role == "initbr" &&
         !ishod && (
           <button
             type="button"
