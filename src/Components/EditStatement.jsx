@@ -6,7 +6,7 @@ import { updatebrstatements } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "../store/toastStore";
-import { is_hod } from "../Helpers/dept_helper";
+import { is_buyrent, is_hod } from "../Helpers/dept_helper";
 
 const EditStatement = ({ onClick }) => {
   const { isedit, setIsEdit, resetIsEdit } = useIsEditing();
@@ -15,6 +15,7 @@ const EditStatement = ({ onClick }) => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { resetNewStatement } = useNewStatement();
   const ishod = is_hod(userInfo?.role);
+  const isbuyvsrent = is_buyrent(userInfo?.role);
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatebrstatements,
     onSuccess: () => {
@@ -45,7 +46,7 @@ const EditStatement = ({ onClick }) => {
       {(brtabledata.status == "created" ||
         brtabledata.status == "reverted" ||
         brtabledata.status == "review" ||
-        (ishod && brtabledata.status == "pending for hod")) && (
+        (ishod && isbuyvsrent && brtabledata.status == "pending for hod")) && (
         <button
           type="button"
           className={`p-2 px-4 py-2 rounded-lg flex items-center gap-2 bg-blue-50  hover:bg-blue-100 active:bg-blue-200 ${brtabledata.id == null ? "cursor-auto" : "cursor-pointer"} `}

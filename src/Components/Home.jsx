@@ -51,7 +51,6 @@ const Home = () => {
     isceo,
     isgm,
   });
-  console.log(selectedDept);
 
   useEffect(() => {
     if (!userInfo) return;
