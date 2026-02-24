@@ -157,7 +157,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               }`}
             >
               <GiClamp />
-              {isOpen && <span>BR Dashboard</span>}
+              {isOpen && <span>Dashboard</span>}
             </Link>
           </div>
         )}
