@@ -16,7 +16,7 @@
     "@tanstack/react-query-devtools": "^5.85.5",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.10.0",
-    "jspdf": "^2.5.1",
+    "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.2",
     "pdf-merger-js": "^5.1.2",
     "react": "^19.1.0",

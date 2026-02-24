@@ -22,7 +22,7 @@ const fetchStatments = async ({
     let type = null;
     if (userInfo?.is_admin) {
       type =
-        userInfo?.role == "inita" || userInfo?.role == "initbr"
+        userInfo?.role == "inita"
           ? "asset"
           : "hiring";
     }

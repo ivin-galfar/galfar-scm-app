@@ -203,16 +203,6 @@ const Receipts = () => {
       "reverted",
       "",
     ],
-    initbr: [
-      "Pending for HOD",
-      "Pending for GM",
-      "Pending for CEO",
-      "Approved",
-      "Rejected",
-      "review",
-      "reverted",
-      "",
-    ],
     hod: [
       "Pending For HOD",
       "Pending For GM",

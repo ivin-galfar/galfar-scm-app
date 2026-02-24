@@ -21,7 +21,7 @@ const AppContextProvider = ({ children }) => {
       status: "",
       receiptupdated: null,
       type:
-        userInfo?.role == "inita" || userInfo?.role == "initbr"
+        userInfo?.role == "inita" 
           ? "asset"
           : "hiring",
       file: [],

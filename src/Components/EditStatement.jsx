@@ -15,7 +15,6 @@ const EditStatement = ({ onClick }) => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { resetNewStatement } = useNewStatement();
   const ishod = is_hod(userInfo?.role);
-  const isbuyvsrent = is_buyrent(userInfo?.dept_code);
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatebrstatements,
     onSuccess: () => {
@@ -41,33 +40,34 @@ const EditStatement = ({ onClick }) => {
 
     updatestatement({ cs_id: brtabledata.id, status: updatedstatus, userInfo });
   };
+  console.log(brtabledata.status);
 
   return (
     <div className="flex  justify-between gap-5">
-      {isbuyvsrent &&
-        (brtabledata.status == "created" ||
-          brtabledata.status == "reverted" ||
-          brtabledata.status == "review" ||
-          (ishod && brtabledata.status == "pending for hod")) && (
-          <button
-            type="button"
-            className={`p-2 px-4 py-2 rounded-lg flex items-center gap-2 bg-blue-50  hover:bg-blue-100 active:bg-blue-200 ${brtabledata.id == null ? "cursor-auto" : "cursor-pointer"} `}
-            disabled={brtabledata.id == null}
-            onClick={() => {
-              onClick();
-              setIsEdit();
-              resetNewStatement();
-            }}
-          >
-            <MdModeEdit />
-            Edit Statement
-          </button>
-        )}
+      {(brtabledata.status == "created" ||
+        brtabledata.status == "reverted" ||
+        brtabledata.status == "review" ||
+        (ishod && brtabledata.status == "pending for hod")) && (
+        <button
+          type="button"
+          className={`p-2 px-4 py-2 rounded-lg flex items-center gap-2 bg-blue-50  hover:bg-blue-100 active:bg-blue-200 ${brtabledata.id == null ? "cursor-auto" : "cursor-pointer"} `}
+          disabled={brtabledata.id == null}
+          onClick={() => {
+            onClick();
+            setIsEdit();
+            resetNewStatement();
+          }}
+        >
+          <MdModeEdit />
+          Edit Statement
+        </button>
+      )}
       {brtabledata.status != "reverted" &&
         brtabledata.status != "created" &&
         brtabledata.status != "approved" &&
         brtabledata.status !== "review" &&
-        userInfo.role == "initbr" &&
+        brtabledata.status !== "rejected" &&
+        userInfo.role == "inita" &&
         !ishod && (
           <button
             type="button"

@@ -1,6 +1,8 @@
 import { formatPrice } from "../Helpers/helperfunctions";
 
 const CashFlow = ({ data }) => {
+  const currencysymbol = data?.currency?.split(" ")[2];
+
   return (
     <div className="my-6 p-4 border border-gray-300 rounded bg-gray-50 text-gray-700 leading-relaxed">
       Cash flow benefit in
@@ -12,10 +14,8 @@ const CashFlow = ({ data }) => {
         </span>
       )}
       {"  "}
-      with benefit of (AED)
-      <span className="font-semibold mx-1">
-        Rs. {formatPrice(data?.benefit)}
-      </span>
+      with benefit of {currencysymbol}
+      <span className="font-semibold mx-1">{formatPrice(data?.benefit)}</span>
       in
       <span className="font-semibold mx-1">
         {formatPrice(data?.fin_tenure)} years

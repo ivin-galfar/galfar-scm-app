@@ -29,7 +29,6 @@ import { useDashboardType } from "../store/logisticsStore";
 import DashboardButton from "../Components/DashboardButton";
 import {
   is_asset,
-  is_buyvsrent,
   is_logistics,
   is_plant,
   is_fm,
@@ -67,7 +66,6 @@ const Dashboard = () => {
 
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isasset = is_asset(userInfo?.role);
-  const isbuyvsrent = is_buyvsrent(userInfo?.role);
   const ishod = is_hod(userInfo?.role);
   const isfm = is_fm(userInfo?.role);
   const location = useLocation();
@@ -103,16 +101,7 @@ const Dashboard = () => {
       "reverted",
       "",
     ],
-    initbr: [
-      "Pending for HOD",
-      "Pending for GM",
-      "Pending for CEO",
-      "Approved",
-      "Rejected",
-      "review",
-      "reverted",
-      "",
-    ],
+
     hod: [
       "Pending For HOD",
       "Pending For GM",
@@ -797,7 +786,7 @@ const Dashboard = () => {
           },
         )}
         <div className="flex justify-between ml-auto">
-          {(isLogistics || isasset || isbuyvsrent || ishod) && isPlant && (
+          {(isLogistics || isasset || ishod) && isPlant && (
             <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
               <DashboardButton />
             </div>
