@@ -149,7 +149,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               {isOpen && <span>Buy vs Rent </span>}
             </Link>
             <Link
-              to="/dashboardbr"
+              to={isPlant ? "/dashboard" : "/dashboardbr"}
               className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
                 !isPlant || isplanthire
                   ? "pointer-events-none opacity-50 cursor-not-allowed"
