@@ -59,7 +59,7 @@ const Accounting = ({ data }) => {
                   className={`font-semibold ${
                     data.chosentype.trim() === "Buying"
                       ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
+                      : "bg-blue-100 text-blue-800"
                   } px-2 py-0.5 rounded-md mx-1`}
                 >
                   [{data.chosentype?.trim()}]

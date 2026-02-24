@@ -312,7 +312,7 @@ export const handlePrint = (formData, tableData) => {
     doc.setTextColor(100);
 
     doc.text(
-      `System Generated Comparative Statement `,
+      `This statement is Electronically Approved; Signature Not Required`,
       14,
       pageHeight - footerPadding,
     );
@@ -337,35 +337,53 @@ export const handleBrPrint = (formData) => {
   const doc = new jsPDF("portrait", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = 10;
+  const logoWidth = 60;
+  const logoHeight = 10;
+  const logoX = (pageWidth - logoWidth) / 2;
+  const logoY = 2;
 
   const formatP = (val) => (val != 0 ? formatPrice(val) : "--");
+  const dateStr = formatDateDDMMYYYY(formData.created_at);
+  const currencyCode = (formData.currency || "AED").split(" - ")[0].trim();
 
   /* =========================
       1. HEADER & HIGHLIGHTED ITEM
   ========================= */
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text(
-    "Galfar Engineering & Contracting WLL Emirates, UAE",
-    pageWidth / 2,
-    y,
-    { align: "center" },
-  );
+  doc.addImage(galfarlogo, "PNG", logoX, logoY, logoWidth, logoHeight);
 
-  y += 6;
+  y += 8;
   doc.setFontSize(12);
-  doc.text("Comparison of Buy Vs Rental Analysis", pageWidth / 2, y, {
+
+  doc.text("Comparison of Buy Vs Rental", pageWidth / 2, y, {
     align: "center",
   });
 
-  y += 6;
-  const itemText = `Item: ${formData.item}`;
-  const textWidth = doc.getTextWidth(itemText);
+  doc.setFont("helvetica", "normal");
+  const rightBlockX = pageWidth - 40; // starting position of the right block
+
+  doc.setFontSize(9);
+
+  doc.text(`BVR No: ${formData.id || ""}`, rightBlockX, y - 3);
+  doc.text(`Date: ${dateStr}`, rightBlockX, y + 3);
+
+  y += 8;
+  const itemText = `Item : ${formData.item}`;
+
+  const margin = 14; // same margin you use in jsPDF tables usually
+  const rectWidth = pageWidth - margin * 2;
+
   doc.setFillColor(245, 245, 245);
-  doc.rect(pageWidth / 2 - textWidth / 2 - 2, y - 4, textWidth + 4, 6, "F");
+
+  // Full width background
+  doc.rect(margin, y - 4, rectWidth, 6, "F");
+
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(44, 62, 80);
+
+  // Keep text centered
   doc.text(itemText, pageWidth / 2, y, { align: "center" });
 
   doc.setTextColor(0);
@@ -375,8 +393,32 @@ export const handleBrPrint = (formData) => {
       2. CASH FLOW TABLES (SIDE BY SIDE)
   ========================= */
   doc.setFontSize(11);
+  let cashflowx = 14;
   doc.setFont("helvetica", "bold");
-  doc.text("Cash flow Gain/(loss)", 14, y);
+  const cashflowtext = "Cash flow Gain/(loss)";
+  const textWidthtypecashflow = doc.getTextWidth(cashflowtext);
+  doc.setFillColor(204, 255, 204);
+
+  // doc.setFillColor(222, 235, 255);
+  const paddingX = 0; // horizontal padding
+
+  const rectHeight = 6;
+
+  doc.rect(
+    cashflowx - paddingX,
+    y - rectHeight + 2,
+    textWidthtypecashflow + paddingX * 2 + 40,
+    rectHeight,
+    "F",
+  );
+  doc.text(cashflowtext, 14, y);
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+
+  const topPadding = 4;
+
+  doc.text(`Currency: ${currencyCode || ""}`, rightBlockX, y - 3 + topPadding);
   y += 4;
 
   const buyingBody = [
@@ -438,9 +480,9 @@ export const handleBrPrint = (formData) => {
       [
         {
           content: "Buying",
-          styles: { halign: "center", fillColor: [46, 204, 113] },
+          colSpan: 2,
+          styles: { halign: "center", fillColor: [22, 101, 52] },
         },
-        "",
       ],
     ],
     body: buyingBody,
@@ -457,9 +499,9 @@ export const handleBrPrint = (formData) => {
       [
         {
           content: "Renting",
-          styles: { halign: "center", fillColor: [52, 152, 219] },
+          colSpan: 2,
+          styles: { halign: "center", fillColor: [30, 64, 175] },
         },
-        "",
       ],
     ],
     body: rentingBody,
@@ -473,8 +515,6 @@ export const handleBrPrint = (formData) => {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-
-  const currencyCode = (formData.currency || "AED").split(" - ")[0].trim();
 
   const part1cash = "Cash flow benefit in ";
   const part2cash = formData.chosentype || ""; // highlighted
@@ -508,8 +548,26 @@ export const handleBrPrint = (formData) => {
       3. ACCOUNTING GAIN/LOSS
   ========================= */
   doc.setFontSize(11);
+  let accountingX = 14;
   doc.setFont("helvetica", "bold");
-  doc.text("Accounting Gain/Loss", 14, y);
+
+  const accountingText = "Accounting Gain/Loss";
+  doc.setFillColor(222, 235, 255);
+
+  // doc.setFillColor(204, 255, 204);
+
+  // Highlight rectangle (same style as Cash flow)
+  doc.rect(
+    accountingX - paddingX,
+    y - rectHeight + 2,
+    textWidthtypecashflow + paddingX * 2 + 40,
+    rectHeight,
+    "F",
+  );
+
+  // Text on top
+  doc.setTextColor(0, 0, 0);
+  doc.text(accountingText, accountingX, y);
   y += 4;
 
   autoTable(doc, {
@@ -546,13 +604,36 @@ export const handleBrPrint = (formData) => {
       4. PAYBACK PERIOD
   ========================= */
   doc.setFontSize(11);
+  let paybackX = 14;
   doc.setFont("helvetica", "bold");
-  doc.text("Payback period", 14, y);
+
+  const paybackText = "Payback period";
+
+  doc.setFillColor(255, 248, 204);
+
+  // Highlight rectangle
+  doc.rect(
+    paybackX - paddingX,
+    y - rectHeight + 2,
+    textWidthtypecashflow + paddingX * 2 + 40,
+    rectHeight,
+    "F",
+  );
+
+  // Text
+  doc.setTextColor(0, 0, 0);
+  doc.text(paybackText, paybackX, y);
   y += 4;
 
   autoTable(doc, {
     startY: y,
-    head: [["Metric", "Without Maint", "Incl Maint"]],
+    head: [
+      [
+        { content: "Particulars", styles: { halign: "left" } },
+        { content: "Without Maint", styles: { halign: "center" } },
+        { content: "Incl Maint", styles: { halign: "center" } },
+      ],
+    ],
     body: [
       [
         "Total Cost in Buying",
@@ -586,8 +667,25 @@ export const handleBrPrint = (formData) => {
       5. SUMMARY SECTION
   ========================= */
   doc.setFontSize(11);
+  let summaryX = 14;
   doc.setFont("helvetica", "bold");
-  doc.text("Summary", 14, y);
+
+  const summaryText = "Summary";
+
+  doc.setFillColor(230, 220, 255);
+
+  // Highlight rectangle
+  doc.rect(
+    summaryX - paddingX,
+    y - rectHeight + 2,
+    textWidthtypecashflow + paddingX * 2 + 40,
+    rectHeight,
+    "F",
+  );
+
+  // Text
+  doc.setTextColor(0, 0, 0);
+  doc.text(summaryText, summaryX, y);
   y += 4;
 
   autoTable(doc, {
@@ -596,8 +694,7 @@ export const handleBrPrint = (formData) => {
       [
         "Cash flow benefit in",
         `${formatP(formData.fin_tenure)} Years`,
-        formData.chosentype,
-        { content: formatP(formData.benefit), styles: { fontStyle: "bold" } },
+        { content: formatP(formData.benefit) },
       ],
       [
         "Accounting Gains in",
@@ -605,7 +702,6 @@ export const handleBrPrint = (formData) => {
         formData.chosentype,
         {
           content: formatP(formData.accounting_gain_loss),
-          styles: { fontStyle: "bold" },
         },
       ],
       [
@@ -617,7 +713,7 @@ export const handleBrPrint = (formData) => {
     ],
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 1.5 },
-    columnStyles: { 0: { fontStyle: "bold" }, 3: { halign: "right" } },
+    columnStyles: { 3: { halign: "right" } },
   });
 
   y = doc.lastAutoTable.finalY + 8;
@@ -629,10 +725,6 @@ export const handleBrPrint = (formData) => {
   doc.setFont("helvetica", "bold");
 
   doc.setTextColor(0, 0, 0);
-
-  const dateStr = formData.created_at
-    ? formData.created_at.split("T")[0]
-    : new Date().toISOString().split("T")[0];
 
   let x = 14;
 
@@ -657,7 +749,8 @@ export const handleBrPrint = (formData) => {
 
   const footerY = 280;
   const col = pageWidth / 4;
-
+  const pageHeight = doc.internal.pageSize.height;
+  const footerPadding = 2;
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.text("(HOD)", col * 0.65, footerY + 5.5, { align: "center" });
@@ -700,7 +793,6 @@ export const handleBrPrint = (formData) => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...color);
-
     doc.line(col * m - 20, lineY, col * m + 20, lineY);
     doc.text(displayStatus, col * m, lineY - 4, { align: "center" });
     doc.setTextColor(0, 0, 0);
@@ -708,6 +800,15 @@ export const handleBrPrint = (formData) => {
     doc.setFontSize(9);
     doc.text(name, col * m, footerY, { align: "center" });
   });
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100);
+  doc.text(
+    `This statement is Electronically Approved; Signature Not Required `,
+    14,
+    pageHeight - footerPadding,
+  );
 
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
