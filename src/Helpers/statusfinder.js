@@ -37,7 +37,7 @@ export const role_finder = (currentrole) => {
 
 export const expectedstatusplant = (currentrole) => {
   let statustext = "";
-  if (currentrole == "initbr") {
+  if (currentrole == "inita") {
     statustext = "pending for hod";
   } else if (currentrole == "hod") {
     statustext = "pending for fm";
@@ -47,7 +47,7 @@ export const expectedstatusplant = (currentrole) => {
     statustext = "pending for ceo";
   } else if (currentrole == "ceo") {
     statustext = "approved";
-  } else { 
+  } else {
     statustext = "rejected";
   }
 

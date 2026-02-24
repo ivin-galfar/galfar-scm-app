@@ -17,7 +17,7 @@ export const categoryapprovers = {
 
 export const nextRole = (role) => {
   const roleMap = {
-    initbr: "hod",
+    inita: "hod",
     hod: "fm",
     fm: "gm",
     gm: "ceo",

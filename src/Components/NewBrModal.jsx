@@ -593,7 +593,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                       }));
                     }}
                   />
-                  Included Maintenance
+                  Included Maintenance (For Rental)
                 </label>{" "}
                 <label className="gap-3 flex">
                   <input
@@ -611,7 +611,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                       }));
                     }}
                   />
-                  Included Operational Cost
+                  Included Operational Cost (For Rental)
                 </label>
               </div>
             </div>

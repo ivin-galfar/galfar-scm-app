@@ -59,7 +59,7 @@ export default function VerticalTable({ showcalc }) {
       };
       const response = await axios.get(
         `${REACT_SERVER_URL}/particulars/${particularname}`,
-        config
+        config,
       );
       setParticular(response.data.particular.particulars);
     } catch (error) {
@@ -84,7 +84,7 @@ export default function VerticalTable({ showcalc }) {
       setSharedTableData((prev) =>
         prev.tableData.length > 0
           ? { ...prev, formData: {}, tableData: [] }
-          : prev
+          : prev,
       );
     }
   }, [particular]);
@@ -124,7 +124,7 @@ export default function VerticalTable({ showcalc }) {
   const [tableData, setTableData] = useState(() =>
     sharedTableData?.tableData?.length
       ? sharedTableData.tableData
-      : createData()
+      : createData(),
   );
 
   const userInfo = useUserInfo();
@@ -143,7 +143,7 @@ export default function VerticalTable({ showcalc }) {
       const clearedTableData = tableData.map((row) => ({
         ...row,
         vendors: Object.fromEntries(
-          Object.keys(row.vendors).map((key) => [key, ""])
+          Object.keys(row.vendors).map((key) => [key, ""]),
         ),
       }));
       setTableData(clearedTableData);
@@ -180,7 +180,7 @@ export default function VerticalTable({ showcalc }) {
   }, [tableData, sortvendors, sharedTableData.formData.qty, selectedmr]);
 
   const vatRowIndex = tableData.findIndex(
-    (row) => row.particulars.trim().toUpperCase() === "VAT @5%"
+    (row) => row.particulars.trim().toUpperCase() === "VAT @5%",
   );
 
   const vendorTotals = vendorInfoWithTotal.map((vendor) => {
@@ -333,7 +333,7 @@ export default function VerticalTable({ showcalc }) {
   }, [vendorInfoWithTotal, vatRate, newMr, hasInputActivity]);
 
   const vendorNetPrices = vendorTotals.map(
-    (total, idx) => total + vendorVATs[idx]
+    (total, idx) => total + vendorVATs[idx],
   );
 
   const handleInputChange = (rowIndex, vendorKey, newValue) => {
@@ -347,7 +347,7 @@ export default function VerticalTable({ showcalc }) {
         },
       };
       const hasInput = updated.some((row) =>
-        Object.values(row.vendors).some((val) => val && val.trim() !== "")
+        Object.values(row.vendors).some((val) => val && val.trim() !== ""),
       );
       setHasInputActivity(hasInput);
       setSharedTableData((prev) => ({ ...prev, tableData: updated }));
@@ -357,7 +357,7 @@ export default function VerticalTable({ showcalc }) {
 
   useEffect(() => {
     const hasInput = tableData.some((row) =>
-      Object.values(row.vendors).some((val) => val && val.trim() !== "")
+      Object.values(row.vendors).some((val) => val && val.trim() !== ""),
     );
     setHasInputActivity(hasInput);
   }, [tableData]);
@@ -437,7 +437,7 @@ export default function VerticalTable({ showcalc }) {
                     const isVendorColumn =
                       cell.column.id?.startsWith("vendor_");
                     const vendorIndex = vendorInfoWithTotal.findIndex(
-                      (v) => `vendor_${v.index}` === cell.column.id
+                      (v) => `vendor_${v.index}` === cell.column.id,
                     );
 
                     return (
@@ -451,7 +451,7 @@ export default function VerticalTable({ showcalc }) {
                           ? vendorTotals[vendorIndex]?.toFixed(2)
                           : flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                       </td>
                     );

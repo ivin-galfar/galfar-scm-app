@@ -7,7 +7,6 @@ import { LuFactory } from "react-icons/lu";
 import { useSelectedDept } from "../store/userStore";
 import {
   is_asset,
-  is_buyvsrent,
   is_ceo,
   is_fm,
   is_gm,
@@ -29,7 +28,6 @@ const Home = () => {
 
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isasset = is_asset(userInfo?.role);
-  const isbuyvsrent = is_buyvsrent(userInfo?.role);
   const isfm = is_fm(userInfo?.role);
   const ishod = is_hod(userInfo?.role);
   const isgm = is_gm(userInfo?.role);
@@ -37,7 +35,7 @@ const Home = () => {
   const isPlant = is_plant(userInfo?.dept_code);
   const departments = [
     { key: "plant", name: "Hiring / Asset", icon: <LuFactory size={18} /> },
-    { key: "brplant", name: "Buy vs Rent", icon: <GiClamp size={18} /> },
+    { key: "bvrplant", name: "Buy vs Rent", icon: <GiClamp size={18} /> },
     { key: "logistics", name: "Logistics", icon: <FaTruck size={18} /> },
   ];
 
@@ -45,7 +43,6 @@ const Home = () => {
     isLogistics,
     isPlant,
     isfm,
-    isbuyvsrent,
     isasset,
     ishod,
     isceo,
@@ -56,7 +53,7 @@ const Home = () => {
     if (!userInfo) return;
     setSelectedDept(defaultDept);
     setDashboardType(defaultDept);
-  }, [userInfo, isLogistics, isbuyvsrent, isfm, isPlant]);
+  }, [userInfo, isLogistics, isfm, isPlant]);
 
   const orderedDepartments = activeDept
     ? [
@@ -112,8 +109,8 @@ const Home = () => {
       <div className=" flex-grow gap-6 ml-10 ">
         {isPlant && selectedDept === "plant" && <PlantHome />}
         {isLogistics && selectedDept === "logistics" && <LogisticsHome />}
-        {(isbuyvsrent || isasset || isfm || ishod || isceo || isgm) &&
-          selectedDept === "brplant" && <HomeContainer />}
+        {(isasset || isfm || ishod || isceo || isgm) &&
+          selectedDept === "bvrplant" && <HomeContainer />}
       </div>
     </div>
   );

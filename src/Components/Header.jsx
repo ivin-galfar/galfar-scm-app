@@ -4,24 +4,27 @@ import galfarlogo from "../assets/Images/logo-new.png";
 import SideNav from "./SideNav";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserDropdown from "./UserDropdown";
+import { useSelectedDept } from "../store/userStore";
 import { AppContext } from "./Context";
 import {
   is_logistics,
   is_plant,
   is_fm,
-  is_buyvsrent,
+  is_asset,
 } from "../Helpers/dept_helper";
-import { useDashboardType } from "../store/logisticsStore";
+import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
 
 const Header = () => {
   const userInfo = useUserInfo();
-  const { setStatusFilter, setMultiStatusFilter } = useContext(AppContext);
+  const { statusFilter, setStatusFilter, setMultiStatusFilter } =
+    useContext(AppContext);
+  const { setStatusFilter: setStatusFilterzustand } = useStatusFilter();
+  const { selectedDept } = useSelectedDept();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const canvasRef = useRef(null);
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
-  const isbuyvsrent = is_buyvsrent(userInfo?.role);
   const isfm = is_fm(userInfo?.role);
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -64,11 +67,11 @@ const Header = () => {
                 </NavLink>
                 <NavLink
                   to={
-                    isfm || isbuyvsrent
-                      ? "/dashboardbr"
-                      : isPlant
-                        ? "/dashboard"
-                        : "/dashboardlg"
+                    selectedDept == "plant"
+                      ? "/dashboard"
+                      : selectedDept == "logistics"
+                        ? "/dashboardlg"
+                        : "/dashboardbr"
                   }
                   className={() => {
                     const isActive =
@@ -82,20 +85,10 @@ const Header = () => {
                   }}
                   onClick={() => {
                     setStatusFilter("All");
+                    setStatusFilterzustand("All");
                     setMultiStatusFilter([]);
-                    if (isfm) {
-                      setDashboardType("brplant");
-                    } else if (isPlant) {
-                      if (isbuyvsrent) {
-                        setDashboardType("brplant");
-                        setPageSize(20);
-                      } else {
-                        setDashboardType("plant");
-                        setPageSize(20);
-                      }
-                    } else {
-                      setDashboardType("logistics");
-                    }
+                    setDashboardType(selectedDept);
+                    setPageSize(20);
                   }}
                 >
                   Dashboard

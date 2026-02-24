@@ -16,7 +16,6 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useStatusFilter } from "../store/logisticsStore";
 import {
   is_asset,
-  is_buyvsrent,
   is_hod,
   is_logistics,
   is_plant,
@@ -42,7 +41,6 @@ const BRDashboards = () => {
   const isPlant = is_plant(userinfo?.dept_code);
   const isLogistics = is_logistics(userinfo?.dept_code);
   const isasset = is_asset(userinfo?.role);
-  const isbuyvsrent = is_buyvsrent(userinfo?.role);
   const ishod = is_hod(userinfo?.role);
   const [deletestatement, setDeleteStatement] = useState({
     id: null,
@@ -230,7 +228,7 @@ const BRDashboards = () => {
               )}
             </span>
 
-            <div className="relative max-w-2/3 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner cursor-pointer">
+            <div className="relative max-w-2/3 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
               <div
                 className={`h-2 ${progressColor} rounded-full transition-all duration-500 `}
                 style={{
@@ -370,14 +368,14 @@ const BRDashboards = () => {
           )}
 
           <div className="flex justify-between ml-auto">
-            {(isLogistics || isasset || isbuyvsrent || ishod) && isPlant && (
+            {(isLogistics || isasset || ishod) && isPlant && (
               <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
                 <DashboardButton />
               </div>
             )}
             <div className="mb-1 ml-auto">
               <label className="  ml-auto text-sm font-medium text-gray-700 ">
-                CS Number:
+                BVR Number:
               </label>
               <input
                 type="text"
@@ -455,7 +453,7 @@ const BRDashboards = () => {
                           </Link>
                           <IoPrint
                             className={
-                              userinfo?.is_admin || userinfo.role === "initbr"
+                              userinfo?.is_admin || userinfo.role === "inita"
                                 ? "text-black cursor-pointer"
                                 : "text-gray-400 pointer-events-none cursor-not-allowed"
                             }

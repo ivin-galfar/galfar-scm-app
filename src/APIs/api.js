@@ -327,10 +327,7 @@ export const fetchReceiptCount = async ({
   let type = null;
 
   if (userInfo?.is_admin) {
-    type =
-      userInfo?.role == "inita" || userInfo?.role == "initbr"
-        ? "asset"
-        : "hiring";
+    type = userInfo?.role == "inita" ? "asset" : "hiring";
   }
   try {
     const config = {
@@ -609,6 +606,7 @@ export const updatebrstatements = async ({
 };
 
 export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
+
   try {
     const config = {
       headers: {
@@ -632,6 +630,8 @@ export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
     );
     return response.data;
   } catch (error) {
+    console.log(error);
+
     throw error;
   }
 };

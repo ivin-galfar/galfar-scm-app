@@ -344,7 +344,7 @@ export const handleBrPrint = (formData) => {
 
   const formatP = (val) => (val != 0 ? formatPrice(val) : "--");
   const dateStr = formatDateDDMMYYYY(formData.created_at);
-  const currencyCode = (formData.currency || "AED").split(" - ")[0].trim();
+  const currencyCode = formData.currency.split(" - ")[0].trim();
 
   /* =========================
       1. HEADER & HIGHLIGHTED ITEM
