@@ -24,15 +24,14 @@ const HomeContainer = () => {
     enabled: !!userInfo,
   });
 
-  const { pagination, setPageIndex, setPageSize } = usePagination();
-  const { setStatusFilter, statusfilter, resetStatusFilter } =
-    useStatusFilter();
-  let pending = data?.rows[0].pending_count;
-  let approved = data?.rows[0].approved_count;
-  let review = data?.rows[0].review_count;
-  let rejected = data?.rows[0].rejected_count;
-  let total = data?.rows[0].total_count;
-  let recentstatements = data?.last7DaysResult;
+  const { setPageIndex } = usePagination();
+  const { setStatusFilter } = useStatusFilter();
+  let pending = data?.rows[0].pending_count ?? 0;
+  let approved = data?.rows[0].approved_count ?? 0;
+  let review = data?.rows[0].review_count ?? 0;
+  let rejected = data?.rows[0].rejected_count ?? 0;
+  let total = data?.rows[0].total_count ?? 0;
+  let recentstatements = data?.last7DaysResult ?? 0;
 
   return (
     <div className="flex gap-6 mt-5">
