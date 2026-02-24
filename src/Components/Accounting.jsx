@@ -9,28 +9,34 @@ const Accounting = ({ data }) => {
 
   return (
     <div>
-      <h2 className="my-2 font-semibold">Accounting Gain/Loss</h2>
+      <h2 className="my-3 font-semibold text-gray-700">
+        Accounting Gain / Loss
+      </h2>
+
       <table className="w-full border border-gray-400">
         <tbody>
-          <tr>
+          <tr className="hover:bg-gray-50">
             <td className="p-2">Depreciation Rate</td>
-            <td className="p-2 text-right border-l border-gray-400 w-40 ">
+            <td className="p-2 text-right border-l border-gray-400 w-40">
               {data.dp_rate}.00 %
             </td>
           </tr>
-          <tr>
+
+          <tr className="hover:bg-gray-50">
             <td className="p-2">Depreciation Cost</td>
             <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.depreciation_cost)}
             </td>
           </tr>
-          <tr>
+
+          <tr className="hover:bg-gray-50">
             <td className="p-2">Interest Cost</td>
             <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.total_interest_cost)}
             </td>
           </tr>
-          <tr>
+
+          <tr className="hover:bg-gray-50">
             <td className="p-2">Operation & Maintenance Cost</td>
             <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(
@@ -39,20 +45,24 @@ const Accounting = ({ data }) => {
               )}
             </td>
           </tr>
-          <tr>
+
+          <tr className="hover:bg-gray-50">
             <td className="p-2">Total Expenses - Buying</td>
             <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(accounting_buying)}
             </td>
           </tr>
-          <tr>
+
+          <tr className="hover:bg-gray-50">
             <td className="p-2">Total Expenses - Rentals</td>
             <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.total_rental_cost)}
             </td>
           </tr>
-          <tr>
-            <td className="p-2 bg-gray-200">
+
+          {/* Final Highlight Row */}
+          <tr className="bg-purple-100 font-semibold text-purple-900">
+            <td className="p-2">
               Accounting Gain/Loss
               {data.chosentype && (
                 <span
@@ -66,7 +76,7 @@ const Accounting = ({ data }) => {
                 </span>
               )}
             </td>
-            <td className="p-2 text-right border-l border-gray-400  bg-gray-200">
+            <td className="p-2 text-right border-l border-gray-400">
               {formatPrice(data.total_rental_cost - accounting_buying)}
             </td>
           </tr>

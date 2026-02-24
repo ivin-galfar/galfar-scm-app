@@ -418,7 +418,7 @@ export const handleBrPrint = (formData) => {
 
   const topPadding = 4;
 
-  doc.text(`Currency: ${currencyCode || ""}`, rightBlockX, y - 3 + topPadding);
+  doc.text(`Currency: ${currencyCode || ""} `, rightBlockX, y - 3 + topPadding);
   y += 4;
 
   const buyingBody = [
@@ -528,13 +528,19 @@ export const handleBrPrint = (formData) => {
   doc.setTextColor(0, 0, 0);
   doc.text(part1cash, xcash, y);
   xcash += doc.getTextWidth(part1cash);
+  console.log(part2cash);
 
-  // highlight chosentype
   const textWidthcash = doc.getTextWidth(part2cash);
   doc.setFillColor(255, 255, 0);
+  if (part2cash?.trim() === "Buying") {
+    doc.setTextColor(0, 128, 0); // Green
+  } else if (part2cash.trim() === "Renting") {
+    doc.setTextColor(0, 102, 204);
+  } else {
+    doc.setTextColor(0, 0, 0);
+  }
   doc.rect(xcash - 0.5, y - 3.5, textWidthcash + 1, 4.5, "F");
 
-  doc.setTextColor(0, 128, 0);
   doc.text(part2cash, xcash, y);
   xcash += textWidthcash;
 
@@ -731,9 +737,16 @@ export const handleBrPrint = (formData) => {
   const part1 = "Recommended for: ";
   doc.text(part1, x, y);
   x += doc.getTextWidth(part1);
-  doc.setTextColor(0, 128, 0);
+  doc.setFillColor(255, 255, 0);
 
   const part2 = formData.chosentype || "";
+  if (part2?.trim() === "Buying") {
+    doc.setTextColor(0, 128, 0); // Green
+  } else if (part2.trim() === "Renting") {
+    doc.setTextColor(0, 102, 204);
+  } else {
+    doc.setTextColor(0, 0, 0);
+  }
   const textWidthtype = doc.getTextWidth(part2);
 
   doc.setFillColor(255, 255, 0);

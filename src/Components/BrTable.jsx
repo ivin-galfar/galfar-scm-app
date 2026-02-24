@@ -33,33 +33,39 @@ const BrTable = () => {
           </div>
         }
       </div>
-      <div className="border border-gray-400 mb-6 flex rounded">
-        <div className="w-1/3 bg-gray-200 font-semibold p-2 flex ">Item</div>
-        <div className=" w-full items-center justify-center flex text-center font-bold p-2">
+      <div className="border border-gray-400 mb-6 flex rounded overflow-hidden">
+        <div className="w-1/3 bg-blue-100 text-blue-800 font-semibold p-2 flex items-center">
+          Item
+        </div>
+        <div className="w-full items-center justify-center flex text-center font-bold p-2 bg-white">
           {data.item}
         </div>
       </div>
-      <h2 className="font-semibold my-2">Cash flow Gain/(loss)</h2>
+
+      <h2 className="font-semibold my-3 text-gray-700">
+        Cash Flow Gain / (Loss)
+      </h2>
+
       <div className="w-full flex gap-20">
-        <div className="w-1/2 border border-gray-400">
-          <div className="bg-gray-200 font-semibold p-2 flex text-center items-center justify-center">
+        <div className="w-1/2 border border-gray-400 rounded overflow-hidden">
+          <div className="bg-green-100 text-green-800 font-semibold p-2 flex text-center items-center justify-center">
             Buying
           </div>
           <table className="w-full text-sm">
             <tbody>
-              <tr>
+              <tr className="hover:bg-gray-50">
                 <td className="p-2">Unit Price</td>
                 <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(data.unit_price)}
                 </td>
               </tr>
-              <tr>
+              <tr className="hover:bg-gray-50">
                 <td className="p-2">No of Units</td>
                 <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(data.units_no)}
                 </td>
               </tr>
-              <tr>
+              <tr className="hover:bg-gray-50">
                 <td className="p-2">Total Principal Cost</td>
                 <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(data.principal_cost)}
@@ -98,8 +104,7 @@ const BrTable = () => {
                   {formatPrice(data.total_interest_cost)}
                 </td>
               </tr>
-
-              <tr className="font-semibold">
+              <tr className="font-semibold bg-green-50">
                 <td className="p-2">Total Principal + Interest</td>
                 <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(
@@ -126,9 +131,9 @@ const BrTable = () => {
                 </td>
               </tr>
 
-              <tr className="bg-gray-100 font-semibold">
+              <tr className="bg-green-100 font-semibold">
                 <td className="p-2">Total Cost Outflow for period</td>
-                <td className="p-2 text-right border-l border-gray-400 ">
+                <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(data.cash_outflow_buying)}
                 </td>
               </tr>
@@ -136,24 +141,27 @@ const BrTable = () => {
           </table>
         </div>
 
-        <div className="w-1/2 border border-gray-400">
-          <div className="bg-gray-200 font-semibold p-2 flex text-center items-center justify-center">
+        <div className="w-1/2 border border-gray-400 rounded overflow-hidden">
+          <div className="bg-indigo-100 text-indigo-800 font-semibold p-2 flex text-center items-center justify-center">
             Renting
           </div>
+
           <table className="w-full text-sm">
             <tbody>
-              <tr>
+              <tr className="hover:bg-gray-50">
                 <td className="p-2">Unit Rental</td>
                 <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(data.monthly_rent)}
                 </td>
               </tr>
-              <tr>
+
+              <tr className="hover:bg-gray-50">
                 <td className="p-2">No of Units</td>
                 <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(data.units_no)}
                 </td>
               </tr>
+
               <tr>
                 <td className="p-2">Tenure-Years</td>
                 <td className="p-2 text-right border-l border-gray-400">
@@ -188,6 +196,7 @@ const BrTable = () => {
                   {operation_cost_rent !== "0" ? operation_cost_rent : "--"}
                 </td>
               </tr>
+
               <tr>
                 <td className="p-2">Maintenance Cost</td>
                 <td className="p-2 text-right border-l border-gray-400">
@@ -209,9 +218,9 @@ const BrTable = () => {
                 <td className="p-2 text-right border-l border-gray-400"></td>
               </tr>
 
-              <tr className="bg-gray-100 font-semibold">
+              <tr className="bg-indigo-100 font-semibold">
                 <td className="p-2">Total Cost Outflow for period</td>
-                <td className="p-2 text-right border-l border-gray-400 ">
+                <td className="p-2 text-right border-l border-gray-400">
                   {formatPrice(data.cash_outflow_renting)}
                 </td>
               </tr>

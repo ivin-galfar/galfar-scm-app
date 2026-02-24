@@ -8,55 +8,53 @@ const Summary = ({ data }) => {
     Number(data.maintenance_cost_tenure);
   return (
     <div className="my-10">
-      <h2 className="my-2 font-semibold">Summary</h2>
-      <table className="w-full border border-gray-400">
+      <h2 className="my-2 font-semibold text-gray-700">Summary</h2>
+
+      <table className="w-full border border-gray-400 rounded">
         <tbody>
-          <tr>
+          <tr className="hover:bg-blue-50">
             <td className="p-2 border-l border-b border-gray-400">
               Cash flow benefit in
             </td>
-            <td className="p-2  border-l border-b border-gray-400">
+            <td className="p-2 border-l border-b border-gray-400">
               {formatPrice(data.fin_tenure)} <span className="ml-3">Years</span>
             </td>
-            <td className="p-2  border-l border-b border-gray-400">
+            <td className="p-2 border-l border-b border-gray-400">
               Cash flow benefit in
             </td>
-            <td className="p-2 font-semibold  border-l border-b border-gray-400">
+            <td className="p-2 font-semibold border-l border-b border-gray-400">
               {data.chosentype}
             </td>
-            <td className="p-2  border-l border-b border-gray-400">
-              {" "}
+            <td className="p-2 border-l border-b border-gray-400">
               {formatPrice(data.benefit)}
             </td>
           </tr>
-          <tr>
-            <td className="p-2  border-l border-b border-gray-400">
-              Accounting Gains in{" "}
+          <tr className="hover:bg-green-50">
+            <td className="p-2 border-l border-b border-gray-400">
+              Accounting Gains in
             </td>
-            <td className="p-2  border-l border-b border-gray-400">
-              {formatPrice(data.fin_tenure)}{" "}
-              <span className="ml-3 ">Years</span>
+            <td className="p-2 border-l border-b border-gray-400">
+              {formatPrice(data.fin_tenure)} <span className="ml-3">Years</span>
             </td>
-            <td className="p-2  border-l border-b border-gray-400">
+            <td className="p-2 border-l border-b border-gray-400">
               Accounting Gain/Loss
             </td>
-            <td className="p-2 font-semibold  border-l border-b border-gray-400 ">
+            <td className="p-2 font-semibold border-l border-b border-gray-400">
               {data.chosentype}
             </td>
-            <td className="p-2  border-l border-b border-gray-400 ">
-              {" "}
+            <td className="p-2 border-l border-b border-gray-400">
               {formatPrice(data.total_rental_cost - accounting_buying)}
             </td>
           </tr>
-          <tr>
-            <td className="p-2  border-l border-b border-gray-400">
+          <tr className="bg-purple-100 text-purple-900 font-semibold">
+            <td className="p-2 border-l border-b border-gray-400">
               With Payback period of
             </td>
-            <td className="p-2  border-l border-b border-gray-400  border-r">
+            <td className="p-2 border-l border-b border-gray-400 border-r">
               {formatPrice(
                 data.cost_in_buying_with_main / data.total_monthly_rental,
               )}{" "}
-              <span className="ml-2 ">Months</span>
+              <span className="ml-2">Months</span>
             </td>
           </tr>
         </tbody>
