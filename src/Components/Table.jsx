@@ -572,7 +572,7 @@ export default function VerticalTable({ showcalc }) {
                       className={`relative group inline-block select-none ${
                         sharedTableData.formData.sentforapproval === "yes" &&
                         sharedTableData.formData?.status !== "review" &&
-                        sharedTableData.formData?.status !== "reverted" &&
+                        sharedTableData.formData?.status !== "reverted"
                           ? "cursor-auto"
                           : "cursor-pointer"
                       }`}
