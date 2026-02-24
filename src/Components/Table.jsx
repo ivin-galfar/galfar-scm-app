@@ -606,7 +606,7 @@ export default function VerticalTable({ showcalc }) {
                           selectedVendorIndex === index
                             ? "bg-green-500 text-white"
                             : "bg-gray-200 text-gray-700  hover:bg-gray-300"
-                        } ${sharedTableData.formData.sentforapproval === "yes" && sharedTableData.formData?.status !== "review" && sharedTableData.formData?.status !== "reverted" ? "cursor-pointer" : ""}`}
+                        } ${sharedTableData.formData.sentforapproval === "yes" && sharedTableData.formData?.status !== "review" && sharedTableData.formData?.status !== "reverted" ? "cursor-auto" : ""}`}
                       >
                         {selectedVendorIndex === index ? (
                           <span className="flex  items-center ">
