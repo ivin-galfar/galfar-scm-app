@@ -37,6 +37,10 @@ import { handlePrint } from "../Helpers/print_helper";
 import { FaHistory } from "react-icons/fa";
 import ApprovalHistory from "../Components/ApprovalHistory";
 import { usePagination, usetotalReceipts } from "../store/statementStore";
+import {
+  getlastSubmittedDate,
+  getSubmittedDate,
+} from "../Helpers/helperfunctions";
 const LogisticsDashboard = () => {
   const userInfo = useUserInfo();
   const { setStatusFilter, statusfilter, resetStatusFilter } =
@@ -438,12 +442,15 @@ const LogisticsDashboard = () => {
                   <th className=" border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
                     Action
                   </th>
-                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
+                    {userInfo?.is_admin ? "Last Activity" : "Submitted on"}
+                  </th>
+                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
                     Created On
                   </th>
-                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
                     {" "}
-                    Approvals
+                    Approvals History
                   </th>
                 </tr>
               ))}
@@ -513,7 +520,17 @@ const LogisticsDashboard = () => {
                         />
                       </div>
                     </td>
-
+                    <td className="border-gray-300 border-b px-4 py-2 text-[13px] text-gray-700 text-center max-w-1">
+                      {userInfo?.is_admin
+                        ? getlastSubmittedDate(
+                            row?.original?.approver_info,
+                            userInfo?.role,
+                          ) || ""
+                        : getSubmittedDate(
+                            row?.original?.approver_info,
+                            userInfo?.role,
+                          ) || ""}
+                    </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                       {row.original.created_at
                         ? new Date(row.original.created_at).toLocaleDateString(
@@ -647,7 +664,7 @@ const LogisticsDashboard = () => {
         />
       )}
 
-      {showtoast && !errormessage && (
+      {showtoast && !errormessage && userInfo?.is_admin && (
         <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
           <SiTicktick /> Statement Removed Successfully!
         </div>
