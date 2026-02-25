@@ -471,7 +471,10 @@ const LogisticsTable = () => {
                                 const [, currency, amount] = match;
                                 const formatted = Number(
                                   amount.replace(/,/g, ""),
-                                ).toLocaleString();
+                                ).toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                });
 
                                 return currency
                                   ? `${currency} ${formatted}`

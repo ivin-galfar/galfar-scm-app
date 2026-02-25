@@ -838,7 +838,7 @@ const StatementHeader = () => {
                     className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "rejected" ? "visible" : "invisible"}`}
                     onClick={recallStatement}
                   >
-                    <GrRevert size={30} />
+                    <GrRevert size={20} />
                   </button>
                 </div>
               </div>

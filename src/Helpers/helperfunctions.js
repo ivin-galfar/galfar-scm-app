@@ -1,6 +1,6 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
-import { categoryapprovers, roles } from "./roles_helper";
+import { categoryapprovers, prevRole, roles } from "./roles_helper";
 
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
@@ -113,8 +113,25 @@ export const getPmName = (projectcode) => {
 
 export const formatDateDDMMYYYY = (date) =>
   new Date(date).toLocaleDateString("en-GB", {
-    timeZone: "UTC",
+    timeZone: "Asia/Dubai",
   });
+
+export const formatDateDDMMYYYYHHMMSS = (date) => {
+  if (!date) return "";
+
+  return new Date(date)
+    .toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Dubai",
+    })
+    .toUpperCase();
+};
 
 export const formatPrice = (value) => {
   return Math.round(value || 0).toLocaleString();
@@ -165,4 +182,21 @@ export const getApproverNames = (category, dept) => {
 
     return roles[role] ? [roles[role]] : [];
   });
+};
+
+export const getSubmittedDate = (approverinfo = [], role) => {
+  let lastsubmissiondate = "";
+  const prevrole = prevRole(role);
+  lastsubmissiondate = formatDateDDMMYYYYHHMMSS(
+    approverinfo?.find((a) => a.role == prevrole)?.datetime,
+  );
+  return lastsubmissiondate;
+};
+
+export const getlastSubmittedDate = (approverinfo = [], role) => {
+  let lastsubmissiondate = "";
+  lastsubmissiondate = formatDateDDMMYYYYHHMMSS(
+    approverinfo?.[approverinfo.length - 1]?.datetime,
+  );
+  return lastsubmissiondate;
 };

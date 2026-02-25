@@ -26,3 +26,15 @@ export const nextRole = (role) => {
 
   return roleMap[role.toLowerCase()] || null;
 };
+
+export const prevRole = (role) => {
+  const roleMap = {
+    ceo: "fm",
+    fm: "gm",
+    gm: "pm",
+    pm: "incharge",
+    incharge: "initlg",
+    initlg: "initlg",
+  };
+  return roleMap[role.toLowerCase()] || null;
+};

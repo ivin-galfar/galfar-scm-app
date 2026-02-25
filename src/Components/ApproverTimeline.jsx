@@ -1,4 +1,8 @@
-import { getApproverName, getPmName } from "../Helpers/helperfunctions";
+import {
+  formatDateDDMMYYYYHHMMSS,
+  getApproverName,
+  getPmName,
+} from "../Helpers/helperfunctions";
 
 const ApproverTimeline = ({ approverhistory }) => {
   const info = approverhistory?.approver_info;
@@ -110,11 +114,11 @@ const ApproverTimeline = ({ approverhistory }) => {
                   >
                     {name}
                     <div
-                      className={`relative mt-1 text-xs text-gray-600 italic  text-wrap ${isLeft ? "text-left " : ""}`}
+                      className={`relative mt-1 text-xs text-gray-600 italic max-w-3xl text-wrap ${isLeft ? "text-left " : ""}`}
                     >
                       {getDatetimeByRole(ap) && (
-                        <div className="mt-2 mb-1 inline-block px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">
-                          {new Date(getDatetimeByRole(ap)).toLocaleString()}
+                        <div className="mt-2 mb-1 inline-block px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full whitespace-nowrap">
+                          {formatDateDDMMYYYYHHMMSS(getDatetimeByRole(ap))}
                         </div>
                       )}
                       {comment && (
