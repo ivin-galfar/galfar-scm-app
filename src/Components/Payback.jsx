@@ -3,7 +3,9 @@ import { formatPrice } from "../Helpers/helperfunctions";
 const PaybackPeriod = ({ data }) => {
   return (
     <div className="my-10">
-      <h2 className="my-2 font-semibold text-gray-700">Payback Period</h2>
+      <div className="w-1/2 px-4 py-2 mb-3 text-sm font-semibold text-blue-800 bg-blue-200 border-l-4 border-blue-500 rounded shadow-sm">
+        Payback Period
+      </div>
 
       <table className="w-full border border-gray-400">
         <tbody>
@@ -39,15 +41,14 @@ const PaybackPeriod = ({ data }) => {
             </td>
           </tr>
 
-          {/* Result row */}
-          <tr className="bg-green-100 text-green-900 font-semibold">
+          <tr className="bg-blue-100 text-blue-900 font-semibold">
             <td className="p-2">Payback Period - Months</td>
-            <td className="p-2 text-right border-l border-gray-400">
+            <td className="p-2 text-right border-l border-gray-400 font-semibold">
               {formatPrice(
                 data.cost_in_buying_without_main / data.total_monthly_rental,
               )}
             </td>
-            <td className="p-2 text-right border-l border-gray-400">
+            <td className="p-2 text-right border-l border-gray-400 font-semibold">
               {formatPrice(
                 data.cost_in_buying_with_main / data.total_monthly_rental,
               )}

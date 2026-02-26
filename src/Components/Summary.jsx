@@ -46,7 +46,7 @@ const Summary = ({ data }) => {
               {formatPrice(data.total_rental_cost - accounting_buying)}
             </td>
           </tr>
-          <tr className="bg-purple-100 text-purple-900 font-semibold">
+          <tr>
             <td className="p-2 border-l border-b border-gray-400">
               With Payback period of
             </td>
