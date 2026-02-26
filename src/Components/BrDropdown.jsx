@@ -68,7 +68,7 @@ const BrDropdown = () => {
         <option value="default">📋 Select Statement</option>
         {brcs_ids?.map((br_id) => (
           <option value={br_id.id} key={br_id.id}>
-            {br_id.id}
+            BVR - {br_id.id}
           </option>
         ))}
       </select>

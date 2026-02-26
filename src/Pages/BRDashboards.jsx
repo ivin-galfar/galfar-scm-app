@@ -170,7 +170,7 @@ const BRDashboards = () => {
     columnHelper.accessor((row) => row?.id, {
       id: "cs_no",
       header: "Cs No.",
-      cell: (info) => info.getValue() || "-",
+      cell: (info) => "BVR - " + info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.item, {
       id: "item",

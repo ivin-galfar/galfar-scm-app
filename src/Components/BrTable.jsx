@@ -42,9 +42,9 @@ const BrTable = () => {
         </div>
       </div>
 
-      <h2 className="font-semibold my-3 text-gray-700">
+      <div className="w-1/2 px-4 py-2 mb-3 text-sm font-semibold text-green-800 bg-green-200 border-l-4 border-blue-500 rounded shadow-sm">
         Cash Flow Gain / (Loss)
-      </h2>
+      </div>
 
       <div className="w-full flex gap-20">
         <div className="w-1/2 border border-gray-400 rounded overflow-hidden">
@@ -65,9 +65,9 @@ const BrTable = () => {
                   {formatPrice(data.units_no)}
                 </td>
               </tr>
-              <tr className="hover:bg-gray-50">
+              <tr className="hover:bg-gray-50 font-semibold">
                 <td className="p-2">Total Principal Cost</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 text-right border-l font-semibold border-gray-400">
                   {formatPrice(data.principal_cost)}
                 </td>
               </tr>
@@ -100,13 +100,13 @@ const BrTable = () => {
 
               <tr>
                 <td className="p-2">Total Interest Cost</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 text-right border-l border-gray-400 font-semibold">
                   {formatPrice(data.total_interest_cost)}
                 </td>
               </tr>
-              <tr className="font-semibold bg-green-50">
+              <tr className="font-semibold  ">
                 <td className="p-2">Total Principal + Interest</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 text-right border-l border-gray-400 font-semibold">
                   {formatPrice(
                     Number(data.principal_cost) +
                       Number(data.total_interest_cost),
@@ -115,16 +115,20 @@ const BrTable = () => {
               </tr>
 
               <tr>
-                <td className="p-2">Operation Cost for the Tenure</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 font-semibold">
+                  Operation Cost for the Tenure
+                </td>
+                <td className="p-2 text-right border-l border-gray-400 font-semibold">
                   {operation_cost_tenure && operation_cost_tenure !== "0"
                     ? operation_cost_tenure
                     : "--"}
                 </td>
               </tr>
               <tr>
-                <td className="p-2">Maintenance Cost for the Tenure</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 font-semibold">
+                  Maintenance Cost for the Tenure
+                </td>
+                <td className="p-2 text-right border-l border-gray-400 font-semibold">
                   {maintainenece_cost_tenure !== "0"
                     ? maintainenece_cost_tenure
                     : "--"}
@@ -142,7 +146,7 @@ const BrTable = () => {
         </div>
 
         <div className="w-1/2 border border-gray-400 rounded overflow-hidden">
-          <div className="bg-indigo-100 text-indigo-800 font-semibold p-2 flex text-center items-center justify-center">
+          <div className="bg-red-100 text-red-800 font-semibold p-2 flex text-center items-center justify-center">
             Renting
           </div>
 
@@ -184,8 +188,8 @@ const BrTable = () => {
               </tr>
 
               <tr>
-                <td className="p-2">Total Rental</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 font-semibold">Total Rental</td>
+                <td className="p-2 text-right border-l border-gray-400 font-semibold">
                   {formatPrice(data.total_rental_cost)}
                 </td>
               </tr>
@@ -198,8 +202,8 @@ const BrTable = () => {
               </tr>
 
               <tr>
-                <td className="p-2">Maintenance Cost</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 font-semibold">Maintenance Cost</td>
+                <td className="p-2 text-right border-l border-gray-400 font-semibold">
                   {maintainence_cost_rental != "0"
                     ? maintainence_cost_rental
                     : "--"}
@@ -218,9 +222,9 @@ const BrTable = () => {
                 <td className="p-2 text-right border-l border-gray-400"></td>
               </tr>
 
-              <tr className="bg-indigo-100 font-semibold">
+              <tr className="bg-red-100 font-semibold">
                 <td className="p-2">Total Cost Outflow for period</td>
-                <td className="p-2 text-right border-l border-gray-400">
+                <td className="p-2 text-right border-l border-gray-400 font-semibold">
                   {formatPrice(data.cash_outflow_renting)}
                 </td>
               </tr>
@@ -238,9 +242,9 @@ const BrTable = () => {
             <div className="my-4 text-gray-700">
               <span>Recommendation for</span>
               <span
-                className={`ml-1 px-2 py-1 ${data.chosentype.trim() == "Buying" ? "bg-green-100 text-green-800" : " bg-blue-100 text-blue-800"} font-semibold rounded-md`}
+                className={`ml-1 px-2 py-1 ${data.chosentype.trim() == "Buying" ? "bg-green-100 text-green-800" : " bg-red-100 text-red-800"} font-semibold rounded-md`}
               >
-                {data.chosentype.trim()}
+                [{data.chosentype.trim()}]
               </span>
               <span className="ml-2">As on</span>
               <span className="ml-1 font-semibold">

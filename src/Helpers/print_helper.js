@@ -500,7 +500,7 @@ export const handleBrPrint = (formData) => {
         {
           content: "Renting",
           colSpan: 2,
-          styles: { halign: "center", fillColor: [30, 64, 175] },
+          styles: { halign: "center", fillColor: [220, 38, 38] },
         },
       ],
     ],
@@ -532,13 +532,6 @@ export const handleBrPrint = (formData) => {
 
   const textWidthcash = doc.getTextWidth(part2cash);
   doc.setFillColor(255, 255, 0);
-  if (part2cash?.trim() === "Buying") {
-    doc.setTextColor(0, 128, 0); // Green
-  } else if (part2cash.trim() === "Renting") {
-    doc.setTextColor(0, 102, 204);
-  } else {
-    doc.setTextColor(0, 0, 0);
-  }
   doc.rect(xcash - 0.5, y - 3.5, textWidthcash + 1, 4.5, "F");
 
   doc.text(part2cash, xcash, y);
@@ -579,20 +572,38 @@ export const handleBrPrint = (formData) => {
   autoTable(doc, {
     startY: y,
     body: [
-      ["Depreciation Rate", `${formData.dp_rate || 0}%`],
-      ["Depreciation Cost", formatP(formData.depreciation_cost)],
-      ["Interest Cost", formatP(formData.total_interest_cost)],
+      ["Depreciation Rate", "", `${formData.dp_rate || 0}%`],
+      ["Depreciation Cost", "", formatP(formData.depreciation_cost)],
+      ["Interest Cost", "", formatP(formData.total_interest_cost)],
       [
         "Operation & Maintenance Cost",
+        "",
         formatP(formData.maintenance_cost_tenure),
       ],
-      ["Total Expenses - BUYING", formatP(formData.total_expenses_buying)],
-      ["Total Expenses - RENTALS", formatP(formData.total_rental_cost)],
+      ["Total Expenses - BUYING", "", formatP(formData.total_expenses_buying)],
+      [
+        "Total Expenses - RENTALS",
+        "",
+        formatP(formData.total_rental_cost),
+        {
+          styles: {
+            lineWidth: { left: 0, right: 0.1, top: 0.1, bottom: 0.1 },
+          },
+        },
+      ],
       [
         {
-          content: `Accounting Gain/Loss (${formData.chosentype})`,
+          content: `Accounting Gain/Loss`,
           styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
         },
+        {
+          content: formData.chosentype,
+          styles: {
+            fontStyle: "bold",
+            fillColor: [255, 255, 0],
+          },
+        },
+
         {
           content: formatP(formData.accounting_gain_loss),
           styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
@@ -601,12 +612,18 @@ export const handleBrPrint = (formData) => {
     ],
     theme: "grid",
     styles: { fontSize: 9, cellPadding: 1.2 },
-    columnStyles: { 1: { halign: "right" } },
+    columnStyles: {
+      1: {
+        halign: "left",
+        lineWidth: { left: 0, right: 0, top: 0.1, bottom: 0.1 },
+      },
+      2: { halign: "right" },
+    },
   });
 
   y = doc.lastAutoTable.finalY + 6;
 
-  /* =========================
+  /* =========================x
       4. PAYBACK PERIOD
   ========================= */
   doc.setFontSize(11);
@@ -740,13 +757,7 @@ export const handleBrPrint = (formData) => {
   doc.setFillColor(255, 255, 0);
 
   const part2 = formData.chosentype || "";
-  if (part2?.trim() === "Buying") {
-    doc.setTextColor(0, 128, 0); // Green
-  } else if (part2.trim() === "Renting") {
-    doc.setTextColor(0, 102, 204);
-  } else {
-    doc.setTextColor(0, 0, 0);
-  }
+
   const textWidthtype = doc.getTextWidth(part2);
 
   doc.setFillColor(255, 255, 0);
@@ -818,8 +829,8 @@ export const handleBrPrint = (formData) => {
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
   doc.text(
-    `This statement is Electronically Approved; Signature Not Required `,
-    14,
+    `This Statement is Electronically Approved; Signature Not Required `,
+    60,
     pageHeight - footerPadding,
   );
 
