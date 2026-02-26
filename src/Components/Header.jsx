@@ -11,21 +11,29 @@ import {
   is_plant,
   is_fm,
   is_asset,
+  is_hod,
+  is_gm,
+  is_ceo,
 } from "../Helpers/dept_helper";
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
+import { getDeptConfig } from "../Helpers/Permissions";
 
 const Header = () => {
   const userInfo = useUserInfo();
   const { statusFilter, setStatusFilter, setMultiStatusFilter } =
     useContext(AppContext);
   const { setStatusFilter: setStatusFilterzustand } = useStatusFilter();
-  const { selectedDept } = useSelectedDept();
+  const { selectedDept, setSelectedDept } = useSelectedDept();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const canvasRef = useRef(null);
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
   const isfm = is_fm(userInfo?.role);
+  const isasset = is_asset(userInfo?.role);
+  const ishod = is_hod(userInfo?.role);
+  const isgm = is_gm(userInfo?.role);
+  const isceo = is_ceo(userInfo?.role);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (canvasRef.current && !canvasRef.current.contains(event.target)) {
@@ -43,7 +51,21 @@ const Header = () => {
 
   const location = useLocation();
   const path = location.pathname;
+  const { defaultDept } = getDeptConfig({
+    isLogistics,
+    isPlant,
+    isfm,
+    isasset,
+    ishod,
+    isceo,
+    isgm,
+  });
 
+  useEffect(() => {
+    if (!userInfo) return;
+    setSelectedDept(defaultDept);
+    setDashboardType(defaultDept);
+  }, [userInfo, isLogistics, isfm, isPlant, isasset]);
   return (
     <div>
       <header className="bg-white shadow-md">
