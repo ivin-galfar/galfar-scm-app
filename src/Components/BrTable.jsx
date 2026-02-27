@@ -210,15 +210,15 @@ const BrTable = () => {
                 </td>
               </tr>
               <tr>
-                <td className="p-2 h-9"></td>
+                <td className="p-2 h-10"></td>
                 <td className="p-2 text-right border-l border-gray-400"></td>
               </tr>
               <tr>
-                <td className="p-2 h-9"></td>
+                <td className="p-2 h-10"></td>
                 <td className="p-2 text-right border-l border-gray-400"></td>
               </tr>
               <tr>
-                <td className="p-2 h-9"></td>
+                <td className="p-2 h-10"></td>
                 <td className="p-2 text-right border-l border-gray-400"></td>
               </tr>
 
