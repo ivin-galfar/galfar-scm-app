@@ -262,7 +262,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                     htmlFor={field.name}
                     className="text-sm font-medium text-gray-700 mb-1"
                   >
-                    Unit Price
+                    Unit Price (Purchase Cost)
                   </label>
                   <input
                     id={field.name}
@@ -574,7 +574,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
               )}
             </form.Field>
             <div className="flex justify-between items-center">
-              <div className="block mt-2">
+              <div className="col col-5 mt-2">
                 <label className="gap-3 flex">
                   <input
                     type="checkbox"
@@ -594,8 +594,12 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                     }}
                   />
                   Included Maintenance (For Rental)
-                </label>{" "}
-                <label className="gap-3 flex">
+                </label>
+                <span className="text-xs text-gray-600 ml-7 block">
+                  (Please tick if maintenance is in the vendor’s scope, i.e.,
+                  hiring/leasing of fleet with maintenance)
+                </span>
+                <label className="gap-3 flex mt-2">
                   <input
                     type="checkbox"
                     checked={formData.is_included_op_cost_rent}
@@ -613,6 +617,10 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                   />
                   Included Operational Cost (For Rental)
                 </label>
+                <span className="text-xs text-gray-600 ml-7 block">
+                  (Please tick if maintenance is in the vendor’s scope, i.e.,
+                  hiring/leasing of fleet with maintenance)
+                </span>
               </div>
             </div>
           </div>

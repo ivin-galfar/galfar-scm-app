@@ -18,9 +18,9 @@ const BrTable = () => {
 
   return (
     <div className="rounded-xl border border-gray-300 p-2">
-      <div className="flex items-center gap-2 text-sm pb-2">
+      <div className="flex items-center gap-2  pb-2">
         {
-          <div className="flex items-center gap-2 bg-gray-50  border border-gray-200 rounded-md px-3 py-1.5 text-sm">
+          <div className="flex items-center gap-2 bg-gray-50  border border-gray-200 rounded-md px-3 py-1.5 ">
             <span>💱</span>
             <span className="text-gray-800">Currency In</span>
             {data.currency ? (
@@ -42,7 +42,7 @@ const BrTable = () => {
         </div>
       </div>
 
-      <div className="w-1/2 px-4 py-2 mb-3 text-sm font-semibold text-green-800 bg-green-200 border-l-4 border-blue-500 rounded shadow-sm">
+      <div className="w-1/2 px-4 py-2 mb-3  font-semibold text-green-800 bg-green-200 border-l-4 border-blue-500 rounded shadow-sm">
         Cash Flow Gain / (Loss)
       </div>
 
@@ -51,7 +51,7 @@ const BrTable = () => {
           <div className="bg-green-100 text-green-800 font-semibold p-2 flex text-center items-center justify-center">
             Buying
           </div>
-          <table className="w-full text-sm">
+          <table className="w-full ">
             <tbody>
               <tr className="hover:bg-gray-50">
                 <td className="p-2">Unit Price</td>
@@ -150,7 +150,7 @@ const BrTable = () => {
             Renting
           </div>
 
-          <table className="w-full text-sm">
+          <table className="w-full ">
             <tbody>
               <tr className="hover:bg-gray-50">
                 <td className="p-2">Unit Rental</td>
@@ -242,7 +242,9 @@ const BrTable = () => {
             <div className="my-4 text-gray-700">
               <span>Recommendation for</span>
               <span
-                className={`ml-1 px-2 py-1 ${data.chosentype.trim() == "Buying" ? "bg-green-100 text-green-800" : " bg-red-100 text-red-800"} font-semibold rounded-md`}
+                className={`ml-1 px-2 py-1 ${
+                  data.chosentype.trim() && "bg-yellow-200 text-gray-700"
+                } font-semibold rounded-md`}
               >
                 [{data.chosentype.trim()}]
               </span>

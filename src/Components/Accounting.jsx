@@ -67,9 +67,7 @@ const Accounting = ({ data }) => {
               {data.chosentype && (
                 <span
                   className={`font-semibold ${
-                    data.chosentype.trim() === "Buying"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
+                    data.chosentype.trim() && "bg-yellow-200 text-gray-700"
                   } px-2 py-0.5 rounded-md mx-1`}
                 >
                   [{data.chosentype?.trim()}]

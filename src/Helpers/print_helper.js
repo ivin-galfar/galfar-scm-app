@@ -572,17 +572,27 @@ export const handleBrPrint = (formData) => {
   autoTable(doc, {
     startY: y,
     body: [
-      ["Depreciation Rate", "", `${formData.dp_rate || 0}%`],
-      ["Depreciation Cost", "", formatP(formData.depreciation_cost)],
-      ["Interest Cost", "", formatP(formData.total_interest_cost)],
+      ["Depreciation Rate", "", "", "", `${formData.dp_rate || 0}%`],
+      ["Depreciation Cost", "", "", "", formatP(formData.depreciation_cost)],
+      ["Interest Cost", "", "", "", formatP(formData.total_interest_cost)],
       [
         "Operation & Maintenance Cost",
         "",
+        "",
+        "",
         formatP(formData.maintenance_cost_tenure),
       ],
-      ["Total Expenses - BUYING", "", formatP(formData.total_expenses_buying)],
+      [
+        "Total Expenses - BUYING",
+        "",
+        "",
+        "",
+        formatP(formData.total_expenses_buying),
+      ],
       [
         "Total Expenses - RENTALS",
+        "",
+        "",
         "",
         formatP(formData.total_rental_cost),
         {
@@ -601,9 +611,17 @@ export const handleBrPrint = (formData) => {
           styles: {
             fontStyle: "bold",
             fillColor: [255, 255, 0],
+            cellWidth: 20,
+            halign: "left",
           },
         },
-
+        {
+          content: "",
+        },
+        {
+          content: "",
+          styles: { cellWidth: 80 },
+        },
         {
           content: formatP(formData.accounting_gain_loss),
           styles: { fontStyle: "bold", fillColor: [240, 240, 240] },
@@ -617,7 +635,15 @@ export const handleBrPrint = (formData) => {
         halign: "left",
         lineWidth: { left: 0, right: 0, top: 0.1, bottom: 0.1 },
       },
-      2: { halign: "right" },
+      2: {
+        halign: "left",
+        lineWidth: { left: 0, right: 0, top: 0.1, bottom: 0.1 },
+      },
+      3: {
+        halign: "left",
+        lineWidth: { left: 0, right: 0, top: 0.1, bottom: 0.1 },
+      },
+      4: { halign: "right" },
     },
   });
 
@@ -771,7 +797,7 @@ export const handleBrPrint = (formData) => {
   const part3 = `   As on ${dateStr}`;
   doc.text(part3, x, y);
 
-  const footerY = 280;
+  const footerY = 275;
   const col = pageWidth / 4;
   const pageHeight = doc.internal.pageSize.height;
   const footerPadding = 2;
