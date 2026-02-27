@@ -800,7 +800,7 @@ export const handleBrPrint = (formData) => {
   const footerY = 275;
   const col = pageWidth / 4;
   const pageHeight = doc.internal.pageSize.height;
-  const footerPadding = 5;
+  const footerPadding = 6;
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.text("(HOD)", col * 0.65, footerY + 5.5, { align: "center" });
