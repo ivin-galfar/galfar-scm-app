@@ -618,8 +618,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
                   Included Operational Cost (For Rental)
                 </label>
                 <span className="text-xs text-gray-600 ml-7 block">
-                  (Please tick if maintenance is in the vendor’s scope, i.e.,
-                  hiring/leasing of fleet with maintenance)
+                  (Please Tick, if Hiring of fleet with operator)
                 </span>
               </div>
             </div>
