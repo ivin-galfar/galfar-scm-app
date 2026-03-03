@@ -38,6 +38,7 @@ import { FaHistory } from "react-icons/fa";
 import ApprovalHistory from "../Components/ApprovalHistory";
 import { usePagination, usetotalReceipts } from "../store/statementStore";
 import {
+  formatDateDDMMYYYY,
   getlastSubmittedDate,
   getSubmittedDate,
 } from "../Helpers/helperfunctions";
@@ -533,16 +534,7 @@ const LogisticsDashboard = () => {
                           ) || ""}
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                      {row.original.created_at
-                        ? new Date(row.original.created_at).toLocaleDateString(
-                            "en-GB",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )
-                        : ""}
+                      {formatDateDDMMYYYY(row.original.created_at)}
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                       <div className="flex items-center justify-center cursor-pointer">

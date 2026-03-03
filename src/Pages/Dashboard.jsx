@@ -40,6 +40,7 @@ import {
   fetchStatement,
   loginUser,
 } from "../APIs/api";
+import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
 const Dashboard = () => {
   const {
     receipts,
@@ -905,13 +906,7 @@ const Dashboard = () => {
                     </div>
                   </td>
                   <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                    {new Date(
-                      row.original.formData?.created_at,
-                    ).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    {formatDateDDMMYYYY(row.original.formData.created_at)}
                   </td>
                 </tr>
               ))
