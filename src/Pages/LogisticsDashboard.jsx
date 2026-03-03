@@ -164,6 +164,10 @@ const LogisticsDashboard = () => {
     fetchStatments();
   }, [statusfilter, searchcs]);
 
+  useEffect(() => {
+    setDashboardType("logistics");
+  }, []);
+
   const columnHelper = createColumnHelper();
   const statusProgress = {
     "Pending For Incharge": 20,
