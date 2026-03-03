@@ -22,7 +22,7 @@ import {
 } from "../store/logisticsStore";
 import { IoPrint, IoWarningOutline } from "react-icons/io5";
 import DashboardButton from "../Components/DashboardButton";
-import { is_logistics, is_plant } from "../Helpers/dept_helper";
+import { is_buyrent, is_logistics, is_plant } from "../Helpers/dept_helper";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowCircleRight, FaTrash } from "react-icons/fa";
@@ -61,6 +61,7 @@ const LogisticsDashboard = () => {
     open: false,
   });
   const isPlant = is_plant(userInfo?.dept_code);
+  const isBuyvsrent = is_buyrent(userInfo?.dept_code);
   const { selectedId, resetSelectedId } = useIdHistory();
   const { data: allstatements } = useQuery({
     queryKey: [
@@ -402,7 +403,7 @@ const LogisticsDashboard = () => {
         )}
 
         <div className="flex justify-between ml-auto">
-          {isLogistics && isPlant && (
+          {isLogistics && (isPlant || isBuyvsrent) && (
             <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
               <DashboardButton />
             </div>

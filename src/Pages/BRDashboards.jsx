@@ -16,6 +16,7 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useStatusFilter } from "../store/logisticsStore";
 import {
   is_asset,
+  is_buyrent,
   is_hod,
   is_logistics,
   is_plant,
@@ -42,6 +43,7 @@ const BRDashboards = () => {
   const isLogistics = is_logistics(userinfo?.dept_code);
   const isasset = is_asset(userinfo?.role);
   const ishod = is_hod(userinfo?.role);
+  const isBuyvsrent = is_buyrent(userinfo?.dept_code);
   const [deletestatement, setDeleteStatement] = useState({
     id: null,
     open: false,
@@ -368,7 +370,7 @@ const BRDashboards = () => {
           )}
 
           <div className="flex justify-between ml-auto">
-            {(isLogistics || isasset || ishod) && isPlant && (
+            {(isLogistics || isasset || ishod) && (isPlant || isBuyvsrent) && (
               <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
                 <DashboardButton />
               </div>

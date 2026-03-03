@@ -94,7 +94,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
         dep_rate = 20;
         break;
       case 7:
-        dep_rate = 14;
+        dep_rate = 14.29;
         break;
       case 10:
         dep_rate = 10;

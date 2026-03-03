@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { FaLock, FaHome } from "react-icons/fa";
@@ -12,7 +12,12 @@ import { AiFillCaretUp } from "react-icons/ai";
 import { AiFillCaretDown } from "react-icons/ai";
 import { FaSignInAlt } from "react-icons/fa";
 import { FaTruck } from "react-icons/fa";
-import { is_fm, is_logistics, is_plant } from "../Helpers/dept_helper";
+import {
+  is_buyrent,
+  is_fm,
+  is_logistics,
+  is_plant,
+} from "../Helpers/dept_helper";
 import { GiCrane } from "react-icons/gi";
 import { useDashboardType } from "../store/logisticsStore";
 import { IoHelpCircleSharp } from "react-icons/io5";
@@ -34,6 +39,15 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const isPlant = is_plant(userInfo?.dept_code);
   const isplanthire = userInfo?.role == "inith";
   const isfm = is_fm(userInfo?.role);
+  const isBuyvsrent = is_buyrent(userInfo?.dept_code);
+  useEffect(() => {
+    if (isPlant) {
+      setDashboardType("plant");
+    } else {
+      setDashboardType("bvrplant");
+    }
+  }, []);
+  const dashboardType = isPlant ? "plant" : "bvrplant";
 
   return (
     <div
@@ -86,7 +100,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               <span className=" break-words">Plant - CS </span>
               <span className="ml-auto flex gap-2 text-gray-500 dark:text-gray-300 cursor-pointer">
                 {submenuOpen ? <AiFillCaretUp /> : <AiFillCaretDown />}
-                {!isPlant ? <FaLock /> : ""}
+                {!isPlant && !isBuyvsrent && <FaLock />}{" "}
               </span>
             </span>
           )}
@@ -123,10 +137,21 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 <>Particulars {!userInfo?.is_admin ? <FaLock /> : ""}</>
               )}
             </Link>
-
+            <Link
+              to={isPlant ? "/dashboard" : "/dashboardbr"}
+              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                !isPlant && !isBuyvsrent
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+              onClick={() => setDashboardType(dashboardType)}
+            >
+              <GiClamp />
+              {isOpen && <span>Dashboard</span>}
+            </Link>
             {!isfm && (
               <Link
-                to="/dashboard"
+                to="/receipts"
                 className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
                   !isPlant
                     ? "pointer-events-none opacity-50 cursor-not-allowed"
@@ -140,24 +165,13 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             <Link
               to="/brstatement"
               className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !isPlant || isplanthire
+                isplanthire
                   ? "pointer-events-none opacity-50 cursor-not-allowed"
                   : ""
               }`}
             >
               <GiClamp />
               {isOpen && <span>Buy vs Rent </span>}
-            </Link>
-            <Link
-              to={isPlant ? "/dashboard" : "/dashboardbr"}
-              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !isPlant || isplanthire
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-            >
-              <GiClamp />
-              {isOpen && <span>Dashboard</span>}
             </Link>
           </div>
         )}
