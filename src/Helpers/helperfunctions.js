@@ -187,9 +187,9 @@ export const getApproverNames = (category, dept) => {
 export const getSubmittedDate = (approverinfo = [], role) => {
   let lastsubmissiondate = "";
   const prevrole = prevRole(role);
-  lastsubmissiondate = formatDateDDMMYYYY(
-    approverinfo?.find((a) => a.role == prevrole)?.datetime,
-  );
+  const prevapprover = approverinfo?.find((a) => a.role == prevrole);
+  if (!prevapprover || !prevapprover.datetime) return "N/A";
+  lastsubmissiondate = formatDateDDMMYYYY(prevapprover?.datetime);
   return lastsubmissiondate;
 };
 
