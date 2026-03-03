@@ -188,7 +188,7 @@ export const getSubmittedDate = (approverinfo = [], role) => {
   let lastsubmissiondate = "";
   const prevrole = prevRole(role);
   const prevapprover = approverinfo?.find((a) => a.role == prevrole);
-  if (!prevapprover || !prevapprover.datetime) return "N/A";
+  if (!prevapprover || !prevapprover.datetime) return "";
   lastsubmissiondate = formatDateDDMMYYYY(prevapprover?.datetime);
   return lastsubmissiondate;
 };
