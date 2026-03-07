@@ -606,7 +606,6 @@ export const updatebrstatements = async ({
 };
 
 export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
-
   try {
     const config = {
       headers: {
@@ -630,8 +629,103 @@ export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    throw error;
+  }
+};
 
+export const createfilenote = async ({ name, content, dept_id, userInfo }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/filenote/addfn`,
+      {
+        content,
+        name,
+        dept_id,
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatefilenotevalues = async ({
+  status,
+  sentforapproval,
+  fnid,
+  userInfo,
+}) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/filenote/updatefn/${fnid}`,
+      {
+        status,
+        sentforapproval,
+      },
+      config,
+    );
+    return response;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+export const fetchfilenoteids = async (userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/filenote/`,
+      {
+        ...config,
+        // params: {
+        //   statusfilter,
+        //   searchcs,
+        //   pageIndex,
+        //   pageSize,
+        //   role: userInfo.role,
+        // },
+      },
+      config,
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchfilenoteidvalue = async (fnid, userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/filenote/${fnid}`,
+      config,
+    );
+    return response.data[0];
+  } catch (error) {
     throw error;
   }
 };

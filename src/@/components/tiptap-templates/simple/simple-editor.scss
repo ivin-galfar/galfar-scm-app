@@ -1,0 +1,102 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+// body {
+//   --tt-toolbar-height: 44px;
+//   --tt-theme-text: var(--tt-gray-light-900);
+
+//   .dark & {
+//     --tt-theme-text: var(--tt-gray-dark-900);
+//   }
+// }
+
+// body {
+//   font-family: "Inter", sans-serif;
+//   color: var(--tt-theme-text);
+//   font-optical-sizing: auto;
+//   font-weight: 400;
+//   font-style: normal;
+//   padding: 0;
+//   overscroll-behavior-y: none;
+// }
+
+// html,
+// body {
+//   overscroll-behavior-x: none;
+// }
+
+// html,
+// body,
+// #root,
+// #app {
+//   height: 100%;
+//   background-color: var(--tt-bg-color);
+// }
+
+// ::-webkit-scrollbar {
+//   width: 0.25rem;
+// }
+
+  // * {
+  //   scrollbar-width: thin;
+  //   scrollbar-color: var(--tt-scrollbar-color) transparent;
+  // }
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--tt-scrollbar-color);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tiptap.ProseMirror {
+  font-family: "DM Sans", sans-serif;
+}
+
+.simple-editor-wrapper {
+  min-height: 65vh;
+  overflow: auto;
+}
+
+.simple-editor-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.simple-editor-content .tiptap.ProseMirror.simple-editor {
+  flex: 1;
+  padding: 6rem 6rem 30vh;
+}
+
+@media screen and (max-width: 480px) {
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    padding: 1rem 1.5rem 30vh;
+  }
+}
+
+.simple-editor table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.simple-editor td,
+.simple-editor th {
+  border: 1px solid #d1d5db;
+  padding: 8px;
+}
+
+.simple-editor .selectedCell {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.simple-editor .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #3b82f6;
+}

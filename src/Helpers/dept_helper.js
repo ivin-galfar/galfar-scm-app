@@ -6,3 +6,4 @@ export const is_gm = (role) => role == "gm";
 export const is_ceo = (role) => role == "ceo";
 export const is_asset = (role) => role == "inita";
 export const is_fm = (role) => role == "fm";
+export const is_fnote = (role) => role == "fnote";

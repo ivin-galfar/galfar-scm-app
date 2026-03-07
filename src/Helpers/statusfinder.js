@@ -53,3 +53,22 @@ export const expectedstatusplant = (currentrole) => {
 
   return statustext;
 };
+
+export const statusExpected = (currentrole, dept) => {
+  let statustext = "";
+  if (currentrole == "fnote") {
+    statustext = "pending for hod";
+  } else if (currentrole == "hod" && dept == "plant") {
+    statustext = "pending for fm";
+  } else if (currentrole == "fm") {
+    statustext = "pending for gm";
+  } else if (currentrole == "gm") {
+    statustext = "pending for ceo";
+  } else if (currentrole == "ceo") {
+    statustext = "approved";
+  } else {
+    statustext = "rejected";
+  }
+
+  return statustext;
+};
