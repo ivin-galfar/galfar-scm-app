@@ -23,7 +23,6 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
       : buttontxt != ""
         ? "px-10 py-2 bg-blue-600  hover:bg-blue-700 cursor-pointer"
         : "";
-  console.log(buttontxt);
 
   return (
     <div>

@@ -133,14 +133,15 @@ const Dashboard = () => {
   const [errormessage, setErrormessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [deleteMr, setdeleteMr] = useState("");
-  const expectedStatuses = (statusMapping[userInfo?.role] || []).map((s) =>
-    s.toLowerCase(),
+
+  const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
+    (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
   );
 
   const pendingStatuses = !userInfo?.is_admin
     ? expectedStatuses.filter(
         (s) =>
-          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase()),
+          s.startsWith("pending") && userInfo.role.some((r) => s.includes(r)),
       )
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 

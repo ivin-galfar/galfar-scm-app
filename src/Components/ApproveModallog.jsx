@@ -42,7 +42,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
     let updatedstatus = "";
 
     if (status == "approved") {
-      updatedstatus = expectedstatus(userInfo.role.toLowerCase());
+      updatedstatus = expectedstatus(userInfo.role);
     } else {
       updatedstatus = "rejected";
     }
@@ -51,7 +51,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
       status: updatedstatus,
     };
 
-    let comments_role = role_finder(userInfo.role.toLowerCase());
+    let comments_role = role_finder(userInfo.role);
     try {
       const config = {
         headers: {
@@ -65,7 +65,8 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
         {
           updatedstatus,
           [comments_role]: comments,
-          rejectedby: updatedstatus === "rejected" ? userInfo.role : undefined,
+          rejectedby:
+            updatedstatus === "rejected" ? userInfo.role[0] : undefined,
         },
         config,
       );
@@ -73,7 +74,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
       if (updatedstatus.toLowerCase() == "rejected") {
         updatedFormData = {
           ...formData,
-          rejectedby: userInfo.role,
+          rejectedby: userInfo.role?.[0] ?? "",
           status: updatedstatus,
         };
       }

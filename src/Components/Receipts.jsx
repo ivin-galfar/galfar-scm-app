@@ -39,7 +39,7 @@ const Receipts = () => {
     setSelectedVendorReason,
     freezequantity,
   } = useContext(AppContext);
-  const Asset = userInfo.role == "inita" ? true : false;
+  const Asset = userInfo.role?.includes("inita") ? true : false;
   const { setIsupdated } = useUpdate();
   const location = useLocation();
 
@@ -228,9 +228,9 @@ const Receipts = () => {
       "Rejected",
     ],
   };
-
-  const expectedStatuses =
-    statusMapping[userInfo?.role]?.map((s) => s.toLowerCase()) || [];
+  const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
+    (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
+  );
 
   useEffect(() => {
     const fetchMR = async () => {
@@ -259,9 +259,9 @@ const Receipts = () => {
 
   let statusclass = "";
   if (
-    (isStatusSet == "Pending for CEO" && userInfo.role != "ceo") ||
-    (isStatusSet == "Pending for GM" && userInfo.role != "gm") ||
-    (isStatusSet == "Pending For HOD" && userInfo.role != "hod") ||
+    (isStatusSet == "Pending for CEO" && !userInfo.role.includes("ceo")) ||
+    (isStatusSet == "Pending for GM" && !userInfo.role.includes("gm")) ||
+    (isStatusSet == "Pending For HOD" && !userInfo.role.includes("hod")) ||
     (isStatusSet == "reverted" &&
       userInfo.role !== "inita" &&
       userInfo.role !== "inith") ||
@@ -294,7 +294,9 @@ const Receipts = () => {
 
   const buttonText = isSentForApproval
     ? isStatusSet
-      ? isStatusSet.toLowerCase().includes(userInfo.role?.toLowerCase())
+      ? userInfo.role.some((r) =>
+          isStatusSet.toLowerCase().includes(r?.toLowerCase()),
+        )
         ? "Approve / Reject"
         : sharedTableData.formData.status === "approved"
           ? "Approved"

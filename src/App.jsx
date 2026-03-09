@@ -16,13 +16,12 @@ import { Suspense } from "react";
 import BrStatement from "./Pages/BrStatement";
 import BRDashboards from "./Pages/BRDashboards";
 import FileNote from "./Pages/FileNote";
-import { is_fnote,  } from "./Helpers/dept_helper";
+import { is_fnote } from "./Helpers/dept_helper";
 
 const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
-  const isfnote = is_fnote(userInfo?.role) || !userInfo?.is_admin;
-
+  const isfnote = is_fnote(userInfo?.role);
   const isLoginPage = location.pathname === "/login";
 
   return (

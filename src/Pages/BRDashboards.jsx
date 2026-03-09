@@ -456,7 +456,8 @@ const BRDashboards = () => {
                           </Link>
                           <IoPrint
                             className={
-                              userinfo?.is_admin || userinfo.role === "inita"
+                              userinfo?.is_admin ||
+                              userinfo.role?.includes("inita")
                                 ? "text-black cursor-pointer"
                                 : "text-gray-400 pointer-events-none cursor-not-allowed"
                             }

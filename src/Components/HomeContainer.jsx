@@ -162,7 +162,7 @@ const HomeContainer = () => {
             <h2 className="text-base font-medium text-gray-700">
               Recent Statements
             </h2>
-            {userInfo?.is_admin && userInfo?.role == "inita" ? (
+            {userInfo?.is_admin && userInfo.role?.includes("inita") ? (
               <Link to="/brstatement">
                 <button
                   className="border border-blue-500 text-blue-500 hover:bg-blue-50 text-sm px-3 py-1.5 rounded cursor-pointer"
