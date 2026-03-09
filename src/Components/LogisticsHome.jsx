@@ -37,7 +37,9 @@ const LogisticsHome = () => {
     if (userInfo.is_admin) {
       return item.status?.includes("pending");
     } else {
-      return item.status?.includes(userInfo?.role?.toLocaleLowerCase());
+      return userInfo?.role.some((role) =>
+        item.status?.toLowerCase()?.includes(role.toLowerCase()),
+      );
     }
   });
   const approvedstatements =

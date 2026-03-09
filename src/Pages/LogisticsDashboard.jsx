@@ -499,7 +499,8 @@ const LogisticsDashboard = () => {
                         </Link>
                         <IoPrint
                           className={
-                            userInfo?.is_admin || userInfo.role === "incharge"
+                            userInfo?.is_admin ||
+                            userInfo.role?.includes("incharge")
                               ? "text-black cursor-pointer"
                               : "text-gray-400 pointer-events-none cursor-not-allowed"
                           }
@@ -530,11 +531,11 @@ const LogisticsDashboard = () => {
                       {userInfo?.is_admin
                         ? getlastSubmittedDate(
                             row?.original?.approver_info,
-                            userInfo?.role,
+                            userInfo?.role[0],
                           ) || ""
                         : getSubmittedDate(
                             row?.original?.approver_info,
-                            userInfo?.role,
+                            userInfo?.role[0],
                           ) || ""}
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">

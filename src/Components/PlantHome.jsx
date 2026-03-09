@@ -94,13 +94,14 @@ const PlantHome = () => {
     loadParticulars();
   }, []);
 
-  const expectedStatuses = (statusMapping[userInfo?.role] || []).map((s) =>
-    s.toLowerCase(),
+  const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
+    (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
   );
   const pendingStatuses = !userInfo?.is_admin
     ? expectedStatuses.filter(
         (s) =>
-          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase()),
+          s.startsWith("pending") &&
+          userInfo.role?.some((r) => s.includes(r.toLowerCase())),
       )
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 
@@ -135,9 +136,9 @@ const PlantHome = () => {
     ? allreceipts?.filter(
         (r) =>
           r?.formData?.status?.toLowerCase().startsWith("pending") &&
-          r?.formData?.status
-            ?.toLowerCase()
-            .includes(userInfo?.role.toLowerCase()),
+          userInfo?.role?.some((role) =>
+            r?.formData?.status?.toLowerCase().includes(role.toLowerCase()),
+          ),
       )
     : allreceipts?.filter((r) =>
         r?.formData?.status?.toLowerCase().startsWith("pending"),

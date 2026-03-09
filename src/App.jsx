@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import Home from "./Components/Home";
 import Header from "./Components/Header";
@@ -15,11 +15,13 @@ import LogisticsDashboard from "./Pages/LogisticsDashboard";
 import { Suspense } from "react";
 import BrStatement from "./Pages/BrStatement";
 import BRDashboards from "./Pages/BRDashboards";
+import FileNote from "./Pages/FileNote";
+import { is_fnote } from "./Helpers/dept_helper";
 
 const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
-
+  const isfnote = is_fnote(userInfo?.role);
   const isLoginPage = location.pathname === "/login";
 
   return (
@@ -89,6 +91,16 @@ const App = () => {
           <Route path="/dashboardbr" element={<BRDashboards />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/brstatement" element={<BrStatement />} />
+          {isfnote && (
+            <>
+              <Route path="/filenote" element={<FileNote />} />
+              <Route path="/filenote/:fn_no" element={<FileNote />} />
+            </>
+          )}
+          {!isfnote && (
+            <Route path="*" element={<Navigate to="/login" replace={true} />} />
+          )}
+
           <Route path="/brstatement/:cs_no" element={<BrStatement />} />
         </Routes>
       </Suspense>

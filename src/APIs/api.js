@@ -145,10 +145,10 @@ export const fetchallid = async (userInfo, module) => {
           d.status !== null && d.status !== "created" && d.status !== "review",
       )
       .sort((a, b) => b.id - a.id);
-    if (userInfo.role == "initlg") {
+    if (userInfo.role?.includes("initlg")) {
       cs = response.data.sort((a, b) => b.id - a.id);
     }
-    if (userInfo.role == "pm") {
+    if (userInfo.role?.includes("pm")) {
       if (userInfo.pr_code.includes(1)) {
         cs = response.data.filter(
           (d) => d.project == "plant" && d.status !== "created",
@@ -191,17 +191,17 @@ export const fetchallstatements = async (
           searchcs,
           pageIndex,
           pageSize,
-          role: userInfo.role,
+          role: userInfo.role[0],
         },
       },
     );
     let cs = response.data
       .filter((d) => d.status !== null)
       .sort((a, b) => b.id - a.id);
-    if (userInfo.role == "initlg") {
+    if (userInfo.role?.includes("initlg")) {
       cs = response.data.sort((a, b) => b.id - a.id);
     }
-    if (userInfo.role == "pm") {
+    if (userInfo.role?.includes("pm")) {
       if (userInfo.pr_code.includes(1)) {
         cs = response.data.filter(
           (d) => d.project == "plant" && d.status !== "created",
@@ -240,7 +240,7 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
       {
         status,
         userInfo: {
-          role: userInfo.role,
+          role: userInfo.role[0],
           pr_code: userInfo.pr_code,
         },
         project_code,
@@ -271,7 +271,7 @@ export const fetchStatement = async (userInfo, cs_id) => {
     );
     let filteredresponse = response;
 
-    if (userInfo.role == "pm") {
+    if (userInfo.role?.includes("pm")) {
       if (
         userInfo.pr_code.includes(1) &&
         response.data?.formData?.project == "plant"
@@ -327,7 +327,7 @@ export const fetchReceiptCount = async ({
   let type = null;
 
   if (userInfo?.is_admin) {
-    type = userInfo?.role == "inita" ? "asset" : "hiring";
+    type = userInfo.role?.includes("inita") ? "asset" : "hiring";
   }
   try {
     const config = {
@@ -389,7 +389,7 @@ export const fetchCsCount = async (userInfo, statusfilter, searchcs) => {
       `${REACT_SERVER_URL}/logistics/totalreceipts/`,
       {
         ...config,
-        params: { statusfilter, role: userInfo.role, searchcs },
+        params: { statusfilter, role: userInfo.role[0], searchcs },
       },
     );
 
@@ -530,7 +530,7 @@ export const fetchbrstatements = async ({
       ...config,
       params: {
         module,
-        role: userinfo.role,
+        role: userinfo.role[0],
         statusfilter,
         page,
         limit,
@@ -561,7 +561,7 @@ export const fetchbrstatementscount = async (
       `${REACT_SERVER_URL}/brstatement/totalstatements`,
       {
         ...config,
-        params: { statusfilter, role: userInfo.role, searchcs, page, limit },
+        params: { statusfilter, role: userInfo.role[0], searchcs, page, limit },
       },
     );
 
@@ -593,7 +593,7 @@ export const updatebrstatements = async ({
       {
         status,
         comments,
-        role: userInfo.role,
+        role: userInfo.role[0],
         file,
         filename,
       },
@@ -606,7 +606,6 @@ export const updatebrstatements = async ({
 };
 
 export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
-
   try {
     const config = {
       headers: {
@@ -619,7 +618,7 @@ export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
       {
         id: data.id,
         userInfo: {
-          role: userInfo.role,
+          role: userInfo.role[0],
         },
         type: data.chosentype,
         date: data.created_at,
@@ -630,8 +629,104 @@ export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    throw error;
+  }
+};
 
+export const createfilenote = async ({ name, content, dept_id, userInfo }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/filenote/addfn`,
+      {
+        content,
+        name,
+        dept_id,
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatefilenotevalues = async ({
+  status,
+  sentforapproval,
+  fnid,
+  userInfo,
+}) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/filenote/updatefn/${fnid}`,
+      {
+        status,
+        sentforapproval,
+      },
+      config,
+    );
+    return response;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+export const fetchfilenoteids = async ({ userInfo, module }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/filenote/`,
+      {
+        ...config,
+        params: {
+          module,
+          // role: userinfo.role,
+          // statusfilter,
+          // page,
+          // limit,
+          // searchcs,
+        },
+      },
+      config,
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchfilenoteidvalue = async (fnid, userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/filenote/${fnid}`,
+      config,
+    );
+    return response.data[0];
+  } catch (error) {
     throw error;
   }
 };

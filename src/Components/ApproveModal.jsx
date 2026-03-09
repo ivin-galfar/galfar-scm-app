@@ -34,11 +34,11 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
     if (status === "rejected") {
       finalStatus = "Rejected";
       rejectedBy = userInfo.role;
-    } else if (userInfo.role === "hod" && status === "approved") {
+    } else if (userInfo.role?.includes("hod") && status === "approved") {
       finalStatus = "Pending for GM";
-    } else if (userInfo.role === "gm" && status === "approved") {
+    } else if (userInfo.role?.includes("gm") && status === "approved") {
       finalStatus = "Pending for CEO";
-    } else if (userInfo.role === "ceo" && status === "approved") {
+    } else if (userInfo.role?.includes("ceo") && status === "approved") {
       finalStatus = "Approved";
     } else if (status === "review") {
       finalStatus = "review";
@@ -55,14 +55,14 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
         `${REACT_SERVER_URL}/receipts/approver/${cs_id}`,
         {
           userId: userInfo.id,
-          role: userInfo.role,
+          role: userInfo.role[0],
           approverstatus: finalStatus,
           action: status,
           approverComments: comments,
           rejectedby: rejectedBy,
           status: finalStatus,
         },
-        config
+        config,
       );
       setErrormessage("");
       setShowToast(true);
@@ -129,11 +129,11 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
             formData: sharedTableData.formData,
             status: finalStatus,
           },
-          config
+          config,
         )
         .then((res) => console.log("✅ Email sent:", res.data))
         .catch((err) =>
-          console.error("❌ Email send failed:", err.response.data.message)
+          console.error("❌ Email send failed:", err.response.data.message),
         );
     } catch (error) {
       let message = error?.response?.data?.message;

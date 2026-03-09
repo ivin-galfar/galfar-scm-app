@@ -21,10 +21,7 @@ const fetchStatments = async ({
     };
     let type = null;
     if (userInfo?.is_admin) {
-      type =
-        userInfo?.role == "inita"
-          ? "asset"
-          : "hiring";
+      type = userInfo.role?.includes("inita") ? "asset" : "hiring";
     }
 
     const response = await axios.get(`${REACT_SERVER_URL}/receipts/`, {

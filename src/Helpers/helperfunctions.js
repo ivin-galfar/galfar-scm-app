@@ -200,3 +200,10 @@ export const getlastSubmittedDate = (approverinfo = [], role) => {
   );
   return lastsubmissiondate;
 };
+
+export const formatwords = (buttontxt) => {
+  return buttontxt
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
