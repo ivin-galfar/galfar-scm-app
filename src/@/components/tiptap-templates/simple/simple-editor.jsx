@@ -79,6 +79,7 @@ import { CiViewTable } from "react-icons/ci";
 import { TbTableColumn } from "react-icons/tb";
 import { TbTableRow } from "react-icons/tb";
 import { TbTrash } from "react-icons/tb";
+import UploadAttachments from "../../../../Components/UploadAttachments";
 
 // import content from "@/components/tiptap-templates/simple/data/content.json";
 
@@ -96,11 +97,15 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <UndoRedoButton
           action="undo"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
         <UndoRedoButton
           action="redo"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
       </ToolbarGroup>
       <ToolbarSeparator />
@@ -108,43 +113,83 @@ const MainToolbarContent = ({
         <HeadingDropdownMenu
           levels={[1, 2, 3, 4]}
           portal={isMobile}
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
         <ListDropdownMenu
           types={["bulletList", "orderedList", "taskList"]}
           portal={isMobile}
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
-        <BlockquoteButton className={newfn ? "cursor-pointer" : ""} />
-        <CodeBlockButton className={newfn ? "cursor-pointer" : ""} />
+        <BlockquoteButton
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
+        />
+        <CodeBlockButton
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
+        />
       </ToolbarGroup>
 
       <ToolbarSeparator />
       <ToolbarGroup>
-        <MarkButton type="bold" className={newfn ? "cursor-pointer" : ""} />
-        <MarkButton type="italic" className={newfn ? "cursor-pointer" : ""} />
-        <MarkButton type="strike" className={newfn ? "cursor-pointer" : ""} />
-        <MarkButton type="code" className={newfn ? "cursor-pointer" : ""} />
+        <MarkButton
+          type="bold"
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
+        />
+        <MarkButton
+          type="italic"
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
+        />
+        <MarkButton
+          type="strike"
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
+        />
+        <MarkButton
+          type="code"
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
+        />
         <MarkButton
           type="underline"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
         {!isMobile ? (
-          <ColorHighlightPopover className={newfn ? "cursor-pointer" : ""} />
+          <ColorHighlightPopover
+            className={
+              newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            }
+          />
         ) : (
           <ColorHighlightPopoverButton
             onClick={onHighlighterClick}
-            className={newfn ? "cursor-pointer" : ""}
+            className={
+              newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            }
           />
         )}
         {!isMobile ? (
           <LinkPopover
-            className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+            className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           />
         ) : (
           <LinkButton
             onClick={onLinkClick}
-            className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+            className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           />
         )}
       </ToolbarGroup>
@@ -161,40 +206,40 @@ const MainToolbarContent = ({
               })
               .run()
           }
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
         >
           <CiViewTable />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().addRowAfter().run()}
         >
           <span className="mr-1">+</span>
           <TbTableRow />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().deleteRow().run()}
         >
           <span className="mr-1">-</span>
           <TbTableRow />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().addColumnAfter().run()}
         >
           <span className="mr-1">+</span>
           <TbTableColumn />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().deleteColumn().run()}
         >
           <span className="mr-1">-</span>
           <TbTableColumn />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : ""} p-2`}
+          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().deleteTable().run()}
         >
           <CiViewTable />
@@ -207,37 +252,48 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <MarkButton
           type="superscript"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
         <MarkButton
           type="subscript"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
         <TextAlignButton
           align="left"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
         <TextAlignButton
           align="center"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
         <TextAlignButton
           align="right"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
         <TextAlignButton
           align="justify"
-          className={newfn ? "cursor-pointer" : ""}
+          className={
+            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+          }
         />
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
-        <ImageUploadButton
-          text="Add"
-          className={newfn ? "cursor-pointer" : ""}
+        <UploadAttachments
+          styles={newfn ? "cursor-pointer" : "pointer-events-none opacity-50"}
         />
       </ToolbarGroup>
       <Spacer />
@@ -272,7 +328,7 @@ const MobileToolbarContent = ({ type, onBack }) => (
   </>
 );
 
-export function SimpleEditor({ content, newfn }) {
+export function SimpleEditor({ content, newfn, is_admin }) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState("main");
@@ -291,6 +347,7 @@ export function SimpleEditor({ content, newfn }) {
     },
 
     onUpdate: ({ editor }) => {
+      if (!is_admin) return;
       localStorage.setItem("editorContent", JSON.stringify(editor.getJSON()));
     },
     extensions: [
@@ -331,6 +388,11 @@ export function SimpleEditor({ content, newfn }) {
     ],
     content: content || {},
   });
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(is_admin);
+    }
+  }, [editor, is_admin]);
 
   useEffect(() => {
     if (content == "") {
@@ -358,30 +420,32 @@ export function SimpleEditor({ content, newfn }) {
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        <Toolbar
-          ref={toolbarRef}
-          style={{
-            ...(isMobile
-              ? {
-                  bottom: `calc(100% - ${height - rect.y}px)`,
-                }
-              : {}),
-          }}
-        >
-          {mobileView === "main" ? (
-            <MainToolbarContent
-              onHighlighterClick={() => setMobileView("highlighter")}
-              onLinkClick={() => setMobileView("link")}
-              isMobile={isMobile}
-              newfn={newfn}
-            />
-          ) : (
-            <MobileToolbarContent
-              type={mobileView === "highlighter" ? "highlighter" : "link"}
-              onBack={() => setMobileView("main")}
-            />
-          )}
-        </Toolbar>
+        {is_admin && (
+          <Toolbar
+            ref={toolbarRef}
+            style={{
+              ...(isMobile
+                ? {
+                    bottom: `calc(100% - ${height - rect.y}px)`,
+                  }
+                : {}),
+            }}
+          >
+            {mobileView === "main" ? (
+              <MainToolbarContent
+                onHighlighterClick={() => setMobileView("highlighter")}
+                onLinkClick={() => setMobileView("link")}
+                isMobile={isMobile}
+                newfn={newfn}
+              />
+            ) : (
+              <MobileToolbarContent
+                type={mobileView === "highlighter" ? "highlighter" : "link"}
+                onBack={() => setMobileView("main")}
+              />
+            )}
+          </Toolbar>
+        )}
 
         <EditorContent
           editor={editor}

@@ -1,7 +1,12 @@
 export const useEditorInfo = () => {
-  const stored = localStorage.getItem("editorContent");
+  try {
+    const stored = localStorage?.getItem("editorContent");
 
-  const formattedStored = stored ? JSON.parse(stored) : null;
+    if (!stored || stored === "undefined") return null;
 
-  return formattedStored;
+    return JSON.parse(stored);
+  } catch (error) {
+    console.error("Invalid editorContent JSON:", error);
+    return null;
+  }
 };

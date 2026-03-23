@@ -528,7 +528,6 @@ export const handleBrPrint = (formData) => {
   doc.setTextColor(0, 0, 0);
   doc.text(part1cash, xcash, y);
   xcash += doc.getTextWidth(part1cash);
-  console.log(part2cash);
 
   const textWidthcash = doc.getTextWidth(part2cash);
   doc.setFillColor(255, 255, 0);

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { categoryapprovers, prevRole, roles } from "./roles_helper";
+import { CategoryValue, TypeForUi, TypeValue } from "./category_helper";
 
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
@@ -16,6 +17,12 @@ export const handleRemoveFile = (index, formData, setFormData) => {
   }));
 };
 
+export const handleRemoveFiles = (index, attachments, setAttachments) => {
+  if (!Array.isArray(attachments)) return;
+  const updatedAttachments = attachments.filter((_, i) => i !== index);
+  setAttachments(updatedAttachments);
+};
+
 export const handleRemoveBrFile = (
   index,
   brtabledata,
@@ -25,7 +32,6 @@ export const handleRemoveBrFile = (
   const updatedFilenames = [...brtabledata.filename];
   const updatedFiles = [...brtabledata.file];
   let status = brtabledata.status;
-  console.log(status);
 
   if (brtabledata.status != "pending for hod") {
     status = "created";
@@ -167,9 +173,33 @@ export const handleFileUpload = async (files, userInfo, setFormData) => {
       filename: [...(prev.filename || []), ...newFileNames],
     }));
   } catch (error) {
-    console.log(error);
-
     return error;
+  }
+};
+
+export const handleAttachmentsUpload = async (files, userInfo) => {
+  try {
+    const formData = new FormData();
+
+    Array.from(files).forEach((file) => {
+      formData.append("file", file);
+    });
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/receipts/file`,
+      formData,
+      config,
+    );
+
+    return response.data.uploadedFiles;
+  } catch (error) {
+    return [];
   }
 };
 
@@ -206,4 +236,16 @@ export const formatwords = (buttontxt) => {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+};
+
+export const getCategoryCode = (category) => {
+  return CategoryValue[category] || "";
+};
+
+export const getTypeCode = (type) => {
+  return TypeValue[type] || "";
+};
+
+export const getType = (type) => {
+  return TypeForUi[type] || "";
 };

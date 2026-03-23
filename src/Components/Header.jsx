@@ -141,8 +141,8 @@ const Header = () => {
                   </NavLink>
                 )}
 
-                <NavLink to="/contact" className={navLinkClasses}>
-                  Contact
+                <NavLink to="/filenote" className={navLinkClasses}>
+                  Documents
                 </NavLink>
                 {userInfo?.email && <UserDropdown />}
               </nav>

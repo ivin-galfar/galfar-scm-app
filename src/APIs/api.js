@@ -633,7 +633,16 @@ export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
   }
 };
 
-export const createfilenote = async ({ name, content, dept_id, userInfo }) => {
+export const createfilenote = async ({
+  name,
+  content,
+  dept_id,
+  file_names,
+  file_urls,
+  category,
+  type,
+  userInfo,
+}) => {
   try {
     const config = {
       headers: {
@@ -647,20 +656,27 @@ export const createfilenote = async ({ name, content, dept_id, userInfo }) => {
         content,
         name,
         dept_id,
+        category,
+        type,
+        file_names,
+        file_urls,
       },
       config,
     );
     return response.data;
   } catch (error) {
+    console.log(error);
+
     throw error;
   }
 };
 
 export const updatefilenotevalues = async ({
   status,
-  sentforapproval,
   fnid,
   userInfo,
+  comments,
+  sentforapproval,
 }) => {
   try {
     const config = {
@@ -674,16 +690,17 @@ export const updatefilenotevalues = async ({
       {
         status,
         sentforapproval,
+        role: userInfo.role,
+        comments,
       },
       config,
     );
-    return response;
+    return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
-export const fetchfilenoteids = async ({ userInfo, module }) => {
+export const fetchfilenoteids = async ({ userInfo, module, dept_id }) => {
   try {
     const config = {
       headers: {
@@ -697,7 +714,9 @@ export const fetchfilenoteids = async ({ userInfo, module }) => {
         ...config,
         params: {
           module,
-          // role: userinfo.role,
+          role: userInfo.role.join(","),
+          isadmin: userInfo.is_admin,
+          dept_id,
           // statusfilter,
           // page,
           // limit,
@@ -721,11 +740,40 @@ export const fetchfilenoteidvalue = async (fnid, userInfo) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/filenote/${fnid}`,
-      config,
-    );
+    const response = await axios.get(`${REACT_SERVER_URL}/filenote/${fnid}`, {
+      ...config,
+      params: {
+        role: userInfo.role.join(","),
+        isadmin: userInfo.is_admin,
+      },
+    });
     return response.data[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchlastid = async ({ dept_id, type, category, userInfo }) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/filenote/fetchdocno`,
+      {
+        ...config,
+        params: {
+          dept_id,
+          type: type,
+          category: category || "file_note",
+        },
+      },
+    );
+
+    return response.data;
   } catch (error) {
     throw error;
   }

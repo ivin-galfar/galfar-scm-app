@@ -10,7 +10,7 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
     ? nextstatus
     : data.status == "created"
       ? "Sent for Approval"
-      : "Create File Note";
+      : "Create Document";
 
   const buttonclass =
     (buttontxt?.toLowerCase().includes("pending") &&

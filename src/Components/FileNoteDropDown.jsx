@@ -6,14 +6,18 @@ import { useEffect, useState } from "react";
 import { useErrorMessage } from "../store/errorStore";
 import { useParams } from "react-router-dom";
 import { useDatasaved } from "../store/brStore";
+import { useAttachments } from "../store/helperStore";
+import { getCategoryCode, getTypeCode } from "../Helpers/helperfunctions";
 const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
   const { datasaved } = useDatasaved();
+  const { attachments, setAttachments, resetAttachments } = useAttachments();
 
   const userInfo = useUserInfo();
   const { fn_no } = useParams();
+  const dept_id = userInfo.dept_code[0];
   const { data } = useQuery({
     queryKey: [datasaved],
-    queryFn: () => fetchfilenoteids(userInfo),
+    queryFn: () => fetchfilenoteids({ userInfo, module: "/filenote", dept_id }),
     enabled: !!userInfo,
   });
 
@@ -44,7 +48,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
   return (
     <div className="flex items-center gap-4 p-4">
       <label className="ml-4 flex font-medium justify-center items-center">
-        Choose File Note
+        Choose Document
       </label>
       <select
         value={fn_no ?? ""}
@@ -60,14 +64,24 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
         onChange={(e) => {
           const id = e.target.value;
           navigate(`/filenote/${id}`, { replace: true });
+          resetAttachments();
         }}
       >
         <option value="">📋 Select File Note</option>
-        {data?.map((d) => (
-          <option key={d.id} value={d.id}>
-            {d.name}
-          </option>
-        ))}
+        {data?.map((d) => {
+          const dept =
+            d.department_id == 1
+              ? "P&E"
+              : d.department_id == 2
+                ? "Logistics"
+                : "";
+          return (
+            <option key={d.id} value={d.id}>
+              {dept}/{getTypeCode(d.type)}/ {getCategoryCode(d.category)} -{" "}
+              {d.doc_no}
+            </option>
+          );
+        })}
       </select>
     </div>
   );

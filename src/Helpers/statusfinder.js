@@ -60,12 +60,13 @@ export const expectedstatusplant = (currentrole) => {
   return statustext;
 };
 
-export const statusExpected = (currentrole = [], dept) => {
+export const statusExpected = (currentrole = [], action) => {
   let statustext = "";
   const roles = currentrole.map((r) => r.toLowerCase());
-  if (roles.includes("fnote")) {
+
+  if (roles.includes("initfn") && action == "save") {
     statustext = "pending for hod";
-  } else if (roles.includes("hod") && dept === "plant") {
+  } else if (roles.includes("hod")) {
     statustext = "pending for fm";
   } else if (roles.includes("fm")) {
     statustext = "pending for gm";

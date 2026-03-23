@@ -7,18 +7,40 @@ import { useErrorMessage } from "../store/errorStore";
 import { statusExpected } from "../Helpers/statusfinder";
 import { updatefilenotevalues } from "../APIs/api";
 import { useComments } from "../store/helperStore";
+import { is_plant } from "../Helpers/dept_helper";
+import { useMutation } from "@tanstack/react-query";
 
 const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const userInfo = useUserInfo();
   const { setShowModal, resetShowModal } = useToggleModal();
   const { setErrorMessage, errormessage } = useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
-  const { setComments, comments } = useComments();
+  const { setComments, comments, resetComments } = useComments();
 
-  const submitApproval = async (cs_id, status) => {
+  const isPlant = is_plant(userInfo?.dept_code);
+  console.log(comments);
+
+  const { mutate: updatestatement } = useMutation({
+    mutationFn: updatefilenotevalues,
+    onSuccess: (data) => {
+      setShowToast();
+      setTimeout(() => {
+        resetshowtoast();
+        resetShowModal();
+        resetComments();
+      }, 1500);
+    },
+    onError: (error) => {
+      console.log(error);
+
+      const message = error?.response?.data || error.message;
+      setErrorMessage(message);
+    },
+  });
+  const submitApproval = async (status) => {
     let updatedstatus = "";
     if (status == "approved") {
-      updatedstatus = statusExpected(userInfo?.role);
+      updatedstatus = statusExpected(userInfo?.role, "update");
       setSelectedValue((prev) => ({
         ...prev,
         status: updatedstatus,
@@ -36,10 +58,12 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         status: updatedstatus,
       }));
     }
-    updatefilenotevalues({
+
+    updatestatement({
       status: updatedstatus,
       fnid: data.id,
       userInfo,
+      comments,
     });
   };
 
@@ -66,22 +90,22 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         <div className="mt-6 flex justify-end space-x-2">
           <button
             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
-            onClick={() => submitApproval(data.id, "approved")}
+            onClick={() => submitApproval("approved")}
           >
             Approve
           </button>
           <button
             className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition cursor-pointer"
-            onClick={() => submitApproval(data.id, "rejected")}
+            onClick={() => submitApproval("rejected")}
           >
             Reject
           </button>
-          <button
+          {/* <button
             className="px-4 py-2 flex items-center gap-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition cursor-pointer"
-            onClick={() => submitApproval(data.id, "review")}
+            onClick={() => submitApproval("review")}
           >
             <LuRotateCcwSquare /> Send For Review
-          </button>
+          </button> */}
         </div>
         {showtoast && !errormessage && data.status == "review" && (
           <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
