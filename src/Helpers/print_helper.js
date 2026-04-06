@@ -395,7 +395,7 @@ export const handleBrPrint = (formData) => {
   doc.setFontSize(11);
   let cashflowx = 14;
   doc.setFont("helvetica", "bold");
-  const cashflowtext = "Cash flow Gain/(loss)";
+  const cashflowtext = "Cash flow Gain/loss";
   const textWidthtypecashflow = doc.getTextWidth(cashflowtext);
   doc.setFillColor(204, 255, 204);
 
