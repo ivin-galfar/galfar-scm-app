@@ -92,7 +92,10 @@ const MainToolbarContent = ({
   const { editor } = useContext(EditorContext);
 
   return (
-    <>
+    <div
+      key={newfn ? "edit" : "view"}
+      className={`flex w-full ${newfn ? "" : "hidden"}`}
+    >
       <Spacer />
       <ToolbarGroup>
         <UndoRedoButton
@@ -301,7 +304,7 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <ThemeToggle />
       </ToolbarGroup>
-    </>
+    </div>
   );
 };
 
@@ -347,7 +350,7 @@ export function SimpleEditor({ content, newfn, is_admin }) {
     },
 
     onUpdate: ({ editor }) => {
-      if (!is_admin) return;
+      // if (is_admin) return;
       localStorage.setItem("editorContent", JSON.stringify(editor.getJSON()));
     },
     extensions: [
@@ -388,11 +391,12 @@ export function SimpleEditor({ content, newfn, is_admin }) {
     ],
     content: content || {},
   });
+
   useEffect(() => {
-    if (editor) {
-      editor.setEditable(is_admin);
+    if (editor || newfn) {
+      editor.setEditable(is_admin && newfn);
     }
-  }, [editor, is_admin]);
+  }, [editor, is_admin, newfn]);
 
   useEffect(() => {
     if (content == "") {
@@ -420,7 +424,7 @@ export function SimpleEditor({ content, newfn, is_admin }) {
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        {is_admin && (
+        {is_admin && newfn && (
           <Toolbar
             ref={toolbarRef}
             style={{

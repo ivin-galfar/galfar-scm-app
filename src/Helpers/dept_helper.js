@@ -6,7 +6,8 @@ export const is_gm = (role) => role?.includes("gm");
 export const is_ceo = (role) => role?.includes("ceo");
 export const is_asset = (role) => role?.includes("inita");
 export const is_fm = (role) => role?.includes("fm");
-export const is_fnote = (role) => role?.includes("initfn");
+export const is_fnote = (role) =>
+  role?.includes("initfn") || role?.includes("initpr");
 
 export const dept_finder_asadmin = (dept_code) => {
   if (!dept_code) return null;

@@ -18,11 +18,10 @@ const AttachmentsContainer = ({ file, file_name }) => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { imagesaved } = useImageSaved();
   const { attachments, setAttachments, resetAttachments } = useAttachments();
-  console.log(file_name);
 
   return (
     <>
-      <div className="w-1/3 ml-20 p-4 bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[45vh]">
+      <div className="w-1/3 ml-15 p-4 bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[45vh]">
         <div className="text-base flex font-bold mb-4 text-gray-800 border-b-2 border-blue-500 pb-2 justify-between">
           📎 Attachments {file?.length > 0 ? `(${file?.length})` : ""}
         </div>

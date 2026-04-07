@@ -5,42 +5,55 @@ import { useToast } from "../store/toastStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useErrorMessage } from "../store/errorStore";
 import { statusExpected } from "../Helpers/statusfinder";
-import { updatefilenotevalues } from "../APIs/api";
+import { FnEmailAlert, updatefilenotevalues } from "../APIs/api";
 import { useComments } from "../store/helperStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { useMutation } from "@tanstack/react-query";
 
 const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const userInfo = useUserInfo();
-  const { setShowModal, resetShowModal } = useToggleModal();
-  const { setErrorMessage, errormessage } = useErrorMessage();
+  const { resetShowModal } = useToggleModal();
+  const { clearErrorMessage, setErrorMessage, errormessage } =
+    useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { setComments, comments, resetComments } = useComments();
 
-  const isPlant = is_plant(userInfo?.dept_code);
-  console.log(comments);
-
+  const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatefilenotevalues,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setShowToast();
       setTimeout(() => {
         resetshowtoast();
         resetShowModal();
         resetComments();
       }, 1500);
+      try {
+        await FnEmailAlert(data.id, userInfo, dept, data);
+      } catch (err) {
+        const message = err?.response?.data || err?.message || "Email failed";
+        setErrorMessage(message);
+      }
     },
     onError: (error) => {
-      console.log(error);
-
       const message = error?.response?.data || error.message;
       setErrorMessage(message);
+      setTimeout(() => {
+        resetshowtoast();
+        clearErrorMessage();
+        resetShowModal();
+      }, 1500);
     },
   });
-  const submitApproval = async (status) => {
+  const submitApproval = (status) => {
     let updatedstatus = "";
     if (status == "approved") {
-      updatedstatus = statusExpected(userInfo?.role, "update");
+      updatedstatus = statusExpected(
+        userInfo?.role,
+        "update",
+        data.type,
+        data.category,
+      );
       setSelectedValue((prev) => ({
         ...prev,
         status: updatedstatus,
@@ -79,14 +92,14 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">
           Approve/Reject
         </h2>
-        <div className="flex w-full">
+        {/* <div className="flex w-full">
           <textarea
             rows={3}
             placeholder="Enter your comments here..."
             className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
             onChange={(e) => setComments(e.target.value)}
           />
-        </div>
+        </div> */}
         <div className="mt-6 flex justify-end space-x-2">
           <button
             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"

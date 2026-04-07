@@ -10,12 +10,15 @@ import {
   useSortVendors,
 } from "../store/statementStore";
 import { RxCross1 } from "react-icons/rx";
+import { is_plant } from "../Helpers/dept_helper";
 
 const ApproveModal = ({ setShowmodal, cs_id }) => {
+  const userInfo = useUserInfo();
   const [comments, setComments] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [errormessage, setErrormessage] = useState("");
   const [lastAction, setLastAction] = useState("");
+  const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
 
   const {
     setSharedTableData,
@@ -26,7 +29,6 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
 
   const { setClearTable } = useClearStatementTable();
   const { resetSortVendors } = useSortVendors();
-  const userInfo = useUserInfo();
   const navigate = useNavigate();
   const submitApproval = async (cs_id, status) => {
     let finalStatus = "";
@@ -123,7 +125,7 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
 
       axios
         .post(
-          `${REACT_SERVER_URL}/emailnotify/${cs_id}`,
+          `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
           {
             userInfo,
             formData: sharedTableData.formData,

@@ -642,6 +642,7 @@ export const createfilenote = async ({
   category,
   type,
   userInfo,
+  project,
 }) => {
   try {
     const config = {
@@ -660,6 +661,7 @@ export const createfilenote = async ({
         type,
         file_names,
         file_urls,
+        project,
       },
       config,
     );
@@ -700,7 +702,16 @@ export const updatefilenotevalues = async ({
     throw error;
   }
 };
-export const fetchfilenoteids = async ({ userInfo, module, dept_id }) => {
+export const fetchfilenoteids = async ({
+  userInfo,
+  module,
+  dept_id,
+  statusfilter,
+  count,
+  page,
+  limit,
+  searchcs,
+}) => {
   try {
     const config = {
       headers: {
@@ -716,11 +727,13 @@ export const fetchfilenoteids = async ({ userInfo, module, dept_id }) => {
           module,
           role: userInfo.role.join(","),
           isadmin: userInfo.is_admin,
-          dept_id,
-          // statusfilter,
-          // page,
-          // limit,
-          // searchcs,
+          dept_id: dept_id.join(","),
+          project_code: userInfo.pr_code,
+          statusfilter,
+          count,
+          page,
+          limit,
+          searchcs,
         },
       },
       config,
@@ -753,7 +766,13 @@ export const fetchfilenoteidvalue = async (fnid, userInfo) => {
   }
 };
 
-export const fetchlastid = async ({ dept_id, type, category, userInfo }) => {
+export const fetchlastid = async ({
+  dept_id,
+  type,
+  category,
+  userInfo,
+  selectedproject,
+}) => {
   try {
     const config = {
       headers: {
@@ -769,12 +788,78 @@ export const fetchlastid = async ({ dept_id, type, category, userInfo }) => {
           dept_id,
           type: type,
           category: category || "file_note",
+          project_code: selectedproject,
         },
       },
     );
 
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchProjectDetails = async (userInfo, project_code, role) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(`${REACT_SERVER_URL}/projects/`, config);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deletefn = async (fnid, userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/filenote/deletefn/${fnid}`,
+      {},
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const FnEmailAlert = async (id, userInfo, dept, data) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/${id}?dept=${dept}&type=${data.type}&category=${data.category}`,
+      {
+        id: data.id,
+        role: !userInfo.is_admin ? userInfo.role[0] : userInfo.role[1],
+        dept_id: data.department_id,
+        doc_no: data.doc_no,
+        name: data.name,
+        status: data.status,
+        created_at: data.created_at,
+        is_admin: userInfo.is_admin,
+        project_code: data.project_code,
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+
     throw error;
   }
 };

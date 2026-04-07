@@ -34,3 +34,17 @@ export const useAttachments = create((set) => ({
       return { attachments: [] };
     }),
 }));
+
+export const useProjectCodes = create((set) => ({
+  projectcodes: [],
+  setProjectCodes: (value) => set(() => ({ projectcodes: value })),
+  resetProjectCodes: () => set(() => ({ projectcodes: [] })),
+}));
+
+export const useDeleteStore = create((set) => ({
+  deleteStatement: { id: null, open: false },
+  setDeleteStatement: (id) =>
+    set(() => ({ deleteStatement: { id, open: true } })),
+  resetDeleteStatement: () =>
+    set(() => ({ deleteStatement: { id: null, open: false } })),
+}));

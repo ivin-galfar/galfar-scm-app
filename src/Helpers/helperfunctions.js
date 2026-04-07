@@ -249,3 +249,16 @@ export const getTypeCode = (type) => {
 export const getType = (type) => {
   return TypeForUi[type] || "";
 };
+
+export const getEnclosureText = (category) => {
+  switch (category) {
+    case "Insurance":
+      return "Encl: Copy of Vcc, Proforma Invoice, LPO";
+    case "PR":
+      return "Encl: Copy of Mulkia, Agreement, Inspection Reports & Maintenance Charge";
+    case "FC":
+      return "Encl: Copy of Registration card";
+    default:
+      return "Encl: Relevant documents attached";
+  }
+};

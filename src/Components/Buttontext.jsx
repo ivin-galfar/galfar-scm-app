@@ -23,15 +23,22 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
       : buttontxt != ""
         ? "px-10 py-2 bg-blue-600  hover:bg-blue-700 cursor-pointer"
         : "";
+  const isDisabled =
+    buttonclass.includes("bg-gray-400") ||
+    buttontxt == "approved" ||
+    buttontxt == "review" ||
+    buttontxt == "reverted" ||
+    buttontxt == "rejected";
 
   return (
     <div>
-      <div
+      <button
         className={` text-white rounded  shadow items-center font-semibold  transition-colors ${buttonclass}`}
         onClick={() => setShowModal()}
+        disabled={isDisabled}
       >
         {formatwords(buttontxt)}
-      </div>
+      </button>
     </div>
   );
 };

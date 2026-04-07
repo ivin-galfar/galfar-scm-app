@@ -1,9 +1,9 @@
-export const getcategory = (category) => {
+export const getcategory = (type) => {
   const map = {
-    file_note: ["General", "ATDS CICPA", "Traffic Fine Waiver"],
-    ioc: ["Insurance", "Demobilization", "Fuel Chip", "Police Return"],
+    file_note: ["General", "Ap", "ADTS", "TFW"],
+    ioc: ["Insurance", "Demob", "FC", "PR"],
   };
-  return map[category] || [];
+  return map[type] || [];
 };
 
 export const TypeValue = {
@@ -13,12 +13,12 @@ export const TypeValue = {
 
 export const CategoryValue = {
   General: "GN",
-  "ATDS CICPA": "ATDS CICPA",
-  "Traffic Fine Waiver": "Traffic Fine Waiver",
+  ADTS: "ADTS CICPA",
+  TFW: "Traffic Fine Waiver",
   Insurance: "Insurance",
-  Demobilization: "Demob",
-  "Fuel Chip": "FC",
-  "Police Return": "PR",
+  Demob: "Demob",
+  FC: "FC",
+  PR: "PR",
 };
 
 export const TypeForUi = {

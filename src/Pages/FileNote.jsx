@@ -1,12 +1,18 @@
 import { useEditorInfo } from "../CustomHooks/useEditorInfo";
 import { SimpleEditor } from "../@/components/tiptap-templates/simple/simple-editor";
 import { useMutation } from "@tanstack/react-query";
-import { createfilenote, fetchlastid, updatefilenotevalues } from "../APIs/api";
+import {
+  createfilenote,
+  fetchlastid,
+  fetchProjectDetails,
+  FnEmailAlert,
+  updatefilenotevalues,
+} from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { act, useEffect, useState } from "react";
 import FileNoteDropDown from "../Components/FileNoteDropDown";
 import { FaPlus } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import Buttontext from "../Components/Buttontext";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
@@ -16,6 +22,7 @@ import Alerts from "../Components/Alerts";
 import { useDatasaved } from "../store/brStore";
 import { BsAsterisk } from "react-icons/bs";
 import ApproveModalFn from "../Components/ApproveModalFn";
+import { format } from "date-fns";
 import {
   dept_finder,
   dept_finder_asadmin,
@@ -24,7 +31,7 @@ import {
 import { fileNoteTemplate } from "../Helpers/filenote_template";
 import { useQuery } from "@tanstack/react-query";
 import AttachmentsContainer from "../Components/AttachmentContainer";
-import { useAttachments } from "../store/helperStore";
+import { useAttachments, useProjectCodes } from "../store/helperStore";
 import { getcategory } from "../Helpers/category_helper";
 import { getType } from "../Helpers/helperfunctions";
 
@@ -36,7 +43,8 @@ const FileNote = () => {
   const [newfn, setNewfn] = useState(false);
   const [selectedfnvalue, setSelectedFnValue] = useState("");
   const [selectedvalue, setSelectedValue] = useState("");
-  const { setErrorMessage, clearErrorMessage } = useErrorMessage();
+  const { errormessage, setErrorMessage, clearErrorMessage } =
+    useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const navigate = useNavigate();
   const { showmodal, setShowModal, resetShowModal } = useToggleModal();
@@ -47,12 +55,19 @@ const FileNote = () => {
   const [category, setCategory] = useState("");
   const { attachments, setAttachments } = useAttachments();
   const { imagesaved } = useImageSaved();
+  const { projectcodes, setProjectCodes } = useProjectCodes();
+  const [selectedproject, setSelectedProject] = useState([]);
+  const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
 
-  const { data: doc_no } = useQuery({
-    queryKey: ["doc_no", userInfo, type, category],
-    queryFn: () => fetchlastid({ dept_id, type, category, userInfo }),
+  const { data: doc_no, isLoading: isDocLoading } = useQuery({
+    queryKey: ["doc_no", userInfo, type, category, selectedproject],
+    queryFn: () =>
+      fetchlastid({ dept_id, userInfo, type, category, selectedproject }),
     enabled: !!userInfo && !!type,
+    staleTime: 0,
+    gcTime: 0,
   });
+  console.log(doc_no);
 
   const { mutate: newfilenote } = useMutation({
     mutationFn: createfilenote,
@@ -62,17 +77,19 @@ const FileNote = () => {
       setShowToast();
       setSelectedValue(data);
       setDataSaved();
+      setNewfn(false);
       setTimeout(() => {
         resetshowtoast();
+        setSelectedProject([]);
         resetShowModal();
         setName("");
         resetDataSaved();
-        setNewfn(false);
       }, 1500);
     },
     onError: (error) => {
       const message = error?.response?.data || error.message;
       setErrorMessage(message);
+      setShowToast();
       setTimeout(() => {
         resetshowtoast();
         clearErrorMessage();
@@ -83,69 +100,95 @@ const FileNote = () => {
 
   const { mutate: updatefilenote } = useMutation({
     mutationFn: updatefilenotevalues,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setSelectedValue(data);
       setErrorMessage("");
       setShowToast();
       setTimeout(() => {
         resetshowtoast();
+        clearErrorMessage();
+        resetShowModal();
+      }, 1500);
+      try {
+        await FnEmailAlert(data.id, userInfo, dept, data);
+      } catch (err) {
+        console.log(err);
+
+        const message =
+          err?.response?.data?.message || err?.message || "Email failed";
+        setErrorMessage(message);
+      }
+    },
+
+    onError: (error) => {
+      const message = error?.response?.data || error.message;
+      setErrorMessage(message);
+      setShowToast();
+      setTimeout(() => {
         resetshowtoast();
         clearErrorMessage();
         resetShowModal();
       }, 1500);
     },
-    onError: (error) => {
-      const message = error?.response?.data || error.message;
-      setErrorMessage(message);
-    },
   });
 
-  const generateTemplate = () => {
+  const generateTemplate = (category, type) => {
     if (!doc_no || doc_no.last_no == null) return "";
-
     const dept = isPlant ? "P&E" : "Logistics";
-    const categorytype = type === "file_note" ? "FN" : "IOC";
-    console.log("doc_no_1");
-
-    console.log(doc_no);
-    console.log("doc_no");
-
-    const ref_no = `${dept}/${categorytype}/${doc_no?.last_no + 1}`;
+    const typedefined = type === "file_note" ? "FN" : "IOC";
+    const ref_no = [
+      typedefined ?? "",
+      dept ?? "",
+      category ?? "",
+      selectedproject ?? "",
+      (doc_no?.last_no ?? 0) + 1,
+    ]
+      .filter(Boolean)
+      .join("/");
     const date = new Date().toDateString();
-
-    return fileNoteTemplate(ref_no, name || " ", date);
+    const formattedDate = format(date, "do MMMM yyyy");
+    return fileNoteTemplate(ref_no, name || " ", formattedDate, type, category);
   };
-  // const handleDocumentType = (selectedtype) => {
-  //   settype(selectedtype);
-  //   // const dept = isPlant ? "P&E" : "Logistics";
-  //   // const categorytype = selectedtype === "file_note" ? "FN" : "IOC";
-  //   // const ref_no = `${dept}/${categorytype}/${doc_no.last_no + 1}`;
-  //   // const date = new Date().toDateString();
-
-  //   setCategories(getcategory(selectedtype));
-  //   if (selectedtype === "file_note") {
-  //     localStorage.setItem(
-  //       "editorContent",
-  //       JSON.stringify(fileNoteTemplate(ref_no, name, date)),
-  //     );
-  //     setSelectedFnValue(fileNoteTemplate(ref_no, name, date));
-  //   } else {
-  //     setSelectedFnValue("");
-  //   }
-  // };
 
   useEffect(() => {
-    setCategories(getcategory(type));
-    if (type === "file_note") {
-      const template = generateTemplate();
+    if (userInfo?.role.includes("initpr") && category == "Demob" && !name) {
+      setName("Demobilization of Vehicle/Equipment");
+    }
+  }, [category, userInfo]);
+
+  useEffect(() => {
+    let cat = [];
+    if (userInfo.role.includes("initpr")) {
+      cat = getcategory(type).filter((c) => c.includes("Demob"));
+    } else {
+      cat = getcategory(type).filter((c) => !c.includes("Demob"));
+    }
+
+    setCategories(cat);
+    if (type && newfn && !isDocLoading && doc_no) {
+      const template = generateTemplate(category, type);
       setSelectedFnValue(template);
       localStorage.setItem("editorContent", JSON.stringify(template));
-    } else {
+    } else if (!type) {
+      setProjectCodes([]);
+      setSelectedProject("");
       setSelectedFnValue("");
     }
-  }, [name, type, category, doc_no]);
-  const handleDocumentcategorytype = (type) => {
-    setCategory(type);
+  }, [type, category, selectedproject, doc_no, isDocLoading, newfn]);
+
+  const handleDocumentcategorytype = async (category) => {
+    if (category == "Demob") {
+      const projects = await fetchProjectDetails(userInfo);
+      const projectids = projects.map((pr) => pr.project);
+      const allocatedprcodes = userInfo.pr_code;
+      const matchedprcodes = projectids.filter((project) =>
+        allocatedprcodes.includes(project),
+      );
+      setProjectCodes(matchedprcodes);
+    } else {
+      setProjectCodes([]);
+    }
+    setCategory(category);
   };
   const nextstatus = userInfo.role.some((r) =>
     selectedvalue?.status?.toLowerCase().includes(r?.toLowerCase()),
@@ -156,13 +199,23 @@ const FileNote = () => {
       : selectedvalue?.status || "";
 
   const handleSave = (action) => {
-    const status = statusExpected(userInfo?.role, "save");
+    const status = statusExpected(userInfo?.role, "save", type, category);
     const files = JSON.parse(localStorage.getItem("editorAttachments")) || [];
 
     const file_names = files.map((file) => file.name);
     const file_urls = files.map((file) => file.url);
 
     if (action != "update") {
+      if (category == "Demob" && selectedproject.length == 0) {
+        setErrorMessage("Please select the Project");
+        setShowToast();
+        setTimeout(() => {
+          resetshowtoast();
+          clearErrorMessage();
+          resetShowModal();
+        }, 1500);
+        return;
+      }
       newfilenote({
         name,
         type,
@@ -172,6 +225,7 @@ const FileNote = () => {
         file_urls,
         dept_id,
         userInfo,
+        project: selectedproject,
       });
     } else {
       updatefilenote({
@@ -183,73 +237,101 @@ const FileNote = () => {
     }
   };
 
-  // const uploaded = JSON.parse(localStorage.getItem("editorAttachments")) || [];
-  // const newfiles = uploaded.map((file) => file.url);
-  // const newfilesnames = uploaded.map((file) => file.name);
-  // console.log(attachments);
-
   return (
     <div className="flex flex-grow flex-col ">
-      <div className="flex gap-5">
+      <div className="flex gap-4 p-4 items-center">
         {userInfo?.is_admin && (
-          <div className="w-1/7 py-2 gap-10 flex p-4 items-center">
-            <span className="flex ml-4  justify-center font-semibold text-sm px-2 py-2  gap-2 h-10 bg-blue-600 rounded-2xl text-white items-center cursor-pointer">
-              {" "}
-              {!newfn && <FaPlus />}
-              <button
-                className="text-white bg-brand border border-transparent hover:bg-brand-strong shadow-xs font-medium leading-5 rounded-lg text-sm px-2 py-2  focus:outline-none cursor-pointer "
-                type="button"
-                onClick={() => {
-                  setNewfn(!newfn);
-                  setSelectedFnValue("");
-                  setSelectedValue("");
-                  setName("");
-                  navigate("/filenote/");
-                  setCategory("");
-                  setAttachments("");
-                  settype("");
-                }}
-              >
-                {!newfn ? "Create FN/IOC" : "View Document"}
-              </button>
-            </span>
+          <div className="w-1/7 py-2 gap-10 flex p-4">
+            <button
+              type="button"
+              onClick={() => {
+                setNewfn(!newfn);
+                setSelectedFnValue("");
+                setSelectedValue("");
+                setName("");
+                navigate("/filenote/");
+                setCategory("");
+                setAttachments("");
+                settype("");
+              }}
+              className="flex items-center justify-center gap-2 w-full h-12 p-4 
+               bg-blue-600 hover:bg-blue-700 
+               text-white font-semibold text-sm 
+               rounded-xl shadow-sm hover:shadow-md 
+               transition-all duration-200 cursor-pointer"
+            >
+              {!newfn && <FaPlus className="text-sm" />}
+              {newfn ? "View Document" : "Create FN/IOC"}
+            </button>
           </div>
         )}
-        {!newfn && (
-          <FileNoteDropDown
-            setSelectedFnValue={setSelectedFnValue}
-            setSelectedValue={setSelectedValue}
-          />
-        )}
+        <div className="items-start flex">
+          {!newfn && (
+            <FileNoteDropDown
+              setSelectedFnValue={setSelectedFnValue}
+              setSelectedValue={setSelectedValue}
+            />
+          )}
+        </div>
 
         {selectedvalue?.id != null && (
-          <div className="flex justify-center items-center gap-8 px-4 py-2 rounded-md">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600 font-medium">Type:</span>
-              <span className="text-blue-600 font-semibold">
-                {getType(selectedvalue.type)}
-              </span>
-            </div>
+          <div className="w-full bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg shadow-md p-4 ">
+            <div className="flex gap-6 w-full">
+              <div className="flex-1 flex flex-col items-center justify-center   bg-white rounded-lg border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
+                  Type
+                </span>
+                <span className="text-blue-700 font-bold text-base">
+                  {getType(selectedvalue.type)}
+                </span>
+              </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600 font-medium">Category:</span>
-              <span className="text-blue-600 font-semibold">
-                {selectedvalue?.category?.charAt(0).toUpperCase() +
-                  selectedvalue?.category?.slice(1)}
-              </span>
+              <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white rounded-lg border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
+                  Category
+                </span>
+                <span className="text-green-700 font-bold text-base">
+                  {selectedvalue?.category?.charAt(0).toUpperCase() +
+                    selectedvalue?.category?.slice(1)}
+                </span>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white rounded-lg border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
+                  Doc ID
+                </span>
+                <span className="text-purple-700 font-bold text-base">
+                  {selectedvalue.doc_no}
+                </span>
+              </div>
+
+              {selectedvalue.project_code && (
+                <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white rounded-lg border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
+                    Project
+                  </span>
+                  <span className="text-orange-700 font-bold text-base">
+                    {selectedvalue.project_code || selectedvalue.project || "—"}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}
         {userInfo?.is_admin && newfn && (
-          <div className="flex justify-center items-center gap-8  px-2 py-2 rounded-md">
+          <div className="flex justify-center items-center gap-3 p-4 rounded-md">
             <label className="font-medium flex">
               Type: <BsAsterisk size={6} color="red" />{" "}
             </label>
             <select
+              disabled={isDocLoading}
               value={type}
-              onChange={(e) => settype(e.target.value)}
+              onChange={(e) => {
+                settype(e.target.value);
+                setCategory("");
+              }}
               className="w-50 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2 text-sm font-medium 
-             text-gray-800 bg-white  cursor-pointer
+             text-gray-800 bg-white  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
              hover:border-blue-400 hover:shadow-lg transition-all duration-200
              focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200
              bg-no-repeat bg-right pr-12"
@@ -259,17 +341,21 @@ const FileNote = () => {
               }}
             >
               <option value="">📋 Select Type</option>
-              <option value="file_note">File Note</option>
-              <option value="ioc">Inter Office Correspondence</option>
+              {!userInfo?.role.includes("initpr") && (
+                <option value="file_note">File Note</option>
+              )}
+
+              <option value="ioc">IOC</option>
             </select>
             <label className="font-medium flex">
               Category: <BsAsterisk size={6} color="red" />{" "}
             </label>
             <select
+              disabled={isDocLoading}
               value={category}
               onChange={(e) => handleDocumentcategorytype(e.target.value)}
-              className="w-50 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2 text-sm font-medium h-
-             text-gray-800 bg-white  cursor-pointer
+              className="w-50 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2 text-sm font-medium
+             text-gray-800 bg-white  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
              hover:border-blue-400 hover:shadow-lg transition-all duration-200
              focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200
              bg-no-repeat bg-right pr-12"
@@ -278,15 +364,41 @@ const FileNote = () => {
                 backgroundPosition: "right 0.9rem center",
               }}
             >
-              <option value="">📋 -- Select Category -- </option>
+              <option value="">📋 - Select - </option>
               {categories.map((category) => (
                 <option key={category}>{category}</option>
               ))}
             </select>
+            {userInfo?.role.includes("initpr") && (
+              <>
+                <label className="font-medium flex">
+                  Project: <BsAsterisk size={6} color="red" />{" "}
+                </label>
+                <select
+                  disabled={isDocLoading}
+                  value={selectedproject}
+                  onChange={(e) => setSelectedProject(e.target.value)}
+                  className="w-40 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2 text-sm font-medium h-
+                  text-gray-800 bg-white  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+                  hover:border-blue-400 hover:shadow-lg transition-all duration-200
+                  focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200
+                  bg-no-repeat bg-right pr-12"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                    backgroundPosition: "right 0.9rem center",
+                  }}
+                >
+                  <option value="">📋 - Select - </option>
+                  {projectcodes.map((project) => (
+                    <option key={project}>{project}</option>
+                  ))}
+                </select>
+              </>
+            )}
           </div>
         )}
         {newfn && selectedvalue.id == null && (
-          <div className="flex items-center gap-2 p-4">
+          <div className="flex items-center gap-1 p-4">
             <label className="font-medium flex">
               Subject: <BsAsterisk size={6} color="red" />
             </label>
@@ -299,23 +411,27 @@ const FileNote = () => {
             />
           </div>
         )}
-        {selectedvalue.doc_no && (
-          <div className="flex justify-center items-center gap-2  px-4 py-2 rounded-md ">
-            <span className="text-gray-600 font-medium">Doc Id:</span>
-            <span className="text-blue-600 font-semibold">
-              {selectedvalue.doc_no}
+        {isDocLoading && newfn && (
+          <div className="flex items-center justify-center gap-2 p-4">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <span className="text-sm text-gray-600 font-medium">
+              Fetching document ID...
             </span>
           </div>
         )}
       </div>
       {selectedvalue.doc_no && (
-        <div className="flex justify-center items-center gap-2  px-4 py-2 rounded-md ">
-          <span className="text-gray-600 font-medium">Department:</span>
-          <span className="text-blue-600 font-semibold">
-            {userInfo.is_admin
-              ? dept_finder_asadmin(userInfo.dept_code)
-              : dept_finder(selectedvalue.department_id)}
-          </span>
+        <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2  ">
+          <div className="flex items-center gap-2 justify-center">
+            <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
+              Department
+            </span>
+            <span className="text-gray-700 font-bold text-base px-4 py-2 ">
+              {userInfo.is_admin
+                ? dept_finder_asadmin(userInfo.dept_code)
+                : dept_finder(selectedvalue.department_id)}
+            </span>
+          </div>
         </div>
       )}
       <SimpleEditor
@@ -340,13 +456,13 @@ const FileNote = () => {
         {((newfn && name != "" && category) ||
           (!newfn && selectedvalue.id !== undefined)) && (
           <div className="flex mt-4 mr-20 p-5 justify-end items-end ">
-            <button>
+            <div>
               <Buttontext
                 issentforapproval={selectedvalue.sentforapproval}
                 nextstatus={nextstatus}
                 data={selectedvalue}
               />
-            </button>
+            </div>
           </div>
         )}
       </div>
@@ -369,16 +485,22 @@ const FileNote = () => {
         />
       )}
 
-      {showtoast && userInfo?.is_admin && !imagesaved && (
+      {showtoast && !errormessage && userInfo?.is_admin && !imagesaved && (
         <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ You have successfully created the File Note/IOC!
+        </div>
+      )}
+      {showtoast && errormessage && userInfo?.is_admin && !imagesaved && (
+        <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+          {errormessage}
         </div>
       )}
       {showtoast &&
         userInfo?.is_admin &&
         selectedvalue.status == "pending for hod" && (
           <div className="fixed top-5 left-1/2 z-60 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-            ✅ You have requested the document for approval!
+            ✅ You have requested the document for approval!{" "}
+            {errormessage ? `but ${errormessage}` : ""}
           </div>
         )}
       {showtoast &&

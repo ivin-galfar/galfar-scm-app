@@ -17,6 +17,7 @@ import BrStatement from "./Pages/BrStatement";
 import BRDashboards from "./Pages/BRDashboards";
 import FileNote from "./Pages/FileNote";
 import { is_fnote } from "./Helpers/dept_helper";
+import FnDashboards from "./Pages/FnDashboards";
 
 const App = () => {
   const location = useLocation();
@@ -89,6 +90,8 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboardlg" element={<LogisticsDashboard />} />
           <Route path="/dashboardbr" element={<BRDashboards />} />
+          <Route path="/dashboardfn" element={<FnDashboards />} />
+
           <Route path="/contact" element={<Contact />} />
           <Route path="/brstatement" element={<BrStatement />} />
           {isfnote && (

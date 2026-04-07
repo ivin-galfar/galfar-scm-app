@@ -14,7 +14,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
 
   const userInfo = useUserInfo();
   const { fn_no } = useParams();
-  const dept_id = userInfo.dept_code[0];
+  const dept_id = userInfo.dept_code;
   const { data } = useQuery({
     queryKey: [datasaved],
     queryFn: () => fetchfilenoteids({ userInfo, module: "/filenote", dept_id }),
@@ -46,8 +46,8 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
   }, [fn_no]);
 
   return (
-    <div className="flex items-center gap-4 p-4">
-      <label className="ml-4 flex font-medium justify-center items-center">
+    <div className="flex bg-gradient-to-r from-slate-50 to-blue-50 items-center hadow-md p-4  rounded-lg gap-4">
+      <label className="ml-4 flex font-medium justify-center items-center text-nowrap">
         Choose Document
       </label>
       <select
@@ -67,7 +67,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
           resetAttachments();
         }}
       >
-        <option value="">📋 Select File Note</option>
+        <option value="">📋 Select FN/IOC</option>
         {data?.map((d) => {
           const dept =
             d.department_id == 1
@@ -77,8 +77,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
                 : "";
           return (
             <option key={d.id} value={d.id}>
-              {dept}/{getTypeCode(d.type)}/ {getCategoryCode(d.category)} -{" "}
-              {d.doc_no}
+              {getTypeCode(d.type)}/{dept}/ {d.category} - {d.doc_no}
             </option>
           );
         })}
