@@ -18,7 +18,7 @@ const Accounting = ({ data }) => {
           <tr className="hover:bg-gray-50">
             <td className="p-2">Depreciation Rate</td>
             <td className="p-2 text-right border-l border-gray-400 w-40">
-              {data.dp_rate}.00 %
+              {data.dp_rate} %
             </td>
           </tr>
 
