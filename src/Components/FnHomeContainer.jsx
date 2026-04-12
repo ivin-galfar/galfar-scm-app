@@ -1,66 +1,49 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchallid } from "../APIs/api";
+import { fetchfilenoteids } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { SiQuicktime } from "react-icons/si";
-import { GrDocumentStore } from "react-icons/gr";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
-import { IoDocumentText } from "react-icons/io5";
 import { MdOutlinePendingActions } from "react-icons/md";
 import { TiTick } from "react-icons/ti";
 import { RxCross1 } from "react-icons/rx";
-import {
-  usecolumns,
-  useNewStatement,
-  useParticularValues,
-  useStatement,
-  useStatusFilter,
-} from "../store/logisticsStore";
+import { GrDocumentStore } from "react-icons/gr";
+import { IoDocumentText, IoWarningOutline } from "react-icons/io5";
 import { usePagination } from "../store/statementStore";
+import { useStatusFilter } from "../store/logisticsStore";
+import { useAttachments, usenewfn } from "../store/helperStore";
 
-const LogisticsHome = () => {
+const FnHomeContainer = () => {
   const userInfo = useUserInfo();
-  const { resetcolumns } = usecolumns();
-  const { resetData } = useStatement();
-  const { setNewStatement } = useNewStatement();
-  const { resetparticularvalue } = useParticularValues();
-  const { setPageIndex } = usePagination();
 
-  const navigate = useNavigate();
-  const { data: cs_id } = useQuery({
-    queryKey: ["cs_id"],
-    queryFn: () => fetchallid(userInfo),
+  const { data, error } = useQuery({
+    queryKey: ["csid"],
+    queryFn: () =>
+      fetchfilenoteids({
+        userInfo: userInfo,
+        module: "/",
+        dept_id: userInfo?.dept_code,
+      }),
     enabled: !!userInfo,
   });
 
-  const pendingstatements = cs_id?.filter((item) => {
-    if (userInfo.is_admin) {
-      return item.status?.includes("pending");
-    } else {
-      return userInfo?.role.some((role) =>
-        item.status?.toLowerCase()?.includes(role.toLowerCase()),
-      );
-    }
-  });
-  const approvedstatements =
-    cs_id?.filter((item) => item.status?.includes("approved")) || [];
-
-  const rejectedstatements =
-    cs_id?.filter((item) => item.status?.includes("rejected")) || [];
-
-  const today = new Date();
+  const { setPageIndex } = usePagination();
   const { setStatusFilter } = useStatusFilter();
+  const { newfn, setNewfn } = usenewfn();
+  const { attachments, setAttachments } = useAttachments();
 
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(today.getDate() - 7);
+  console.log(attachments);
 
-  const recentReceipts = cs_id?.filter((r) => {
-    const created = new Date(r?.created_at);
-    return created >= sevenDaysAgo;
-  });
+  let pending = data?.count?.pending_count ?? 0;
+  let approved = data?.count?.approved_count ?? 0;
+  let review = data?.count?.review_count ?? 0;
+  let rejected = data?.count?.rejected_count ?? 0;
+  let total = data?.count?.total_count ?? 0;
+  let recentstatements = data?.last7DaysResult ?? 0;
 
   return (
     <div className="flex gap-6  border-1 border-gray-200 ">
+      {" "}
       <div className="w-1/3 p-4 bg-white rounded-lg shadow-md border border-gray-200">
         <div className="flex justify-between">
           <h2 className="flex text-lg font-semibold mb-4  gap-2 items-center">
@@ -68,7 +51,7 @@ const LogisticsHome = () => {
             Quick Links
           </h2>
           <Link
-            to="/dashboardlg"
+            to="/dashboardfn"
             className="relative inline-flex ml-auto cursor-pointer"
             onClick={() => {
               if (userInfo?.is_admin) {
@@ -81,19 +64,36 @@ const LogisticsHome = () => {
             }}
           >
             <FaBell size={22} className="text-gray-700" />
-            {pendingstatements?.length > 0 && (
+            {pending > 0 && (
               <span
                 className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold 
              rounded-full w-4 h-4 flex items-center justify-center shadow-md animate-pulse-highlight"
               >
-                {pendingstatements.length}
+                {pending}
               </span>
             )}
           </Link>
         </div>
         <ul className="p-2 space-y-3 ">
+          {/* <li>
+            <Link to="/dashboardfn">
+              <button
+                className="w-full flex text-left px-3 py-2 justify-between bg-cyan-300 hover:bg-cyan-400 rounded font-medium cursor-pointer"
+                onClick={() => {
+                  setPageIndex(0);
+                  setStatusFilter("review");
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <IoWarningOutline size={18} />
+                  <span>Under Review</span>
+                </div>
+                <p>{review}</p>
+              </button>
+            </Link>
+          </li> */}
           <li>
-            <Link to="/dashboardlg">
+            <Link to="/dashboardfn">
               <button
                 className="w-full flex text-left px-3 py-2 justify-between bg-blue-200 hover:bg-blue-300 rounded font-medium cursor-pointer"
                 onClick={() => {
@@ -105,29 +105,29 @@ const LogisticsHome = () => {
                   <MdOutlinePendingActions />
                   <span>Pending Statements</span>
                 </div>
-                <p>{pendingstatements?.length}</p>
+                <p>{pending}</p>
               </button>
             </Link>
           </li>
           <li>
-            <Link to="/dashboardlg">
+            <Link to="/dashboardfn">
               <button
                 className="w-full text-left px-3 py-2 justify-between flex bg-green-200 hover:bg-green-300 rounded font-medium cursor-pointer"
                 onClick={() => {
-                  setPageIndex(0);
                   setStatusFilter("Approved");
+                  setPageIndex(0);
                 }}
               >
                 <div className="flex items-center gap-4">
                   <TiTick />
                   Approved Statements
                 </div>
-                <p>{approvedstatements?.length}</p>
+                <p>{approved}</p>
               </button>
             </Link>
           </li>
           <li>
-            <Link to="/dashboardlg">
+            <Link to="/dashboardfn">
               <button
                 className="w-full text-left px-3 py-2 justify-between flex bg-red-200 hover:bg-red-300 rounded font-medium cursor-pointer"
                 onClick={() => {
@@ -139,12 +139,12 @@ const LogisticsHome = () => {
                   <RxCross1 />
                   Rejected Statements
                 </div>
-                <p>{rejectedstatements?.length}</p>
+                <p>{rejected}</p>
               </button>
             </Link>
           </li>
           <li>
-            <Link to="/dashboardlg">
+            <Link to="/dashboardfn">
               <button
                 className="w-full text-left px-3 py-2 bg-gray-100 justify-between flex hover:bg-gray-200 rounded font-medium cursor-pointer"
                 onClick={() => {
@@ -156,7 +156,7 @@ const LogisticsHome = () => {
                   <GrDocumentStore />
                   All Statements
                 </div>
-                <p>{cs_id?.length}</p>
+                <p>{total}</p>
               </button>
             </Link>
           </li>
@@ -170,17 +170,13 @@ const LogisticsHome = () => {
             <h2 className="text-base font-medium text-gray-700">
               Recent Statements
             </h2>
-            {userInfo?.is_admin ? (
-              <Link to="/lstatements">
+            {userInfo?.is_admin && userInfo.role?.includes("initfn") ? (
+              <Link to="/filenote">
                 <button
                   className="border border-blue-500 text-blue-500 hover:bg-blue-50 text-sm px-3 py-1.5 rounded cursor-pointer"
                   onClick={() => {
-                    resetcolumns();
-                    resetData();
-                    setNewStatement();
-                    resetparticularvalue();
-
-                    navigate(`/lstatements`, { replace: true });
+                    setNewfn(true);
+                    setAttachments("");
                   }}
                 >
                   <span className="flex justify-center items-center gap-1">
@@ -199,7 +195,7 @@ const LogisticsHome = () => {
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    New Comparative Statement
+                    New FN/IOC
                   </span>
                 </button>
               </Link>
@@ -209,14 +205,14 @@ const LogisticsHome = () => {
           </div>
         </h2>
         <ul className="space-y-3 max-h-64 overflow-y-auto text-gray-700">
-          {recentReceipts?.length > 0 ? (
-            recentReceipts.map((r, index) => (
+          {recentstatements?.length > 0 ? (
+            recentstatements.map((r, index) => (
               <div
                 key={r.id || index}
                 className="p-3 bg-gray-50 rounded-lg shadow-sm border border-gray-200 flex justify-between items-start"
               >
                 <div className="flex flex-col">
-                  <p className="font-medium text-gray-900">{r.cargo_details}</p>
+                  <p className="font-medium text-gray-900">{r.name}</p>
                   <p className="text-xs text-gray-500">
                     {new Date(r.created_at).toLocaleDateString()}
                   </p>
@@ -254,4 +250,4 @@ const LogisticsHome = () => {
   );
 };
 
-export default LogisticsHome;
+export default FnHomeContainer;

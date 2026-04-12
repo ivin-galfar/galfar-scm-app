@@ -31,16 +31,20 @@ import {
 import { fileNoteTemplate } from "../Helpers/filenote_template";
 import { useQuery } from "@tanstack/react-query";
 import AttachmentsContainer from "../Components/AttachmentContainer";
-import { useAttachments, useProjectCodes } from "../store/helperStore";
+import {
+  useAttachments,
+  usenewfn,
+  useProjectCodes,
+} from "../store/helperStore";
 import { getcategory } from "../Helpers/category_helper";
-import { getType } from "../Helpers/helperfunctions";
+import { getCategoryforUI, getType } from "../Helpers/helperfunctions";
 
 const FileNote = () => {
   const editorinfo = useEditorInfo();
   const userInfo = useUserInfo();
   const dept_id = userInfo.dept_code[0];
   const [name, setName] = useState("");
-  const [newfn, setNewfn] = useState(false);
+  const { newfn, setNewfn } = usenewfn();
   const [selectedfnvalue, setSelectedFnValue] = useState("");
   const [selectedvalue, setSelectedValue] = useState("");
   const { errormessage, setErrorMessage, clearErrorMessage } =
@@ -67,7 +71,6 @@ const FileNote = () => {
     staleTime: 0,
     gcTime: 0,
   });
-  console.log(doc_no);
 
   const { mutate: newfilenote } = useMutation({
     mutationFn: createfilenote,
@@ -138,7 +141,7 @@ const FileNote = () => {
     const typedefined = type === "file_note" ? "FN" : "IOC";
     const ref_no = [
       typedefined ?? "",
-      dept ?? "",
+      category !== "Demob" ? dept || "" : "",
       category ?? "",
       selectedproject ?? "",
       (doc_no?.last_no ?? 0) + 1,
@@ -147,12 +150,39 @@ const FileNote = () => {
       .join("/");
     const date = new Date().toDateString();
     const formattedDate = format(date, "do MMMM yyyy");
-    return fileNoteTemplate(ref_no, name || " ", formattedDate, type, category);
+    const cleanCategory = category?.trim();
+    console.log(cleanCategory);
+
+    return fileNoteTemplate(
+      ref_no,
+      name || " ",
+      formattedDate,
+      type,
+      cleanCategory,
+    );
   };
 
   useEffect(() => {
     if (userInfo?.role.includes("initpr") && category == "Demob" && !name) {
       setName("Demobilization of Vehicle/Equipment");
+    } else if (userInfo.role.includes("initfn") && category == "ADTS") {
+      setName("ADTS Payments for CICPA Renewal -      Units (    Months)");
+    } else if (userInfo.role.includes("initfn") && category == "ADTSNew") {
+      setName(
+        "ADTS Payments for Al Dhafra New Vehicle -   Units (     months)",
+      );
+    } else if (userInfo.role.includes("initfn") && category == "PR") {
+      setName("Return of Police Vehicle");
+    } else if (userInfo.role.includes("initfn") && category == "FC") {
+      setName("ADNOC Fuel Chip (Petrol)");
+    } else if (userInfo.role.includes("initfn") && category == "Insurance") {
+      setName("Insurance for ");
+    } else if (userInfo.role.includes("initfn") && category == "TFW") {
+      setName(
+        "Approval Request for Traffic fine paid/to be paid by Galfar for ADNOC allotted/Galfar Vehicles ",
+      );
+    } else {
+      setName("");
     }
   }, [category, userInfo]);
 
@@ -174,7 +204,7 @@ const FileNote = () => {
       setSelectedProject("");
       setSelectedFnValue("");
     }
-  }, [type, category, selectedproject, doc_no, isDocLoading, newfn]);
+  }, [type, category, selectedproject, doc_no, isDocLoading, newfn, name]);
 
   const handleDocumentcategorytype = async (category) => {
     if (category == "Demob") {
@@ -245,7 +275,7 @@ const FileNote = () => {
             <button
               type="button"
               onClick={() => {
-                setNewfn(!newfn);
+                setNewfn();
                 setSelectedFnValue("");
                 setSelectedValue("");
                 setName("");
@@ -291,19 +321,20 @@ const FileNote = () => {
                   Category
                 </span>
                 <span className="text-green-700 font-bold text-base">
-                  {selectedvalue?.category?.charAt(0).toUpperCase() +
-                    selectedvalue?.category?.slice(1)}
+                  {getCategoryforUI(selectedvalue.category)}
                 </span>
               </div>
 
-              <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white rounded-lg border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
-                  Doc ID
-                </span>
-                <span className="text-purple-700 font-bold text-base">
-                  {selectedvalue.doc_no}
-                </span>
-              </div>
+              {selectedvalue.doc_no !== 0 && selectedvalue.doc_no && (
+                <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white rounded-lg border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
+                    Doc ID
+                  </span>
+                  <span className="text-purple-700 font-bold text-base">
+                    {selectedvalue.doc_no}
+                  </span>
+                </div>
+              )}
 
               {selectedvalue.project_code && (
                 <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white rounded-lg border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -415,7 +446,7 @@ const FileNote = () => {
           <div className="flex items-center justify-center gap-2 p-4">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
             <span className="text-sm text-gray-600 font-medium">
-              Fetching document ID...
+              Fetching ID...
             </span>
           </div>
         )}
@@ -450,6 +481,7 @@ const FileNote = () => {
               selectedvalue?.file_name ||
               (Array.isArray(attachments) ? attachments.map((a) => a.name) : [])
             }
+            newfn={newfn}
           />
         )}
 

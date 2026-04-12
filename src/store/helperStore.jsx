@@ -48,3 +48,12 @@ export const useDeleteStore = create((set) => ({
   resetDeleteStatement: () =>
     set(() => ({ deleteStatement: { id: null, open: false } })),
 }));
+
+
+export const usenewfn = create((set) => ({
+  newfn: false,
+  setNewfn: (value) =>
+    set((state) => ({
+      newfn: value !== undefined ? value : !state.newfn,
+    })),
+}));

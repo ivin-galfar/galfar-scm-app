@@ -11,8 +11,9 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useToast } from "../store/toastStore";
 import { is_hod } from "../Helpers/dept_helper";
 import { useAttachments } from "../store/helperStore";
+import UploadAttachments from "./UploadAttachments";
 
-const AttachmentsContainer = ({ file, file_name }) => {
+const AttachmentsContainer = ({ file, file_name, newfn }) => {
   const userInfo = useUserInfo();
   const ishod = is_hod(userInfo?.role);
   const { showtoast, setShowToast, resetshowtoast } = useToast();
@@ -24,8 +25,10 @@ const AttachmentsContainer = ({ file, file_name }) => {
       <div className="w-1/3 ml-15 p-4 bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[45vh]">
         <div className="text-base flex font-bold mb-4 text-gray-800 border-b-2 border-blue-500 pb-2 justify-between">
           📎 Attachments {file?.length > 0 ? `(${file?.length})` : ""}
+          <UploadAttachments
+            styles={newfn ? "cursor-pointer" : "pointer-events-none opacity-50"}
+          />
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           {file?.length > 0 ? (
             file?.map((file, index) => {

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { categoryapprovers, prevRole, roles } from "./roles_helper";
-import { CategoryValue, TypeForUi, TypeValue } from "./category_helper";
+import { CategoryForUi, TypeForUi, TypeValue } from "./category_helper";
 
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
@@ -238,9 +238,9 @@ export const formatwords = (buttontxt) => {
     .join(" ");
 };
 
-export const getCategoryCode = (category) => {
-  return CategoryValue[category] || "";
-};
+// export const getCategoryCode = (category) => {
+//   return CategoryValue[category] || "";
+// };
 
 export const getTypeCode = (type) => {
   return TypeValue[type] || "";
@@ -248,6 +248,10 @@ export const getTypeCode = (type) => {
 
 export const getType = (type) => {
   return TypeForUi[type] || "";
+};
+
+export const getCategoryforUI = (category) => {
+  return CategoryForUi[category];
 };
 
 export const getEnclosureText = (category) => {
@@ -258,7 +262,31 @@ export const getEnclosureText = (category) => {
       return "Encl: Copy of Mulkia, Agreement, Inspection Reports & Maintenance Charge";
     case "FC":
       return "Encl: Copy of Registration card";
+    case "ADTSNew":
+      return "CC: Mr. Suraj Rajan - Sr. Manager (F&A)";
     default:
       return "Encl: Relevant documents attached";
+  }
+};
+
+export const getToValue = (category) => {
+  switch (category) {
+    case "PR":
+      return " Sr.Manger-Finance & Accounts";
+    case "FC":
+      return " Sr.Manger-Finance & Accounts";
+    case "Insurance":
+      return "  CEO";
+  }
+};
+
+export const getFromValue = (category) => {
+  switch (category) {
+    case "PR":
+      return " Manger (Plant & Equipment)";
+    case "FC":
+      return " Manger (Plant & Equipment)";
+    case "Insurance":
+      return " Manger (Plant & Equipment)";
   }
 };

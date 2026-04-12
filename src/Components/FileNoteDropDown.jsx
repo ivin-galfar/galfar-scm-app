@@ -7,7 +7,7 @@ import { useErrorMessage } from "../store/errorStore";
 import { useParams } from "react-router-dom";
 import { useDatasaved } from "../store/brStore";
 import { useAttachments } from "../store/helperStore";
-import { getCategoryCode, getTypeCode } from "../Helpers/helperfunctions";
+import { getTypeCode } from "../Helpers/helperfunctions";
 const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
   const { datasaved } = useDatasaved();
   const { attachments, setAttachments, resetAttachments } = useAttachments();

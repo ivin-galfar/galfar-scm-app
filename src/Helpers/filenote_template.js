@@ -1,4 +1,4 @@
-import { getEnclosureText } from "./helperfunctions";
+import { getEnclosureText, getFromValue, getToValue } from "./helperfunctions";
 
 export const fileNoteTemplate = (ref, sub, date, type, category) => {
   let basecontent = [];
@@ -126,12 +126,26 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             { type: "text", marks: [{ type: "underline" }], text: "    " },
             {
               type: "text",
-              text: " units of our fleet. As per the ADTS guidelines, we are required to make a payment as mentioned in the proforma for the listed fleets to proceed with the issue of security pass. We have received an official notification from ADTS regarding the payment, amounting to ",
+              text: " units of our fleet. As per the ADTS guidelines, we are required to make a payment as mentioned in the proforma for the listed fleets to proceed with the issue of security pass. We have received an official notification from ADTS regarding the payment, amounting to AED",
             },
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                                                            .",
+              text: "                                                        ",
+            },
+
+            {
+              type: "text",
+              text: " (for ",
+            },
+            {
+              type: "text",
+              marks: [{ type: "underline" }],
+              text: "    ",
+            },
+            {
+              type: "text",
+              text: " units due for renewal).",
             },
           ],
         },
@@ -261,6 +275,157 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
         },
       );
     }
+    if (category == "ADTSNew") {
+      const footer = {
+        type: "footer",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Regards," }],
+          },
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "(Pramoj Ramesh)" }],
+          },
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: getEnclosureText(category) }],
+          },
+        ],
+      };
+      basecontent.push(
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "We have been advised by ADTS to hire the fleet(s) as per following details, ",
+            },
+            { type: "text", marks: [{ type: "underline" }], text: "    " },
+          ],
+        },
+        { type: "paragraph" },
+        {
+          type: "table",
+          content: [
+            {
+              type: "tableRow",
+              content: [
+                {
+                  type: "tableHeader",
+                  attrs: { colspan: 1, rowspan: 1 },
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Sl No." }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableHeader",
+                  attrs: { colspan: 1, rowspan: 1 },
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Reg No" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableHeader",
+                  attrs: { colspan: 1, rowspan: 1 },
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Description" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableHeader",
+                  attrs: { colspan: 1, rowspan: 1 },
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Hire Period (months)" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableHeader",
+                  attrs: { colspan: 1, rowspan: 1 },
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Hire charge month" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableHeader",
+                  attrs: { colspan: 1, rowspan: 1 },
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [
+                        { type: "text", text: "Total amount inclusive of VAT" },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            // Empty row
+            {
+              type: "tableRow",
+              content: Array(6)
+                .fill(null)
+                .map(() => ({
+                  type: "tableCell",
+                  content: [{ type: "paragraph" }],
+                })),
+            },
+            // Last row with merged total
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "We request approval to release ",
+            },
+            { type: "text", marks: [{ type: "underline" }], text: "    " },
+
+            {
+              type: "text",
+              text: " cheques for the above  ",
+            },
+            { type: "text", marks: [{ type: "underline" }], text: "   " },
+
+            {
+              type: "text",
+              text: " equipment to pay for them monthly. The total cheque's value shall be AED ",
+            },
+            { type: "text", marks: [{ type: "underline" }], text: "     ." },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "The payment is essential to complete the approval process and to proceed with the necessary CICPA renewals.",
+            },
+          ],
+        },
+      );
+      basecontent.push(
+        { type: "paragraph" },
+        { type: "paragraph" },
+        ...footer.content,
+      );
+    }
 
     if (category === "TFW") {
       basecontent.push(
@@ -269,12 +434,10 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
           content: [
             {
               type: "text",
-              marks: [{ type: "bold" }],
-              text: "Approval Request for Traffic fine paid/to be paid by Galfar for ADNOC allotted/Galfar Vehicles",
+              text: "Details of traffic fine:",
             },
           ],
         },
-        { type: "paragraph" },
         { type: "paragraph" },
       );
 
@@ -285,7 +448,6 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             type: "tableRow",
             content: [
               { text: "Sl.No.", widths: 50 },
-              { text: "Date", widths: 80 },
               { text: "Veh. No", widths: 90 },
               { text: "Veh. type", widths: 90 },
               { text: "Owner", widths: 100 },
@@ -309,7 +471,6 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             type: "tableRow",
             content: [
               { widths: 50 },
-              { widths: 80 },
               { widths: 90 },
               { widths: 90 },
               { widths: 100 },
@@ -393,7 +554,10 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
                 {
                   type: "paragraph",
                   attrs: { textAlign: "left" },
-                  content: [{ type: "text", text: "To : " }],
+                  content: [
+                    { type: "text", text: "To : " },
+                    { type: "text", text: getToValue(category) },
+                  ],
                 },
               ],
             },
@@ -417,7 +581,10 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
               content: [
                 {
                   type: "paragraph",
-                  content: [{ type: "text", text: "From : " }],
+                  content: [
+                    { type: "text", text: "From : " },
+                    { type: "text", text: getFromValue(category) },
+                  ],
                 },
               ],
             },
@@ -804,7 +971,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                   ",
+              text: "              ",
             },
             {
               type: "text",
@@ -813,7 +980,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                   .",
+              text: "          .",
             },
           ],
         },
@@ -845,26 +1012,21 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                   .",
+              text: "                     ",
             },
-          ],
-        },
-        {
-          type: "paragraph",
-          content: [
             {
               type: "text",
-              text: "expenses incurred in connection with the vehicles return has to be booked as under,",
+              text: "   expenses incurred in connection with the vehicles return has to be booked as under,",
             },
           ],
         },
-        { type: "paragraph" },
         { type: "paragraph" },
         {
           type: "paragraph",
           content: [
             {
               type: "text",
+              marks: [{ type: "bold" }],
               text: "Vehicle Reg. No. : ",
             },
           ],
@@ -874,6 +1036,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
           content: [
             {
               type: "text",
+              marks: [{ type: "bold" }],
               text: "Vehicle Description :   ",
             },
           ],
@@ -883,6 +1046,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
           content: [
             {
               type: "text",
+              marks: [{ type: "bold" }],
               text: "Project No. : ",
             },
           ],

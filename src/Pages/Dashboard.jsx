@@ -712,11 +712,10 @@ const Dashboard = () => {
   });
 
   return (
-    <div className="w-full px-5 flex-grow">
+    <div className="w-full px-5 flex-grow relative">
       <div className="flex border-b  border-gray-300 mb-4">
         {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
           (tab) => {
-            // if (tab == "Under Review" && !userInfo?.is_admin) return null;
             const isActive =
               (tab === "All" && statusFilter === "All") ||
               (tab === "Approved" && statusFilter === "Approved") ||

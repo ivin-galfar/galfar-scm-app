@@ -6,44 +6,24 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  deletefn,
-  fetchbrstatement,
-  fetchbrstatements,
-  fetchbrstatementscount,
-  fetchfilenoteids,
-  fetchfilenoteidvalue,
-} from "../APIs/api";
+import { deletefn, fetchfilenoteids, fetchfilenoteidvalue } from "../APIs/api";
 import { Link, useLocation } from "react-router-dom";
 import useuserInfo from "../CustomHooks/useUserInfo";
 import { useStatusFilter } from "../store/logisticsStore";
-import {
-  dept_finder,
-  is_asset,
-  is_buyrent,
-  is_hod,
-  is_logistics,
-  is_plant,
-} from "../Helpers/dept_helper";
+import { dept_finder } from "../Helpers/dept_helper";
 import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
-import DashboardButton from "../Components/DashboardButton";
-import { useNewStatement, usetotalBRstatements } from "../store/brStore";
 import { usePagination } from "../store/statementStore";
 import { useEffect, useState } from "react";
 import { IoPrint, IoWarningOutline } from "react-icons/io5";
 import Alerts from "../Components/Alerts";
-import { REACT_SERVER_URL } from "../../config/ENV";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
-import axios from "axios";
 import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
-import { handleBrPrint, handlePrint } from "../Helpers/print_helper";
+import { handleFnPrint } from "../Helpers/print_helper";
 import { formatDateDDMMYYYY, getType } from "../Helpers/helperfunctions";
 import { useDeleteStore } from "../store/helperStore";
-
 const FnDashboards = () => {
-  const location = useLocation();
   const userInfo = useuserInfo();
 
   const deleteStatement = useDeleteStore((state) => state.deleteStatement);
@@ -57,7 +37,6 @@ const FnDashboards = () => {
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
-  //   const { resetNewStatement } = useNewStatement();
   const { pagination, setPageIndex, setPageSize } = usePagination();
   const [searchcs, setSearchCS] = useState("");
   const queryClient = useQueryClient();
@@ -166,6 +145,7 @@ const FnDashboards = () => {
     columnHelper.accessor((row) => row?.name, {
       id: "subject",
       header: "Subject",
+      meta: { className: "max-w-70  whitespace-pre-wrap break-words" },
       cell: (info) => info.getValue() || "-",
     }),
     ...(hasProjectColumn
@@ -215,14 +195,24 @@ const FnDashboards = () => {
         const rowData = info.row.original;
         const getStatusProgress = (row) => {
           if (row?.type === "file_note") {
-            return {
-              "Pending For Hod": 20,
-              "Pending For Sfm": 40,
-              "Pending For Gm": 60,
-              "Pending For Ceo": 80,
-              Approved: 100,
-              Rejected: 100,
-            };
+            if (row?.category === "General" || row?.category === "TFW") {
+              return {
+                "Pending For Hod": 40,
+                "Pending For Gm": 60,
+                "Pending For Ceo": 80,
+                Approved: 100,
+                Rejected: 100,
+              };
+            } else {
+              return {
+                "Pending For Hod": 20,
+                "Pending For Sfm": 40,
+                "Pending For Gm": 60,
+                "Pending For Ceo": 80,
+                Approved: 100,
+                Rejected: 100,
+              };
+            }
           } else if (row?.type === "ioc") {
             if (row?.category === "Demob") {
               return {
@@ -429,9 +419,7 @@ const FnDashboards = () => {
 
           <div className="flex justify-between ml-auto">
             {
-              <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
-                {/* <DashboardButton /> */}
-              </div>
+              <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto"></div>
             }
             <div className="mb-1 ml-auto">
               <label className="  ml-auto text-sm font-medium text-gray-700 ">
@@ -506,8 +494,11 @@ const FnDashboards = () => {
                         <div className="flex items-center justify-center gap-4">
                           <Link
                             className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
-                            to={`/filenote/${row.original?.id}`}
-                            // onClick={resetNewStatement}
+                            to={
+                              userInfo?.role?.includes("initfn")
+                                ? `/filenote/${row.original?.id}`
+                                : "/login"
+                            }
                           >
                             View <FaArrowAltCircleRight />
                           </Link>
@@ -520,10 +511,8 @@ const FnDashboards = () => {
                             }
                             size={25}
                             onClick={async () => {
-                              const formData = await getstatement(
-                                row.original?.id,
-                              );
-                              // handleBrPrint(formData);
+                              const data = await getstatement(row.original?.id);
+                              handleFnPrint(data);
                             }}
                           />
                           <FaTrash

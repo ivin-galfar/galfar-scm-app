@@ -394,7 +394,7 @@ export function SimpleEditor({ content, newfn, is_admin }) {
 
   useEffect(() => {
     if (editor || newfn) {
-      editor.setEditable(is_admin && newfn);
+      editor?.setEditable(is_admin && newfn);
     }
   }, [editor, is_admin, newfn]);
 

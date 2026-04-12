@@ -22,7 +22,6 @@ import FnDashboards from "./Pages/FnDashboards";
 const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
-  const isfnote = is_fnote(userInfo?.role);
   const isLoginPage = location.pathname === "/login";
 
   return (
@@ -94,20 +93,33 @@ const App = () => {
 
           <Route path="/contact" element={<Contact />} />
           <Route path="/brstatement" element={<BrStatement />} />
-          {isfnote && (
-            <>
-              <Route path="/filenote" element={<FileNote />} />
-              <Route path="/filenote/:fn_no" element={<FileNote />} />
-            </>
-          )}
-          {!isfnote && (
-            <Route path="*" element={<Navigate to="/login" replace={true} />} />
-          )}
 
+          <>
+            <Route
+              path="/filenote"
+              element={
+                <ProtectedRoute>
+                  <FileNote />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/filenote/:fn_no"
+              element={
+                <ProtectedRoute>
+                  <FileNote />
+                </ProtectedRoute>
+              }
+            />
+          </>
           <Route path="/brstatement/:cs_no" element={<BrStatement />} />
         </Routes>
       </Suspense>
-      {!isLoginPage && <Footer />}
+      {!isLoginPage && (
+        <div className="flex flex-grow">
+          <Footer />
+        </div>
+      )}
     </div>
   );
 };

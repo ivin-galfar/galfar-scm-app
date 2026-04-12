@@ -5,9 +5,9 @@ import {
   formatDateDDMMYYYY,
   formatPrice,
   getApproverNames,
+  getType,
 } from "./helperfunctions";
 import { categoryapprovers, nextRole } from "./roles_helper";
-import { expectedstatusplant } from "./statusfinder";
 
 export const handlePrint = (formData, tableData) => {
   const doc = new jsPDF({
@@ -858,6 +858,90 @@ export const handleBrPrint = (formData) => {
     60,
     pageHeight - footerPadding,
   );
+
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  window.open(blobUrl);
+};
+
+export const handleFnPrint = (data) => {
+  const doc = new jsPDF();
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const logoWidth = 60;
+  const logoHeight = 10;
+  doc.setFontSize(14);
+  const logoX = (pageWidth - logoWidth) / 2;
+  const logoY = 10;
+
+  doc.addImage(galfarlogo, "PNG", logoX, logoY, logoWidth, logoHeight);
+
+  doc.setFontSize(12);
+
+  const text = getType(data?.type);
+
+  const x = pageWidth / 2;
+  let y = 30;
+
+  doc.text(text, x, y, { align: "center" });
+
+  const textWidth = doc.getTextWidth(text);
+  const startX = x - textWidth / 2;
+  const endX = x + textWidth / 2;
+
+  doc.line(startX, y + 1, endX, y + 1);
+
+  const marginLeft = 14;
+  const marginRight = 20;
+  const contentWidth = 180;
+  const marginTop = 40;
+  const marginBottom = 20;
+  const headerBottomY = 40;
+  y = headerBottomY;
+
+  data.content.content.forEach((block) => {
+    if (block.type === "table") {
+      const body = block.content.map((row) =>
+        row.content.map(
+          (cell) =>
+            cell.content
+              ?.map((p) => p.content?.map((t) => t.text || "").join(""))
+              .join("\n") || "",
+        ),
+      );
+
+      autoTable(doc, {
+        startY: y,
+        body: body,
+        margin: {
+          left: marginLeft,
+          right: marginRight,
+          top: marginTop,
+          bottom: marginBottom,
+        },
+
+        theme: "grid",
+      });
+
+      // update Y position after table
+      y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // ✅ PARAGRAPH
+    else if (block.type === "paragraph") {
+      const text = block.content?.map((t) => t.text || "").join("") || "";
+
+      if (text.trim()) {
+        doc.setFontSize(9);
+
+        doc.text(text, marginLeft, y, {
+          maxWidth: contentWidth,
+        });
+
+        y += 8;
+      }
+    }
+  });
 
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
