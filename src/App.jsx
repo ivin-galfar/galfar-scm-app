@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import Home from "./Components/Home";
 import Header from "./Components/Header";
@@ -15,11 +15,13 @@ import LogisticsDashboard from "./Pages/LogisticsDashboard";
 import { Suspense } from "react";
 import BrStatement from "./Pages/BrStatement";
 import BRDashboards from "./Pages/BRDashboards";
+import FileNote from "./Pages/FileNote";
+import { is_fnote } from "./Helpers/dept_helper";
+import FnDashboards from "./Pages/FnDashboards";
 
 const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
-
   const isLoginPage = location.pathname === "/login";
 
   return (
@@ -87,12 +89,37 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboardlg" element={<LogisticsDashboard />} />
           <Route path="/dashboardbr" element={<BRDashboards />} />
+          <Route path="/dashboardfn" element={<FnDashboards />} />
+
           <Route path="/contact" element={<Contact />} />
           <Route path="/brstatement" element={<BrStatement />} />
+
+          <>
+            <Route
+              path="/filenote"
+              element={
+                <ProtectedRoute>
+                  <FileNote />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/filenote/:fn_no"
+              element={
+                <ProtectedRoute>
+                  <FileNote />
+                </ProtectedRoute>
+              }
+            />
+          </>
           <Route path="/brstatement/:cs_no" element={<BrStatement />} />
         </Routes>
       </Suspense>
-      {!isLoginPage && <Footer />}
+      {!isLoginPage && (
+        <div className="flex flex-grow">
+          <Footer />
+        </div>
+      )}
     </div>
   );
 };

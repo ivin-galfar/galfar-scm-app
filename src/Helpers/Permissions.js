@@ -6,28 +6,35 @@ export const getDeptConfig = ({
   ishod,
   isceo,
   isgm,
+  isfnote,
 }) => {
   let defaultDept = "plant";
   let activeDept = "plant";
-  let allowedDept = ["logistics", "bvrplant", "plant"];
+  let allowedDept = ["logistics", "bvrplant", "plant", "fn"];
   if (isfm) {
     defaultDept = "bvrplant";
     activeDept = "bvrplant";
-    allowedDept = ["logistics", "bvrplant"];
+    allowedDept = ["logistics", "bvrplant", "fn"];
   } else if (!isceo && !isgm && !ishod) {
     if (isLogistics) {
-      defaultDept = "logistics";
-      activeDept = "logistics";
-      allowedDept = ["logistics"];
-    } else if (isPlant) {
-      if (isasset) {
-        defaultDept = "plant";
-        activeDept = "plant";
-        allowedDept = ["plant", "bvrplant"];
+      if (isfnote) {
+        defaultDept = "logistics";
+        activeDept = "logistics";
+        allowedDept = ["logistics", "fn"];
       } else {
-        defaultDept = "plant";
-        activeDept = "plant";
-        allowedDept = ["plant"];
+        defaultDept = "logistics";
+        activeDept = "logistics";
+        allowedDept = ["logistics"];
+      }
+    } else if (isPlant) {
+      allowedDept = ["plant"];
+
+      if (isasset) {
+        allowedDept.push("bvrplant");
+      }
+
+      if (isfnote) {
+        allowedDept.push("fn");
       }
     }
   }

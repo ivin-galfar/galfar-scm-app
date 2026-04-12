@@ -295,16 +295,17 @@ const LogisticsTable = () => {
     }
   };
 
-  const changestatus = expectedstatus(userInfo.role.toLowerCase());
+  const changestatus = expectedstatus(userInfo.role);
 
-  const nextstatus = formData?.status?.includes(userInfo.role.toLowerCase())
+  const nextstatus = userInfo.role?.some((role) =>
+    formData?.status?.toLowerCase()?.includes(role.toLowerCase()),
+  )
     ? "Approve/Reject"
-    : formData?.status == "created"
+    : formData?.status === "created"
       ? "Sent for Approval"
       : formData?.status || "";
 
   const isentforapproval = formData.sentforapproval;
-  // const status = formData.status == "created" ? "Created" : changestatus;
   const buttontxt = isentforapproval
     ? nextstatus
     : formData.status == "created"

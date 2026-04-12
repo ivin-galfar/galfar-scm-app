@@ -37,7 +37,9 @@ const LogisticsHome = () => {
     if (userInfo.is_admin) {
       return item.status?.includes("pending");
     } else {
-      return item.status?.includes(userInfo?.role?.toLocaleLowerCase());
+      return userInfo?.role.some((role) =>
+        item.status?.toLowerCase()?.includes(role.toLowerCase()),
+      );
     }
   });
   const approvedstatements =
@@ -58,7 +60,7 @@ const LogisticsHome = () => {
   });
 
   return (
-    <div className="flex gap-6 mt-5">
+    <div className="flex gap-6  border-1 border-gray-200 ">
       <div className="w-1/3 p-4 bg-white rounded-lg shadow-md border border-gray-200">
         <div className="flex justify-between">
           <h2 className="flex text-lg font-semibold mb-4  gap-2 items-center">

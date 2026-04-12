@@ -37,7 +37,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const userInfo = useUserInfo();
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
-  const isplanthire = userInfo?.role == "inith";
+  const isplanthire = userInfo?.role?.includes("inith");
   const isfm = is_fm(userInfo?.role);
   const isBuyvsrent = is_buyrent(userInfo?.dept_code);
   useEffect(() => {

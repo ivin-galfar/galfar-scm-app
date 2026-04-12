@@ -9,6 +9,7 @@ import {
   is_asset,
   is_ceo,
   is_fm,
+  is_fnote,
   is_gm,
   is_hod,
   is_logistics,
@@ -19,6 +20,8 @@ import LogisticsHome from "./LogisticsHome";
 import { useDashboardType } from "../store/logisticsStore";
 import { getDeptConfig } from "../Helpers/Permissions";
 import HomeContainer from "./HomeContainer";
+import { IoDocument } from "react-icons/io5";
+import FnHomeContainer from "./FnHomeContainer";
 
 const Home = () => {
   const userInfo = useUserInfo();
@@ -33,10 +36,13 @@ const Home = () => {
   const isgm = is_gm(userInfo?.role);
   const isceo = is_ceo(userInfo?.role);
   const isPlant = is_plant(userInfo?.dept_code);
+  const isfnote = is_fnote(userInfo?.role);
+
   const departments = [
     { key: "plant", name: "Hiring / Asset", icon: <LuFactory size={18} /> },
     { key: "bvrplant", name: "Buy vs Rent", icon: <GiClamp size={18} /> },
     { key: "logistics", name: "Logistics", icon: <FaTruck size={18} /> },
+    { key: "fn", name: "FN / IOC", icon: <IoDocument size={18} /> },
   ];
 
   const { defaultDept, activeDept, allowedDept } = getDeptConfig({
@@ -47,13 +53,14 @@ const Home = () => {
     ishod,
     isceo,
     isgm,
+    isfnote,
   });
 
   useEffect(() => {
     if (!userInfo) return;
     setSelectedDept(defaultDept);
     setDashboardType(defaultDept);
-  }, [userInfo, isLogistics, isfm, isPlant]);
+  }, [userInfo, isLogistics, isfm, isPlant, isfnote]);
 
   const orderedDepartments = activeDept
     ? [
@@ -69,13 +76,13 @@ const Home = () => {
   const isDeptDisabled = (deptKey) => !allowedDept?.includes(deptKey);
 
   return (
-    <div className="flex flex-col  min-h-screen relative">
+    <div className="flex flex-col pb-10 min-h-screen relative ">
       <img
         src={galfarlogo || ""}
         alt="Galfar Logo"
-        className="w-full object-cover h-7 md:h-9 lg:h-[25rem]"
+        className="w-full object-cover  md:h-[40vh]"
       />
-      <div className="flex flex-wrap items-center gap-3 ml-10 mt-5">
+      <div className="ml-10 mt-5  border-gray-300 flex">
         {orderedDepartments.map((dept) => (
           <div key={dept.key} className="relative group inline-block">
             <button
@@ -85,13 +92,13 @@ const Home = () => {
                 setSelectedDept(dept.key);
                 setDashboardType(dept.key);
               }}
-              className={`flex items-center gap-2 px-5 py-2 rounded-md border font-medium text-sm transition-all duration-200 
+              className={`px-6 py-2 text-sm font-medium flex items-center gap-2 border-b-4  transition-all duration-200 
         ${
           isDeptDisabled(dept.key)
             ? "bg-gray-100 text-gray-400 border-gray-200 cursor-auto"
             : selectedDept === dept.key
-              ? "bg-blue-600 text-white border-blue-600 shadow-inner cursor-pointer"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 cursor-pointer"
+              ? "bg-gradient-to-r from-indigo-100 via-indigo-50 to-white text-indigo-900 bg-white border-t border-l border-r border-gray-100 rounded-t-md cursor-pointer "
+              : " text-gray-600  hover:bg-gray-50 hover:border-indigo-300 cursor-pointer border-b-gray-200"
         }`}
             >
               {dept.icon}
@@ -106,11 +113,12 @@ const Home = () => {
         ))}
       </div>
 
-      <div className=" flex-grow gap-6 ml-10 ">
+      <div className="bg-white border-white rounded-b-md pl-10 mt-0 shadow">
         {isPlant && selectedDept === "plant" && <PlantHome />}
         {isLogistics && selectedDept === "logistics" && <LogisticsHome />}
         {(isasset || isfm || ishod || isceo || isgm) &&
           selectedDept === "bvrplant" && <HomeContainer />}
+        {isfnote && selectedDept === "fn" && <FnHomeContainer />}
       </div>
     </div>
   );

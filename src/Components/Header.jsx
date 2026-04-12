@@ -66,6 +66,7 @@ const Header = () => {
     setSelectedDept(defaultDept);
     setDashboardType(defaultDept);
   }, [userInfo, isLogistics, isfm, isPlant, isasset]);
+
   return (
     <div>
       <header className="bg-white shadow-md">
@@ -96,10 +97,14 @@ const Header = () => {
                         : "/dashboardbr"
                   }
                   className={() => {
-                    const isActive =
-                      path.startsWith("/dashboard") ||
-                      path.startsWith("/dashboardlg") ||
-                      path.startsWith("/dashboardbr");
+                    const expectedPath =
+                      selectedDept === "plant"
+                        ? "/dashboard"
+                        : selectedDept === "logistics"
+                          ? "/dashboardlg"
+                          : "/dashboardbr";
+
+                    const isActive = path === expectedPath;
 
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
@@ -113,37 +118,27 @@ const Header = () => {
                     setPageSize(20);
                   }}
                 >
-                  Dashboard
+                  Comp. Statements
                 </NavLink>
-                {(isPlant || isLogistics) && (
-                  <NavLink
-                    to={
-                      isfm
-                        ? "/brstatement"
-                        : isPlant
-                          ? "/receipts"
-                          : "/lstatements"
-                    }
-                    className={() => {
-                      const isActive =
-                        path.startsWith("/receipts") ||
-                        path.startsWith("/lstatements") ||
-                        path.startsWith("/brstatement");
 
-                      return `text-gray-700 hover:text-blue-600 ${
-                        isActive
-                          ? "border-b-2 border-blue-500 text-blue-600"
-                          : ""
-                      }`;
-                    }}
-                  >
-                    Statements
-                  </NavLink>
-                )}
+                <NavLink
+                  to="/dashboardfn"
+                  className={() => {
+                    const isActive =
+                      location.pathname.startsWith("/dashboardfn") ||
+                      location.pathname.startsWith("/filenote");
 
-                <NavLink to="/contact" className={navLinkClasses}>
-                  Contact
+                    return `text-gray-700 hover:text-blue-600 ${
+                      isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
+                    }`;
+                  }}
+                >
+                  FN/IOC
                 </NavLink>
+
+                {/* <NavLink to="/filenote" className={navLinkClasses}>
+                  Documents
+                </NavLink> */}
                 {userInfo?.email && <UserDropdown />}
               </nav>
             </div>

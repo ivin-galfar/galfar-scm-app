@@ -73,7 +73,7 @@ const TableHeader = ({ isAdmin }) => {
   // const [update, setUpdate] = useState(false);
   const { isupdated, setIsupdated, revertisupdated } = useUpdate();
   const Asset =
-    userInfo.role == "inita" || formData.type == "asset" ? true : false;
+    userInfo.role?.includes("inita") || formData.type == "asset" ? true : false;
 
   useEffect(() => {
     const loadParticulars = async () => {
@@ -202,7 +202,7 @@ const TableHeader = ({ isAdmin }) => {
       setSharedTableData({
         formData: {
           datevalue: new Date().toISOString().split("T")[0],
-          type: userInfo.role == "inita" ? "asset" : "hiring",
+          type: userInfo.role?.includes("inita") ? "asset" : "hiring",
         },
         tableData: [],
       });
@@ -437,7 +437,7 @@ const TableHeader = ({ isAdmin }) => {
                   currency: "",
                   requireddatevalue: new Date(),
                   datevalue: new Date(),
-                  type: userInfo.role == "inita" ? "asset" : "hiring",
+                  type: userInfo.role?.includes("inita") ? "asset" : "hiring",
                 },
                 tableData: [],
               });

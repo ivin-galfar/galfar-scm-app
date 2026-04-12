@@ -3,6 +3,7 @@ import { REACT_SERVER_URL } from "../../config/ENV";
 import { AppContext } from "./Context";
 import { useContext } from "react";
 import useUserInfo from "../CustomHooks/useUserInfo";
+import { is_plant } from "../Helpers/dept_helper";
 
 const ReasonForSelection = ({
   setShowmodal,
@@ -15,9 +16,11 @@ const ReasonForSelection = ({
   const { setSharedTableData, setfreezeQuantity, sharedTableData } =
     useContext(AppContext);
   const userInfo = useUserInfo();
+  const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
 
   const statusMap = {
-    initiator: "Pending For HOD",
+    inith: "Pending For HOD",
+    inita: "Pending For HOD",
     hod: "Pending for GM",
     gm: "Pending for CEO",
     ceo: "Approved",
@@ -36,7 +39,7 @@ const ReasonForSelection = ({
 
         const response = await axios.get(
           `${REACT_SERVER_URL}/receipts`,
-          config
+          config,
         );
         const receipts = response.data?.receipts || [];
         const lastReceipt = receipts.at(-1);
@@ -47,14 +50,14 @@ const ReasonForSelection = ({
     }
 
     const recommendationRow = sharedTableData.tableData.find(
-      (row) => row.particulars === "Recommendation (If Any)"
+      (row) => row.particulars === "Recommendation (If Any)",
     );
     let selectedRecommendation = "";
 
     if (recommendationRow && recommendationRow.vendors) {
       selectedRecommendation =
         Object.values(recommendationRow.vendors).find(
-          (val) => val && val.trim() !== ""
+          (val) => val && val.trim() !== "",
         ) || "";
     }
     try {
@@ -69,23 +72,23 @@ const ReasonForSelection = ({
         {
           selectedVendorIndex: selectedVendorIndex,
           selectedVendorReason: selectedRecommendation,
-          status: statusMap[userInfo.role] || "Pending For HOD",
+          status: statusMap[userInfo.role[0]],
         },
-        config
+        config,
       );
       axios
         .post(
-          `${REACT_SERVER_URL}/emailnotify/${cs_id}`,
+          `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
           {
             userInfo,
             formData: sharedTableData.formData,
-            status: statusMap[userInfo.role] || "Pending For HOD",
+            status: statusMap[userInfo.role[0]],
           },
-          config
+          config,
         )
         .then((res) => console.log("✅ Email sent:", res.data))
         .catch((err) =>
-          console.error("❌ Email send failed:", err.response.data.message)
+          console.error("❌ Email send failed:", err.response.data.message),
         );
 
       setreqApprovalstatus(response.data.formData.sentforapproval);

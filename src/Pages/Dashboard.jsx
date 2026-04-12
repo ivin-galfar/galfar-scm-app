@@ -133,14 +133,15 @@ const Dashboard = () => {
   const [errormessage, setErrormessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [deleteMr, setdeleteMr] = useState("");
-  const expectedStatuses = (statusMapping[userInfo?.role] || []).map((s) =>
-    s.toLowerCase(),
+
+  const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
+    (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
   );
 
   const pendingStatuses = !userInfo?.is_admin
     ? expectedStatuses.filter(
         (s) =>
-          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase()),
+          s.startsWith("pending") && userInfo.role.some((r) => s.includes(r)),
       )
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 
@@ -711,11 +712,10 @@ const Dashboard = () => {
   });
 
   return (
-    <div className="w-full px-5 flex-grow">
+    <div className="w-full px-5 flex-grow relative">
       <div className="flex border-b  border-gray-300 mb-4">
         {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
           (tab) => {
-            // if (tab == "Under Review" && !userInfo?.is_admin) return null;
             const isActive =
               (tab === "All" && statusFilter === "All") ||
               (tab === "Approved" && statusFilter === "Approved") ||

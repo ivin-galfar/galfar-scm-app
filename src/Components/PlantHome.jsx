@@ -94,13 +94,14 @@ const PlantHome = () => {
     loadParticulars();
   }, []);
 
-  const expectedStatuses = (statusMapping[userInfo?.role] || []).map((s) =>
-    s.toLowerCase(),
+  const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
+    (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
   );
   const pendingStatuses = !userInfo?.is_admin
     ? expectedStatuses.filter(
         (s) =>
-          s.startsWith("pending") && s.includes(userInfo?.role.toLowerCase()),
+          s.startsWith("pending") &&
+          userInfo.role?.some((r) => s.includes(r.toLowerCase())),
       )
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 
@@ -135,9 +136,9 @@ const PlantHome = () => {
     ? allreceipts?.filter(
         (r) =>
           r?.formData?.status?.toLowerCase().startsWith("pending") &&
-          r?.formData?.status
-            ?.toLowerCase()
-            .includes(userInfo?.role.toLowerCase()),
+          userInfo?.role?.some((role) =>
+            r?.formData?.status?.toLowerCase().includes(role.toLowerCase()),
+          ),
       )
     : allreceipts?.filter((r) =>
         r?.formData?.status?.toLowerCase().startsWith("pending"),
@@ -158,7 +159,7 @@ const PlantHome = () => {
   });
 
   return (
-    <div className="flex gap-6 mt-5">
+    <div className="flex gap-6  border-1 border-gray-200 ">
       <div className="w-1/3 p-4 bg-white rounded-lg shadow-md border border-gray-200">
         <div className="flex justify-between">
           <h2 className="flex text-lg font-semibold mb-4  gap-2 items-center">

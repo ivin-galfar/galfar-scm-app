@@ -122,7 +122,7 @@ const StatementHeader = () => {
         );
         let filteredresponse = response;
 
-        if (userInfo.role == "pm") {
+        if (userInfo.role?.includes("pm")) {
           if (
             userInfo.pr_code.includes(1) &&
             response.data?.formData?.project == "plant"
@@ -339,7 +339,7 @@ const StatementHeader = () => {
     <div>
       <form className="flex max-w-full h-1/4 p-5">
         <div className="absolute w-1/3  gap-10 flex ">
-          {userInfo?.role == "initlg" && (
+          {userInfo.role?.includes("initlg") && (
             <span
               className="flex   justify-center font-semibold text-sm px-2 py-2 gap-2 h-10 bg-blue-600 rounded-2xl text-white items-center cursor-pointer"
               onClick={() => {

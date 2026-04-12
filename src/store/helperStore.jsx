@@ -11,3 +11,49 @@ export const useIsEditing = create((set) => ({
   setIsEdit: () => set(() => ({ isedit: true })),
   resetIsEdit: () => set(() => ({ isedit: false })),
 }));
+
+export const useAttachments = create((set) => ({
+  attachments: JSON.parse(localStorage.getItem("editorAttachments")) || [],
+
+  setAttachments: (value) =>
+    set((state) => {
+      const updatedAttachments =
+        typeof value === "function" ? value(state.attachments) : value;
+
+      localStorage.setItem(
+        "editorAttachments",
+        JSON.stringify(updatedAttachments),
+      );
+
+      return { attachments: updatedAttachments };
+    }),
+
+  resetAttachments: () =>
+    set(() => {
+      localStorage.removeItem("editorAttachments");
+      return { attachments: [] };
+    }),
+}));
+
+export const useProjectCodes = create((set) => ({
+  projectcodes: [],
+  setProjectCodes: (value) => set(() => ({ projectcodes: value })),
+  resetProjectCodes: () => set(() => ({ projectcodes: [] })),
+}));
+
+export const useDeleteStore = create((set) => ({
+  deleteStatement: { id: null, open: false },
+  setDeleteStatement: (id) =>
+    set(() => ({ deleteStatement: { id, open: true } })),
+  resetDeleteStatement: () =>
+    set(() => ({ deleteStatement: { id: null, open: false } })),
+}));
+
+
+export const usenewfn = create((set) => ({
+  newfn: false,
+  setNewfn: (value) =>
+    set((state) => ({
+      newfn: value !== undefined ? value : !state.newfn,
+    })),
+}));

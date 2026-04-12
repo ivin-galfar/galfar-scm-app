@@ -26,15 +26,15 @@ const HomeContainer = () => {
 
   const { setPageIndex } = usePagination();
   const { setStatusFilter } = useStatusFilter();
-  let pending = data?.rows[0].pending_count ?? 0;
-  let approved = data?.rows[0].approved_count ?? 0;
-  let review = data?.rows[0].review_count ?? 0;
-  let rejected = data?.rows[0].rejected_count ?? 0;
-  let total = data?.rows[0].total_count ?? 0;
+  let pending = data?.rows?.[0].pending_count ?? 0;
+  let approved = data?.rows?.[0].approved_count ?? 0;
+  let review = data?.rows?.[0].review_count ?? 0;
+  let rejected = data?.rows?.[0].rejected_count ?? 0;
+  let total = data?.rows?.[0].total_count ?? 0;
   let recentstatements = data?.last7DaysResult ?? 0;
 
   return (
-    <div className="flex gap-6 mt-5">
+    <div className="flex gap-6  border-1 border-gray-200 ">
       {" "}
       <div className="w-1/3 p-4 bg-white rounded-lg shadow-md border border-gray-200">
         <div className="flex justify-between">
@@ -162,7 +162,7 @@ const HomeContainer = () => {
             <h2 className="text-base font-medium text-gray-700">
               Recent Statements
             </h2>
-            {userInfo?.is_admin && userInfo?.role == "inita" ? (
+            {userInfo?.is_admin && userInfo.role?.includes("inita") ? (
               <Link to="/brstatement">
                 <button
                   className="border border-blue-500 text-blue-500 hover:bg-blue-50 text-sm px-3 py-1.5 rounded cursor-pointer"

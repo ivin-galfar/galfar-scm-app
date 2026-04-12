@@ -42,7 +42,7 @@ const ApprovalModalBR = () => {
     },
   });
 
-  const submitApproval = async (cs_id, status) => {
+  const submitApproval = (cs_id, status) => {
     let updatedstatus = "";
     let file = "";
     let filename = "";

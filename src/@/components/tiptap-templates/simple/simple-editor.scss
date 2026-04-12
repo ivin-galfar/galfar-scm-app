@@ -1,0 +1,154 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+// body {
+//   --tt-toolbar-height: 44px;
+//   --tt-theme-text: var(--tt-gray-light-900);
+
+//   .dark & {
+//     --tt-theme-text: var(--tt-gray-dark-900);
+//   }
+// }
+
+// body {
+//   font-family: "Inter", sans-serif;
+//   color: var(--tt-theme-text);
+//   font-optical-sizing: auto;
+//   font-weight: 400;
+//   font-style: normal;
+//   padding: 0;
+//   overscroll-behavior-y: none;
+// }
+
+// html,
+// body {
+//   overscroll-behavior-x: none;
+// }
+
+// html,
+// body,
+// #root,
+// #app {
+//   height: 100%;
+//   background-color: var(--tt-bg-color);
+// }
+
+// ::-webkit-scrollbar {
+//   width: 0.25rem;
+// }
+
+  // * {
+  //   scrollbar-width: thin;
+  //   scrollbar-color: var(--tt-scrollbar-color) transparent;
+  // }
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--tt-scrollbar-color);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tiptap.ProseMirror {
+  font-family: "DM Sans", sans-serif;
+}
+
+.simple-editor-wrapper {
+  min-height: 65vh;
+  overflow: auto;
+}
+
+.simple-editor-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.simple-editor-content .tiptap.ProseMirror.simple-editor {
+  flex: 1;
+  padding: 4rem 4rem 10vh;
+}
+
+@media screen and (max-width: 480px) {
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    padding: 1rem 1.5rem 30vh;
+  }
+}
+
+.simple-editor table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.simple-editor table td,
+.simple-editor table th {
+  border: 1px solid #d1d5db;
+  padding: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+// Column width rules for File Note Demob table (6 columns)
+.simple-editor table tr:nth-child(15) td:nth-child(1),
+.simple-editor table tr:nth-child(15) th:nth-child(1),
+.simple-editor table tr:not(:nth-child(15)) td:nth-child(1),
+.simple-editor table tr:not(:nth-child(15)) th:nth-child(1) {
+  width: 10%;
+  min-width: 50px;
+}
+
+.simple-editor table td:nth-child(2),
+.simple-editor table th:nth-child(2) {
+  width: 20%;
+}
+
+.simple-editor table td:nth-child(3),
+.simple-editor table th:nth-child(3) {
+  width: 15%;
+}
+
+.simple-editor table td:nth-child(4),
+.simple-editor table th:nth-child(4) {
+  width: 20%;
+}
+
+.simple-editor table td:nth-child(5),
+.simple-editor table th:nth-child(5) {
+  width: 20%;
+}
+
+.simple-editor table td:nth-child(6),
+.simple-editor table th:nth-child(6) {
+  width: 20%;
+}
+
+// Column width rules for IOC table (9 columns)
+.simple-editor table td:nth-child(7),
+.simple-editor table th:nth-child(7) {
+  width: 10%;
+}
+
+.simple-editor table td:nth-child(8),
+.simple-editor table th:nth-child(8) {
+  width: 15%;
+}
+
+.simple-editor table td:nth-child(9),
+.simple-editor table th:nth-child(9) {
+  width: 15%;
+}
+
+.simple-editor .selectedCell {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.simple-editor .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #3b82f6;
+}

@@ -58,9 +58,11 @@ const ApproveButton = () => {
     }
   };
 
-  const nextstatus = brtabledata?.status?.includes(userInfo.role.toLowerCase())
+  const nextstatus = userInfo.role?.some((role) =>
+    brtabledata?.status?.toLowerCase()?.includes(role.toLowerCase()),
+  )
     ? "Approve/Reject"
-    : brtabledata?.status == "created"
+    : brtabledata?.status === "created"
       ? "Sent for Approval"
       : brtabledata?.status || "";
 
@@ -89,7 +91,7 @@ const ApproveButton = () => {
     buttontxt == "reverted" ||
     buttontxt == "rejected";
 
-  const changestatus = expectedstatusplant(userInfo?.role.toLowerCase());
+  const changestatus = expectedstatusplant(userInfo?.role);
 
   return (
     <>
