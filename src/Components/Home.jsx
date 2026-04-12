@@ -97,7 +97,7 @@ const Home = () => {
           isDeptDisabled(dept.key)
             ? "bg-gray-100 text-gray-400 border-gray-200 cursor-auto"
             : selectedDept === dept.key
-              ? "bg-gradient-to-r from-indigo-100 via-indigo-50 to-white text-indigo-900 bg-white border-t border-l border-r border-gray-100 rounded-t-md cursor-pointer "
+              ? "text-white   bg-blue-600 border-t border-l border-r border-gray-100 rounded-t-md cursor-pointer "
               : " text-gray-600  hover:bg-gray-50 hover:border-indigo-300 cursor-pointer border-b-gray-200"
         }`}
             >

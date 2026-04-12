@@ -311,7 +311,7 @@ const FileNote = () => {
                 <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
                   Type
                 </span>
-                <span className="text-blue-700 font-bold text-base">
+                <span className="text-blue-700 font-bold text-base text-center">
                   {getType(selectedvalue.type)}
                 </span>
               </div>
