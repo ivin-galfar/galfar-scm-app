@@ -853,7 +853,9 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
       `${REACT_SERVER_URL}/emailnotify/${id}?dept=${dept}&type=${data.type}&category=${data.category}`,
       {
         id: data.id,
-        role: !userInfo.is_admin ? userInfo.role[0] : userInfo.role[1],
+        role: userInfo.is_admin
+          ? (userInfo.role?.[1] ?? userInfo.role?.[0])
+          : userInfo.role?.[0],
         dept_id: data.department_id,
         doc_no: data.doc_no,
         name: data.name,
