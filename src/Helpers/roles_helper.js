@@ -4,6 +4,7 @@ export const roles = {
     HIRE: ["Mr.Ramzan", "Mr.Sabulal"],
     ASSET: ["Mr.Satheesh"],
     BUYRENT: ["Mr.Satheesh"],
+    FNIOC: ["plant"],
   },
   CEO: "Mr.Sridhar.C",
   GM: "Mr.Vijayan. C.G",
@@ -13,11 +14,13 @@ export const roles = {
 
 export const categoryapprovers = {
   BUYRENT: ["HOD", "FM", "GM", "CEO"],
+  FNIOC: ["HOD", "FM", "GM", "CEO"],
 };
 
 export const nextRole = (role) => {
   const roleMap = {
     inita: "hod",
+    inith: "hod",
     hod: "fm",
     fm: "gm",
     gm: "ceo",

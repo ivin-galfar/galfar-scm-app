@@ -679,6 +679,9 @@ export const updatefilenotevalues = async ({
   userInfo,
   comments,
   sentforapproval,
+  type,
+  category,
+  action,
 }) => {
   try {
     const config = {
@@ -694,6 +697,9 @@ export const updatefilenotevalues = async ({
         sentforapproval,
         role: userInfo.role,
         comments,
+        type,
+        category,
+        action,
       },
       config,
     );

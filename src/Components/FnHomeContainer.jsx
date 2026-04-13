@@ -32,8 +32,6 @@ const FnHomeContainer = () => {
   const { newfn, setNewfn } = usenewfn();
   const { attachments, setAttachments } = useAttachments();
 
-  console.log(attachments);
-
   let pending = data?.count?.pending_count ?? 0;
   let approved = data?.count?.approved_count ?? 0;
   let review = data?.count?.review_count ?? 0;

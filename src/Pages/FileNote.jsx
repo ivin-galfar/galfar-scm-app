@@ -263,6 +263,9 @@ const FileNote = () => {
         fnid: selectedvalue.id,
         userInfo,
         sentforapproval: selectedvalue.sentforapproval,
+        type: selectedvalue.type,
+        category: selectedvalue.category,
+        action: "save",
       });
     }
   };

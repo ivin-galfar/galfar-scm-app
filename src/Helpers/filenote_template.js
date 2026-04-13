@@ -123,7 +123,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
               type: "text",
               text: "We have received intimation from ADTS for security pass for ",
             },
-            { type: "text", marks: [{ type: "underline" }], text: "    " },
+            { type: "text", marks: [{ type: "underline" }], text: "  " },
             {
               type: "text",
               text: " units of our fleet. As per the ADTS guidelines, we are required to make a payment as mentioned in the proforma for the listed fleets to proceed with the issue of security pass. We have received an official notification from ADTS regarding the payment, amounting to AED",
@@ -131,7 +131,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                                                        ",
+              text: "             ",
             },
 
             {
@@ -141,7 +141,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "    ",
+              text: "   ",
             },
             {
               type: "text",

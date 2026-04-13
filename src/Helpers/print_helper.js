@@ -891,12 +891,16 @@ export const handleFnPrint = (data) => {
 
   doc.line(startX, y + 1, endX, y + 1);
 
+  // ...existing code...
   const marginLeft = 14;
   const marginRight = 20;
   const contentWidth = 180;
   const marginTop = 40;
   const marginBottom = 20;
   const headerBottomY = 40;
+  const paragraphFontSize = 10;
+  const paragraphLineHeight = 6;
+  const paragraphSpacing = 4;
   y = headerBottomY;
 
   data.content.content.forEach((block) => {
@@ -905,7 +909,7 @@ export const handleFnPrint = (data) => {
         row.content.map(
           (cell) =>
             cell.content
-              ?.map((p) => p.content?.map((t) => t.text || "").join(""))
+              ?.map((p) => p.content?.map((t) => t.text || "").join(" "))
               .join("\n") || "",
         ),
       );
@@ -919,29 +923,118 @@ export const handleFnPrint = (data) => {
           top: marginTop,
           bottom: marginBottom,
         },
-
         theme: "grid",
       });
 
       // update Y position after table
-      y = doc.lastAutoTable.finalY + 10;
+      y = doc.lastAutoTable.finalY + 12;
     }
 
     // ✅ PARAGRAPH
     else if (block.type === "paragraph") {
-      const text = block.content?.map((t) => t.text || "").join("") || "";
+      const text = block.content?.map((t) => t.text || "").join(" ") || "";
 
       if (text.trim()) {
-        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(paragraphFontSize);
 
-        doc.text(text, marginLeft, y, {
-          maxWidth: contentWidth,
-        });
+        const wrapped = doc.splitTextToSize(text, contentWidth);
+        doc.text(wrapped, marginLeft, y, { maxWidth: contentWidth });
 
-        y += 8;
+        y += wrapped.length * paragraphLineHeight + paragraphSpacing;
       }
     }
   });
+  // ...existing code...
+
+  const footerY = 275;
+  const pageHeight = doc.internal.pageSize.height;
+  const footerPadding = 6;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+
+  const skipSfmCategories = [
+    "tfw",
+    "general",
+    "inusrance",
+    "insurance",
+    "fuelchip",
+    "pr",
+  ];
+  const categoryKey = String(data?.category || "")
+    .trim()
+    .toLowerCase();
+  const skipSfm = skipSfmCategories.includes(categoryKey);
+
+  const approverLabels = skipSfm
+    ? ["(HOD)", "(GM)", "(CEO)"]
+    : ["(HOD)", "(SFM)", "(GM)", "(CEO)"];
+
+  const approverIndexes = skipSfm ? [0, 2, 3] : [0, 1, 2, 3];
+  const names = getApproverNames("FNIOC", "FNIOC");
+  const approvers = categoryapprovers.FNIOC;
+  const approvals = data.approver_info || [];
+
+  const positions = approverLabels.map(
+    (_, index) => (pageWidth * (index + 1)) / (approverLabels.length + 1),
+  );
+
+  approverLabels.forEach((label, index) => {
+    doc.text(label, positions[index], footerY + 5.5, { align: "center" });
+  });
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  const lineY = footerY - 7;
+
+  approverIndexes.forEach((approverIndex, index) => {
+    const name = names[approverIndex] || "";
+    const role = approvers[approverIndex]?.toLowerCase() || "";
+
+    const lastApprover = approvals[approvals.length - 1];
+    const lastRole = lastApprover?.role?.toUpperCase() ?? "";
+
+    const status =
+      approvals.findLast((a) => a.role?.toLowerCase() === role)?.status ?? "--";
+    const formattedstatus = status.charAt(0).toUpperCase() + status.slice(1);
+    const isRejected = approvals.some(
+      (a) => a.status?.toLowerCase() === "rejected",
+    );
+    const nextPending = !isRejected ? nextRole(lastRole) : null;
+
+    const displayStatus =
+      nextPending && role === nextPending.toLowerCase()
+        ? "(Pending)"
+        : formattedstatus;
+
+    let color = [128, 128, 128];
+    if (status.toLowerCase() === "approved") color = [0, 128, 0];
+    else if (status.toLowerCase() === "rejected") color = [200, 0, 0];
+    if (displayStatus.toLowerCase() === "(pending)") color = [255, 165, 0];
+
+    const posX = positions[index];
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...color);
+    doc.line(posX - 20, lineY, posX + 20, lineY);
+    doc.text(displayStatus, posX, lineY - 4, { align: "center" });
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(name, posX, footerY, { align: "center" });
+  });
+
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100);
+  doc.text(
+    `This Statement is Electronically Approved; Signature Not Required `,
+    60,
+    pageHeight - footerPadding,
+  );
 
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
