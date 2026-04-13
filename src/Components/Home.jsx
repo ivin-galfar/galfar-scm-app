@@ -39,10 +39,30 @@ const Home = () => {
   const isfnote = is_fnote(userInfo?.role);
 
   const departments = [
-    { key: "plant", name: "Hiring / Asset", icon: <LuFactory size={18} /> },
-    { key: "bvrplant", name: "Buy vs Rent", icon: <GiClamp size={18} /> },
-    { key: "logistics", name: "Logistics", icon: <FaTruck size={18} /> },
-    { key: "fn", name: "FN / IOC", icon: <IoDocument size={18} /> },
+    {
+      key: "plant",
+      name: "Hiring / Asset",
+      icon: <LuFactory size={18} />,
+      color: " bg-blue-600",
+    },
+    {
+      key: "bvrplant",
+      name: "Buy vs Rent",
+      icon: <GiClamp size={18} />,
+      color: "bg-emerald-600",
+    },
+    {
+      key: "logistics",
+      name: "Logistics",
+      icon: <FaTruck size={18} />,
+      color: "bg-orange-600",
+    },
+    {
+      key: "fn",
+      name: "FN / IOC",
+      icon: <IoDocument size={18} />,
+      color: "bg-purple-600",
+    },
   ];
 
   const { defaultDept, activeDept, allowedDept } = getDeptConfig({
@@ -97,7 +117,7 @@ const Home = () => {
           isDeptDisabled(dept.key)
             ? "bg-gray-100 text-gray-400 border-gray-200 cursor-auto"
             : selectedDept === dept.key
-              ? "text-white   bg-blue-600 border-t border-l border-r border-gray-100 rounded-t-md cursor-pointer "
+              ? `text-white  ${dept.color} border-t border-l border-r border-gray-100 rounded-t-md cursor-pointer `
               : " text-gray-600  hover:bg-gray-50 hover:border-indigo-300 cursor-pointer border-b-gray-200"
         }`}
             >

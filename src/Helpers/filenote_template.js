@@ -114,7 +114,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
       },
       { type: "paragraph" },
     ];
-    if (category == "ADTS") {
+    if (category == "ADTSRen") {
       basecontent.push(
         {
           type: "paragraph",

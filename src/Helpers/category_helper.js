@@ -1,6 +1,6 @@
 export const getcategory = (type) => {
   const map = {
-    file_note: ["General", "Ap", "ADTS", "ADTSNew", "TFW"],
+    file_note: ["General", "Ap", "ADTSRen", "ADTSNew", "TFW"],
     ioc: ["Insurance", "Demob", "FC", "PR"],
   };
   return map[type] || [];
@@ -30,7 +30,8 @@ export const CategoryForUi = {
   General: "General",
   Ap: "Asset Purchase",
   Insurance: "Insurance",
-  ADTS: "ADTS CICPA",
+  ADTSRen: "ADTS CICPA",
+  ADTSNew: "ADTS CICPA",
   TFW: "Traffic Fine Waiver",
   Demob: "Demobilization",
   FC: "Fuel Chip",
