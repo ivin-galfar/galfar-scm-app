@@ -12,7 +12,7 @@ import Footer from "./Components/Footer";
 import Contact from "./Pages/Contact";
 import LogisticsStatement from "./Pages/LogisticsStatement";
 import LogisticsDashboard from "./Pages/LogisticsDashboard";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import BrStatement from "./Pages/BrStatement";
 import BRDashboards from "./Pages/BRDashboards";
 import FileNote from "./Pages/FileNote";
@@ -23,6 +23,13 @@ const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
   const isLoginPage = location.pathname === "/login";
+
+  useEffect(() => {
+    if (!localStorage.getItem("app_version")) {
+      localStorage.setItem("app_version", "1.7.5");
+      localStorage.removeItem("userInfo");
+    }
+  }, []);
 
   return (
     <div
