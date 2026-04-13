@@ -165,7 +165,7 @@ const FileNote = () => {
   useEffect(() => {
     if (userInfo?.role.includes("initpr") && category == "Demob" && !name) {
       setName("Demobilization of Vehicle/Equipment");
-    } else if (userInfo.role.includes("initfn") && category == "ADTS") {
+    } else if (userInfo.role.includes("initfn") && category == "ADTSRen") {
       setName("ADTS Payments for CICPA Renewal -      Units (    Months)");
     } else if (userInfo.role.includes("initfn") && category == "ADTSNew") {
       setName(
