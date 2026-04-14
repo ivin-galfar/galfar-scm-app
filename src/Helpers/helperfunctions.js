@@ -326,3 +326,11 @@ export const isBold = (cell) => {
     return false;
   });
 };
+export const getDept = (code) => {
+  switch (code) {
+    case 1:
+      return "Plant & Equipment Department";
+    case 2:
+      return "Logistics Department";
+  }
+};

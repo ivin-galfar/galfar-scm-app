@@ -7,6 +7,7 @@ import {
   formatPrice,
   getAlignment,
   getApproverNames,
+  getDept,
   getType,
   isBold,
 } from "./helperfunctions";
@@ -882,10 +883,14 @@ export const handleFnPrint = (data) => {
   doc.setFontSize(12);
 
   const text = getType(data?.type);
+  const dept = getDept(data?.department_id);
 
   const x = pageWidth / 2;
   let y = 30;
 
+  doc.text(dept, x, y, { align: "center" });
+
+  y += 8; // spacing between lines
   doc.text(text, x, y, { align: "center" });
 
   const textWidth = doc.getTextWidth(text);
@@ -899,7 +904,7 @@ export const handleFnPrint = (data) => {
   const contentWidth = 180;
   const marginTop = 40;
   const marginBottom = 20;
-  const headerBottomY = 40;
+  const headerBottomY = 50;
   const paragraphFontSize = 10;
   const paragraphLineHeight = 6;
   const paragraphSpacing = 4;
@@ -932,7 +937,7 @@ export const handleFnPrint = (data) => {
       });
 
       // update Y position after table
-      y = doc.lastAutoTable.finalY + 12;
+      y = doc.lastAutoTable.finalY + 20;
     }
 
     // ✅ PARAGRAPH
