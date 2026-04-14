@@ -905,20 +905,20 @@ export const handleFnPrint = (data) => {
   const marginTop = 40;
   const marginBottom = 20;
   const headerBottomY = 50;
-  const paragraphFontSize = 10;
+  const paragraphFontSize = 11;
   const paragraphLineHeight = 6;
   const paragraphSpacing = 4;
   y = headerBottomY;
 
   data.content.content.forEach((block) => {
     if (block.type === "table") {
-      const body = block.content.map((row) =>
+      const body = block.content.map((row, rowIndex) =>
         row.content.map((cell) => ({
           content: extractText(cell.content || []),
           colSpan: cell.attrs?.colspan || 1,
           styles: {
             halign: getAlignment(cell),
-            fontStyle: isBold(cell) ? "bold" : "normal",
+            fontStyle: rowIndex === 0 ? "bold" : "normal",
           },
         })),
       );
@@ -927,12 +927,30 @@ export const handleFnPrint = (data) => {
         startY: y,
         body: body,
         theme: "grid",
+        styles: {
+          font: "helvetica",
+          fontStyle: "normal",
+          fontSize: 10,
+          textColor: [0, 0, 0],
+          lineWidth: 0.3,
+          cellPadding: 2,
+        },
         margin: {
           left: marginLeft,
           right: marginRight,
           top: marginTop,
           bottom: marginBottom,
         },
+        headStyles: {
+          fontStyle: "bold",
+          textColor: [0, 0, 0],
+          fillColor: [240, 240, 240], // light gray header (optional)
+          lineWidth: 0.4,
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+        },
+
         theme: "grid",
       });
 
@@ -947,7 +965,7 @@ export const handleFnPrint = (data) => {
       if (text.trim()) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(paragraphFontSize);
-
+        doc.setLineHeightFactor(1.5);
         const wrapped = doc.splitTextToSize(text, contentWidth);
         doc.text(wrapped, marginLeft, y, { maxWidth: contentWidth });
 
