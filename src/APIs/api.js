@@ -327,7 +327,11 @@ export const fetchReceiptCount = async ({
   let type = null;
 
   if (userInfo?.is_admin) {
-    type = userInfo.role?.includes("inita") ? "asset" : "hiring";
+    if (userInfo.role?.includes("inita")) {
+      type = "asset";
+    } else if (userInfo.role?.includes("inith")) {
+      type = "hiring";
+    }
   }
   try {
     const config = {

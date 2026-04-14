@@ -2,6 +2,9 @@ import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 
 const fetchParticulars = async (userInfo, dept_id) => {
+  if (!userInfo.role.includes("inita") && !userInfo.role.includes("inith")) {
+    return;
+  }
   try {
     const config = {
       headers: {
@@ -12,7 +15,7 @@ const fetchParticulars = async (userInfo, dept_id) => {
     };
     const response = await axios.get(
       `${REACT_SERVER_URL}/particulars?dept_code=${dept_id}`,
-      config
+      config,
     );
     return response.data;
   } catch (error) {

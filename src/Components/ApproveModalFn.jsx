@@ -77,6 +77,8 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       fnid: data.id,
       userInfo,
       comments,
+      type: data.type,
+      category: data.category,
     });
   };
 

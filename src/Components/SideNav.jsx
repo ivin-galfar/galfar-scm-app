@@ -38,6 +38,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
   const isplanthire = userInfo?.role?.includes("inith");
+  const initfn = userInfo?.role?.includes("initfn");
   const isfm = is_fm(userInfo?.role);
   const isBuyvsrent = is_buyrent(userInfo?.dept_code);
   useEffect(() => {
@@ -100,7 +101,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               <span className=" break-words">Plant - CS </span>
               <span className="ml-auto flex gap-2 text-gray-500 dark:text-gray-300 cursor-pointer">
                 {submenuOpen ? <AiFillCaretUp /> : <AiFillCaretDown />}
-                {!isPlant && !isBuyvsrent && <FaLock />}{" "}
+                {!isPlant && !isBuyvsrent && !initfn && <FaLock />}{" "}
               </span>
             </span>
           )}
@@ -159,19 +160,30 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 }`}
               >
                 <PiFireTruckLight />
-                {isOpen && <span> Hiring/Asset</span>}
+                {isOpen && <span> Hiring / Asset</span>}
               </Link>
             )}
             <Link
               to="/brstatement"
               className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                isplanthire
+                isplanthire || !isBuyvsrent
                   ? "pointer-events-none opacity-50 cursor-not-allowed"
                   : ""
               }`}
             >
               <GiClamp />
               {isOpen && <span>Buy vs Rent </span>}
+            </Link>
+            <Link
+              to="/filenote"
+              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                !initfn
+                  ? "pointer-events-none opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+            >
+              <GiClamp />
+              {isOpen && <span>Fn / IOC </span>}
             </Link>
           </div>
         )}

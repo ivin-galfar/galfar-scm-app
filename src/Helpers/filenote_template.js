@@ -496,7 +496,6 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
               { widths: 120 },
               { widths: 80 },
               { widths: 120 },
-              { widths: 100 },
             ].map(({ widths }, idx) => {
               if (idx === 3) {
                 return {

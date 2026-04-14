@@ -22,7 +22,7 @@ import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleFnPrint } from "../Helpers/print_helper";
 import { formatDateDDMMYYYY, getType } from "../Helpers/helperfunctions";
-import { useDeleteStore } from "../store/helperStore";
+import { useDeleteStore, usenewfn } from "../store/helperStore";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
 
@@ -40,6 +40,7 @@ const FnDashboards = () => {
   const { pagination, setPageIndex, setPageSize } = usePagination();
   const [searchcs, setSearchCS] = useState("");
   const queryClient = useQueryClient();
+  const { newfn, setNewfn } = usenewfn();
 
   const { setStatusFilter, statusfilter, resetStatusFilter } =
     useStatusFilter();
@@ -494,6 +495,7 @@ const FnDashboards = () => {
                         <div className="flex items-center justify-center gap-4">
                           <Link
                             className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
+                            onClick={() => setNewfn(false)}
                             to={
                               userInfo?.role?.includes("initfn")
                                 ? `/filenote/${row.original?.id}`

@@ -15,19 +15,30 @@ export const roles = {
 export const categoryapprovers = {
   BUYRENT: ["HOD", "FM", "GM", "CEO"],
   FNIOC: ["HOD", "FM", "GM", "CEO"],
+  FNIOCM: ["HOD", "GM", "CEO"],
 };
 
-export const nextRole = (role) => {
+export const nextRole = (role, category) => {
+  const normalizedRole = role?.toLowerCase();
+  const normalizedCategory = category?.toLowerCase();
+
+  const fmCategories = ["ap", "adtsren", "adtsnew"];
+
+  if (normalizedRole === "hod") {
+    return fmCategories.includes(normalizedCategory) ? "fm" : "gm";
+  }
+
   const roleMap = {
     inita: "hod",
     inith: "hod",
-    hod: "fm",
+    initfn: "hod",
+    hod: "gm",
     fm: "gm",
     gm: "ceo",
     ceo: null,
   };
 
-  return roleMap[role.toLowerCase()] || null;
+  return roleMap[normalizedRole] || null;
 };
 
 export const prevRole = (role) => {

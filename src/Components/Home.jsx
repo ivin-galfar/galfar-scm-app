@@ -55,7 +55,7 @@ const Home = () => {
       key: "logistics",
       name: "Logistics",
       icon: <FaTruck size={18} />,
-      color: "bg-orange-600",
+      color: "bg-indigo-600",
     },
     {
       key: "fn",

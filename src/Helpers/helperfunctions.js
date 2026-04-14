@@ -203,9 +203,10 @@ export const handleAttachmentsUpload = async (files, userInfo) => {
   }
 };
 
-export const getApproverNames = (category, dept) => {
-  const flow = categoryapprovers[category] || [];
-  return flow.flatMap((role) => {
+export const getApproverNames = (flow, dept) => {
+  const flowRoles = categoryapprovers[flow] || [];
+
+  return flowRoles.flatMap((role) => {
     if (role == "INITIATOR") {
       return roles.INITIATOR[dept];
     }
@@ -289,4 +290,39 @@ export const getFromValue = (category) => {
     case "Insurance":
       return " Manger (Plant & Equipment)";
   }
+};
+
+export const extractText = (content = []) => {
+  return content
+    .map((item) => {
+      if (item.type === "text") {
+        return item.text || "";
+      }
+
+      if (item.content) {
+        console.log(item);
+
+        return extractText(item.content);
+      }
+
+      return "";
+    })
+    .join(" ");
+};
+
+export const getAlignment = (cell) => {
+  const paragraph = cell.content?.find((c) => c.type === "paragraph");
+  return paragraph?.attrs?.textAlign || "left";
+};
+
+export const isBold = (cell) => {
+  return cell.content?.some((item) => {
+    if (item.type === "text") {
+      return item.marks?.some((m) => m.type === "bold");
+    }
+    if (item.content) {
+      return isBold({ content: item.content });
+    }
+    return false;
+  });
 };

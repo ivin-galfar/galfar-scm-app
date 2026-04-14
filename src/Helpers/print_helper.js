@@ -2,10 +2,13 @@ import jsPDF from "jspdf";
 import galfarlogo from "../assets/Images/logo-new.png";
 import { autoTable } from "jspdf-autotable";
 import {
+  extractText,
   formatDateDDMMYYYY,
   formatPrice,
+  getAlignment,
   getApproverNames,
   getType,
+  isBold,
 } from "./helperfunctions";
 import { categoryapprovers, nextRole } from "./roles_helper";
 
@@ -891,7 +894,6 @@ export const handleFnPrint = (data) => {
 
   doc.line(startX, y + 1, endX, y + 1);
 
-  // ...existing code...
   const marginLeft = 14;
   const marginRight = 20;
   const contentWidth = 180;
@@ -906,17 +908,20 @@ export const handleFnPrint = (data) => {
   data.content.content.forEach((block) => {
     if (block.type === "table") {
       const body = block.content.map((row) =>
-        row.content.map(
-          (cell) =>
-            cell.content
-              ?.map((p) => p.content?.map((t) => t.text || "").join(" "))
-              .join("\n") || "",
-        ),
+        row.content.map((cell) => ({
+          content: extractText(cell.content || []),
+          colSpan: cell.attrs?.colspan || 1,
+          styles: {
+            halign: getAlignment(cell),
+            fontStyle: isBold(cell) ? "bold" : "normal",
+          },
+        })),
       );
 
       autoTable(doc, {
         startY: y,
         body: body,
+        theme: "grid",
         margin: {
           left: marginLeft,
           right: marginRight,
@@ -945,7 +950,6 @@ export const handleFnPrint = (data) => {
       }
     }
   });
-  // ...existing code...
 
   const footerY = 275;
   const pageHeight = doc.internal.pageSize.height;
@@ -953,14 +957,7 @@ export const handleFnPrint = (data) => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
 
-  const skipSfmCategories = [
-    "tfw",
-    "general",
-    "inusrance",
-    "insurance",
-    "fuelchip",
-    "pr",
-  ];
+  const skipSfmCategories = ["tfw", "general", "insurance", "fc", "pr"];
   const categoryKey = String(data?.category || "")
     .trim()
     .toLowerCase();
@@ -970,9 +967,26 @@ export const handleFnPrint = (data) => {
     ? ["(HOD)", "(GM)", "(CEO)"]
     : ["(HOD)", "(SFM)", "(GM)", "(CEO)"];
 
-  const approverIndexes = skipSfm ? [0, 2, 3] : [0, 1, 2, 3];
-  const names = getApproverNames("FNIOC", "FNIOC");
-  const approvers = categoryapprovers.FNIOC;
+  const approverIndexes = skipSfm ? [0, 1, 2] : [0, 1, 2, 3];
+  const Flow =
+    data?.category == "Ap" ||
+    data.category == "ADTSNew" ||
+    data.category == "ADTSRen"
+      ? "FNIOC"
+      : "FNIOCM";
+
+  const names = getApproverNames(Flow, "FNIOC");
+
+  let approvers = categoryapprovers.FNIOCM;
+
+  if (
+    data?.category == "Ap" ||
+    data.category == "ADTSNew" ||
+    data.category == "ADTSRen"
+  ) {
+    approvers = categoryapprovers.FNIOC;
+  }
+
   const approvals = data.approver_info || [];
 
   const positions = approverLabels.map(
@@ -1000,7 +1014,8 @@ export const handleFnPrint = (data) => {
     const isRejected = approvals.some(
       (a) => a.status?.toLowerCase() === "rejected",
     );
-    const nextPending = !isRejected ? nextRole(lastRole) : null;
+
+    const nextPending = !isRejected ? nextRole(lastRole, data.category) : null;
 
     const displayStatus =
       nextPending && role === nextPending.toLowerCase()

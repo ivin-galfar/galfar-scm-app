@@ -166,11 +166,9 @@ const FileNote = () => {
     if (userInfo?.role.includes("initpr") && category == "Demob" && !name) {
       setName("Demobilization of Vehicle/Equipment");
     } else if (userInfo.role.includes("initfn") && category == "ADTSRen") {
-      setName("ADTS Payments for CICPA Renewal -      Units (    Months)");
+      setName("ADTS Payments for CICPA Renewal -   Units (  Months)");
     } else if (userInfo.role.includes("initfn") && category == "ADTSNew") {
-      setName(
-        "ADTS Payments for Al Dhafra New Vehicle -   Units (     months)",
-      );
+      setName("ADTS Payments for Al Dhafra New Vehicle -  Units (  months)");
     } else if (userInfo.role.includes("initfn") && category == "PR") {
       setName("Return of Police Vehicle");
     } else if (userInfo.role.includes("initfn") && category == "FC") {
