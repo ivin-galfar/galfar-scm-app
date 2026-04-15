@@ -137,32 +137,32 @@ export const fetchallid = async (userInfo, module) => {
     };
     const response = await axios.get(`${REACT_SERVER_URL}/logistics/allcs`, {
       ...config,
-      params: { module },
+      params: { module, project: userInfo.pr_code, role: userInfo.role },
     });
-    let cs = response.data
-      .filter(
-        (d) =>
-          d.status !== null && d.status !== "created" && d.status !== "review",
-      )
-      .sort((a, b) => b.id - a.id);
-    if (userInfo.role?.includes("initlg")) {
-      cs = response.data.sort((a, b) => b.id - a.id);
-    }
-    if (userInfo.role?.includes("pm")) {
-      if (userInfo.pr_code.includes(1)) {
-        cs = response.data.filter(
-          (d) => d.project == "plant" && d.status !== "created",
-        );
-      } else {
-        cs = response.data.filter(
-          (d) =>
-            userInfo.pr_code.includes(Number(d.project)) &&
-            d.status !== "created",
-        );
-      }
-    }
+    // let cs = response.data
+    //   .filter(
+    //     (d) =>
+    //       d.status !== null && d.status !== "created" && d.status !== "review",
+    //   )
+    //   .sort((a, b) => b.id - a.id);
+    // if (userInfo.role?.includes("initlg")) {
+    //   cs = response.data.sort((a, b) => b.id - a.id);
+    // }
+    // if (userInfo.role?.includes("pm")) {
+    //   if (userInfo.pr_code.includes(1)) {
+    //     cs = response.data.filter(
+    //       (d) => d.project == "plant" && d.status !== "created",
+    //     );
+    //   } else {
+    //     cs = response.data.filter(
+    //       (d) =>
+    //         userInfo.pr_code.includes(Number(d.project)) &&
+    //         d.status !== "created",
+    //     );
+    //   }
+    // }
 
-    return cs;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -192,30 +192,32 @@ export const fetchallstatements = async (
           pageIndex,
           pageSize,
           role: userInfo.role[0],
+          project: userInfo.pr_code,
         },
       },
     );
-    let cs = response.data
-      .filter((d) => d.status !== null)
-      .sort((a, b) => b.id - a.id);
-    if (userInfo.role?.includes("initlg")) {
-      cs = response.data.sort((a, b) => b.id - a.id);
-    }
-    if (userInfo.role?.includes("pm")) {
-      if (userInfo.pr_code.includes(1)) {
-        cs = response.data.filter(
-          (d) => d.project == "plant" && d.status !== "created",
-        );
-      } else {
-        cs = response.data.filter(
-          (d) =>
-            userInfo.pr_code.includes(Number(d.project)) &&
-            d.status !== "created",
-        );
-      }
-    }
 
-    return cs;
+    // let cs = response.data
+    //   .filter((d) => d.status !== null)
+    //   .sort((a, b) => b.id - a.id);
+    // if (userInfo.role?.includes("initlg")) {
+    //   cs = response.data.sort((a, b) => b.id - a.id);
+    // }
+    // if (userInfo.role?.includes("pm")) {
+    //   if (userInfo.pr_code.includes(1)) {
+    //     cs = response.data.filter(
+    //       (d) => d.project == "plant" && d.status !== "created",
+    //     );
+    //   } else {
+    //     cs = response.data.filter(
+    //       (d) =>
+    //         userInfo.pr_code.includes(Number(d.project)) &&
+    //         d.status !== "created",
+    //     );
+    //   }
+    // }
+
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -381,7 +383,12 @@ export const fetchApproverDetails = async (userInfo, cs_id) => {
   }
 };
 
-export const fetchCsCount = async (userInfo, statusfilter, searchcs) => {
+export const fetchCsCount = async (
+  userInfo,
+  statusfilter,
+  searchcs,
+  project,
+) => {
   try {
     const config = {
       headers: {
@@ -393,7 +400,7 @@ export const fetchCsCount = async (userInfo, statusfilter, searchcs) => {
       `${REACT_SERVER_URL}/logistics/totalreceipts/`,
       {
         ...config,
-        params: { statusfilter, role: userInfo.role[0], searchcs },
+        params: { statusfilter, role: userInfo.role[0], searchcs, project },
       },
     );
 

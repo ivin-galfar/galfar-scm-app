@@ -154,7 +154,12 @@ const LogisticsDashboard = () => {
   useEffect(() => {
     const fetchStatments = async () => {
       try {
-        const totalcount = await fetchCsCount(userInfo, statusfilter, searchcs);
+        const totalcount = await fetchCsCount(
+          userInfo,
+          statusfilter,
+          searchcs,
+          userInfo.pr_code,
+        );
         setReceiptsCount(totalcount.receipts_count);
       } catch (error) {
         const message = error?.response?.data?.message || error.message;

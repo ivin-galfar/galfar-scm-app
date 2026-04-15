@@ -2,7 +2,11 @@ import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 
 const fetchParticulars = async (userInfo, dept_id) => {
-  if (!userInfo.role.includes("inita") && !userInfo.role.includes("inith")) {
+  if (
+    !userInfo.role.includes("inita") &&
+    !userInfo.role.includes("inith") &&
+    !userInfo.role.includes("initlg")
+  ) {
     return;
   }
   try {
