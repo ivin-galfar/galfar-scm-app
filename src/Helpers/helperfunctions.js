@@ -93,7 +93,7 @@ export const getPmName = (projectcode) => {
     case "7099":
       return "Mr. Shanmugam R.";
     case "7110":
-      return "Mr. Swarup Biswas";
+      return "Mr. Shanmugam R.";
     case "7111":
       return "Mr. Manoj Pattabi";
     case "7114":

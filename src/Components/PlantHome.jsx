@@ -85,7 +85,7 @@ const PlantHome = () => {
           userInfo,
           userInfo?.dept_code?.[0],
         );
-        setParticulars(particulars.Particulars);
+        setParticulars(particulars?.Particulars);
         setfreezeQuantity(false);
       } catch (error) {
         console.log(error);

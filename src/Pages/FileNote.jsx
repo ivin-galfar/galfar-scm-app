@@ -227,13 +227,14 @@ const FileNote = () => {
       : selectedvalue?.status || "";
 
   const handleSave = (action) => {
-    const status = statusExpected(userInfo?.role, "save", type, category);
     const files = JSON.parse(localStorage.getItem("editorAttachments")) || [];
 
     const file_names = files.map((file) => file.name);
     const file_urls = files.map((file) => file.url);
-
+    let status = "";
     if (action != "update") {
+      status = statusExpected(userInfo?.role, "save", type, category);
+
       if (category == "Demob" && selectedproject.length == 0) {
         setErrorMessage("Please select the Project");
         setShowToast();
@@ -256,6 +257,13 @@ const FileNote = () => {
         project: selectedproject,
       });
     } else {
+      status = statusExpected(
+        userInfo?.role,
+        "save",
+        selectedvalue.type,
+        selectedvalue.category,
+      );
+
       updatefilenote({
         status: status,
         fnid: selectedvalue.id,

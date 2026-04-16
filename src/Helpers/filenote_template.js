@@ -542,7 +542,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
         },
       ],
     };
-    if (category != "Demobilization") {
+    if (category != "Demob") {
       basecontent = [
         {
           type: "tableRow",
@@ -698,7 +698,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
       ];
     }
 
-    if (category == "Demobilization") {
+    if (category == "Demob") {
       basecontent.push(
         {
           type: "paragraph",
@@ -718,7 +718,6 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             },
             {
               type: "text",
-              // marks: [{ type: "underline" }],
               text: "                                                            .",
             },
           ],
@@ -781,7 +780,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             .fill(null)
             .map(() => ({
               type: "tableCell",
-              content: [{ type: "paragraph" }],
+              content: [{ type: "paragraph", attrs: { textAlign: "center" } }],
             })),
         },
       );
