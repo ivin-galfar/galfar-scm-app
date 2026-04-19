@@ -22,7 +22,16 @@ import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleFnPrint } from "../Helpers/print_helper";
 import { formatDateDDMMYYYY, getType } from "../Helpers/helperfunctions";
-import { useDeleteStore, usenewfn } from "../store/helperStore";
+import {
+  useCategories,
+  useDeleteStore,
+  usenewfn,
+  useProjectCodes,
+  useSelectedProject,
+} from "../store/helperStore";
+import TypeFilter from "../Components/TypeFilter";
+import { getcategory } from "../Helpers/category_helper";
+import { GrAttachment } from "react-icons/gr";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
 
@@ -41,9 +50,16 @@ const FnDashboards = () => {
   const [searchcs, setSearchCS] = useState("");
   const queryClient = useQueryClient();
   const { newfn, setNewfn } = usenewfn();
-
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const { setStatusFilter, statusfilter, resetStatusFilter } =
     useStatusFilter();
+  const { projectcodes, setProjectCodes } = useProjectCodes();
+  // const [selectedproject, setSelectedProject] = useState([]);
+  const { selectedproject, setSelectedProject } = useSelectedProject();
+  // const [categories, setCategories] = useState([]);
+  const { categories, setCategories } = useCategories();
+
   const [total, setTotal] = useState(0);
   const { data: fndata } = useQuery({
     queryKey: [
@@ -52,6 +68,8 @@ const FnDashboards = () => {
       pagination.pageSize,
       pagination.pageIndex,
       searchcs,
+      categoryFilter,
+      typeFilter,
     ],
     queryFn: () =>
       fetchfilenoteids({
@@ -62,6 +80,9 @@ const FnDashboards = () => {
         searchcs,
         page: pagination.pageIndex,
         limit: pagination.pageSize,
+        categoryFilter,
+        typeFilter,
+        projectFilter: selectedproject,
       }),
     enabled: !!userInfo,
     keepPreviousData: true,
@@ -99,6 +120,8 @@ const FnDashboards = () => {
           page: pagination.pageIndex,
           limit: pagination.pageSize,
           count: true,
+          categoryFilter,
+          typeFilter,
         });
         setTotal(totalcount);
       } catch (error) {
@@ -107,7 +130,7 @@ const FnDashboards = () => {
       }
     };
     fetchStatments();
-  }, [statusfilter, searchcs]);
+  }, [statusfilter, searchcs, categoryFilter, typeFilter]);
 
   const handleDelete = async (id) => {
     try {
@@ -292,50 +315,6 @@ const FnDashboards = () => {
         );
       },
     }),
-
-    // columnHelper.accessor(
-    //   (row) => {
-    //     const comments = row.approver_info ?? "";
-    //     return comments;
-    //   },
-    //   {
-    //     id: "comments",
-    //     header: "Approver Comments",
-    //     meta: { className: "w-50 max-w-xs whitespace-pre-wrap break-words" },
-    //     cell: (info) => {
-    //       const comments = info.getValue();
-
-    //       if (
-    //         comments &&
-    //         typeof comments === "object" &&
-    //         Object.keys(comments).length > 0
-    //       ) {
-    //         return (
-    //           <div className="space-y-1 overflow-y-auto max-h-30 ">
-    //             {Object.entries(comments)
-    //               .reverse()
-    //               .map(([key, value]) =>
-    //                 value.comment?.trim() ? (
-    //                   <div key={key}>
-    //                     {value.comment !== "" && (
-    //                       <>
-    //                         <strong className="capitalize">
-    //                           {value.role + ":"}
-    //                         </strong>{" "}
-    //                         {value.comment}
-    //                       </>
-    //                     )}
-    //                   </div>
-    //                 ) : null,
-    //               )}
-    //           </div>
-    //         );
-    //       } else {
-    //         return "-";
-    //       }
-    //     },
-    //   },
-    // ),
   ];
   const table = useReactTable({
     data: fndata || [],
@@ -348,77 +327,115 @@ const FnDashboards = () => {
     getExpandedRowModel: getExpandedRowModel(),
   });
 
+  useEffect(() => {
+    let cat = [];
+    if (
+      userInfo.role.includes("initpr") ||
+      userInfo.role.includes("cm") ||
+      userInfo.role.includes("pm")
+    ) {
+      cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
+    } else {
+      cat = getcategory(typeFilter).filter((c) => !c.includes("Demob"));
+    }
+
+    setCategories(cat);
+  }, [typeFilter, categoryFilter]);
+  const shouldShowFilter =
+    !userInfo?.role?.includes("cm") &&
+    !userInfo?.role?.includes("pm") &&
+    !userInfo?.role?.includes("initpr") &&
+    userInfo?.role?.includes("initfn");
+
   return (
     <div className="flex-grow ">
       <div className="flex-grow w-full px-5">
-        <div className="flex border-b  border-gray-300 mb-4">
-          {["All", "Approved", "Rejected", "Pending"].map((tab) => {
-            const isActive =
-              (tab === "All" && statusfilter === "All") ||
-              (tab === "Approved" && statusfilter === "Approved") ||
-              (tab === "Rejected" && statusfilter === "Rejected") ||
-              (tab === "Pending" && statusfilter === "Pending") ||
-              (tab === "Under Review" && statusfilter === "review");
+        <div className="flex border-b justify-between items-center border-gray-300 mb-4">
+          <div>
+            {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+              (tab) => {
+                const isActive =
+                  (tab === "All" && statusfilter === "All") ||
+                  (tab === "Approved" && statusfilter === "Approved") ||
+                  (tab === "Rejected" && statusfilter === "Rejected") ||
+                  (tab === "Pending" && statusfilter === "Pending") ||
+                  (tab === "Under Review" && statusfilter === "review");
 
-            let activeColor = "border-blue-500 text-blue-600";
-            let inactiveColor =
-              "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+                let activeColor = "border-blue-500 text-blue-600";
+                let inactiveColor =
+                  "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
 
-            if (tab === "Approved") {
-              activeColor = "border-green-500 text-green-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-green-500";
-            } else if (tab === "Rejected") {
-              activeColor = "border-red-500 text-red-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-red-500";
-            } else if (tab === "Pending") {
-              activeColor = "border-yellow-500 text-yellow-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-yellow-500";
-            } else if (tab === "Under Review") {
-              activeColor = "border-cyan-500 text-cyan-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-cyan-500";
-            }
+                if (tab === "Approved") {
+                  activeColor = "border-green-500 text-green-600";
+                  inactiveColor =
+                    "border-transparent text-gray-500 hover:text-green-500";
+                } else if (tab === "Rejected") {
+                  activeColor = "border-red-500 text-red-600";
+                  inactiveColor =
+                    "border-transparent text-gray-500 hover:text-red-500";
+                } else if (tab === "Pending") {
+                  activeColor = "border-yellow-500 text-yellow-600";
+                  inactiveColor =
+                    "border-transparent text-gray-500 hover:text-yellow-500";
+                } else if (tab === "Under Review") {
+                  activeColor = "border-cyan-500 text-cyan-600";
+                  inactiveColor =
+                    "border-transparent text-gray-500 hover:text-cyan-500";
+                }
 
-            return (
-              <button
-                key={tab}
-                onClick={() => {
-                  switch (tab) {
-                    case "All":
-                      setStatusFilter("All");
-                      setPageIndex(0);
-                      break;
-                    case "Approved":
-                      setStatusFilter("Approved");
-                      setPageIndex(0);
-                      break;
-                    case "Rejected":
-                      setStatusFilter("Rejected");
-                      setPageIndex(0);
-                      break;
-                    case "Pending":
-                      setStatusFilter("Pending");
-                      setPageIndex(0);
-                      break;
-                    case "Under Review":
-                      setStatusFilter("review");
-                      setPageIndex(0);
-                      break;
-                  }
-                }}
-                className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                  isActive ? activeColor : inactiveColor
-                }`}
-              >
-                {tab}
-              </button>
-            );
-          })}
-
-          <div className="flex justify-between ml-auto">
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      switch (tab) {
+                        case "All":
+                          setStatusFilter("All");
+                          setPageIndex(0);
+                          break;
+                        case "Approved":
+                          setStatusFilter("Approved");
+                          setPageIndex(0);
+                          break;
+                        case "Rejected":
+                          setStatusFilter("Rejected");
+                          setPageIndex(0);
+                          break;
+                        case "Pending":
+                          setStatusFilter("Pending");
+                          setPageIndex(0);
+                          break;
+                        case "Under Review":
+                          setStatusFilter("review");
+                          setPageIndex(0);
+                          break;
+                      }
+                    }}
+                    className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
+                      isActive ? activeColor : inactiveColor
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                );
+              },
+            )}
+          </div>
+          {shouldShowFilter && (
+            <div className="ml-auto flex">
+              <TypeFilter
+                type={typeFilter}
+                category={categoryFilter}
+                projectcodes={projectcodes}
+                settype={setTypeFilter}
+                setCategory={setCategoryFilter}
+                setProjectCodes={setProjectCodes}
+                categories={categories}
+                selectedproject={selectedproject}
+                setSelectedProject={setSelectedProject}
+              />
+            </div>
+          )}
+          <div className="flex ">
             {
               <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto"></div>
             }
@@ -531,6 +548,14 @@ const FnDashboards = () => {
                       <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                         {formatDateDDMMYYYY(row.original.created_at)}
                       </td>
+                      <td>
+                        {row.original.file_name?.length > 0 && (
+                          <span className="flex items-center gap-1 text-gray-400 text-xs">
+                            <GrAttachment size={12} />
+                            <span>{row.original.file_name.length}</span>
+                          </span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -629,7 +654,6 @@ const FnDashboards = () => {
             }}
           />
         )}
-
         {showtoast && !errormessage && (
           <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
             <SiTicktick /> Statement Removed Successfully!

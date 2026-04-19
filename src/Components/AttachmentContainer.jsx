@@ -13,20 +13,24 @@ import { is_hod } from "../Helpers/dept_helper";
 import { useAttachments } from "../store/helperStore";
 import UploadAttachments from "./UploadAttachments";
 
-const AttachmentsContainer = ({ file, file_name, newfn }) => {
+const AttachmentsContainer = ({ file, file_name, newfn, isreview }) => {
   const userInfo = useUserInfo();
   const ishod = is_hod(userInfo?.role);
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { imagesaved } = useImageSaved();
   const { attachments, setAttachments, resetAttachments } = useAttachments();
-
+  const isAdmin = userInfo?.is_admin;
   return (
     <>
       <div className="w-1/3 ml-15 p-4 bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[45vh]">
         <div className="text-base flex font-bold mb-4 text-gray-800 border-b-2 border-blue-500 pb-2 justify-between">
           📎 Attachments {file?.length > 0 ? `(${file?.length})` : ""}
           <UploadAttachments
-            styles={newfn ? "cursor-pointer" : "pointer-events-none opacity-50"}
+            styles={
+              (newfn || isreview) && isAdmin
+                ? "cursor-pointer"
+                : "pointer-events-none opacity-50"
+            }
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -37,7 +41,7 @@ const AttachmentsContainer = ({ file, file_name, newfn }) => {
                   key={index}
                   className="relative flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-200 hover:border-blue-400"
                 >
-                  {attachments.length > 0 && (
+                  {(newfn || isreview) && isAdmin && (
                     <button
                       onClick={() =>
                         handleRemoveFiles(index, attachments, setAttachments)

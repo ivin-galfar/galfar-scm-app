@@ -49,11 +49,22 @@ export const useDeleteStore = create((set) => ({
     set(() => ({ deleteStatement: { id: null, open: false } })),
 }));
 
-
 export const usenewfn = create((set) => ({
   newfn: false,
   setNewfn: (value) =>
     set((state) => ({
       newfn: value !== undefined ? value : !state.newfn,
     })),
+}));
+
+export const useSelectedProject = create((set) => ({
+  selectedproject: "",
+  setSelectedProject: (value) => set(() => ({ selectedproject: value })),
+  resetSelectedproject: () => set(() => ({ selectedproject: "" })),
+}));
+
+export const useCategories = create((set) => ({
+  categories: [],
+  setCategories: (value) => set(() => ({ categories: value })),
+  resetCategories: () => set(() => ({ categories: [] })),
 }));

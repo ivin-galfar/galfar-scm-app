@@ -63,14 +63,20 @@ export const expectedstatusplant = (currentrole) => {
 export const statusExpected = (currentrole = [], action, type, category) => {
   let statustext = "";
   const roles = currentrole.map((r) => r.toLowerCase());
-
   if (
     !roles.includes("cm") &&
     !roles.includes("pm") &&
     !roles.includes("initpr")
   ) {
     if (roles.includes("initfn") && action == "save") {
+      //initial save
       statustext = "pending for hod";
+    } else if (roles.includes("initfn") && action == "update") {
+      //save after review
+      statustext = "created";
+    } else if (roles.includes("initfn") && action == "edited") {
+      //save after review
+      statustext = "sent for approval";
     } else if (roles.includes("hod")) {
       statustext = `pending for ${type == "ioc" || (type == "file_note" && category == "TFW") || (type == "file_note" && category == "General") ? "gm" : "sfm"}`;
     } else if (roles.includes("fm")) {

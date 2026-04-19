@@ -813,6 +813,8 @@ export const handleBrPrint = (formData) => {
   const names = getApproverNames("BUYRENT", "BUYRENT");
   const approvers = categoryapprovers.BUYRENT;
   const approvals = formData.approver_info;
+  const isReviewStatus = formData?.status?.toLowerCase() === "review";
+  const flowRoles = approvers.map((r) => r.toLowerCase());
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
@@ -822,7 +824,9 @@ export const handleBrPrint = (formData) => {
     const role = approvers[index]?.toLowerCase();
 
     const lastApprover = approvals?.[approvals.length - 1];
-    const lastRole = lastApprover?.role.toUpperCase() ?? "";
+    const lastRole = lastApprover?.role?.toLowerCase() ?? "";
+    const currentRoleIndex = flowRoles.indexOf(lastRole);
+    const roleIndex = flowRoles.indexOf(role);
 
     const status =
       approvals?.findLast((a) => a.role.toLowerCase() === role)?.status ?? "--";
@@ -832,9 +836,12 @@ export const handleBrPrint = (formData) => {
     );
     const nextPending = !isRejected ? nextRole(lastRole) : null;
 
-    // Display logic
-    const displayStatus =
-      nextPending && role.toLowerCase() === nextPending.toLowerCase()
+    const isFutureReviewRole =
+      isReviewStatus && currentRoleIndex >= 0 && roleIndex > currentRoleIndex;
+
+    const displayStatus = isFutureReviewRole
+      ? "--"
+      : nextPending && role.toLowerCase() === nextPending.toLowerCase()
         ? "(Pending)"
         : formattedstatus;
 
@@ -980,7 +987,7 @@ export const handleFnPrint = (data) => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
 
-  const skipSfmCategories = ["tfw", "general", "insurance", "fc", "pr"];
+  const skipSfmCategories = ["tfw", "general", "insurance", "fc", "pr", "dpr"];
   const categoryKey = String(data?.category || "")
     .trim()
     .toLowerCase();
@@ -1011,6 +1018,8 @@ export const handleFnPrint = (data) => {
   }
 
   const approvals = data.approver_info || [];
+  const isReviewStatus = data?.status?.toLowerCase() === "review";
+  const flowRoles = approvers.map((r) => r.toLowerCase());
 
   const positions = approverLabels.map(
     (_, index) => (pageWidth * (index + 1)) / (approverLabels.length + 1),
@@ -1029,7 +1038,9 @@ export const handleFnPrint = (data) => {
     const role = approvers[approverIndex]?.toLowerCase() || "";
 
     const lastApprover = approvals[approvals.length - 1];
-    const lastRole = lastApprover?.role?.toUpperCase() ?? "";
+    const lastRole = lastApprover?.role?.toLowerCase() ?? "";
+    const currentRoleIndex = flowRoles.indexOf(lastRole);
+    const roleIndex = flowRoles.indexOf(role);
 
     const status =
       approvals.findLast((a) => a.role?.toLowerCase() === role)?.status ?? "--";
@@ -1039,9 +1050,12 @@ export const handleFnPrint = (data) => {
     );
 
     const nextPending = !isRejected ? nextRole(lastRole, data.category) : null;
+    const isFutureReviewRole =
+      isReviewStatus && currentRoleIndex >= 0 && roleIndex > currentRoleIndex;
 
-    const displayStatus =
-      nextPending && role === nextPending.toLowerCase()
+    const displayStatus = isFutureReviewRole
+      ? "--"
+      : nextPending && role === nextPending.toLowerCase()
         ? "(Pending)"
         : formattedstatus;
 

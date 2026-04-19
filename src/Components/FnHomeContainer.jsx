@@ -73,7 +73,7 @@ const FnHomeContainer = () => {
           </Link>
         </div>
         <ul className="p-2 space-y-3 ">
-          {/* <li>
+          <li>
             <Link to="/dashboardfn">
               <button
                 className="w-full flex text-left px-3 py-2 justify-between bg-cyan-300 hover:bg-cyan-400 rounded font-medium cursor-pointer"
@@ -89,7 +89,7 @@ const FnHomeContainer = () => {
                 <p>{review}</p>
               </button>
             </Link>
-          </li> */}
+          </li>
           <li>
             <Link to="/dashboardfn">
               <button

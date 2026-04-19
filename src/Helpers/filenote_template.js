@@ -1,4 +1,9 @@
-import { getEnclosureText, getFromValue, getToValue } from "./helperfunctions";
+import {
+  getEnclosureText,
+  getFooterText,
+  getFromValue,
+  getToValue,
+} from "./helperfunctions";
 
 export const fileNoteTemplate = (ref, sub, date, type, category) => {
   let basecontent = [];
@@ -534,7 +539,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
       content: [
         {
           type: "paragraph",
-          content: [{ type: "text", text: "CC: CEO/GM" }],
+          content: [{ type: "text", text: getFooterText(category) }],
         },
         {
           type: "paragraph",
@@ -1049,6 +1054,13 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
             },
           ],
         },
+      );
+    }
+    if (category == "DPR") {
+      basecontent.push(
+        { type: "paragraph" },
+        { type: "paragraph" },
+        { type: "paragraph" },
       );
     }
     basecontent.push(

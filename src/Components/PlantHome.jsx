@@ -106,6 +106,9 @@ const PlantHome = () => {
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 
   useEffect(() => {
+    if (!userInfo.role.includes("inita") && !userInfo.role.includes("inith")) {
+      return;
+    }
     const fetchStatementsdetails = async () => {
       try {
         const { filteredReceipts, categorizedReceipts, mrValues } =
