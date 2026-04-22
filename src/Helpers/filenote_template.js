@@ -547,7 +547,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
         },
       ],
     };
-    if (category != "Demob") {
+    if (category != "Demob" && category !== "FWA") {
       basecontent = [
         {
           type: "tableRow",
@@ -559,7 +559,10 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
                   type: "paragraph",
                   attrs: { textAlign: "left" },
                   content: [
-                    { type: "text", text: "To : " },
+                    {
+                      type: "text",
+                      text: "To : ",
+                    },
                     { type: "text", text: getToValue(category) },
                   ],
                 },
@@ -662,7 +665,10 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
               content: [
                 {
                   type: "paragraph",
-                  content: [{ type: "text", text: `To : ` }],
+                  content: [
+                    { type: "text", text: `To : ` },
+                    { type: "text", text: getToValue(category) },
+                  ],
                 },
               ],
             },
@@ -703,7 +709,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
       ];
     }
 
-    if (category == "Demob") {
+    if (category == "FWA") {
       basecontent.push(
         {
           type: "paragraph",
@@ -719,10 +725,11 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
           content: [
             {
               type: "text",
-              text: "We are hereby demobilizing the following fleet(s) from Project:         w.e.f.  ",
+              text: "With reference to the above subject, and in view of work requirements, we kindly seek your approval to expedite the following activities on   ",
             },
             {
               type: "text",
+              marks: [{ type: "underline" }],
               text: "                                                            .",
             },
           ],
@@ -730,63 +737,37 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
         { type: "paragraph" },
         { type: "paragraph" },
         {
-          type: "tableRow",
+          type: "text",
+          marks: [{ type: "bold" }],
+          text: "Site/Office Activities :",
+        },
+        {
+          type: "bulletList",
           content: [
             {
-              type: "tableHeader",
+              type: "listItem",
               content: [
                 {
                   type: "paragraph",
-                  content: [{ type: "text", text: "Sl. No." }],
-                },
-              ],
-            },
-            {
-              type: "tableHeader",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [{ type: "text", text: "Equipment No./Plate No." }],
-                },
-              ],
-            },
-            {
-              type: "tableHeader",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [{ type: "text", text: "Equipment/Vehicle" }],
-                },
-              ],
-            },
-            {
-              type: "tableHeader",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [{ type: "text", text: "Company" }],
-                },
-              ],
-            },
-            {
-              type: "tableHeader",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [{ type: "text", text: "Remarks" }],
                 },
               ],
             },
           ],
         },
+        { type: "paragraph" },
+        { type: "paragraph" },
+
         {
-          type: "tableRow",
-          content: Array(5)
-            .fill(null)
-            .map(() => ({
-              type: "tableCell",
-              content: [{ type: "paragraph", attrs: { textAlign: "center" } }],
-            })),
+          type: "text",
+          marks: [{ type: "bold" }],
+          text: "Total Manpower : ",
+        },
+        { type: "hardBreak" },
+        { type: "hardBreak" },
+        {
+          type: "text",
+          marks: [{ type: "bold" }],
+          text: "Total Vehicles & Equipment's : ",
         },
       );
     }

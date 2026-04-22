@@ -19,6 +19,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { setComments, comments, resetComments } = useComments();
   const [isreviewclicked, setIsReviewClicked] = useState(false);
+  const isHod = userInfo.role.includes("hod");
 
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const { mutate: updatestatement } = useMutation({
@@ -82,6 +83,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       comments,
       type: data.type,
       category: data.category,
+      sentforapproval: "yes",
     });
   };
 
@@ -97,7 +99,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">
           Approve/Reject
         </h2>
-        {isreviewclicked && (
+        {(isreviewclicked || isHod) && (
           <div className="flex w-full">
             <textarea
               rows={3}

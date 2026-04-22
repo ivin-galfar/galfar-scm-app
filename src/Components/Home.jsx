@@ -8,12 +8,14 @@ import { useSelectedDept } from "../store/userStore";
 import {
   is_asset,
   is_ceo,
+  is_cm,
   is_fm,
   is_fnote,
   is_gm,
   is_hod,
   is_logistics,
   is_plant,
+  is_pm,
 } from "../Helpers/dept_helper";
 import PlantHome from "./PlantHome";
 import LogisticsHome from "./LogisticsHome";
@@ -35,6 +37,9 @@ const Home = () => {
   const ishod = is_hod(userInfo?.role);
   const isgm = is_gm(userInfo?.role);
   const isceo = is_ceo(userInfo?.role);
+  const ispm = is_pm(userInfo?.role);
+  const iscm = is_cm(userInfo?.role);
+
   const isPlant = is_plant(userInfo?.dept_code);
   const isfnote = is_fnote(userInfo?.role);
 
@@ -74,6 +79,8 @@ const Home = () => {
     isceo,
     isgm,
     isfnote,
+    ispm,
+    iscm,
   });
 
   useEffect(() => {

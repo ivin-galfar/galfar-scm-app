@@ -97,14 +97,15 @@ const Header = () => {
                         : "/dashboardbr"
                   }
                   className={() => {
-                    const expectedPath =
+                    const isActive =
                       selectedDept === "plant"
-                        ? "/dashboard"
+                        ? path === "/dashboard" ||
+                          path.startsWith("/receipts") ||
+                          path.startsWith("/brstatement")
                         : selectedDept === "logistics"
-                          ? "/dashboardlg"
-                          : "/dashboardbr";
-
-                    const isActive = path === expectedPath;
+                          ? path === "/dashboardlg" ||
+                            path.startsWith("/lstatement")
+                          : path === "/dashboardbr";
 
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""

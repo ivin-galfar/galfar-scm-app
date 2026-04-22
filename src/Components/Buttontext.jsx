@@ -10,7 +10,7 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
     ? nextstatus
     : data.status == "created"
       ? "Sent for Approval"
-      : data.status != "review"
+      : data.status != "review" && data.status != "edit"
         ? "Create Document"
         : "";
 

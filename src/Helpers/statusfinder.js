@@ -66,7 +66,9 @@ export const statusExpected = (currentrole = [], action, type, category) => {
   if (
     !roles.includes("cm") &&
     !roles.includes("pm") &&
-    !roles.includes("initpr")
+    !roles.includes("initpr") &&
+    !roles.includes("initdc") &&
+    category !== "FWA"
   ) {
     if (roles.includes("initfn") && action == "save") {
       //initial save
@@ -88,9 +90,30 @@ export const statusExpected = (currentrole = [], action, type, category) => {
     } else {
       statustext = "rejected";
     }
-  } else if (roles.includes("initpr") && category == "Demob") {
+  } else if (
+    roles.includes("initpr") &&
+    category == "Demob" &&
+    action == "update"
+  ) {
+    statustext = "created";
+  } else if (
+    roles.includes("initdc") &&
+    category == "FWA" &&
+    action == "update"
+  ) {
+    statustext = "created";
+  } else if (
+    (roles.includes("initpr") || roles.includes("initdc")) &&
+    (category == "Demob" || category == "FWA")
+  ) {
     statustext = "pending for cm";
-  } else if (roles.includes("cm")) {
+  } else if (roles.includes("cm") && category == "FWA") {
+    statustext = "pending for pm";
+  } else if (roles.includes("pm") && category == "FWA") {
+    statustext = "pending for gm";
+  } else if (roles.includes("gm") && category == "FWA") {
+    statustext = "approved";
+  } else if (roles.includes("cm") && category == "Demob") {
     statustext = "approved";
   } else {
     statustext = "rejected";

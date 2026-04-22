@@ -225,9 +225,9 @@ const LogisticsHome = () => {
                 <span
                   className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     r.status
-                      ? r.status === "Approved"
+                      ? r.status.toLowerCase() === "approved"
                         ? "bg-green-100 text-green-800"
-                        : r.status === "Rejected"
+                        : r.status.toLowerCase() === "rejected"
                           ? "bg-red-100 text-red-800"
                           : "bg-blue-100 text-blue-800"
                       : ""

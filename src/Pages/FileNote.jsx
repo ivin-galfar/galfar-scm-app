@@ -52,6 +52,7 @@ const FileNote = () => {
   const { newfn, setNewfn } = usenewfn();
   const [selectedfnvalue, setSelectedFnValue] = useState("");
   const [selectedvalue, setSelectedValue] = useState("");
+  const [dataupdated, setDataUpdated] = useState(false);
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
@@ -69,7 +70,7 @@ const FileNote = () => {
   const { categories, setCategories } = useCategories();
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const isReview = selectedvalue.status == "review";
-  // const isEdit = selectedvalue.status == "edit";
+  const isEdit = selectedvalue.status == "edit";
 
   const { data: doc_no, isLoading: isDocLoading } = useQuery({
     queryKey: ["doc_no", userInfo, type, category, selectedproject],
@@ -112,6 +113,7 @@ const FileNote = () => {
   const { mutate: updatefilenote } = useMutation({
     mutationFn: updatefilenotevalues,
     onSuccess: async (data) => {
+      if (data.status == "created") setDataUpdated(true);
       setSelectedValue(data);
       setErrorMessage("");
       setShowToast();
@@ -119,6 +121,7 @@ const FileNote = () => {
         resetshowtoast();
         clearErrorMessage();
         resetShowModal();
+        setDataUpdated(false);
       }, 1500);
       try {
         await FnEmailAlert(data.id, userInfo, dept, data);
@@ -188,6 +191,8 @@ const FileNote = () => {
       );
     } else if (userInfo.role.includes("initfn") && category == "DPR") {
       setName("Request for ");
+    } else if (userInfo.role.includes("initdc") && category == "FWA") {
+      setName("Friday Work Approval - ");
     } else {
       setName("");
     }
@@ -197,8 +202,12 @@ const FileNote = () => {
     let cat = [];
     if (userInfo.role.includes("initpr")) {
       cat = getcategory(type).filter((c) => c.includes("Demob"));
+    } else if (userInfo.role.includes("initdc")) {
+      cat = getcategory(type).filter((c) => c.includes("FWA"));
     } else {
-      cat = getcategory(type).filter((c) => !c.includes("Demob"));
+      cat = getcategory(type).filter(
+        (c) => !c.includes("Demob") && !c.includes("FWA"),
+      );
     }
 
     setCategories(cat);
@@ -213,22 +222,6 @@ const FileNote = () => {
       setSelectedFnValue("");
     }
   }, [type, category, selectedproject, doc_no, isDocLoading, newfn, name]);
-  // console.log(selectedvalue);
-
-  // const handleDocumentcategorytype = async (category) => {
-  //   if (category == "Demob") {
-  //     const projects = await fetchProjectDetails(userInfo);
-  //     const projectids = projects.map((pr) => pr.project);
-  //     const allocatedprcodes = userInfo.pr_code;
-  //     const matchedprcodes = projectids.filter((project) =>
-  //       allocatedprcodes.includes(project),
-  //     );
-  //     setProjectCodes(matchedprcodes);
-  //   } else {
-  //     setProjectCodes([]);
-  //   }
-  //   setCategory(category);
-  // };
 
   const nextstatus = userInfo.role.some((r) =>
     selectedvalue?.status?.toLowerCase().includes(r?.toLowerCase()),
@@ -239,8 +232,6 @@ const FileNote = () => {
       : selectedvalue?.status !== "review"
         ? selectedvalue.status
         : "" || "";
-  // console.log(nextstatus);
-  // console.log(selectedvalue.status);
 
   const handleSave = (action) => {
     const files = JSON.parse(localStorage.getItem("editorAttachments")) || [];
@@ -277,11 +268,10 @@ const FileNote = () => {
       const editorinfo = useEditorInfo();
       status = statusExpected(
         userInfo?.role,
-        isReview ? "update" : "save",
+        isReview || isEdit ? "update" : "save",
         selectedvalue.type,
         selectedvalue.category,
       );
-      console.log(status);
 
       updatefilenote({
         status: status,
@@ -312,12 +302,12 @@ const FileNote = () => {
   }, [selectedvalue?.file, selectedvalue?.file_name]);
 
   const handleEdit = () => {
-    // updatefilenote({
-    //   status: "edit",
-    //   fnid: selectedvalue.id,
-    //   userInfo,
-    // });
-    // setNewfn(true);
+    updatefilenote({
+      status: "edit",
+      fnid: selectedvalue.id,
+      userInfo,
+    });
+    setDataSaved();
   };
 
   return (
@@ -452,7 +442,7 @@ const FileNote = () => {
                 : dept_finder(selectedvalue.department_id)}
             </span>
           </div>
-          {userInfo?.is_admin && isReview && (
+          {userInfo?.is_admin && (isReview || isEdit) && (
             <span className="text-gray-500 cursor-pointer hover:text-gray-700">
               <IoSave
                 size={20}
@@ -473,6 +463,7 @@ const FileNote = () => {
         newfn={newfn}
         is_admin={userInfo.is_admin}
         isreview={isReview}
+        isedit={isEdit}
       />
       {hasComments && (
         <div className="sticky bottom-5 flex px-25">
@@ -488,10 +479,22 @@ const FileNote = () => {
                   : "";
 
                 if (!val.comment) return null;
-
+                const roleColors = {
+                  Hod: "text-purple-600",
+                  Cm: "text-green-600",
+                  Pm: "text-red-600",
+                  Ceo: "text-blue-600",
+                  Gm: "text-teal-600",
+                };
                 return (
                   <div key={val.id || val.date}>
-                    {role ? `${role}: ` : ""}
+                    {role && (
+                      <span
+                        className={`font-semibold ${roleColors[role] || "text-orange-600"}`}
+                      >
+                        {role}:
+                      </span>
+                    )}{" "}
                     {val.comment}
                   </div>
                 );
@@ -545,16 +548,32 @@ const FileNote = () => {
           setSelectedValue={setSelectedValue}
         />
       )}
-      {showtoast && !errormessage && userInfo?.is_admin && !imagesaved && (
-        <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-          ✅ Statement changed to Edit mode!
-        </div>
-      )}
       {showtoast &&
         !errormessage &&
         userInfo?.is_admin &&
         !imagesaved &&
-        selectedvalue.status !== null && (
+        isEdit && (
+          <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ Statement changed to Edit mode!
+          </div>
+        )}
+      {showtoast &&
+        dataupdated &&
+        userInfo?.is_admin &&
+        !imagesaved &&
+        !isEdit && (
+          <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅Document updated successfully!!
+          </div>
+        )}
+
+      {showtoast &&
+        !errormessage &&
+        userInfo?.is_admin &&
+        !imagesaved &&
+        selectedvalue.status !== null &&
+        !dataupdated &&
+        !isEdit && (
           <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
             ✅ You have successfully created the File Note/IOC!
           </div>
@@ -566,7 +585,8 @@ const FileNote = () => {
       )}
       {showtoast &&
         userInfo?.is_admin &&
-        selectedvalue.status == "pending for hod" && (
+        (selectedvalue.status == "pending for hod" ||
+          selectedvalue.status == "pending for cm") && (
           <div className="fixed top-5 left-1/2 z-60 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
             ✅ You have requested the document for approval!{" "}
             {errormessage ? `but ${errormessage}` : ""}

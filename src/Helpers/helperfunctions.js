@@ -267,14 +267,18 @@ export const getEnclosureText = (category) => {
       return "CC: Mr. Suraj Rajan - Sr. Manager (F&A)";
     case "DPR":
       return "Encl: PO and Performa Invoice";
+    case "FWA":
+      return "Your kind approval in this regard will be highly appreciated.";
     default:
       return "Encl: Relevant documents attached";
   }
 };
 
 export const getFooterText = (category) => {
-  if (category !== "DPR") {
+  if (category !== "DPR" && category !== "FWA") {
     return "CC: CEO/GM";
+  } else if (category === "FWA") {
+    return " ";
   } else {
     return "Pramoj Ramesh\n(Manager P&E)";
   }
@@ -288,6 +292,10 @@ export const getToValue = (category) => {
       return " Sr.Manager-Finance & Accounts";
     case "Insurance":
       return "  CEO";
+    case "Demob":
+      return "Mr. Pramoj Ramesh Konattuseril (Plant Manager)";
+    case "FWA":
+      return "C.G. Vijayan (General Manager)";
     case "DPR":
       return "  CEO";
   }

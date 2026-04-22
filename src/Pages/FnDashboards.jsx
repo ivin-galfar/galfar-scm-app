@@ -238,9 +238,11 @@ const FnDashboards = () => {
               };
             }
           } else if (row?.type === "ioc") {
-            if (row?.category === "Demob") {
+            if (row?.category === "Demob" || row?.category === "FWA") {
               return {
-                "Pending For Cm": 50,
+                "Pending For Cm": 40,
+                "Pending For Pm": 60,
+                "Pending For Gm": 80,
                 Approved: 100,
                 Rejected: 100,
               };
@@ -274,7 +276,7 @@ const FnDashboards = () => {
                     : formattedstatus === "Pending For Cm"
                       ? "bg-amber-500"
                       : formattedstatus === "Pending For Gm"
-                        ? "bg-amber-500"
+                        ? "bg-orange-500"
                         : formattedstatus === "Pending For Pm"
                           ? "bg-lime-500"
                           : formattedstatus === "Pending For Ceo"
@@ -329,23 +331,28 @@ const FnDashboards = () => {
 
   useEffect(() => {
     let cat = [];
-    if (
-      userInfo.role.includes("initpr") ||
-      userInfo.role.includes("cm") ||
-      userInfo.role.includes("pm")
-    ) {
+    if (userInfo.role.includes("initpr") || userInfo.role.includes("pm")) {
       cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
+    } else if (userInfo.role.includes("cm") || userInfo.role.includes("pm")) {
+      cat = getcategory(typeFilter).filter(
+        (c) => c.includes("FWA") || c.includes("Demob"),
+      );
     } else {
-      cat = getcategory(typeFilter).filter((c) => !c.includes("Demob"));
+      cat = getcategory(typeFilter).filter(
+        (c) => !c.includes("Demob") && !c.includes("FWA"),
+      );
     }
 
     setCategories(cat);
   }, [typeFilter, categoryFilter]);
-  const shouldShowFilter =
-    !userInfo?.role?.includes("cm") &&
-    !userInfo?.role?.includes("pm") &&
+  const cmusers =
+    userInfo?.role?.includes("cm") && userInfo?.role?.includes("initfn");
+  const pmusers =
+    userInfo?.role?.includes("pm") && userInfo?.role?.includes("initfn");
+  const initusers =
+    userInfo?.role?.includes("initfn") &&
     !userInfo?.role?.includes("initpr") &&
-    userInfo?.role?.includes("initfn");
+    !userInfo.role.includes("initdc");
 
   return (
     <div className="flex-grow ">
@@ -420,7 +427,7 @@ const FnDashboards = () => {
               },
             )}
           </div>
-          {shouldShowFilter && (
+          {(cmusers || pmusers || initusers) && (
             <div className="ml-auto flex">
               <TypeFilter
                 type={typeFilter}
@@ -531,7 +538,7 @@ const FnDashboards = () => {
                             size={25}
                             onClick={async () => {
                               const data = await getstatement(row.original?.id);
-                              handleFnPrint(data);
+                              handleFnPrint(data, userInfo);
                             }}
                           />
                           <FaTrash

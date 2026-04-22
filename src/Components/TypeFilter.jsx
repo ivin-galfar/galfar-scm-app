@@ -3,6 +3,7 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { BsAsterisk } from "react-icons/bs";
 import { fetchProjectDetails } from "../APIs/api";
 import { useLocation } from "react-router-dom";
+import { usePagination } from "../store/statementStore";
 
 const TypeFilter = ({
   isDocLoading,
@@ -17,9 +18,12 @@ const TypeFilter = ({
   setSelectedProject,
 }) => {
   const userInfo = useUserInfo();
+  const { setPageIndex } = usePagination();
+  console.log(type);
 
   const handleDocumentcategorytype = async (category) => {
-    if (category == "Demob") {
+    setPageIndex(0);
+    if (category == "Demob" || category == "FWA") {
       const projects = await fetchProjectDetails(userInfo);
       const projectids = projects.map((pr) => pr.project);
       const allocatedprcodes = userInfo.pr_code;
@@ -32,11 +36,13 @@ const TypeFilter = ({
     }
     setCategory(category);
   };
-
+  const location = useLocation();
   const demobusers =
     userInfo?.role.includes("initpr") ||
     userInfo?.role.includes("cm") ||
     userInfo?.role.includes("pm");
+
+  const fwausers = userInfo.role.includes("initdc");
 
   return (
     <div>
@@ -63,7 +69,9 @@ const TypeFilter = ({
             }}
           >
             <option value="">📋 - Select Type -</option>
-            {!demobusers && <option value="file_note">File Note</option>}
+            {!demobusers && !fwausers && (
+              <option value="file_note">File Note</option>
+            )}
 
             <option value="ioc">IOC</option>
           </select>
@@ -89,7 +97,7 @@ const TypeFilter = ({
               <option key={category}>{category}</option>
             ))}
           </select>
-          {demobusers && (
+          {(demobusers || fwausers) && location.pathname != "/dashboardfn" && (
             <>
               <label className="font-medium flex">
                 Project: <BsAsterisk size={6} color="red" />{" "}
@@ -114,6 +122,15 @@ const TypeFilter = ({
                 ))}
               </select>
             </>
+          )}
+          {type != "" && (
+            <span
+              className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-900 cursor-pointer transition-colors"
+              onClick={() => settype("")}
+            >
+              <span className="justify-center leading-none">&times;</span>
+              Clear filters
+            </span>
           )}
         </div>
       }

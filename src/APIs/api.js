@@ -897,3 +897,21 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
     throw error;
   }
 };
+
+export const getcmpmNames = async (role, project, userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(`${REACT_SERVER_URL}/projects/cmpmnames`, {
+      ...config,
+      params: { requiredrole: role, project: project },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

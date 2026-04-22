@@ -770,7 +770,7 @@ const StatementHeader = () => {
                     value={formData.project ?? ""}
                     type="text"
                     onChange={(e) => {
-                      const value = e.target.value;
+                      const value = e.target.value.trim();
                       field.handleChange(value);
                       setFormData((prev) => ({
                         ...prev,
