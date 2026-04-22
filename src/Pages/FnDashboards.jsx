@@ -70,6 +70,7 @@ const FnDashboards = () => {
       searchcs,
       categoryFilter,
       typeFilter,
+      selectedproject,
     ],
     queryFn: () =>
       fetchfilenoteids({
@@ -109,6 +110,8 @@ const FnDashboards = () => {
   };
 
   useEffect(() => {
+    console.log("coming");
+
     const fetchStatments = async () => {
       try {
         const totalcount = await fetchfilenoteids({

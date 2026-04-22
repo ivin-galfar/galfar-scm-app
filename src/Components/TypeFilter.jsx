@@ -126,7 +126,13 @@ const TypeFilter = ({
           {type != "" && (
             <span
               className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-900 cursor-pointer transition-colors"
-              onClick={() => settype("")}
+              onClick={() => {
+                settype("");
+                setCategory("");
+                setSelectedProject("");
+                setProjectCodes([]);
+                setPageIndex(0);
+              }}
             >
               <span className="justify-center leading-none">&times;</span>
               Clear filters
