@@ -32,7 +32,9 @@ const FnHomeContainer = () => {
   const { newfn, setNewfn } = usenewfn();
   const { attachments, setAttachments } = useAttachments();
 
-  let pending = data?.count?.pending_count ?? 0;
+  let pending = userInfo?.is_admin
+    ? data?.count?.review_count
+    : (data?.count?.pending_count ?? 0);
   let approved = data?.count?.approved_count ?? 0;
   let review = data?.count?.review_count ?? 0;
   let rejected = data?.count?.rejected_count ?? 0;
@@ -73,7 +75,7 @@ const FnHomeContainer = () => {
           </Link>
         </div>
         <ul className="p-2 space-y-3 ">
-          {/* <li>
+          <li>
             <Link to="/dashboardfn">
               <button
                 className="w-full flex text-left px-3 py-2 justify-between bg-cyan-300 hover:bg-cyan-400 rounded font-medium cursor-pointer"
@@ -89,7 +91,7 @@ const FnHomeContainer = () => {
                 <p>{review}</p>
               </button>
             </Link>
-          </li> */}
+          </li>
           <li>
             <Link to="/dashboardfn">
               <button
@@ -219,9 +221,9 @@ const FnHomeContainer = () => {
                 <span
                   className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     r.status
-                      ? r.status === "Approved"
+                      ? r.status.toLowerCase() === "approved"
                         ? "bg-green-100 text-green-800"
-                        : r.status === "Rejected"
+                        : r.status.toLowerCase() === "rejected"
                           ? "bg-red-100 text-red-800"
                           : "bg-blue-100 text-blue-800"
                       : ""

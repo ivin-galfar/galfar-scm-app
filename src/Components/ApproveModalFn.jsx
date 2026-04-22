@@ -9,6 +9,7 @@ import { FnEmailAlert, updatefilenotevalues } from "../APIs/api";
 import { useComments } from "../store/helperStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const userInfo = useUserInfo();
@@ -17,6 +18,8 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { setComments, comments, resetComments } = useComments();
+  const [isreviewclicked, setIsReviewClicked] = useState(false);
+  const isHod = userInfo.role.includes("hod");
 
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const { mutate: updatestatement } = useMutation({
@@ -50,10 +53,11 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
     if (status == "approved") {
       updatedstatus = statusExpected(
         userInfo?.role,
-        "update",
+        null,
         data.type,
         data.category,
       );
+
       setSelectedValue((prev) => ({
         ...prev,
         status: updatedstatus,
@@ -79,6 +83,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       comments,
       type: data.type,
       category: data.category,
+      sentforapproval: "yes",
     });
   };
 
@@ -94,14 +99,17 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">
           Approve/Reject
         </h2>
-        {/* <div className="flex w-full">
-          <textarea
-            rows={3}
-            placeholder="Enter your comments here..."
-            className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
-            onChange={(e) => setComments(e.target.value)}
-          />
-        </div> */}
+        {(isreviewclicked || isHod) && (
+          <div className="flex w-full">
+            <textarea
+              rows={3}
+              placeholder="Enter your comments here..."
+              className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+              onChange={(e) => setComments(e.target.value)}
+              value={comments}
+            />
+          </div>
+        )}
         <div className="mt-6 flex justify-end space-x-2">
           <button
             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
@@ -115,12 +123,18 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
           >
             Reject
           </button>
-          {/* <button
-            className="px-4 py-2 flex items-center gap-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition cursor-pointer"
-            onClick={() => submitApproval("review")}
+          <button
+            className={`px-4 py-2 flex items-center gap-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition ${isreviewclicked && !comments?.trim() ? "cursor-pointer" : "cursor-pointer"}`}
+            onClick={() => {
+              if (isreviewclicked) {
+                submitApproval("review");
+              } else {
+                setIsReviewClicked(true);
+              }
+            }}
           >
             <LuRotateCcwSquare /> Send For Review
-          </button> */}
+          </button>
         </div>
         {showtoast && !errormessage && data.status == "review" && (
           <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">

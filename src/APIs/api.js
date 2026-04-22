@@ -692,7 +692,10 @@ export const updatefilenotevalues = async ({
   sentforapproval,
   type,
   category,
+  name,
   action,
+  content,
+  attachments,
 }) => {
   try {
     const config = {
@@ -710,12 +713,18 @@ export const updatefilenotevalues = async ({
         comments,
         type,
         category,
+        name,
         action,
+        content,
+        attachments,
       },
       config,
     );
+
     return response.data;
   } catch (error) {
+    console.log(error);
+
     throw error;
   }
 };
@@ -728,6 +737,8 @@ export const fetchfilenoteids = async ({
   page,
   limit,
   searchcs,
+  categoryFilter,
+  typeFilter,
 }) => {
   try {
     const config = {
@@ -751,6 +762,8 @@ export const fetchfilenoteids = async ({
           page,
           limit,
           searchcs,
+          categoryFilter,
+          typeFilter,
         },
       },
       config,
@@ -881,6 +894,24 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
   } catch (error) {
     console.log(error);
 
+    throw error;
+  }
+};
+
+export const getcmpmNames = async (role, project, userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(`${REACT_SERVER_URL}/projects/cmpmnames`, {
+      ...config,
+      params: { requiredrole: role, project: project },
+    });
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };

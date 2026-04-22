@@ -87,27 +87,33 @@ const MainToolbarContent = ({
   onHighlighterClick,
   onLinkClick,
   isMobile,
+  isreview,
+  isedit,
   newfn,
 }) => {
   const { editor } = useContext(EditorContext);
 
   return (
     <div
-      key={newfn ? "edit" : "view"}
-      className={`flex w-full ${newfn ? "" : "hidden"}`}
+      key={newfn || isreview || isedit ? "edit" : "view"}
+      className={`flex w-full ${newfn || isreview || isedit ? "" : "hidden"}`}
     >
       <Spacer />
       <ToolbarGroup>
         <UndoRedoButton
           action="undo"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <UndoRedoButton
           action="redo"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
       </ToolbarGroup>
@@ -117,24 +123,32 @@ const MainToolbarContent = ({
           levels={[1, 2, 3, 4]}
           portal={isMobile}
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <ListDropdownMenu
           types={["bulletList", "orderedList", "taskList"]}
           portal={isMobile}
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <BlockquoteButton
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <CodeBlockButton
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
       </ToolbarGroup>
@@ -144,55 +158,69 @@ const MainToolbarContent = ({
         <MarkButton
           type="bold"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <MarkButton
           type="italic"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <MarkButton
           type="strike"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <MarkButton
           type="code"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <MarkButton
           type="underline"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         {!isMobile ? (
           <ColorHighlightPopover
             className={
-              newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+              newfn || isreview || isedit
+                ? "cursor-pointer"
+                : "pointer-events-none opacity-50"
             }
           />
         ) : (
           <ColorHighlightPopoverButton
             onClick={onHighlighterClick}
             className={
-              newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+              newfn || isreview || isedit
+                ? "cursor-pointer"
+                : "pointer-events-none opacity-50"
             }
           />
         )}
         {!isMobile ? (
           <LinkPopover
-            className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+            className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           />
         ) : (
           <LinkButton
             onClick={onLinkClick}
-            className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+            className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           />
         )}
       </ToolbarGroup>
@@ -209,40 +237,40 @@ const MainToolbarContent = ({
               })
               .run()
           }
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+          className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
         >
           <CiViewTable />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+          className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().addRowAfter().run()}
         >
           <span className="mr-1">+</span>
           <TbTableRow />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+          className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().deleteRow().run()}
         >
           <span className="mr-1">-</span>
           <TbTableRow />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+          className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().addColumnAfter().run()}
         >
           <span className="mr-1">+</span>
           <TbTableColumn />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+          className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().deleteColumn().run()}
         >
           <span className="mr-1">-</span>
           <TbTableColumn />
         </span>
         <span
-          className={`flex justify-center items-center ${newfn ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
+          className={`flex justify-center items-center ${newfn || isreview || isedit ? "cursor-pointer" : "pointer-events-none opacity-50"} p-2`}
           onClick={() => editor?.chain().focus().deleteTable().run()}
         >
           <CiViewTable />
@@ -256,13 +284,17 @@ const MainToolbarContent = ({
         <MarkButton
           type="superscript"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <MarkButton
           type="subscript"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
       </ToolbarGroup>
@@ -271,32 +303,44 @@ const MainToolbarContent = ({
         <TextAlignButton
           align="left"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <TextAlignButton
           align="center"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <TextAlignButton
           align="right"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
         <TextAlignButton
           align="justify"
           className={
-            newfn ? "cursor-pointer" : "pointer-events-none opacity-50"
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
           }
         />
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
         <UploadAttachments
-          styles={newfn ? "cursor-pointer" : "pointer-events-none opacity-50"}
+          styles={
+            newfn || isreview || isedit
+              ? "cursor-pointer"
+              : "pointer-events-none opacity-50"
+          }
         />
       </ToolbarGroup>
       <Spacer />
@@ -331,7 +375,7 @@ const MobileToolbarContent = ({ type, onBack }) => (
   </>
 );
 
-export function SimpleEditor({ content, newfn, is_admin }) {
+export function SimpleEditor({ content, newfn, is_admin, isreview, isedit }) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState("main");
@@ -393,10 +437,10 @@ export function SimpleEditor({ content, newfn, is_admin }) {
   });
 
   useEffect(() => {
-    if (editor || newfn) {
-      editor?.setEditable(is_admin && newfn);
+    if (editor || newfn || isreview || isedit) {
+      editor?.setEditable(is_admin && (newfn || isreview || isedit));
     }
-  }, [editor, is_admin, newfn]);
+  }, [editor, is_admin, newfn, isreview, isedit]);
 
   useEffect(() => {
     if (content == "") {
@@ -424,7 +468,7 @@ export function SimpleEditor({ content, newfn, is_admin }) {
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        {is_admin && newfn && (
+        {is_admin && (newfn || isreview || isedit) && (
           <Toolbar
             ref={toolbarRef}
             style={{
@@ -440,6 +484,8 @@ export function SimpleEditor({ content, newfn, is_admin }) {
                 onHighlighterClick={() => setMobileView("highlighter")}
                 onLinkClick={() => setMobileView("link")}
                 isMobile={isMobile}
+                isreview={isreview}
+                isedit={isedit}
                 newfn={newfn}
               />
             ) : (

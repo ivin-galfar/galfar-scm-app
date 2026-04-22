@@ -30,7 +30,7 @@ const PlantHome = () => {
   } = useContext(AppContext);
   const userInfo = useUserInfo();
   const { setPageSize, setPageIndex } = usePagination();
-
+  const isAdmin = userInfo?.is_admin;
   const statusMapping = {
     inita: [
       "Pending for HOD",
@@ -106,6 +106,13 @@ const PlantHome = () => {
     : expectedStatuses.filter((s) => s.startsWith("pending"));
 
   useEffect(() => {
+    if (
+      isAdmin &&
+      !userInfo.role.includes("inita") &&
+      !userInfo.role.includes("inith")
+    ) {
+      return;
+    }
     const fetchStatementsdetails = async () => {
       try {
         const { filteredReceipts, categorizedReceipts, mrValues } =
@@ -357,9 +364,9 @@ const PlantHome = () => {
                 <span
                   className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     r.formData.status
-                      ? r.formData.status === "Approved"
+                      ? r.formData.status.toLowerCase() === "approved"
                         ? "bg-green-100 text-green-800"
-                        : r.formData.status === "Rejected"
+                        : r.formData.status.toLowerCase() === "rejected"
                           ? "bg-red-100 text-red-800"
                           : "bg-blue-100 text-blue-800"
                       : ""

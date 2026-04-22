@@ -33,11 +33,16 @@ import { useQuery } from "@tanstack/react-query";
 import AttachmentsContainer from "../Components/AttachmentContainer";
 import {
   useAttachments,
+  useCategories,
   usenewfn,
   useProjectCodes,
+  useSelectedProject,
 } from "../store/helperStore";
 import { getcategory } from "../Helpers/category_helper";
 import { getCategoryforUI, getType } from "../Helpers/helperfunctions";
+import TypeFilter from "../Components/TypeFilter";
+import { IoSave } from "react-icons/io5";
+import { MdModeEdit } from "react-icons/md";
 
 const FileNote = () => {
   const editorinfo = useEditorInfo();
@@ -47,6 +52,7 @@ const FileNote = () => {
   const { newfn, setNewfn } = usenewfn();
   const [selectedfnvalue, setSelectedFnValue] = useState("");
   const [selectedvalue, setSelectedValue] = useState("");
+  const [dataupdated, setDataUpdated] = useState(false);
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
@@ -55,13 +61,16 @@ const FileNote = () => {
   const { setDataSaved, resetDataSaved } = useDatasaved();
   const isPlant = is_plant(userInfo?.dept_code);
   const [type, settype] = useState("");
-  const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState("");
   const { attachments, setAttachments } = useAttachments();
   const { imagesaved } = useImageSaved();
   const { projectcodes, setProjectCodes } = useProjectCodes();
-  const [selectedproject, setSelectedProject] = useState([]);
+  const { selectedproject, setSelectedProject, resetSelectedproject } =
+    useSelectedProject();
+  const { categories, setCategories } = useCategories();
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
+  const isReview = selectedvalue.status == "review";
+  const isEdit = selectedvalue.status == "edit";
 
   const { data: doc_no, isLoading: isDocLoading } = useQuery({
     queryKey: ["doc_no", userInfo, type, category, selectedproject],
@@ -83,7 +92,7 @@ const FileNote = () => {
       setNewfn(false);
       setTimeout(() => {
         resetshowtoast();
-        setSelectedProject([]);
+        resetSelectedproject();
         resetShowModal();
         setName("");
         resetDataSaved();
@@ -104,6 +113,7 @@ const FileNote = () => {
   const { mutate: updatefilenote } = useMutation({
     mutationFn: updatefilenotevalues,
     onSuccess: async (data) => {
+      if (data.status == "created") setDataUpdated(true);
       setSelectedValue(data);
       setErrorMessage("");
       setShowToast();
@@ -111,6 +121,7 @@ const FileNote = () => {
         resetshowtoast();
         clearErrorMessage();
         resetShowModal();
+        setDataUpdated(false);
       }, 1500);
       try {
         await FnEmailAlert(data.id, userInfo, dept, data);
@@ -151,7 +162,6 @@ const FileNote = () => {
     const date = new Date().toDateString();
     const formattedDate = format(date, "do MMMM yyyy");
     const cleanCategory = category?.trim();
-    console.log(cleanCategory);
 
     return fileNoteTemplate(
       ref_no,
@@ -179,6 +189,10 @@ const FileNote = () => {
       setName(
         "Approval Request for Traffic fine paid/to be paid by Galfar for ADNOC allotted/Galfar Vehicles ",
       );
+    } else if (userInfo.role.includes("initfn") && category == "DPR") {
+      setName("Request for ");
+    } else if (userInfo.role.includes("initdc") && category == "FWA") {
+      setName("Friday Work Approval - ");
     } else {
       setName("");
     }
@@ -188,43 +202,36 @@ const FileNote = () => {
     let cat = [];
     if (userInfo.role.includes("initpr")) {
       cat = getcategory(type).filter((c) => c.includes("Demob"));
+    } else if (userInfo.role.includes("initdc")) {
+      cat = getcategory(type).filter((c) => c.includes("FWA"));
     } else {
-      cat = getcategory(type).filter((c) => !c.includes("Demob"));
+      cat = getcategory(type).filter(
+        (c) => !c.includes("Demob") && !c.includes("FWA"),
+      );
     }
 
     setCategories(cat);
+
     if (type && newfn && !isDocLoading && doc_no) {
       const template = generateTemplate(category, type);
       setSelectedFnValue(template);
       localStorage.setItem("editorContent", JSON.stringify(template));
     } else if (!type) {
       setProjectCodes([]);
-      setSelectedProject("");
+      resetSelectedproject();
       setSelectedFnValue("");
     }
   }, [type, category, selectedproject, doc_no, isDocLoading, newfn, name]);
 
-  const handleDocumentcategorytype = async (category) => {
-    if (category == "Demob") {
-      const projects = await fetchProjectDetails(userInfo);
-      const projectids = projects.map((pr) => pr.project);
-      const allocatedprcodes = userInfo.pr_code;
-      const matchedprcodes = projectids.filter((project) =>
-        allocatedprcodes.includes(project),
-      );
-      setProjectCodes(matchedprcodes);
-    } else {
-      setProjectCodes([]);
-    }
-    setCategory(category);
-  };
   const nextstatus = userInfo.role.some((r) =>
     selectedvalue?.status?.toLowerCase().includes(r?.toLowerCase()),
   )
     ? "Approve/Reject"
     : selectedvalue?.status == "created"
       ? "Sent for Approval"
-      : selectedvalue?.status || "";
+      : selectedvalue?.status !== "review"
+        ? selectedvalue.status
+        : "" || "";
 
   const handleSave = (action) => {
     const files = JSON.parse(localStorage.getItem("editorAttachments")) || [];
@@ -233,7 +240,7 @@ const FileNote = () => {
     const file_urls = files.map((file) => file.url);
     let status = "";
     if (action != "update") {
-      status = statusExpected(userInfo?.role, "save", type, category);
+      // status = statusExpected(userInfo?.role, "save", type, category);
 
       if (category == "Demob" && selectedproject.length == 0) {
         setErrorMessage("Please select the Project");
@@ -255,11 +262,13 @@ const FileNote = () => {
         dept_id,
         userInfo,
         project: selectedproject,
+        sentforapproval: null,
       });
     } else {
+      const editorinfo = useEditorInfo();
       status = statusExpected(
         userInfo?.role,
-        "save",
+        isReview || isEdit ? "update" : "save",
         selectedvalue.type,
         selectedvalue.category,
       );
@@ -268,12 +277,37 @@ const FileNote = () => {
         status: status,
         fnid: selectedvalue.id,
         userInfo,
-        sentforapproval: selectedvalue.sentforapproval,
+        sentforapproval: "yes",
         type: selectedvalue.type,
         category: selectedvalue.category,
         action: "save",
+        content: editorinfo,
+        attachments,
       });
     }
+  };
+  const hasComments = (selectedvalue.approver_info || []).some(
+    (v) => v.comment,
+  );
+  useEffect(() => {
+    const files = selectedvalue?.file || [];
+    const names = selectedvalue?.file_name || [];
+
+    const newAttachments = files.map((url, index) => ({
+      url,
+      name: names[index] ?? "Unnamed file",
+    }));
+
+    setAttachments(newAttachments);
+  }, [selectedvalue?.file, selectedvalue?.file_name]);
+
+  const handleEdit = () => {
+    updatefilenote({
+      status: "edit",
+      fnid: selectedvalue.id,
+      userInfo,
+    });
+    setDataSaved();
   };
 
   return (
@@ -313,7 +347,7 @@ const FileNote = () => {
           )}
         </div>
 
-        {selectedvalue?.id != null && (
+        {selectedvalue?.id != null && !newfn && (
           <div className="w-full bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg shadow-md p-4 ">
             <div className="flex gap-6 w-full">
               <div className="flex-1 flex flex-col items-center justify-center   bg-white rounded-lg border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -359,85 +393,20 @@ const FileNote = () => {
           </div>
         )}
         {userInfo?.is_admin && newfn && (
-          <div className="flex justify-center items-center gap-3 p-4 rounded-md">
-            <label className="font-medium flex">
-              Type: <BsAsterisk size={6} color="red" />{" "}
-            </label>
-            <select
-              disabled={isDocLoading}
-              value={type}
-              onChange={(e) => {
-                settype(e.target.value);
-                setCategory("");
-              }}
-              className="w-50 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2 text-sm font-medium 
-             text-gray-800 bg-white  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
-             hover:border-blue-400 hover:shadow-lg transition-all duration-200
-             focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200
-             bg-no-repeat bg-right pr-12"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundPosition: "right 0.9rem center",
-              }}
-            >
-              <option value="">📋 Select Type</option>
-              {!userInfo?.role.includes("initpr") && (
-                <option value="file_note">File Note</option>
-              )}
-
-              <option value="ioc">IOC</option>
-            </select>
-            <label className="font-medium flex">
-              Category: <BsAsterisk size={6} color="red" />{" "}
-            </label>
-            <select
-              disabled={isDocLoading}
-              value={category}
-              onChange={(e) => handleDocumentcategorytype(e.target.value)}
-              className="w-50 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2 text-sm font-medium
-             text-gray-800 bg-white  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
-             hover:border-blue-400 hover:shadow-lg transition-all duration-200
-             focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200
-             bg-no-repeat bg-right pr-12"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundPosition: "right 0.9rem center",
-              }}
-            >
-              <option value="">📋 - Select - </option>
-              {categories.map((category) => (
-                <option key={category}>{category}</option>
-              ))}
-            </select>
-            {userInfo?.role.includes("initpr") && (
-              <>
-                <label className="font-medium flex">
-                  Project: <BsAsterisk size={6} color="red" />{" "}
-                </label>
-                <select
-                  disabled={isDocLoading}
-                  value={selectedproject}
-                  onChange={(e) => setSelectedProject(e.target.value)}
-                  className="w-40 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2 text-sm font-medium h-
-                  text-gray-800 bg-white  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
-                  hover:border-blue-400 hover:shadow-lg transition-all duration-200
-                  focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200
-                  bg-no-repeat bg-right pr-12"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                    backgroundPosition: "right 0.9rem center",
-                  }}
-                >
-                  <option value="">📋 - Select - </option>
-                  {projectcodes.map((project) => (
-                    <option key={project}>{project}</option>
-                  ))}
-                </select>
-              </>
-            )}
-          </div>
+          <TypeFilter
+            isDocLoading={isDocLoading}
+            type={type}
+            category={category}
+            projectcodes={projectcodes}
+            settype={settype}
+            setCategory={setCategory}
+            setProjectCodes={setProjectCodes}
+            categories={categories}
+            selectedproject={selectedproject}
+            setSelectedProject={setSelectedProject}
+          />
         )}
-        {newfn && selectedvalue.id == null && (
+        {newfn && (
           <div className="flex items-center gap-1 p-4">
             <label className="font-medium flex">
               Subject: <BsAsterisk size={6} color="red" />
@@ -461,36 +430,90 @@ const FileNote = () => {
         )}
       </div>
       {selectedvalue.doc_no && (
-        <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2  ">
-          <div className="flex items-center gap-2 justify-center">
+        <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2 flex items-center">
+          <div className="flex-1 flex items-center justify-center gap-2">
             <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
               Department
             </span>
-            <span className="text-gray-700 font-bold text-base px-4 py-2 ">
+
+            <span className="text-gray-700 font-bold text-base px-4 py-2">
               {userInfo.is_admin
                 ? dept_finder_asadmin(userInfo.dept_code)
                 : dept_finder(selectedvalue.department_id)}
             </span>
           </div>
+          {userInfo?.is_admin && (isReview || isEdit) && (
+            <span className="text-gray-500 cursor-pointer hover:text-gray-700">
+              <IoSave
+                size={20}
+                color="green"
+                onClick={() => handleSave("update")}
+              />
+            </span>
+          )}
+          {selectedvalue.status == "created" && userInfo?.is_admin && (
+            <span className="text-gray-500 cursor-pointer hover:text-gray-700">
+              <MdModeEdit size={20} color="red" onClick={handleEdit} />
+            </span>
+          )}
         </div>
       )}
       <SimpleEditor
         content={selectedfnvalue}
         newfn={newfn}
         is_admin={userInfo.is_admin}
+        isreview={isReview}
+        isedit={isEdit}
       />
+      {hasComments && (
+        <div className="sticky bottom-5 flex px-25">
+          <div className="ml-auto max-w-sm bg-indigo-50 text-indigo-900 px-5 py-4 rounded-xl shadow-md border border-indigo-100">
+            <div className="text-xs font-semibold mb-1 opacity-70">
+              Comments
+            </div>
+            {[...(selectedvalue.approver_info || [])]
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
+              .map((val) => {
+                const role = val.role
+                  ? val.role.charAt(0).toUpperCase() + val.role.slice(1)
+                  : "";
+
+                if (!val.comment) return null;
+                const roleColors = {
+                  Hod: "text-purple-600",
+                  Cm: "text-green-600",
+                  Pm: "text-red-600",
+                  Ceo: "text-blue-600",
+                  Gm: "text-teal-600",
+                };
+                return (
+                  <div key={val.id || val.date}>
+                    {role && (
+                      <span
+                        className={`font-semibold ${roleColors[role] || "text-orange-600"}`}
+                      >
+                        {role}:
+                      </span>
+                    )}{" "}
+                    {val.comment}
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
       <div className="flex justify-between pb-10">
         {(selectedvalue.id || newfn) && (
           <AttachmentsContainer
             file={
-              selectedvalue?.file ||
-              (Array.isArray(attachments) ? attachments.map((a) => a.url) : [])
+              Array.isArray(attachments) ? attachments.map((a) => a.url) : []
             }
             file_name={
-              selectedvalue?.file_name ||
-              (Array.isArray(attachments) ? attachments.map((a) => a.name) : [])
+              Array.isArray(attachments) ? attachments.map((a) => a.name) : []
             }
             newfn={newfn}
+            isreview={isReview}
+            setSelectedValue={setSelectedValue}
           />
         )}
 
@@ -525,12 +548,36 @@ const FileNote = () => {
           setSelectedValue={setSelectedValue}
         />
       )}
+      {showtoast &&
+        !errormessage &&
+        userInfo?.is_admin &&
+        !imagesaved &&
+        isEdit && (
+          <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ Statement changed to Edit mode!
+          </div>
+        )}
+      {showtoast &&
+        dataupdated &&
+        userInfo?.is_admin &&
+        !imagesaved &&
+        !isEdit && (
+          <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅Document updated successfully!!
+          </div>
+        )}
 
-      {showtoast && !errormessage && userInfo?.is_admin && !imagesaved && (
-        <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-          ✅ You have successfully created the File Note/IOC!
-        </div>
-      )}
+      {showtoast &&
+        !errormessage &&
+        userInfo?.is_admin &&
+        !imagesaved &&
+        selectedvalue.status !== null &&
+        !dataupdated &&
+        !isEdit && (
+          <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ You have successfully created the File Note/IOC!
+          </div>
+        )}
       {showtoast && errormessage && userInfo?.is_admin && !imagesaved && (
         <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           {errormessage}
@@ -538,7 +585,8 @@ const FileNote = () => {
       )}
       {showtoast &&
         userInfo?.is_admin &&
-        selectedvalue.status == "pending for hod" && (
+        (selectedvalue.status == "pending for hod" ||
+          selectedvalue.status == "pending for cm") && (
           <div className="fixed top-5 left-1/2 z-60 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
             ✅ You have requested the document for approval!{" "}
             {errormessage ? `but ${errormessage}` : ""}

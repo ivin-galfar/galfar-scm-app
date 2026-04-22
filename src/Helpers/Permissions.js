@@ -7,6 +7,8 @@ export const getDeptConfig = ({
   isceo,
   isgm,
   isfnote,
+  ispm,
+  iscm,
 }) => {
   let defaultDept = "plant";
   let activeDept = "plant";
@@ -15,6 +17,10 @@ export const getDeptConfig = ({
     defaultDept = "bvrplant";
     activeDept = "bvrplant";
     allowedDept = ["logistics", "bvrplant", "fn"];
+  } else if (iscm) {
+    defaultDept = "fn";
+    activeDept = "fn";
+    allowedDept = ["fn"];
   } else if (!isceo && !isgm && !ishod) {
     if (isLogistics) {
       if (isfnote) {
@@ -33,8 +39,10 @@ export const getDeptConfig = ({
         allowedDept.push("bvrplant");
       }
 
-      if (isfnote) {
+      if (isfnote || ispm) {
         allowedDept.push("fn");
+        defaultDept = "fn";
+        activeDept = "fn";
       }
     }
   }

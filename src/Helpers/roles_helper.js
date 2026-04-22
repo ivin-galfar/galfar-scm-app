@@ -16,6 +16,8 @@ export const categoryapprovers = {
   BUYRENT: ["HOD", "FM", "GM", "CEO"],
   FNIOC: ["HOD", "FM", "GM", "CEO"],
   FNIOCM: ["HOD", "GM", "CEO"],
+  FNDEMOB: ["CM"],
+  FNFWA: ["CM", "PM", "GM"],
 };
 
 export const nextRole = (role, category) => {
@@ -38,7 +40,15 @@ export const nextRole = (role, category) => {
     ceo: null,
   };
 
-  return roleMap[normalizedRole] || null;
+  const roleMapfwa = {
+    initdc: "cm",
+    cm: "pm",
+    pm: "gm",
+  };
+
+  return category != "FWA"
+    ? roleMap[normalizedRole]
+    : roleMapfwa[normalizedRole] || null;
 };
 
 export const prevRole = (role) => {

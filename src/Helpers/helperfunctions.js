@@ -265,18 +265,38 @@ export const getEnclosureText = (category) => {
       return "Encl: Copy of Registration card";
     case "ADTSNew":
       return "CC: Mr. Suraj Rajan - Sr. Manager (F&A)";
+    case "DPR":
+      return "Encl: PO and Performa Invoice";
+    case "FWA":
+      return "Your kind approval in this regard will be highly appreciated.";
     default:
       return "Encl: Relevant documents attached";
+  }
+};
+
+export const getFooterText = (category) => {
+  if (category !== "DPR" && category !== "FWA") {
+    return "CC: CEO/GM";
+  } else if (category === "FWA") {
+    return " ";
+  } else {
+    return "Pramoj Ramesh\n(Manager P&E)";
   }
 };
 
 export const getToValue = (category) => {
   switch (category) {
     case "PR":
-      return " Sr.Manger-Finance & Accounts";
+      return " Sr.Manager-Finance & Accounts";
     case "FC":
-      return " Sr.Manger-Finance & Accounts";
+      return " Sr.Manager-Finance & Accounts";
     case "Insurance":
+      return "  CEO";
+    case "Demob":
+      return "Mr. Pramoj Ramesh Konattuseril (Plant Manager)";
+    case "FWA":
+      return "C.G. Vijayan (General Manager)";
+    case "DPR":
       return "  CEO";
   }
 };
@@ -284,11 +304,13 @@ export const getToValue = (category) => {
 export const getFromValue = (category) => {
   switch (category) {
     case "PR":
-      return " Manger (Plant & Equipment)";
+      return " Manager (Plant & Equipment)";
     case "FC":
-      return " Manger (Plant & Equipment)";
+      return " Manager (Plant & Equipment)";
     case "Insurance":
-      return " Manger (Plant & Equipment)";
+      return " Manager (Plant & Equipment)";
+    case "DPR":
+      return "  Manager (Plant & Equipment)";
   }
 };
 
@@ -300,8 +322,6 @@ export const extractText = (content = []) => {
       }
 
       if (item.content) {
-        console.log(item);
-
         return extractText(item.content);
       }
 

@@ -11,7 +11,8 @@ import {
   getType,
   isBold,
 } from "./helperfunctions";
-import { categoryapprovers, nextRole } from "./roles_helper";
+import { categoryapprovers, nextRole, roles } from "./roles_helper";
+import { getcmpmNames } from "../APIs/api";
 
 export const handlePrint = (formData, tableData) => {
   const doc = new jsPDF({
@@ -813,6 +814,8 @@ export const handleBrPrint = (formData) => {
   const names = getApproverNames("BUYRENT", "BUYRENT");
   const approvers = categoryapprovers.BUYRENT;
   const approvals = formData.approver_info;
+  const isReviewStatus = formData?.status?.toLowerCase() === "review";
+  const flowRoles = approvers.map((r) => r.toLowerCase());
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
@@ -822,7 +825,9 @@ export const handleBrPrint = (formData) => {
     const role = approvers[index]?.toLowerCase();
 
     const lastApprover = approvals?.[approvals.length - 1];
-    const lastRole = lastApprover?.role.toUpperCase() ?? "";
+    const lastRole = lastApprover?.role?.toLowerCase() ?? "";
+    const currentRoleIndex = flowRoles.indexOf(lastRole);
+    const roleIndex = flowRoles.indexOf(role);
 
     const status =
       approvals?.findLast((a) => a.role.toLowerCase() === role)?.status ?? "--";
@@ -832,9 +837,12 @@ export const handleBrPrint = (formData) => {
     );
     const nextPending = !isRejected ? nextRole(lastRole) : null;
 
-    // Display logic
-    const displayStatus =
-      nextPending && role.toLowerCase() === nextPending.toLowerCase()
+    const isFutureReviewRole =
+      isReviewStatus && currentRoleIndex >= 0 && roleIndex > currentRoleIndex;
+
+    const displayStatus = isFutureReviewRole
+      ? "--"
+      : nextPending && role.toLowerCase() === nextPending.toLowerCase()
         ? "(Pending)"
         : formattedstatus;
 
@@ -868,7 +876,7 @@ export const handleBrPrint = (formData) => {
   window.open(blobUrl);
 };
 
-export const handleFnPrint = (data) => {
+export const handleFnPrint = async (data, userInfo) => {
   const doc = new jsPDF();
 
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -980,25 +988,49 @@ export const handleFnPrint = (data) => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
 
-  const skipSfmCategories = ["tfw", "general", "insurance", "fc", "pr"];
+  const skipSfmCategories = ["tfw", "general", "insurance", "fc", "pr", "dpr"];
   const categoryKey = String(data?.category || "")
     .trim()
     .toLowerCase();
   const skipSfm = skipSfmCategories.includes(categoryKey);
+  const demob = data.category == "Demob";
+  const fwa = data.category == "FWA";
 
-  const approverLabels = skipSfm
-    ? ["(HOD)", "(GM)", "(CEO)"]
-    : ["(HOD)", "(SFM)", "(GM)", "(CEO)"];
+  let approverLabels;
 
-  const approverIndexes = skipSfm ? [0, 1, 2] : [0, 1, 2, 3];
-  const Flow =
-    data?.category == "Ap" ||
-    data.category == "ADTSNew" ||
-    data.category == "ADTSRen"
-      ? "FNIOC"
-      : "FNIOCM";
+  if (skipSfm) {
+    approverLabels = ["(HOD)", "(GM)", "(CEO)"];
+  } else if (demob) {
+    approverLabels = ["(CM / SCM)"];
+  } else if (fwa) {
+    approverLabels = ["(CM / SCM)", "(PM / SPM)", "(GM)"];
+  } else {
+    approverLabels = ["(HOD)", "(SFM)", "(GM)", "(CEO)"];
+  }
 
-  const names = getApproverNames(Flow, "FNIOC");
+  const approverIndexes =
+    skipSfm || fwa ? [0, 1, 2] : demob ? [0] : [0, 1, 2, 3];
+  let Flow;
+  const category = data?.category;
+
+  if (category === "Ap" || category === "ADTSNew" || category === "ADTSRen") {
+    Flow = "FNIOC";
+  } else {
+    Flow = "FNIOCM";
+  }
+  let names = [];
+
+  if (category == "Demob") {
+    const cmName = await getcmpmNames("cm", data.project_code, userInfo);
+    names.push(cmName);
+  } else if (category == "FWA") {
+    const cmName = await getcmpmNames("cm", data.project_code, userInfo);
+    const pmName = await getcmpmNames("pm", data.project_code, userInfo);
+    names.push(cmName, pmName);
+    names.push(roles.GM);
+  } else {
+    names = getApproverNames(Flow, "FNIOC");
+  }
 
   let approvers = categoryapprovers.FNIOCM;
 
@@ -1008,9 +1040,15 @@ export const handleFnPrint = (data) => {
     data.category == "ADTSRen"
   ) {
     approvers = categoryapprovers.FNIOC;
+  } else if (data.category == "Demob") {
+    approvers = categoryapprovers.FNDEMOB;
+  } else if (data.category == "FWA") {
+    approvers = categoryapprovers.FNFWA;
   }
 
   const approvals = data.approver_info || [];
+  const isReviewStatus = data?.status?.toLowerCase() === "review";
+  const flowRoles = approvers.map((r) => r.toLowerCase());
 
   const positions = approverLabels.map(
     (_, index) => (pageWidth * (index + 1)) / (approverLabels.length + 1),
@@ -1029,7 +1067,9 @@ export const handleFnPrint = (data) => {
     const role = approvers[approverIndex]?.toLowerCase() || "";
 
     const lastApprover = approvals[approvals.length - 1];
-    const lastRole = lastApprover?.role?.toUpperCase() ?? "";
+    const lastRole = lastApprover?.role?.toLowerCase() ?? "";
+    const currentRoleIndex = flowRoles.indexOf(lastRole);
+    const roleIndex = flowRoles.indexOf(role);
 
     const status =
       approvals.findLast((a) => a.role?.toLowerCase() === role)?.status ?? "--";
@@ -1039,9 +1079,12 @@ export const handleFnPrint = (data) => {
     );
 
     const nextPending = !isRejected ? nextRole(lastRole, data.category) : null;
+    const isFutureReviewRole =
+      isReviewStatus && currentRoleIndex >= 0 && roleIndex > currentRoleIndex;
 
-    const displayStatus =
-      nextPending && role === nextPending.toLowerCase()
+    const displayStatus = isFutureReviewRole
+      ? "--"
+      : nextPending && role === nextPending.toLowerCase()
         ? "(Pending)"
         : formattedstatus;
 
