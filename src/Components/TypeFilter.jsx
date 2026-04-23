@@ -25,7 +25,7 @@ const TypeFilter = ({
     setPageIndex(0);
     if (
       (category == "Demob" || category == "FWA") &&
-      location.pathname == "/filenote/"
+      location.pathname == "/filenote"
     ) {
       const projects = await fetchProjectDetails(userInfo);
       const projectids = projects.map((pr) => pr.project);

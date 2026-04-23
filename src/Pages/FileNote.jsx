@@ -322,7 +322,7 @@ const FileNote = () => {
                 setSelectedFnValue("");
                 setSelectedValue("");
                 setName("");
-                navigate("/filenote/");
+                navigate("/filenote");
                 setCategory("");
                 setAttachments("");
                 settype("");
