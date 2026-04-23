@@ -95,7 +95,7 @@
 .simple-editor table tr:nth-child(15) th:nth-child(1),
 .simple-editor table tr:not(:nth-child(15)) td:nth-child(1),
 .simple-editor table tr:not(:nth-child(15)) th:nth-child(1) {
-  width: 10%;
+  width: 8%;
   min-width: 50px;
 }
 
@@ -127,7 +127,7 @@
 // Column width rules for IOC table (9 columns)
 .simple-editor table td:nth-child(7),
 .simple-editor table th:nth-child(7) {
-  width: 10%;
+  width: 20%;
 }
 
 .simple-editor table td:nth-child(8),
