@@ -34,18 +34,19 @@ export const getDeptConfig = ({
       }
     } else if (isPlant) {
       allowedDept = ["plant"];
-
+      defaultDept = "plant";
       if (isasset) {
         allowedDept.push("bvrplant");
       }
 
-      if (isfnote || ispm) {
+      if ((isfnote && !isPlant && !isasset) || ispm) {
         allowedDept.push("fn");
         defaultDept = "fn";
         activeDept = "fn";
       }
     }
   }
+  console.log(defaultDept);
 
   return {
     defaultDept,
