@@ -334,11 +334,7 @@ const FnDashboards = () => {
     let cat = [];
     if (userInfo.role.includes("initpr")) {
       cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
-    } else if (
-      userInfo.role.includes("cm") ||
-      userInfo.role.includes("pm") ||
-      userInfo.role.includes("gm")
-    ) {
+    } else if (userInfo.role.includes("cm") || userInfo.role.includes("pm")) {
       cat = getcategory(typeFilter).filter(
         (c) => c.includes("FWA") || c.includes("Demob"),
       );
@@ -353,6 +349,8 @@ const FnDashboards = () => {
       cat = getcategory(typeFilter).filter(
         (c) => !c.includes("Demob") && !c.includes("FWA"),
       );
+    } else if (userInfo.role.includes("gm")) {
+      cat = getcategory(typeFilter).filter((c) => !c.includes("Demob"));
     } else {
       cat = getcategory(typeFilter);
     }

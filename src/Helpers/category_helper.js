@@ -11,16 +11,6 @@ export const TypeValue = {
   ioc: "Ioc",
 };
 
-// export const CategoryValue = {
-//   General: "GN",
-//   ADTS: "ADTS CICPA",
-//   TFW: "Traffic Fine Waiver",
-//   Insurance: "Insurance",
-//   Demob: "Demob",
-//   FC: "FC",
-//   PR: "PR",
-// };
-
 export const TypeForUi = {
   file_note: "File Note",
   ioc: "Inter Office Correspondence",
