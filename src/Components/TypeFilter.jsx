@@ -19,16 +19,19 @@ const TypeFilter = ({
 }) => {
   const userInfo = useUserInfo();
   const { setPageIndex } = usePagination();
-  console.log(type);
+  const location = useLocation();
 
   const handleDocumentcategorytype = async (category) => {
     setPageIndex(0);
-    if (category == "Demob" || category == "FWA") {
+    if (
+      (category == "Demob" || category == "FWA") &&
+      location.pathname == "/filenote/"
+    ) {
       const projects = await fetchProjectDetails(userInfo);
       const projectids = projects.map((pr) => pr.project);
       const allocatedprcodes = userInfo.pr_code;
       const matchedprcodes = projectids.filter((project) =>
-        allocatedprcodes.includes(project),
+        allocatedprcodes?.includes(project),
       );
       setProjectCodes(matchedprcodes);
     } else {
@@ -36,7 +39,6 @@ const TypeFilter = ({
     }
     setCategory(category);
   };
-  const location = useLocation();
   const demobusers =
     userInfo?.role.includes("initpr") ||
     userInfo?.role.includes("cm") ||

@@ -14,6 +14,7 @@ import {
   is_hod,
   is_gm,
   is_ceo,
+  is_dc,
 } from "../Helpers/dept_helper";
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
@@ -31,6 +32,8 @@ const Header = () => {
   const isPlant = is_plant(userInfo?.dept_code);
   const isfm = is_fm(userInfo?.role);
   const isasset = is_asset(userInfo?.role);
+  const isdc = is_dc(userInfo?.role);
+
   const ishod = is_hod(userInfo?.role);
   const isgm = is_gm(userInfo?.role);
   const isceo = is_ceo(userInfo?.role);
@@ -59,6 +62,7 @@ const Header = () => {
     ishod,
     isceo,
     isgm,
+    isdc,
   });
 
   useEffect(() => {

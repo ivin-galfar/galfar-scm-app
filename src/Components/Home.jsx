@@ -9,9 +9,11 @@ import {
   is_asset,
   is_ceo,
   is_cm,
+  is_dc,
   is_fm,
   is_fnote,
   is_gm,
+  is_hire,
   is_hod,
   is_logistics,
   is_plant,
@@ -39,7 +41,8 @@ const Home = () => {
   const isceo = is_ceo(userInfo?.role);
   const ispm = is_pm(userInfo?.role);
   const iscm = is_cm(userInfo?.role);
-
+  const isdc = is_dc(userInfo?.role);
+  const ishire = is_hire(userInfo?.role);
   const isPlant = is_plant(userInfo?.dept_code);
   const isfnote = is_fnote(userInfo?.role);
 
@@ -81,6 +84,8 @@ const Home = () => {
     isfnote,
     ispm,
     iscm,
+    isdc,
+    ishire,
   });
 
   useEffect(() => {

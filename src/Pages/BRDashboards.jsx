@@ -60,6 +60,7 @@ const BRDashboards = () => {
   const { setStatusFilter, statusfilter, resetStatusFilter } =
     useStatusFilter();
   const { brcount, setBRCount } = usetotalBRstatements();
+  const canFetch = !!userinfo && isBuyvsrent;
 
   const { data: brstatements } = useQuery({
     queryKey: [
@@ -78,7 +79,7 @@ const BRDashboards = () => {
         limit: pagination.pageSize,
         module: location.pathname,
       }),
-    enabled: !!userinfo,
+    enabled: canFetch,
     keepPreviousData: true,
   });
 
@@ -151,8 +152,10 @@ const BRDashboards = () => {
         console.error("Fetch receipts error:", message);
       }
     };
-    fetchStatments();
-  }, [statusfilter, searchcs]);
+    if (canFetch) {
+      fetchStatments();
+    }
+  }, [statusfilter, searchcs, canFetch]);
 
   const columnHelper = createColumnHelper();
   const statusProgress = {

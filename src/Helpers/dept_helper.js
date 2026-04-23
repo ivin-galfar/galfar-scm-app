@@ -8,6 +8,8 @@ export const is_asset = (role) => role?.includes("inita");
 export const is_fm = (role) => role?.includes("fm");
 export const is_pm = (role) => role?.includes("pm");
 export const is_cm = (role) => role?.includes("cm");
+export const is_dc = (role) => role?.includes("initdc");
+export const is_hire = (role) => role?.includes("inith");
 
 export const is_fnote = (role) =>
   role?.includes("initfn") ||

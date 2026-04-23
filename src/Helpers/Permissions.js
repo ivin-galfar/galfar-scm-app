@@ -9,6 +9,8 @@ export const getDeptConfig = ({
   isfnote,
   ispm,
   iscm,
+  isdc,
+  ishire,
 }) => {
   let defaultDept = "plant";
   let activeDept = "plant";
@@ -34,19 +36,37 @@ export const getDeptConfig = ({
       }
     } else if (isPlant) {
       allowedDept = ["plant"];
+      activeDept = "plant";
       defaultDept = "plant";
       if (isasset) {
         allowedDept.push("bvrplant");
       }
 
-      if ((isfnote && !isPlant && !isasset) || ispm) {
-        allowedDept.push("fn");
-        defaultDept = "fn";
+      // Highest priority overrides first
+      if (ispm) {
+        allowedDept = ["logistics", "fn"];
+        defaultDept = "logistics";
         activeDept = "fn";
+      } else if (isdc) {
+        allowedDept.push("fn");
+        allowedDept.push("fn");
+        activeDept = "fn";
+        defaultDept = "fn";
+        allowedDept = allowedDept.filter((dept) => dept !== "plant");
+      } else if (isfnote) {
+        activeDept = "fn";
+        defaultDept = "fn";
+        allowedDept.push("fn");
+
+        if (ishire || isasset) {
+          allowedDept.push("plant");
+        } else {
+          // remove plant when only fnote (with or without asset)
+          allowedDept = allowedDept.filter((dept) => dept !== "plant");
+        }
       }
     }
   }
-  console.log(defaultDept);
 
   return {
     defaultDept,

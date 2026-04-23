@@ -34,7 +34,7 @@ import { getcategory } from "../Helpers/category_helper";
 import { GrAttachment } from "react-icons/gr";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
-
+  const isAdmin = userInfo.is_admin;
   const deleteStatement = useDeleteStore((state) => state.deleteStatement);
   const setDeleteStatement = useDeleteStore(
     (state) => state.setDeleteStatement,
@@ -110,8 +110,6 @@ const FnDashboards = () => {
   };
 
   useEffect(() => {
-    console.log("coming");
-
     const fetchStatments = async () => {
       try {
         const totalcount = await fetchfilenoteids({
@@ -334,16 +332,29 @@ const FnDashboards = () => {
 
   useEffect(() => {
     let cat = [];
-    if (userInfo.role.includes("initpr") || userInfo.role.includes("pm")) {
+    if (userInfo.role.includes("initpr")) {
       cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
-    } else if (userInfo.role.includes("cm") || userInfo.role.includes("pm")) {
+    } else if (
+      userInfo.role.includes("cm") ||
+      userInfo.role.includes("pm") ||
+      userInfo.role.includes("gm")
+    ) {
       cat = getcategory(typeFilter).filter(
         (c) => c.includes("FWA") || c.includes("Demob"),
       );
-    } else {
+    } else if (
+      (userInfo.role.includes("initfn") && isAdmin) ||
+      userInfo.role.includes("fm")
+    ) {
       cat = getcategory(typeFilter).filter(
         (c) => !c.includes("Demob") && !c.includes("FWA"),
       );
+    } else if (userInfo.role.includes("ceo")) {
+      cat = getcategory(typeFilter).filter(
+        (c) => !c.includes("Demob") && !c.includes("FWA"),
+      );
+    } else {
+      cat = getcategory(typeFilter);
     }
 
     setCategories(cat);
