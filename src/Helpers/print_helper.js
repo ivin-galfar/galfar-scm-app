@@ -917,6 +917,7 @@ export const handleFnPrint = async (data, userInfo) => {
   const paragraphLineHeight = 6;
   const paragraphSpacing = 4;
   y = headerBottomY;
+  let pageHeight = doc.internal.pageSize.height;
 
   data.content.content.forEach((block) => {
     if (block.type === "table") {
@@ -971,6 +972,12 @@ export const handleFnPrint = async (data, userInfo) => {
       const text = block.content?.map((t) => t.text || "").join(" ") || "";
 
       if (text.trim()) {
+        // Check if we need a new page
+        if (y > pageHeight - 40) {
+          doc.addPage();
+          y = 20;
+        }
+
         doc.setFont("helvetica", "normal");
         doc.setFontSize(paragraphFontSize);
         doc.setLineHeightFactor(1.5);
@@ -983,7 +990,6 @@ export const handleFnPrint = async (data, userInfo) => {
   });
 
   const footerY = 275;
-  const pageHeight = doc.internal.pageSize.height;
   const footerPadding = 6;
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
