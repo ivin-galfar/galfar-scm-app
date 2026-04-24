@@ -756,7 +756,9 @@ export const fetchfilenoteids = async ({
           role: userInfo.role.join(","),
           isadmin: userInfo.is_admin,
           dept_id: dept_id.join(","),
-          project_code: userInfo.pr_code.join(","),
+          project_code: Array.isArray(userInfo.pr_code)
+            ? userInfo.pr_code.join(",")
+            : "",
           statusfilter,
           count,
           page,
