@@ -47,13 +47,17 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
     } else {
       setDashboardType("bvrplant");
     }
-  }, []);
+    // Keep nav open if user is not logged in
+    if (!userInfo) {
+      setIsMenuOpen(true);
+    }
+  }, [userInfo, setIsMenuOpen, isPlant]);
   const dashboardType = isPlant ? "plant" : "bvrplant";
 
   return (
     <div
       ref={ref}
-      onMouseLeave={() => setIsMenuOpen(false)}
+      onMouseLeave={() => userInfo && setIsMenuOpen(false)}
       className={`fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow transition-all duration-300 
     ${isOpen ? "w-68" : "w-15"}`}
     >
