@@ -60,6 +60,8 @@ export const getDeptConfig = ({
 
         if (ishire || isasset) {
           allowedDept.push("plant");
+          activeDept = "plant";
+          defaultDept = "plant";
         } else {
           // remove plant when only fnote (with or without asset)
           allowedDept = allowedDept.filter((dept) => dept !== "plant");
