@@ -71,10 +71,10 @@ const Header = () => {
     setDashboardType(defaultDept);
   }, [userInfo, isLogistics, isfm, isPlant, isasset]);
   const isDisabled =
-    (userInfo.is_admin &&
-      !userInfo.role.includes("inith") &&
-      !userInfo.role.includes("inita")) ||
-    userInfo.role.includes("cm");
+    (userInfo?.is_admin &&
+      !userInfo?.role?.includes("inith") &&
+      !userInfo?.role?.includes("inita")) ||
+    userInfo?.role?.includes("cm");
   return (
     <div>
       <header className="bg-white shadow-md">
