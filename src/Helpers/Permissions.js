@@ -19,6 +19,10 @@ export const getDeptConfig = ({
     defaultDept = "bvrplant";
     activeDept = "bvrplant";
     allowedDept = ["logistics", "bvrplant", "fn"];
+  } else if (ispm) {
+    allowedDept = ["logistics", "fn"];
+    defaultDept = "logistics";
+    activeDept = "logistics";
   } else if (iscm) {
     defaultDept = "fn";
     activeDept = "fn";
@@ -40,13 +44,6 @@ export const getDeptConfig = ({
       defaultDept = "plant";
       if (isasset) {
         allowedDept.push("bvrplant");
-      }
-
-      // Highest priority overrides first
-      if (ispm) {
-        allowedDept = ["logistics", "fn"];
-        defaultDept = "logistics";
-        activeDept = "fn";
       } else if (isdc) {
         allowedDept.push("fn");
         allowedDept.push("fn");

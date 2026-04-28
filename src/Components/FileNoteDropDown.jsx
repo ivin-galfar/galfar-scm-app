@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { useErrorMessage } from "../store/errorStore";
 import { useParams } from "react-router-dom";
 import { useDatasaved } from "../store/brStore";
-import { useAttachments } from "../store/helperStore";
+import { useAttachments, useComments } from "../store/helperStore";
 import { getTypeCode } from "../Helpers/helperfunctions";
 const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
   const { datasaved } = useDatasaved();
-  const { attachments, setAttachments, resetAttachments } = useAttachments();
+  const { resetAttachments } = useAttachments();
+  const { comments } = useComments();
 
   const userInfo = useUserInfo();
   const { fn_no } = useParams();
@@ -43,7 +44,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
       setSelectedFnValue("");
       setSelectedValue("");
     }
-  }, [fn_no]);
+  }, [fn_no, comments]);
 
   return (
     <div className="flex bg-gradient-to-r from-slate-50 to-blue-50 items-center hadow-md p-4  rounded-lg gap-4">

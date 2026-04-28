@@ -2,6 +2,7 @@ import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { categoryapprovers, prevRole, roles } from "./roles_helper";
 import { CategoryForUi, TypeForUi, TypeValue } from "./category_helper";
+import { getcmpmNames } from "../APIs/api";
 
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
@@ -301,6 +302,24 @@ export const getToValue = (category) => {
   }
 };
 
+export const getCCValue = async (category, project_code, userInfo) => {
+  const pmName =
+    project_code != "" ? await getcmpmNames("pm", project_code, userInfo) : "";
+
+  switch (category) {
+    case "Demob":
+      return `C.G. Vijayan (General Manager), ${pmName} (SPM/PM)`;
+    case "FWA":
+      return `${pmName} (SPM/PM)`;
+  }
+};
+
+export const getCMFromValue = async (category, project_code, userInfo) => {
+  const cmName =
+    project_code != "" ? await getcmpmNames("cm", project_code, userInfo) : "";
+  return `${cmName} (CM/SCM - P10${project_code})`;
+};
+
 export const getFromValue = (category) => {
   switch (category) {
     case "PR":
@@ -310,6 +329,8 @@ export const getFromValue = (category) => {
     case "Insurance":
       return " Manager (Plant & Equipment)";
     case "DPR":
+      return "  Manager (Plant & Equipment)";
+    case "Demob":
       return "  Manager (Plant & Equipment)";
   }
 };

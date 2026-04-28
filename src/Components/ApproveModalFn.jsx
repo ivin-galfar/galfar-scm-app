@@ -20,6 +20,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const { setComments, comments, resetComments } = useComments();
   const [isreviewclicked, setIsReviewClicked] = useState(false);
   const isHod = userInfo.role.includes("hod");
+  const isGm = userInfo.role.includes("gm");
 
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const { mutate: updatestatement } = useMutation({
@@ -99,7 +100,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">
           Approve/Reject
         </h2>
-        {(isreviewclicked || isHod) && (
+        {(isreviewclicked || isHod || isGm) && (
           <div className="flex w-full">
             <textarea
               rows={3}
@@ -126,7 +127,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
           <button
             className={`px-4 py-2 flex items-center gap-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition ${isreviewclicked && !comments?.trim() ? "cursor-pointer" : "cursor-pointer"}`}
             onClick={() => {
-              if (isreviewclicked) {
+              if (isreviewclicked || isHod || isGm) {
                 submitApproval("review");
               } else {
                 setIsReviewClicked(true);

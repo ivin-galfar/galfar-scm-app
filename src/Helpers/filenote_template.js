@@ -1,11 +1,20 @@
 import {
+  getCCValue,
   getEnclosureText,
   getFooterText,
   getFromValue,
   getToValue,
 } from "./helperfunctions";
 
-export const fileNoteTemplate = (ref, sub, date, type, category) => {
+export const fileNoteTemplate = (
+  ref,
+  sub,
+  date,
+  type,
+  category,
+  ccvalue,
+  cmname,
+) => {
   let basecontent = [];
 
   if (type == "file_note") {
@@ -630,7 +639,7 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
           ],
         },
       ];
-    } else {
+    } else if (category == "FWA") {
       basecontent = [
         {
           type: "tableRow",
@@ -641,7 +650,10 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
                 {
                   type: "paragraph",
                   attrs: { textAlign: "left" },
-                  content: [{ type: "text", text: "From : " }],
+                  content: [
+                    { type: "text", text: "From : " },
+                    { type: "text", text: cmname },
+                  ],
                 },
               ],
             },
@@ -691,7 +703,13 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
               content: [
                 {
                   type: "paragraph",
-                  content: [{ type: "text", text: `Cc : ` }],
+                  content: [
+                    { type: "text", text: `Cc : ` },
+                    {
+                      type: "text",
+                      text: ccvalue,
+                    },
+                  ],
                 },
               ],
             },
@@ -707,6 +725,219 @@ export const fileNoteTemplate = (ref, sub, date, type, category) => {
           ],
         },
       ];
+    } else {
+      basecontent = [
+        {
+          type: "tableRow",
+          content: [
+            {
+              type: "tableCell",
+              content: [
+                {
+                  type: "paragraph",
+                  attrs: { textAlign: "left" },
+                  content: [
+                    { type: "text", text: "From : " },
+                    { type: "text", text: cmname },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "tableCell",
+              content: [
+                {
+                  type: "paragraph",
+                  attrs: { textAlign: "left" },
+                  content: [{ type: "text", text: `Ref : ${ref}` }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: "tableRow",
+          content: [
+            {
+              type: "tableCell",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    { type: "text", text: `To : ` },
+                    { type: "text", text: getToValue(category) },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "tableCell",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text: `Date : ${date}` }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: "tableRow",
+          content: [
+            {
+              type: "tableCell",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    { type: "text", text: `Cc : ` },
+                    {
+                      type: "text",
+                      text: ccvalue,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "tableCell",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text: `sub : ${sub}` }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "V. Urgent / Urgent/ For Info / Action.",
+              marks: [{ type: "underline" }],
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "SUBJECT : ",
+            },
+            {
+              type: "text",
+              text: "Demobilization of Galfar Equipment from the project",
+              marks: [{ type: "bold" }, { type: "underline" }],
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "PROJECT :  ",
+              marks: [{ type: "bold" }],
+            },
+            {
+              type: "text",
+              text: "                                     ",
+              marks: [{ type: "bold" }, { type: "underline" }],
+            },
+          ],
+        },
+
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Dear Sir,",
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "We are hereby demobilizing the below-listed Galfar Equipment from Project ",
+            },
+            {
+              type: "text",
+              marks: [{ type: "underline" }],
+              text: "                                         .",
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "w.e.f ",
+            },
+            {
+              type: "text",
+              marks: [{ type: "underline" }],
+              text: "                            .",
+            },
+          ],
+        },
+        { type: "paragraph" },
+      ];
+      const secondTable = {
+        type: "table",
+        content: [
+          {
+            type: "tableRow",
+            content: [
+              { text: "Sl.No.", widths: 50 },
+              { text: "Equipment No./Plate No.", widths: 90 },
+              { text: "Equipment / Vehicle", widths: 90 },
+              { text: "Company", widths: 100 },
+              { text: "Remarks", widths: 120 },
+            ].map(({ text, widths }) => ({
+              type: "tableHeader",
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: widths,
+              },
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text }],
+                },
+              ],
+            })),
+          },
+          {
+            type: "tableRow",
+            content: [
+              { widths: 50 },
+              { widths: 90 },
+              { widths: 90 },
+              { widths: 100 },
+              { widths: 120 },
+            ].map(({ widths }) => ({
+              type: "tableCell",
+              attrs: { colspan: 1, rowspan: 1, colwidth: widths },
+              content: [
+                {
+                  type: "paragraph",
+                  attrs: { textAlign: "center" },
+                },
+              ],
+            })),
+          },
+        ],
+      };
+
+      basecontent.push(secondTable, { type: "paragraph" });
     }
 
     if (category == "FWA") {
