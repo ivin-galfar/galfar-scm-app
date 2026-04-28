@@ -13,7 +13,7 @@ import { is_hod } from "../Helpers/dept_helper";
 import { useAttachments } from "../store/helperStore";
 import UploadAttachments from "./UploadAttachments";
 
-const AttachmentsContainer = ({ file, file_name, newfn, isreview }) => {
+const AttachmentsContainer = ({ file, file_name, newfn, isreview, isedit }) => {
   const userInfo = useUserInfo();
   const ishod = is_hod(userInfo?.role);
   const { showtoast, setShowToast, resetshowtoast } = useToast();
@@ -27,7 +27,7 @@ const AttachmentsContainer = ({ file, file_name, newfn, isreview }) => {
           📎 Attachments {file?.length > 0 ? `(${file?.length})` : ""}
           <UploadAttachments
             styles={
-              (newfn || isreview) && isAdmin
+              (newfn || isreview || isedit) && isAdmin
                 ? "cursor-pointer"
                 : "pointer-events-none opacity-50"
             }
@@ -41,7 +41,7 @@ const AttachmentsContainer = ({ file, file_name, newfn, isreview }) => {
                   key={index}
                   className="relative flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-200 hover:border-blue-400"
                 >
-                  {(newfn || isreview) && isAdmin && (
+                  {(newfn || isreview || isedit) && isAdmin && (
                     <button
                       onClick={() =>
                         handleRemoveFiles(index, attachments, setAttachments)

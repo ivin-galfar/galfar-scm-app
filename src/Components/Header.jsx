@@ -70,7 +70,11 @@ const Header = () => {
     setSelectedDept(defaultDept);
     setDashboardType(defaultDept);
   }, [userInfo, isLogistics, isfm, isPlant, isasset]);
-
+  const isDisabled =
+    (userInfo.is_admin &&
+      !userInfo.role.includes("inith") &&
+      !userInfo.role.includes("inita")) ||
+    userInfo.role.includes("cm");
   return (
     <div>
       <header className="bg-white shadow-md">
@@ -112,7 +116,7 @@ const Header = () => {
 
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
-                    }`;
+                    }${isDisabled ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`;
                   }}
                   onClick={() => {
                     setStatusFilter("All");

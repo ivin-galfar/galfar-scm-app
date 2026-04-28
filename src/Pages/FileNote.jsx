@@ -4,7 +4,6 @@ import { useMutation } from "@tanstack/react-query";
 import {
   createfilenote,
   fetchlastid,
-  fetchProjectDetails,
   FnEmailAlert,
   updatefilenotevalues,
 } from "../APIs/api";
@@ -34,15 +33,22 @@ import AttachmentsContainer from "../Components/AttachmentContainer";
 import {
   useAttachments,
   useCategories,
+  useComments,
   usenewfn,
   useProjectCodes,
   useSelectedProject,
 } from "../store/helperStore";
 import { getcategory } from "../Helpers/category_helper";
-import { getCategoryforUI, getType } from "../Helpers/helperfunctions";
+import {
+  getCategoryforUI,
+  getCCValue,
+  getCMFromValue,
+  getType,
+} from "../Helpers/helperfunctions";
 import TypeFilter from "../Components/TypeFilter";
 import { IoSave } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
+import { FaUndoAlt } from "react-icons/fa";
 
 const FileNote = () => {
   const editorinfo = useEditorInfo();
@@ -53,6 +59,7 @@ const FileNote = () => {
   const [selectedfnvalue, setSelectedFnValue] = useState("");
   const [selectedvalue, setSelectedValue] = useState("");
   const [dataupdated, setDataUpdated] = useState(false);
+  const [recall, setRecall] = useState(false);
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
@@ -146,7 +153,7 @@ const FileNote = () => {
     },
   });
 
-  const generateTemplate = (category, type) => {
+  const generateTemplate = async (category, type) => {
     if (!doc_no || doc_no.last_no == null) return "";
     const dept = isPlant ? "P&E" : "Logistics";
     const typedefined = type === "file_note" ? "FN" : "IOC";
@@ -162,6 +169,12 @@ const FileNote = () => {
     const date = new Date().toDateString();
     const formattedDate = format(date, "do MMMM yyyy");
     const cleanCategory = category?.trim();
+    const ccvalue = selectedproject
+      ? await getCCValue(category, selectedproject, userInfo)
+      : "";
+    const cmname = selectedproject
+      ? await getCMFromValue(category, selectedproject, userInfo)
+      : "";
 
     return fileNoteTemplate(
       ref_no,
@@ -169,6 +182,8 @@ const FileNote = () => {
       formattedDate,
       type,
       cleanCategory,
+      ccvalue,
+      cmname,
     );
   };
 
@@ -213,9 +228,10 @@ const FileNote = () => {
     setCategories(cat);
 
     if (type && newfn && !isDocLoading && doc_no) {
-      const template = generateTemplate(category, type);
-      setSelectedFnValue(template);
-      localStorage.setItem("editorContent", JSON.stringify(template));
+      generateTemplate(category, type).then((template) => {
+        setSelectedFnValue(template);
+        localStorage.setItem("editorContent", JSON.stringify(template));
+      });
     } else if (!type) {
       setProjectCodes([]);
       resetSelectedproject();
@@ -242,7 +258,10 @@ const FileNote = () => {
     if (action != "update") {
       // status = statusExpected(userInfo?.role, "save", type, category);
 
-      if (category == "Demob" && selectedproject.length == 0) {
+      if (
+        (category == "Demob" || category == "FWA") &&
+        selectedproject.length == 0
+      ) {
         setErrorMessage("Please select the Project");
         setShowToast();
         setTimeout(() => {
@@ -284,6 +303,7 @@ const FileNote = () => {
         content: editorinfo,
         attachments,
       });
+      setRecall(false);
     }
   };
   const hasComments = (selectedvalue.approver_info || []).some(
@@ -431,17 +451,29 @@ const FileNote = () => {
       </div>
       {selectedvalue.doc_no && (
         <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2 flex items-center">
-          <div className="flex-1 flex items-center justify-center gap-2">
-            <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
-              Department
-            </span>
+          {selectedvalue.category !== "FWA" ? (
+            <div className="flex-1 flex items-center justify-center gap-2">
+              <>
+                <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
+                  Department
+                </span>
 
-            <span className="text-gray-700 font-bold text-base px-4 py-2">
-              {userInfo.is_admin
-                ? dept_finder_asadmin(userInfo.dept_code)
-                : dept_finder(selectedvalue.department_id)}
-            </span>
-          </div>
+                <span className="text-gray-700 font-bold text-base px-4 py-2">
+                  {userInfo.is_admin
+                    ? dept_finder_asadmin(userInfo.dept_code)
+                    : dept_finder(selectedvalue.department_id)}
+                </span>
+              </>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center gap-2">
+              <div className="flex flex-col">
+                <span className=" text-base font-bold uppercase tracking-wide ">
+                  PROJECT - P10{selectedvalue?.project_code || "-"}
+                </span>
+              </div>
+            </div>
+          )}
           {userInfo?.is_admin && (isReview || isEdit) && (
             <span className="text-gray-500 cursor-pointer hover:text-gray-700">
               <IoSave
@@ -456,6 +488,21 @@ const FileNote = () => {
               <MdModeEdit size={20} color="red" onClick={handleEdit} />
             </span>
           )}
+          {userInfo?.is_admin &&
+            selectedvalue.status !== "approved" &&
+            selectedvalue.status !== "rejected" &&
+            selectedvalue.status !== "edit" &&
+            selectedvalue.status !== "created" && (
+              <span className="text-gray-500 cursor-pointer hover:text-gray-700">
+                <FaUndoAlt
+                  size={20}
+                  color="#2563EB"
+                  onClick={() => {
+                    (setRecall(true), handleEdit());
+                  }}
+                />{" "}
+              </span>
+            )}
         </div>
       )}
       <SimpleEditor
@@ -514,6 +561,7 @@ const FileNote = () => {
             newfn={newfn}
             isreview={isReview}
             setSelectedValue={setSelectedValue}
+            isedit={isEdit}
           />
         )}
 
@@ -549,7 +597,18 @@ const FileNote = () => {
         />
       )}
       {showtoast &&
+        recall &&
         !errormessage &&
+        userInfo?.is_admin &&
+        !imagesaved &&
+        isEdit && (
+          <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ Statement reverted and swithced to Edit mode!
+          </div>
+        )}
+      {showtoast &&
+        !errormessage &&
+        !recall &&
         userInfo?.is_admin &&
         !imagesaved &&
         isEdit && (

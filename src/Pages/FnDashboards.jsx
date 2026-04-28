@@ -59,7 +59,7 @@ const FnDashboards = () => {
   const { selectedproject, setSelectedProject } = useSelectedProject();
   // const [categories, setCategories] = useState([]);
   const { categories, setCategories } = useCategories();
-
+  const isgm = userInfo.role.includes("gm");
   const [total, setTotal] = useState(0);
   const { data: fndata } = useQuery({
     queryKey: [
@@ -543,7 +543,8 @@ const FnDashboards = () => {
                           <IoPrint
                             className={
                               userInfo?.is_admin ||
-                              userInfo.role?.includes("initpr")
+                              userInfo.role?.includes("initpr") ||
+                              isgm
                                 ? "text-black cursor-pointer"
                                 : "text-gray-400 pointer-events-none cursor-not-allowed"
                             }

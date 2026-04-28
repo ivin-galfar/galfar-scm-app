@@ -917,3 +917,22 @@ export const getcmpmNames = async (role, project, userInfo) => {
     throw error;
   }
 };
+
+export const getcategory = async (userInfo, dept_id) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/filenote/fetchcategory`,
+      { config, params: { dept_id: dept_id } },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
