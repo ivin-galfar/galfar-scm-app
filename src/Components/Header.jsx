@@ -112,7 +112,7 @@ const Header = () => {
                       path === "/dashboardlg" ||
                       path.startsWith("/lstatements") ||
                       path === "/dashboardbr" ||
-                      path == "/brstatement";
+                      path.startsWith("/brstatement");
 
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""

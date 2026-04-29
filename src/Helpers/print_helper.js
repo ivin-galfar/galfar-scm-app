@@ -891,7 +891,10 @@ export const handleFnPrint = async (data, userInfo) => {
   doc.setFontSize(12);
 
   const text = getType(data?.type);
-  const dept = getDept(data?.department_id);
+  const dept =
+    data.category != "FWA"
+      ? getDept(data?.department_id)
+      : `PROJECT - P10${data?.project_code} `;
 
   const x = pageWidth / 2;
   let y = 30;
@@ -965,27 +968,127 @@ export const handleFnPrint = async (data, userInfo) => {
 
       // update Y position after table
       y = doc.lastAutoTable.finalY + 20;
-    }
+    } else if (block.type === "paragraph") {
+      const lines = [];
+      let currentLine = [];
 
-    // ✅ PARAGRAPH
-    else if (block.type === "paragraph") {
-      const text = block.content?.map((t) => t.text || "").join(" ") || "";
+      block.content?.forEach((item) => {
+        if (item.type === "hardBreak") {
+          if (currentLine.length > 0) {
+            lines.push([...currentLine]);
+            currentLine = [];
+          }
+        } else if (item.type === "text") {
+          currentLine.push(item);
+        }
+      });
 
-      if (text.trim()) {
-        // Check if we need a new page
+      if (currentLine.length > 0) {
+        lines.push(currentLine);
+      }
+
+      // Render each logical line (separated by hardBreaks)
+      lines.forEach((line) => {
         if (y > pageHeight - 40) {
           doc.addPage();
           y = 20;
         }
 
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(paragraphFontSize);
-        doc.setLineHeightFactor(1.5);
-        const wrapped = doc.splitTextToSize(text, contentWidth);
-        doc.text(wrapped, marginLeft, y, { maxWidth: contentWidth });
+        // Build full text and formatting map
+        let fullText = "";
+        const formatMap = [];
 
-        y += wrapped.length * paragraphLineHeight + paragraphSpacing;
-      }
+        line.forEach((textItem) => {
+          const text = textItem.text || "";
+          const isBold =
+            textItem.marks?.some((m) => m.type === "bold") || false;
+
+          for (let i = 0; i < text.length; i++) {
+            formatMap.push({ bold: isBold });
+          }
+
+          fullText += text;
+        });
+
+        // Wrap text to fit page width
+        doc.setFontSize(paragraphFontSize);
+        doc.setFont("helvetica", "normal");
+        const wrappedLines = doc.splitTextToSize(fullText, contentWidth);
+
+        let charIndex = 0;
+
+        wrappedLines.forEach((wrappedLine) => {
+          if (y > pageHeight - 40) {
+            doc.addPage();
+            y = 20;
+          }
+
+          let xPos = marginLeft;
+
+          // Render each character/segment with proper formatting
+          for (let i = 0; i < wrappedLine.length; i++) {
+            const char = wrappedLine[i];
+            const formatting = formatMap[charIndex] || {
+              bold: false,
+              underline: false,
+            };
+
+            doc.setFontSize(paragraphFontSize);
+            doc.setFont("helvetica", formatting.bold ? "bold" : "normal");
+            doc.text(char, xPos, y);
+
+            if (formatting.underline) {
+              const charWidth = doc.getTextWidth(char);
+              doc.setDrawColor(0, 0, 0);
+              doc.setLineWidth(0.3);
+              doc.line(xPos, y + 1, xPos + charWidth, y + 1);
+            }
+
+            xPos += doc.getTextWidth(char);
+            charIndex++;
+          }
+
+          y += paragraphLineHeight + paragraphSpacing;
+        });
+      });
+    }
+
+    // ✅ BULLET LIST
+    else if (block.type === "bulletList") {
+      block.content.forEach((listItem) => {
+        if (listItem.type === "listItem" && listItem.content) {
+          // Extract text from paragraph inside listItem
+          const paragraphBlock = listItem.content[0];
+          if (paragraphBlock && paragraphBlock.type === "paragraph") {
+            const itemText =
+              paragraphBlock.content?.map((t) => t.text || "").join(" ") || "";
+
+            if (itemText.trim()) {
+              // Check if we need a new page
+              if (y > pageHeight - 40) {
+                doc.addPage();
+                y = 20;
+              }
+
+              doc.setFont("helvetica", "normal");
+              doc.setFontSize(paragraphFontSize);
+              doc.setLineHeightFactor(1.1); // tighter lines
+
+              const wrapped = doc.splitTextToSize(
+                `• ${itemText}`,
+                contentWidth - 4,
+              );
+
+              doc.text(wrapped, marginLeft + 4, y);
+
+              y += wrapped.length * paragraphLineHeight;
+            }
+          }
+        }
+      });
+
+      // Add spacing after bullet list
+      y += paragraphSpacing + 2;
     }
   });
 

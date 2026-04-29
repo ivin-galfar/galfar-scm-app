@@ -156,6 +156,7 @@ const FnDashboards = () => {
 
   const columnHelper = createColumnHelper();
   const hasProjectColumn = fndata?.some((row) => row.project_code);
+  const hideDepartColumn = fndata?.some((row) => row.category !== "FWA");
 
   const columns = [
     columnHelper.accessor("sl", {
@@ -192,17 +193,21 @@ const FnDashboards = () => {
       header: "Category",
       cell: (info) => info.getValue() || "-",
     }),
-    columnHelper.accessor(
-      (row) => {
-        const dept = dept_finder(row?.department_id);
-        return dept === "Plant & Equipment" ? "P&E" : dept;
-      },
-      {
-        id: "department",
-        header: "Department",
-        cell: (info) => info.getValue() || "-",
-      },
-    ),
+    ...(hideDepartColumn
+      ? [
+          columnHelper.accessor(
+            (row) => {
+              const dept = dept_finder(row?.department_id);
+              return dept === "Plant & Equipment" ? "P&E" : dept;
+            },
+            {
+              id: "department",
+              header: "Department",
+              cell: (info) => info.getValue() || "-",
+            },
+          ),
+        ]
+      : []),
 
     columnHelper.accessor((row) => row?.status, {
       id: "status",

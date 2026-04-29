@@ -961,7 +961,7 @@ export const fileNoteTemplate = (
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                                                            .",
+              text: "       .",
             },
           ],
         },

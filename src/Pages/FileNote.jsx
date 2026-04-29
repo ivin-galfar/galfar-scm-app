@@ -131,7 +131,9 @@ const FileNote = () => {
         setDataUpdated(false);
       }, 1500);
       try {
-        await FnEmailAlert(data.id, userInfo, dept, data);
+        if (data?.sentforapproval === "yes") {
+          await FnEmailAlert(data.id, userInfo, dept, data);
+        }
       } catch (err) {
         console.log(err);
 
@@ -237,7 +239,7 @@ const FileNote = () => {
       resetSelectedproject();
       setSelectedFnValue("");
     }
-  }, [type, category, selectedproject, doc_no, isDocLoading, newfn, name]);
+  }, [type, category, selectedproject, doc_no, isDocLoading, newfn]);
 
   const nextstatus = userInfo.role.some((r) =>
     selectedvalue?.status?.toLowerCase().includes(r?.toLowerCase()),
@@ -296,7 +298,7 @@ const FileNote = () => {
         status: status,
         fnid: selectedvalue.id,
         userInfo,
-        sentforapproval: "yes",
+        sentforapproval: !isEdit && !isReview ? "yes" : null,
         type: selectedvalue.type,
         category: selectedvalue.category,
         action: "save",

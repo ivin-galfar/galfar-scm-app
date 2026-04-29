@@ -43,7 +43,7 @@ export const getDeptConfig = ({
       activeDept = "plant";
       defaultDept = "plant";
       if (isasset) {
-        allowedDept.push("bvrplant");
+        allowedDept.push("bvrplant", "fn");
       } else if (isdc) {
         allowedDept.push("fn");
         allowedDept.push("fn");
