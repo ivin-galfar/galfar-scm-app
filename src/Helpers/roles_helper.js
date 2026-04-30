@@ -18,9 +18,10 @@ export const categoryapprovers = {
   FNIOCM: ["HOD", "GM", "CEO"],
   FNDEMOB: ["CM"],
   FNFWA: ["CM", "PM", "GM"],
+  FNFWAS: ["CM", "GM"],
 };
 
-export const nextRole = (role, category) => {
+export const nextRole = (role, category, project_code) => {
   const normalizedRole = role?.toLowerCase();
   const normalizedCategory = category?.toLowerCase();
 
@@ -45,10 +46,15 @@ export const nextRole = (role, category) => {
     cm: "pm",
     pm: "gm",
   };
-
+  const roleMapfwas = {
+    initdc: "cm",
+    cm: "gm",
+  };
   return category != "FWA"
     ? roleMap[normalizedRole]
-    : roleMapfwa[normalizedRole] || null;
+    : category == "FWA" && project_code == 101501
+      ? roleMapfwas[normalizedRole] || null
+      : roleMapfwa[normalizedRole] || null;
 };
 
 export const prevRole = (role) => {

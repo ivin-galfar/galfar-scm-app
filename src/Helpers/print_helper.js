@@ -1166,8 +1166,10 @@ export const handleFnPrint = async (data, userInfo) => {
     approvers = categoryapprovers.FNIOC;
   } else if (data.category == "Demob") {
     approvers = categoryapprovers.FNDEMOB;
-  } else if (data.category == "FWA") {
+  } else if (data.category == "FWA" && data.project_code != 101501) {
     approvers = categoryapprovers.FNFWA;
+  } else if (data.category == "FWA" && data.project_code == 101501) {
+    approvers = categoryapprovers.FNFWAS;
   }
 
   const approvals = data.approver_info || [];
@@ -1202,7 +1204,10 @@ export const handleFnPrint = async (data, userInfo) => {
       (a) => a.status?.toLowerCase() === "rejected",
     );
 
-    const nextPending = !isRejected ? nextRole(lastRole, data.category) : null;
+    const nextPending = !isRejected
+      ? nextRole(lastRole, data.category, data.project_code)
+      : null;
+
     const isFutureReviewRole =
       isReviewStatus && currentRoleIndex >= 0 && roleIndex > currentRoleIndex;
 
