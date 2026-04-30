@@ -1111,14 +1111,25 @@ export const handleFnPrint = async (data, userInfo) => {
     approverLabels = ["(HOD)", "(GM)", "(CEO)"];
   } else if (demob) {
     approverLabels = ["(CM / SCM)"];
-  } else if (fwa) {
+  } else if (fwa && data.project_code != 101501) {
     approverLabels = ["(CM / SCM)", "(PM / SPM)", "(GM)"];
+  } else if (fwa && data.project_code == 101501) {
+    approverLabels = ["(CM / SCM)", "(GM)"];
   } else {
     approverLabels = ["(HOD)", "(SFM)", "(GM)", "(CEO)"];
   }
 
-  const approverIndexes =
-    skipSfm || fwa ? [0, 1, 2] : demob ? [0] : [0, 1, 2, 3];
+  let approverIndexes;
+
+  if (skipSfm || (fwa && data.project_code === 101501)) {
+    approverIndexes = [0, 1];
+  } else if (demob) {
+    approverIndexes = [0];
+  } else if (fwa && data.project_code !== 101501) {
+    approverIndexes = [0, 1, 2];
+  } else {
+    approverIndexes = [0, 1, 2, 3];
+  }
   let Flow;
   const category = data?.category;
 
@@ -1133,9 +1144,13 @@ export const handleFnPrint = async (data, userInfo) => {
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
     names.push(cmName);
   } else if (category == "FWA") {
+    let pmName = "";
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
-    const pmName = await getcmpmNames("pm", data.project_code, userInfo);
-    names.push(cmName, pmName);
+    if (data.project_code != 101501) {
+      pmName = await getcmpmNames("pm", data.project_code, userInfo);
+      names.push(pmName);
+    }
+    names.push(cmName);
     names.push(roles.GM);
   } else {
     names = getApproverNames(Flow, "FNIOC");
