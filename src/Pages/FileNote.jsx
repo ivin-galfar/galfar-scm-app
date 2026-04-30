@@ -171,9 +171,10 @@ const FileNote = () => {
     const date = new Date().toDateString();
     const formattedDate = format(date, "do MMMM yyyy");
     const cleanCategory = category?.trim();
-    const ccvalue = selectedproject
-      ? await getCCValue(category, selectedproject, userInfo)
-      : "";
+    const ccvalue =
+      selectedproject != "" && selectedproject != 101501
+        ? await getCCValue(category, selectedproject, userInfo)
+        : "";
     const cmname = selectedproject
       ? await getCMFromValue(category, selectedproject, userInfo)
       : "";

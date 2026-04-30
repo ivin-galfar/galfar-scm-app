@@ -60,7 +60,13 @@ export const expectedstatusplant = (currentrole) => {
   return statustext;
 };
 
-export const statusExpected = (currentrole = [], action, type, category) => {
+export const statusExpected = (
+  currentrole = [],
+  action,
+  type,
+  category,
+  project_code,
+) => {
   let statustext = "";
   const roles = currentrole.map((r) => r.toLowerCase());
   if (
@@ -107,8 +113,18 @@ export const statusExpected = (currentrole = [], action, type, category) => {
     (category == "Demob" || category == "FWA")
   ) {
     statustext = "pending for cm";
-  } else if (roles.includes("cm") && category == "FWA") {
+  } else if (
+    roles.includes("cm") &&
+    category == "FWA" &&
+    project_code != 101501
+  ) {
     statustext = "pending for pm";
+  } else if (
+    roles.includes("cm") &&
+    category == "FWA" &&
+    project_code == 101501
+  ) {
+    statustext = "pending for gm";
   } else if (roles.includes("pm") && category == "FWA") {
     statustext = "pending for gm";
   } else if (roles.includes("gm") && category == "FWA") {

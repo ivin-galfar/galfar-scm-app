@@ -57,6 +57,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         null,
         data.type,
         data.category,
+        data.project_code,
       );
 
       setSelectedValue((prev) => ({
@@ -85,6 +86,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       type: data.type,
       category: data.category,
       sentforapproval: "yes",
+      project_code: data.project_code,
     });
   };
 

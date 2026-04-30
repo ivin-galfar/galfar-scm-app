@@ -696,6 +696,7 @@ export const updatefilenotevalues = async ({
   action,
   content,
   attachments,
+  project_code,
 }) => {
   try {
     const config = {
@@ -717,6 +718,7 @@ export const updatefilenotevalues = async ({
         action,
         content,
         attachments,
+        project_code
       },
       config,
     );
