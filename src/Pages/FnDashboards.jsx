@@ -357,7 +357,9 @@ const FnDashboards = () => {
     } else if (userInfo.role.includes("gm")) {
       cat = getcategory(typeFilter).filter((c) => !c.includes("Demob"));
     } else {
-      cat = getcategory(typeFilter);
+      cat = getcategory(typeFilter).filter(
+        (c) => !c.includes("Demob") && !c.includes("FWA"),
+      );
     }
 
     setCategories(cat);
