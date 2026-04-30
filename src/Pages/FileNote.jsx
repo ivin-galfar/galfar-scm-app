@@ -240,7 +240,7 @@ const FileNote = () => {
       resetSelectedproject();
       setSelectedFnValue("");
     }
-  }, [type, category, selectedproject, doc_no, isDocLoading, newfn]);
+  }, [type, category, selectedproject, doc_no, isDocLoading, newfn, name]);
 
   const nextstatus = userInfo.role.some((r) =>
     selectedvalue?.status?.toLowerCase().includes(r?.toLowerCase()),
