@@ -1121,8 +1121,10 @@ export const handleFnPrint = async (data, userInfo) => {
 
   let approverIndexes;
 
-  if (skipSfm || (fwa && data.project_code === 101501)) {
-    approverIndexes = [0, 1];
+  if (skipSfm) {
+    approverIndexes = [0, 1, 2];
+  } else if (fwa) {
+    approverIndexes = data.project_code === 101501 ? [0, 1] : [0, 1, 2];
   } else if (demob) {
     approverIndexes = [0];
   } else if (fwa && data.project_code !== 101501) {
@@ -1155,6 +1157,7 @@ export const handleFnPrint = async (data, userInfo) => {
   } else {
     names = getApproverNames(Flow, "FNIOC");
   }
+  console.log(names);
 
   let approvers = categoryapprovers.FNIOCM;
 
