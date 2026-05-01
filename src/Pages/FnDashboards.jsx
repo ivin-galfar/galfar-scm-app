@@ -337,7 +337,10 @@ const FnDashboards = () => {
 
   useEffect(() => {
     let cat = [];
-    if (userInfo.role.includes("initpr")) {
+
+    if (userInfo.role.includes("gm")) {
+      cat = getcategory(typeFilter);
+    } else if (userInfo.role.includes("initpr")) {
       cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
     } else if (userInfo.role.includes("cm") || userInfo.role.includes("pm")) {
       cat = getcategory(typeFilter).filter(
@@ -354,14 +357,11 @@ const FnDashboards = () => {
       cat = getcategory(typeFilter).filter(
         (c) => !c.includes("Demob") && !c.includes("FWA"),
       );
-    } else if (userInfo.role.includes("gm")) {
-      cat = getcategory(typeFilter).filter((c) => !c.includes("Demob"));
     } else {
       cat = getcategory(typeFilter).filter(
         (c) => !c.includes("Demob") && !c.includes("FWA"),
       );
     }
-
     setCategories(cat);
   }, [typeFilter, categoryFilter]);
   const cmusers =
