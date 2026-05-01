@@ -1146,11 +1146,11 @@ export const handleFnPrint = async (data, userInfo) => {
   } else if (category == "FWA") {
     let pmName = "";
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
+    names.push(cmName);
     if (data.project_code != 101501) {
       pmName = await getcmpmNames("pm", data.project_code, userInfo);
       names.push(pmName);
     }
-    names.push(cmName);
     names.push(roles.GM);
   } else {
     names = getApproverNames(Flow, "FNIOC");
