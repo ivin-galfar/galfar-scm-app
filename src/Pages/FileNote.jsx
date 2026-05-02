@@ -517,7 +517,7 @@ const FileNote = () => {
       />
       {hasComments && (
         <div className="sticky bottom-5 flex px-25">
-          <div className="ml-auto max-w-sm bg-indigo-50 text-indigo-900 px-5 py-4 rounded-xl shadow-md border border-indigo-100">
+          <div className="ml-auto max-w-sm bg-indigo-50 text-indigo-900 px-5 py-4 rounded-xl shadow-md border border-indigo-100 max-h-52 overflow-y-auto">
             <div className="text-xs font-semibold mb-1 opacity-70">
               Comments
             </div>
