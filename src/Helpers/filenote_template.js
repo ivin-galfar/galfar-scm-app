@@ -971,9 +971,14 @@ export const fileNoteTemplate = (
         { type: "paragraph" },
         { type: "paragraph" },
         {
-          type: "text",
-          marks: [{ type: "bold" }],
-          text: "Site/Office Activities :",
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              marks: [{ type: "bold" }],
+              text: "Site/Office Activities :",
+            },
+          ],
         },
         {
           type: "bulletList",
@@ -992,16 +997,111 @@ export const fileNoteTemplate = (
         { type: "paragraph" },
 
         {
-          type: "text",
-          marks: [{ type: "bold" }],
-          text: "Total Manpower : ",
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              marks: [{ type: "bold" }],
+              text: "Total Manpower : ",
+            },
+            {
+              type: "text",
+              marks: [{ type: "underline" }],
+              text: "         ",
+            },
+          ],
         },
+
+        { type: "hardBreak" },
+        {
+          type: "table",
+          content: [
+            {
+              type: "tableRow",
+              content: [
+                { text: "Sl.No.", width: 70 },
+                { text: "Gec No.", width: 180 },
+                { text: "Name", width: 300 },
+              ].map(({ text, width }) => ({
+                type: "tableHeader",
+                attrs: {
+                  colspan: 1,
+                  rowspan: 1,
+                  colwidth: [width],
+                },
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [{ type: "text", text }],
+                  },
+                ],
+              })),
+            },
+
+            ...Array(5)
+              .fill(null)
+              .map(() => ({
+                type: "tableRow",
+                content: Array(3)
+                  .fill(null)
+                  .map(() => ({
+                    type: "tableCell",
+                    content: [{ type: "paragraph" }],
+                  })),
+              })),
+          ],
+        },
+
         { type: "hardBreak" },
         { type: "hardBreak" },
         {
           type: "text",
           marks: [{ type: "bold" }],
           text: "Total Vehicles & Equipment's : ",
+        },
+        {
+          type: "text",
+          marks: [{ type: "underline" }],
+          text: "         ",
+        },
+        { type: "hardBreak" },
+        {
+          type: "table",
+          content: [
+            {
+              type: "tableRow",
+              content: [
+                { text: "Sl.No.", width: 70 },
+                { text: "Eq. Name.", width: 180 },
+                { text: "Equipment Type", width: 300 },
+              ].map(({ text, width }) => ({
+                type: "tableHeader",
+                attrs: {
+                  colspan: 1,
+                  rowspan: 1,
+                  colwidth: [width],
+                },
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [{ type: "text", text }],
+                  },
+                ],
+              })),
+            },
+
+            ...Array(2)
+              .fill(null)
+              .map(() => ({
+                type: "tableRow",
+                content: Array(3)
+                  .fill(null)
+                  .map(() => ({
+                    type: "tableCell",
+                    content: [{ type: "paragraph" }],
+                  })),
+              })),
+          ],
         },
       );
     }
