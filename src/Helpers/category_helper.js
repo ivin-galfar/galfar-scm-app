@@ -27,5 +27,5 @@ export const CategoryForUi = {
   FC: "Fuel Chip",
   PR: "Police Return",
   DPR: "Down Payment Request",
-  FWA: "Friday Work Approval",
+  FWA: "Holiday Work Approval",
 };

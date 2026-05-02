@@ -210,7 +210,7 @@ const FileNote = () => {
     } else if (userInfo.role.includes("initfn") && category == "DPR") {
       setName("Request for ");
     } else if (userInfo.role.includes("initdc") && category == "FWA") {
-      setName("Holiday Work Approval - ");
+      setName("Friday Work Approval - ");
     } else {
       setName("");
     }
@@ -386,7 +386,7 @@ const FileNote = () => {
                 <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">
                   Category
                 </span>
-                <span className="text-green-700 font-bold text-base text-center">
+                <span className="text-green-700 font-bold text-base">
                   {getCategoryforUI(selectedvalue.category)}
                 </span>
               </div>
@@ -517,7 +517,7 @@ const FileNote = () => {
       />
       {hasComments && (
         <div className="sticky bottom-5 flex px-25">
-          <div className="ml-auto max-w-sm bg-indigo-50 text-indigo-900 px-5 py-4 rounded-xl shadow-md border border-indigo-100 max-h-52 overflow-y-auto">
+          <div className="ml-auto max-w-sm bg-indigo-50 text-indigo-900 px-5 py-4 rounded-xl shadow-md border border-indigo-100">
             <div className="text-xs font-semibold mb-1 opacity-70">
               Comments
             </div>
@@ -530,11 +530,12 @@ const FileNote = () => {
 
                 if (!val.comment) return null;
                 const roleColors = {
-                  hod: "text-violet-700",
-                  cm: "text-emerald-700",
-                  pm: "text-rose-700",
-                  ceo: "text-sky-700",
-                  gm: "text-green-700",
+                  Hod: "text-purple-700",
+                  Cm: "text-emerald-700",
+                  Pm: "text-orange-700",
+                  Ceo: "text-green-700",
+                  Gm: "text-cyan-700",
+                  Fm: "text-blue-700",
                 };
                 return (
                   <div key={val.id || val.date}>
