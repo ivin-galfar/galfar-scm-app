@@ -310,7 +310,7 @@ export const getCCValue = async (category, project_code, userInfo) => {
     case "Demob":
       return `C.G. Vijayan (General Manager), ${pmName} (SPM/PM)`;
     case "FWA":
-      return `${pmName} (SPM/PM)`;
+      return `${pmName} (SPM/PD/PM)`;
   }
 };
 
