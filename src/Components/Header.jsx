@@ -75,7 +75,8 @@ const Header = () => {
       !userInfo?.role?.includes("inith") &&
       !userInfo?.role?.includes("inita") &&
       !userInfo?.role?.includes("initlg")) ||
-    userInfo?.role?.includes("cm");
+    userInfo?.role?.includes("cm") ||
+    userInfo?.role?.includes("view");
   return (
     <div>
       <header className="bg-white shadow-md">
