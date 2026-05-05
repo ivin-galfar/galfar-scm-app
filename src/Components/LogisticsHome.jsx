@@ -71,13 +71,8 @@ const LogisticsHome = () => {
             to="/dashboardlg"
             className="relative inline-flex ml-auto cursor-pointer"
             onClick={() => {
-              if (userInfo?.is_admin) {
-                setPageIndex(0);
-                setStatusFilter("review");
-              } else {
-                setPageIndex(0);
-                setStatusFilter("Pending");
-              }
+              setPageIndex(0);
+              setStatusFilter("Pending");
             }}
           >
             <FaBell size={22} className="text-gray-700" />
