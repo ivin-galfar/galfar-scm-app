@@ -73,7 +73,8 @@ const Header = () => {
   const isDisabled =
     (userInfo?.is_admin &&
       !userInfo?.role?.includes("inith") &&
-      !userInfo?.role?.includes("inita")) ||
+      !userInfo?.role?.includes("inita") &&
+      !userInfo?.role?.includes("initlg")) ||
     userInfo?.role?.includes("cm");
   return (
     <div>

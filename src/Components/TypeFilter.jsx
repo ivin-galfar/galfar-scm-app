@@ -45,6 +45,7 @@ const TypeFilter = ({
     userInfo?.role.includes("pm");
 
   const fwausers = userInfo.role.includes("initdc");
+  const viewusers = userInfo.role.includes("view");
 
   return (
     <div>
@@ -71,7 +72,7 @@ const TypeFilter = ({
             }}
           >
             <option value="">📋 - Select Type -</option>
-            {!demobusers && !fwausers && (
+            {!demobusers && !fwausers && !viewusers && (
               <option value="file_note">File Note</option>
             )}
 

@@ -164,3 +164,9 @@ export const useRecallStatement = create((set) => ({
   setIsRecalled: () => set({ isRecalled: true }),
   resetIsRecalled: () => set({ isRecalled: false }),
 }));
+
+export const usePmName = create((set) => ({
+  pmname: [],
+  setPmName: (name) => set({ pmname: Array.isArray(name) ? name : [] }),
+  resetPmName: () => set({ pmname: [] }),
+}));

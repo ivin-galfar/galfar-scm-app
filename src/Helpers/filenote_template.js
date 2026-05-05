@@ -847,7 +847,7 @@ export const fileNoteTemplate = (
             },
             {
               type: "text",
-              text: "                                     ",
+              text: "       ",
               marks: [{ type: "bold" }, { type: "underline" }],
             },
           ],
@@ -872,7 +872,7 @@ export const fileNoteTemplate = (
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                                         .",
+              text: "      .",
             },
           ],
         },
@@ -886,7 +886,7 @@ export const fileNoteTemplate = (
             {
               type: "text",
               marks: [{ type: "underline" }],
-              text: "                            .",
+              text: "          .",
             },
           ],
         },

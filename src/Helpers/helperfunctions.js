@@ -308,7 +308,7 @@ export const getCCValue = async (category, project_code, userInfo) => {
 
   switch (category) {
     case "Demob":
-      return `C.G. Vijayan (General Manager), ${pmName} (SPM/PM)`;
+      return `C.G. Vijayan (General Manager), ${pmName} (SPM/PD/PM)`;
     case "FWA":
       return `${pmName} (SPM/PD/PM)`;
   }
@@ -374,4 +374,16 @@ export const getDept = (code) => {
     case 2:
       return "Logistics Department";
   }
+};
+
+export const formatName = (name) => {
+  if (!name) return "";
+
+  const trimmed = name?.trim();
+
+  if (/^mr\./i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `Mr. ${trimmed}`;
 };

@@ -1,14 +1,13 @@
+import { usePmName } from "../store/logisticsStore";
 import {
   formatDateDDMMYYYYHHMMSS,
+  formatName,
   getApproverName,
-  getPmName,
 } from "../Helpers/helperfunctions";
 
 const ApproverTimeline = ({ approverhistory }) => {
   const info = approverhistory?.approver_info;
-
-  let definedpm = getPmName(approverhistory?.project);
-  let pmname = info?.find((pm) => pm?.role == "pm")?.pm || definedpm;
+  const { pmname } = usePmName();
 
   let roles = ["initlg", "incharge", "pm", "gm", "fm", "ceo"];
   const createdBy = approverhistory?.createdby?.split("@")[0];
@@ -73,7 +72,7 @@ const ApproverTimeline = ({ approverhistory }) => {
           const isLeft = index % 2 === 0;
           const name =
             ap === "pm"
-              ? pmname
+              ? formatName(pmname[0])
               : ap === "initlg"
                 ? createdBy
                 : getApproverName(ap);

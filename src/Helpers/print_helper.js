@@ -1112,7 +1112,7 @@ export const handleFnPrint = async (data, userInfo) => {
   } else if (demob) {
     approverLabels = ["(CM / SCM)"];
   } else if (fwa && data.project_code != 101501) {
-    approverLabels = ["(CM / SCM)", "(PM / SPM)", "(GM)"];
+    approverLabels = ["(CM / SCM)", "(PM / SPM / PD)", "(GM)"];
   } else if (fwa && data.project_code == 101501) {
     approverLabels = ["(CM / SCM)", "(GM)"];
   } else {

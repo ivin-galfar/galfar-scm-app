@@ -718,7 +718,7 @@ export const updatefilenotevalues = async ({
         action,
         content,
         attachments,
-        project_code
+        project_code,
       },
       config,
     );

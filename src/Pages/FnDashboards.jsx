@@ -357,6 +357,8 @@ const FnDashboards = () => {
       cat = getcategory(typeFilter).filter(
         (c) => !c.includes("Demob") && !c.includes("FWA"),
       );
+    } else if (userInfo.role.includes("view")) {
+      cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
     } else {
       cat = getcategory(typeFilter).filter(
         (c) => !c.includes("Demob") && !c.includes("FWA"),
@@ -551,7 +553,8 @@ const FnDashboards = () => {
                             className={
                               userInfo?.is_admin ||
                               userInfo.role?.includes("initpr") ||
-                              isgm
+                              isgm ||
+                              row.original.category == "Demob"
                                 ? "text-black cursor-pointer"
                                 : "text-gray-400 pointer-events-none cursor-not-allowed"
                             }

@@ -5,6 +5,7 @@ import {
   fetchApproverDetails,
   fetchCsCount,
   fetchStatement,
+  getcmpmNames,
 } from "../APIs/api";
 import {
   createColumnHelper,
@@ -18,6 +19,7 @@ import {
   useHistoryData,
   useIdHistory,
   useMultiStatusFilter,
+  usePmName,
   useStatusFilter,
 } from "../store/logisticsStore";
 import { IoPrint, IoWarningOutline } from "react-icons/io5";
@@ -50,6 +52,7 @@ const LogisticsDashboard = () => {
   const { approverhistory, setApproverHistory, resetApproverHistory } =
     useHistoryData();
   const { dashboardType, setDashboardType } = useDashboardType();
+  const { resetPmName, setPmName } = usePmName();
   const isLogistics = is_logistics(userInfo?.dept_code);
   const [searchcs, setSearchCS] = useState("");
   const { errormessage, setErrorMessage, clearErrorMessage } =
@@ -136,9 +139,30 @@ const LogisticsDashboard = () => {
     }
   };
 
+  const fetchPmName = async (project) => {
+    try {
+      const res = await getcmpmNames("pm", project, userInfo);
+      const name = res?.data ?? res ?? [];
+      if (Array.isArray(name) && name.length > 0) {
+        setPmName(name);
+      } else {
+        resetPmName();
+      }
+    } catch (error) {
+      setErrorMessage("Cant fetch the PM Name");
+      console.error("Error fetching PM name:", error);
+      resetPmName();
+      setTimeout(() => {
+        clearErrorMessage();
+      }, 1000);
+    }
+  };
+
   const handleApprovalHistory = async (cs_id) => {
     setStatusFilter("Approval History");
     const Approvals = await fetchApproverDetails(userInfo, cs_id);
+    const name = fetchPmName(Approvals.project);
+    setPmName(name);
     setApproverHistory(Approvals);
     resetSelectedId();
   };
@@ -547,10 +571,14 @@ const LogisticsDashboard = () => {
                       {formatDateDDMMYYYY(row.original.created_at)}
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                      <div className="flex items-center justify-center cursor-pointer">
-                        <FaHistory
-                          onClick={() => handleApprovalHistory(row.original.id)}
-                        />
+                      <div
+                        className="flex items-center justify-center cursor-pointer"
+                        onClick={() => {
+                          (handleApprovalHistory(row.original.id),
+                            fetchPmName(row.original.project));
+                        }}
+                      >
+                        <FaHistory />
                       </div>
                     </td>
                   </tr>
@@ -668,13 +696,18 @@ const LogisticsDashboard = () => {
       )}
 
       {showtoast && !errormessage && userInfo?.is_admin && (
-        <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
+        <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
           <SiTicktick /> Statement Removed Successfully!
         </div>
       )}
       {showtoast && errormessage && (
         <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
           <MdOutlineErrorOutline /> {errormessage}
+        </div>
+      )}
+      {errormessage && (
+        <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
+          <SiTicktick /> {errormessage}
         </div>
       )}
     </div>

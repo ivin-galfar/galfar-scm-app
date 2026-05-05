@@ -495,7 +495,8 @@ const FileNote = () => {
             selectedvalue.status !== "approved" &&
             selectedvalue.status !== "rejected" &&
             selectedvalue.status !== "edit" &&
-            selectedvalue.status !== "created" && (
+            selectedvalue.status !== "created" &&
+            selectedvalue.status !== "review" && (
               <span className="text-gray-500 cursor-pointer hover:text-gray-700">
                 <FaUndoAlt
                   size={20}
