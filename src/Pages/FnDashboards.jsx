@@ -350,9 +350,7 @@ const FnDashboards = () => {
       (userInfo.role.includes("initfn") && isAdmin) ||
       userInfo.role.includes("fm")
     ) {
-      cat = getcategory(typeFilter).filter(
-        (c) => !c.includes("Demob") && !c.includes("FWA"),
-      );
+      cat = getcategory(typeFilter).filter((c) => !c.includes("FWA"));
     } else if (userInfo.role.includes("ceo")) {
       cat = getcategory(typeFilter).filter(
         (c) => !c.includes("Demob") && !c.includes("FWA"),

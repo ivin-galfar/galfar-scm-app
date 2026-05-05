@@ -218,7 +218,7 @@ const FileNote = () => {
 
   useEffect(() => {
     let cat = [];
-    if (userInfo.role.includes("initpr")) {
+    if (userInfo.role.includes("initpr") || userInfo.role.includes("inith")) {
       cat = getcategory(type).filter((c) => c.includes("Demob"));
     } else if (userInfo.role.includes("initdc")) {
       cat = getcategory(type).filter((c) => c.includes("FWA"));
