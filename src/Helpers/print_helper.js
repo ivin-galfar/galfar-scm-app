@@ -584,7 +584,10 @@ export const handleBrPrint = (formData) => {
         "",
         "",
         "",
-        formatP(formData.maintenance_cost_tenure),
+        formatP(
+          Number(formData.maintenance_cost_tenure) +
+            Number(formData.op_cost_tenure),
+        ),
       ],
       [
         "Total Expenses - BUYING",
@@ -690,8 +693,8 @@ export const handleBrPrint = (formData) => {
     body: [
       [
         "Total Cost in Buying",
-        formatP(formData.principal_with_interest_buy),
-        formatP(formData.cash_outflow_buying),
+        formatP(formData.cost_in_buying_without_main),
+        formatP(formData.cost_in_buying_with_main),
       ],
       [
         "Monthly Rentals",
