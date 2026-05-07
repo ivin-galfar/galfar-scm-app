@@ -13,6 +13,7 @@ import {
 } from "./helperfunctions";
 import { categoryapprovers, nextRole, roles } from "./roles_helper";
 import { getcmpmNames } from "../APIs/api";
+import { SPECIAL_PROJECTS } from "../../config/ENV";
 
 export const handlePrint = (formData, tableData) => {
   const doc = new jsPDF({
@@ -197,12 +198,20 @@ export const handlePrint = (formData, tableData) => {
   const roleDisplayMap = {
     incharge: "Mr.Anoop.GP",
     pm: "Project Manager",
+    pd: "Mr.Sumon Kuriakose",
     gm: "Mr.Vijayan.C",
     fm: "Mr.Suraj.R",
     ceo: "Mr.Sridhar. C",
   };
 
-  const rolesToShow = ["incharge", "pm", "gm", "fm", "ceo"];
+  const rolesToShow = [
+    "incharge",
+    "pm",
+    ...(SPECIAL_PROJECTS.includes(Number(formData.project)) ? ["pd"] : []),
+    "gm",
+    "fm",
+    "ceo",
+  ];
 
   const status = {};
   const currentStatus = formData.status?.toLowerCase() || "";

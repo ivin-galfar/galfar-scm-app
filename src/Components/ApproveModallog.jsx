@@ -42,7 +42,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
     let updatedstatus = "";
 
     if (status == "approved") {
-      updatedstatus = expectedstatus(userInfo.role);
+      updatedstatus = expectedstatus(userInfo.role, project);
     } else {
       updatedstatus = "rejected";
     }

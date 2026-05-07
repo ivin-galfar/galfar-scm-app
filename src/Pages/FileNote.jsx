@@ -210,7 +210,7 @@ const FileNote = () => {
     } else if (userInfo.role.includes("initfn") && category == "DPR") {
       setName("Request for ");
     } else if (userInfo.role.includes("initdc") && category == "FWA") {
-      setName("Friday Work Approval - ");
+      setName("Holiday Work Approval - ");
     } else {
       setName("");
     }

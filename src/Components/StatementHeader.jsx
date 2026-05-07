@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
-import { FaFileDownload, FaFileUpload, FaPlus } from "react-icons/fa";
+import {
+  FaFileDownload,
+  FaFileUpload,
+  FaPlus,
+  FaUndoAlt,
+} from "react-icons/fa";
 import {
   useAllParticulars,
   usecolumns,
@@ -30,6 +35,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { MdModeEdit } from "react-icons/md";
 import { IoMdSave } from "react-icons/io";
 import { GrRevert } from "react-icons/gr";
+import { IoSave } from "react-icons/io5";
 
 const StatementHeader = () => {
   const { formData, setFormData, setTableData, resetData, tableData } =
@@ -831,14 +837,14 @@ const StatementHeader = () => {
                     }}
                     disabled={!isEditing}
                   >
-                    <IoMdSave size={30} />
+                    <IoSave size={20} color="green" title="save" />
                   </button>
                   <button
                     type="button"
                     className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "rejected" ? "visible" : "invisible"}`}
                     onClick={recallStatement}
                   >
-                    <GrRevert size={20} />
+                    <FaUndoAlt size={15} title="Recall" />
                   </button>
                 </div>
               </div>
