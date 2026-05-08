@@ -308,9 +308,9 @@ export const getCCValue = async (category, project_code, userInfo) => {
 
   switch (category) {
     case "Demob":
-      return `C.G. Vijayan (General Manager), ${pmName} (SPM/PD/PM)`;
+      return `C.G. Vijayan (General Manager), ${pmName} (SPM/PM)`;
     case "FWA":
-      return `${pmName} (SPM/PD/PM)`;
+      return `${pmName} (SPM/PM)`;
   }
 };
 
@@ -342,6 +342,9 @@ export const extractText = (content = []) => {
         return item.text || "";
       }
 
+      if (item.type === "hardBreak") {
+        return "\n";
+      }
       if (item.content) {
         return extractText(item.content);
       }
