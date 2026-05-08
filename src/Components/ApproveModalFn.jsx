@@ -10,6 +10,7 @@ import { useComments } from "../store/helperStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { SPECIAL_PROJECTS } from "../../config/ENV";
 
 const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const userInfo = useUserInfo();
@@ -21,6 +22,9 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const [isreviewclicked, setIsReviewClicked] = useState(false);
   const isHod = userInfo.role.includes("hod");
   const isGm = userInfo.role.includes("gm");
+  const SpecialProjects = userInfo?.pr_code?.some((code) =>
+    SPECIAL_PROJECTS.includes(Number(code)),
+  );
 
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const { mutate: updatestatement } = useMutation({
@@ -58,6 +62,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         data.type,
         data.category,
         data.project_code,
+        SpecialProjects,
       );
 
       setSelectedValue((prev) => ({

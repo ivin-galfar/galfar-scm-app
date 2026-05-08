@@ -201,6 +201,7 @@ const LogisticsDashboard = () => {
   const statusProgress = {
     "Pending For Incharge": 20,
     "Pending For Pm": 30,
+    "Pending For Pd": 50,
     "Pending For Gm": 60,
     "Pending For Fm": 80,
     "Pending For Ceo": 90,
@@ -264,9 +265,11 @@ const LogisticsDashboard = () => {
                       ? "bg-indigo-400"
                       : formattedstatus === "Pending For Gm"
                         ? "bg-amber-500"
-                        : formattedstatus === "Pending For Ceo"
-                          ? "bg-violet-500"
-                          : "bg-gray-300";
+                        : formattedstatus === "Pending For Pd"
+                          ? "bg-teal-500"
+                          : formattedstatus === "Pending For Ceo"
+                            ? "bg-violet-500"
+                            : "bg-gray-300";
 
         return (
           <div className="flex flex-col gap-1">
@@ -301,6 +304,7 @@ const LogisticsDashboard = () => {
       (row) => {
         const comment_incharge = row.comment_in ?? "";
         const comment_pm = row.comment_pm ?? "";
+        const comment_pd = row.comment_pd ?? "";
         const comment_gm = row.comment_gm ?? "";
 
         const comment_fm = row.comment_fm ?? "";
@@ -315,6 +319,9 @@ const LogisticsDashboard = () => {
         }
         if (comment_gm !== "") {
           comments_group.gm = comment_gm;
+        }
+        if (comment_pd !== "") {
+          comments_group.pd = comment_pd;
         }
         if (comment_pm !== "") {
           comments_group.pm = comment_pm;
@@ -539,7 +546,7 @@ const LogisticsDashboard = () => {
                               row.original?.id,
                             );
 
-                            handlePrint(formData, tableData);
+                            handlePrint(formData, tableData, userInfo);
                           }}
                         />
                         <FaTrash

@@ -1,12 +1,22 @@
-export const expectedstatus = (currentrole) => {
+import { SPECIAL_PROJECTS } from "../../config/ENV";
+
+export const expectedstatus = (currentrole, project) => {
   const roles = currentrole.map((r) => r.toLowerCase());
+  const isPmWithSpecialProjects = SPECIAL_PROJECTS.includes(project);
+  const isPm = roles.includes("pm");
+  const isPd = roles.includes("pd");
 
   let statustext = "";
   if (roles.includes("initlg")) {
     statustext = "pending for incharge";
   } else if (roles.includes("incharge")) {
     statustext = "pending for pm";
-  } else if (roles.includes("pm")) {
+  } else if (isPmWithSpecialProjects && isPm) {
+    statustext = "pending for pd";
+  } else if (
+    (isPmWithSpecialProjects && isPd) ||
+    (!isPmWithSpecialProjects && isPm)
+  ) {
     statustext = "pending for gm";
   } else if (roles.includes("gm")) {
     statustext = "pending for fm";
@@ -29,6 +39,8 @@ export const role_finder = (currentrole) => {
     role = "comments_incharge";
   } else if (roles.includes("pm")) {
     role = "comments_pm";
+  } else if (roles.includes("pd")) {
+    role = "comments_pd";
   } else if (roles.includes("gm")) {
     role = "comments_gm";
   } else if (roles.includes("fm")) {
@@ -66,6 +78,7 @@ export const statusExpected = (
   type,
   category,
   project_code,
+  SpecialProjects,
 ) => {
   let statustext = "";
   const roles = currentrole.map((r) => r.toLowerCase());
@@ -125,7 +138,13 @@ export const statusExpected = (
     project_code == 1501
   ) {
     statustext = "pending for gm";
-  } else if (roles.includes("pm") && category == "FWA") {
+  } else if (roles.includes("pm") && category == "FWA" && SpecialProjects) {
+    statustext = "pending for pd";
+  } else if (
+    category === "FWA" &&
+    ((roles.includes("pm") && !SpecialProjects) ||
+      (roles.includes("pd") && SpecialProjects))
+  ) {
     statustext = "pending for gm";
   } else if (roles.includes("gm") && category == "FWA") {
     statustext = "approved";

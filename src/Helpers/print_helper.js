@@ -13,8 +13,9 @@ import {
 } from "./helperfunctions";
 import { categoryapprovers, nextRole, roles } from "./roles_helper";
 import { getcmpmNames } from "../APIs/api";
+import { SPECIAL_PROJECTS } from "../../config/ENV";
 
-export const handlePrint = (formData, tableData) => {
+export const handlePrint = async (formData, tableData, userInfo) => {
   const doc = new jsPDF({
     orientation: "landscape",
   });
@@ -192,17 +193,33 @@ export const handlePrint = (formData, tableData) => {
       totalLines += 1;
     });
   });
+  const pmName =
+    formData.project != ""
+      ? (await getcmpmNames("pm", formData.project, userInfo))?.[0] || ""
+      : "";
 
+  const pdName =
+    formData.project != ""
+      ? (await getcmpmNames("pd", formData.project, userInfo))?.[0] || ""
+      : "";
   const pageHeight = doc.internal.pageSize.height;
   const roleDisplayMap = {
     incharge: "Mr.Anoop.GP",
-    pm: "Project Manager",
+    pm: pmName,
+    pd: pdName,
     gm: "Mr.Vijayan.C",
     fm: "Mr.Suraj.R",
     ceo: "Mr.Sridhar. C",
   };
 
-  const rolesToShow = ["incharge", "pm", "gm", "fm", "ceo"];
+  const rolesToShow = [
+    "incharge",
+    "pm",
+    ...(SPECIAL_PROJECTS.includes(Number(formData.project)) ? ["pd"] : []),
+    "gm",
+    "fm",
+    "ceo",
+  ];
 
   const status = {};
   const currentStatus = formData.status?.toLowerCase() || "";
@@ -1114,8 +1131,18 @@ export const handleFnPrint = async (data, userInfo) => {
     approverLabels = ["(HOD)", "(GM)", "(CEO)"];
   } else if (demob) {
     approverLabels = ["(CM / SCM)"];
-  } else if (fwa && data.project_code != 1501) {
-    approverLabels = ["(CM / SCM)", "(PM / SPM / PD)", "(GM)"];
+  } else if (
+    fwa &&
+    data.project_code != 1501 &&
+    !SPECIAL_PROJECTS.includes(data.project_code)
+  ) {
+    approverLabels = ["(CM / SCM)", "(PM / SPM)", "(GM)"];
+  } else if (
+    fwa &&
+    SPECIAL_PROJECTS.includes(data.project_code) &&
+    data.project_code != 1501
+  ) {
+    approverLabels = ["(CM / SCM)", "(PM / SPM)", "(PD)", "(GM)"];
   } else if (fwa && data.project_code == 1501) {
     approverLabels = ["(CM / SCM)", "(GM)"];
   } else {
@@ -1127,7 +1154,12 @@ export const handleFnPrint = async (data, userInfo) => {
   if (skipSfm) {
     approverIndexes = [0, 1, 2];
   } else if (fwa) {
-    approverIndexes = data.project_code === 1501 ? [0, 1] : [0, 1, 2];
+    approverIndexes =
+      data.project_code === 1501
+        ? [0, 1]
+        : SPECIAL_PROJECTS.includes(data.project_code)
+          ? [0, 1, 2, 3]
+          : [0, 1, 2];
   } else if (demob) {
     approverIndexes = [0];
   } else if (fwa && data.project_code !== 1501) {
@@ -1156,6 +1188,10 @@ export const handleFnPrint = async (data, userInfo) => {
       pmName = await getcmpmNames("pm", data.project_code, userInfo);
       names.push(pmName);
     }
+    if (SPECIAL_PROJECTS.includes(data.project_code)) {
+      let pdName = await getcmpmNames("pd", data.project_code, userInfo);
+      names.push(pdName);
+    }
     names.push(roles.GM);
   } else {
     names = getApproverNames(Flow, "FNIOC");
@@ -1172,8 +1208,18 @@ export const handleFnPrint = async (data, userInfo) => {
     approvers = categoryapprovers.FNIOC;
   } else if (data.category == "Demob") {
     approvers = categoryapprovers.FNDEMOB;
-  } else if (data.category == "FWA" && data.project_code != 1501) {
+  } else if (
+    data.category == "FWA" &&
+    data.project_code != 1501 &&
+    !SPECIAL_PROJECTS.includes(data.project_code)
+  ) {
     approvers = categoryapprovers.FNFWA;
+  } else if (
+    data.category == "FWA" &&
+    data.project_code != 1501 &&
+    SPECIAL_PROJECTS.includes(data.project_code)
+  ) {
+    approvers = categoryapprovers.FNFWASP;
   } else if (data.category == "FWA" && data.project_code == 1501) {
     approvers = categoryapprovers.FNFWAS;
   }

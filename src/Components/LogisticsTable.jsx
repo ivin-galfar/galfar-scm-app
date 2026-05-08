@@ -295,7 +295,7 @@ const LogisticsTable = () => {
     }
   };
 
-  const changestatus = expectedstatus(userInfo.role);
+  const changestatus = expectedstatus(userInfo.role, formData.project);
 
   const nextstatus = userInfo.role?.some((role) =>
     formData?.status?.toLowerCase()?.includes(role.toLowerCase()),

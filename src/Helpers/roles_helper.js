@@ -1,3 +1,5 @@
+import { SPECIAL_PROJECTS } from "../../config/ENV";
+
 export const roles = {
   INITIATOR: {
     LOGISTICS: ["Mr.Appus Jose", "Mr.Conston"],
@@ -18,6 +20,7 @@ export const categoryapprovers = {
   FNIOCM: ["HOD", "GM", "CEO"],
   FNDEMOB: ["CM"],
   FNFWA: ["CM", "PM", "GM"],
+  FNFWASP: ["CM", "PM", "PD", "GM"],
   FNFWAS: ["CM", "GM"],
 };
 
@@ -50,11 +53,20 @@ export const nextRole = (role, category, project_code) => {
     initdc: "cm",
     cm: "gm",
   };
+
+  const roleMapfwapd = {
+    initdc: "cm",
+    cm: "pm",
+    pm: "pd",
+    pd: "gm",
+  };
   return category != "FWA"
     ? roleMap[normalizedRole]
     : category == "FWA" && project_code == 1501
       ? roleMapfwas[normalizedRole] || null
-      : roleMapfwa[normalizedRole] || null;
+      : SPECIAL_PROJECTS.includes(project_code)
+        ? roleMapfwapd[normalizedRole] || null
+        : roleMapfwa[normalizedRole] || null;
 };
 
 export const prevRole = (role) => {

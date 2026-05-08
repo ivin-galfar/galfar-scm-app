@@ -244,11 +244,18 @@ const FnDashboards = () => {
               };
             }
           } else if (row?.type === "ioc") {
-            if (row?.category === "Demob" || row?.category === "FWA") {
+            if (row?.category === "FWA") {
               return {
-                "Pending For Cm": 40,
-                "Pending For Pm": 60,
+                "Pending For Cm": 35,
+                "Pending For Pm": 50,
+                "Pending For Pd": 60,
                 "Pending For Gm": 80,
+                Approved: 100,
+                Rejected: 100,
+              };
+            } else if (row?.category === "Demob") {
+              return {
+                "Pending For Cm": 50,
                 Approved: 100,
                 Rejected: 100,
               };
@@ -285,9 +292,11 @@ const FnDashboards = () => {
                         ? "bg-orange-500"
                         : formattedstatus === "Pending For Pm"
                           ? "bg-lime-500"
-                          : formattedstatus === "Pending For Ceo"
-                            ? "bg-violet-600"
-                            : "bg-gray-400";
+                          : formattedstatus === "Pending For Pd"
+                            ? "bg-teal-500"
+                            : formattedstatus === "Pending For Ceo"
+                              ? "bg-violet-600"
+                              : "bg-gray-400";
 
         return (
           <div className="flex flex-col gap-1">
