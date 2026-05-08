@@ -15,7 +15,7 @@ import { categoryapprovers, nextRole, roles } from "./roles_helper";
 import { getcmpmNames } from "../APIs/api";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
 
-export const handlePrint = (formData, tableData) => {
+export const handlePrint = async (formData, tableData, userInfo) => {
   const doc = new jsPDF({
     orientation: "landscape",
   });
@@ -193,12 +193,20 @@ export const handlePrint = (formData, tableData) => {
       totalLines += 1;
     });
   });
+  const pmName =
+    formData.project != ""
+      ? (await getcmpmNames("pm", formData.project, userInfo))?.[0] || ""
+      : "";
 
+  const pdName =
+    formData.project != ""
+      ? (await getcmpmNames("pd", formData.project, userInfo))?.[0] || ""
+      : "";
   const pageHeight = doc.internal.pageSize.height;
   const roleDisplayMap = {
     incharge: "Mr.Anoop.GP",
-    pm: "Project Manager",
-    pd: "Mr.Sumon Kuriakose",
+    pm: pmName,
+    pd: pdName,
     gm: "Mr.Vijayan.C",
     fm: "Mr.Suraj.R",
     ceo: "Mr.Sridhar. C",

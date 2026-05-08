@@ -546,7 +546,7 @@ const LogisticsDashboard = () => {
                               row.original?.id,
                             );
 
-                            handlePrint(formData, tableData);
+                            handlePrint(formData, tableData, userInfo);
                           }}
                         />
                         <FaTrash
