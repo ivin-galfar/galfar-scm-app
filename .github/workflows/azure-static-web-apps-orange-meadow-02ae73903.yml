@@ -17,6 +17,7 @@ jobs:
     env:
       VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
       VITE_REACT_PROD_SERVER_URL: ${{ secrets.VITE_REACT_PROD_SERVER_URL }}
+      VITE_SPECIAL_PROJECTS: ${{ secrets.VITE_SPECIAL_PROJECTS }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -45,9 +46,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ORANGE_MEADOW_02AE73903 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/"                  # App root
-          api_location: ""                   # No API
-          output_location: "dist/"           # Folder where the built files are
+          app_location: "/" # App root
+          api_location: "" # No API
+          output_location: "dist/" # Folder where the built files are
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
