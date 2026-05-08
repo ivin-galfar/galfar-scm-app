@@ -32,6 +32,7 @@ const Home = () => {
 
   const { selectedDept, setSelectedDept } = useSelectedDept();
   const { setDashboardType } = useDashboardType();
+  console.log("env", import.meta.env.VITE_SPECIAL_PROJECTS);
 
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isasset = is_asset(userInfo?.role);
