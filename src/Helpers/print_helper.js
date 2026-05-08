@@ -199,7 +199,8 @@ export const handlePrint = async (formData, tableData, userInfo) => {
       : "";
 
   const pdName =
-    formData.project != "" && SPECIAL_PROJECTS.includes(formData.project)
+    formData.project != "" &&
+    SPECIAL_PROJECTS.includes(Number(formData.project))
       ? (await getcmpmNames("pd", formData.project, userInfo))?.[0] || ""
       : "";
   const pageHeight = doc.internal.pageSize.height;
