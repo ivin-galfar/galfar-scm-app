@@ -62,7 +62,7 @@ export const nextRole = (role, category, project_code) => {
   };
   return category != "FWA"
     ? roleMap[normalizedRole]
-    : category == "FWA" && project_code == 101501
+    : category == "FWA" && project_code == 1501
       ? roleMapfwas[normalizedRole] || null
       : SPECIAL_PROJECTS.includes(project_code)
         ? roleMapfwapd[normalizedRole] || null

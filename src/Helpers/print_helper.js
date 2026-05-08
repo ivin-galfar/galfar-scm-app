@@ -601,7 +601,10 @@ export const handleBrPrint = (formData) => {
         "",
         "",
         "",
-        formatP(formData.maintenance_cost_tenure),
+        formatP(
+          Number(formData.maintenance_cost_tenure) +
+            Number(formData.op_cost_tenure),
+        ),
       ],
       [
         "Total Expenses - BUYING",
@@ -707,8 +710,8 @@ export const handleBrPrint = (formData) => {
     body: [
       [
         "Total Cost in Buying",
-        formatP(formData.principal_with_interest_buy),
-        formatP(formData.cash_outflow_buying),
+        formatP(formData.cost_in_buying_without_main),
+        formatP(formData.cost_in_buying_with_main),
       ],
       [
         "Monthly Rentals",
@@ -1128,6 +1131,7 @@ export const handleFnPrint = async (data, userInfo) => {
     approverLabels = ["(HOD)", "(GM)", "(CEO)"];
   } else if (demob) {
     approverLabels = ["(CM / SCM)"];
+<<<<<<< ivin.austan/adding-pd-for-approvals
   } else if (
     fwa &&
     data.project_code != 101501 &&
@@ -1141,6 +1145,11 @@ export const handleFnPrint = async (data, userInfo) => {
   ) {
     approverLabels = ["(CM / SCM)", "(PM / SPM)", "(PD)", "(GM)"];
   } else if (fwa && data.project_code == 101501) {
+=======
+  } else if (fwa && data.project_code != 1501) {
+    approverLabels = ["(CM / SCM)", "(PM / SPM / PD)", "(GM)"];
+  } else if (fwa && data.project_code == 1501) {
+>>>>>>> main
     approverLabels = ["(CM / SCM)", "(GM)"];
   } else {
     approverLabels = ["(HOD)", "(SFM)", "(GM)", "(CEO)"];
@@ -1151,15 +1160,19 @@ export const handleFnPrint = async (data, userInfo) => {
   if (skipSfm) {
     approverIndexes = [0, 1, 2];
   } else if (fwa) {
+<<<<<<< ivin.austan/adding-pd-for-approvals
     approverIndexes =
       data.project_code === 101501
         ? [0, 1]
         : SPECIAL_PROJECTS.includes(data.project_code)
           ? [0, 1, 2, 3]
           : [0, 1, 2];
+=======
+    approverIndexes = data.project_code === 1501 ? [0, 1] : [0, 1, 2];
+>>>>>>> main
   } else if (demob) {
     approverIndexes = [0];
-  } else if (fwa && data.project_code !== 101501) {
+  } else if (fwa && data.project_code !== 1501) {
     approverIndexes = [0, 1, 2];
   } else {
     approverIndexes = [0, 1, 2, 3];
@@ -1181,7 +1194,7 @@ export const handleFnPrint = async (data, userInfo) => {
     let pmName = "";
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
     names.push(cmName);
-    if (data.project_code != 101501) {
+    if (data.project_code != 1501) {
       pmName = await getcmpmNames("pm", data.project_code, userInfo);
       names.push(pmName);
     }
@@ -1205,6 +1218,7 @@ export const handleFnPrint = async (data, userInfo) => {
     approvers = categoryapprovers.FNIOC;
   } else if (data.category == "Demob") {
     approvers = categoryapprovers.FNDEMOB;
+<<<<<<< ivin.austan/adding-pd-for-approvals
   } else if (
     data.category == "FWA" &&
     data.project_code != 101501 &&
@@ -1218,6 +1232,11 @@ export const handleFnPrint = async (data, userInfo) => {
   ) {
     approvers = categoryapprovers.FNFWASP;
   } else if (data.category == "FWA" && data.project_code == 101501) {
+=======
+  } else if (data.category == "FWA" && data.project_code != 1501) {
+    approvers = categoryapprovers.FNFWA;
+  } else if (data.category == "FWA" && data.project_code == 1501) {
+>>>>>>> main
     approvers = categoryapprovers.FNFWAS;
   }
 
