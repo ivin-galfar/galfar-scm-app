@@ -20,6 +20,7 @@ import {
   useIdHistory,
   useMultiStatusFilter,
   usePmName,
+  useSelectedProject,
   useStatusFilter,
 } from "../store/logisticsStore";
 import { IoPrint, IoWarningOutline } from "react-icons/io5";
@@ -51,6 +52,7 @@ const LogisticsDashboard = () => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { approverhistory, setApproverHistory, resetApproverHistory } =
     useHistoryData();
+  const { selectedproject, setSelectedProject } = useSelectedProject();
   const { dashboardType, setDashboardType } = useDashboardType();
   const { resetPmName, setPmName } = usePmName();
   const isLogistics = is_logistics(userInfo?.dept_code);
@@ -163,6 +165,7 @@ const LogisticsDashboard = () => {
     const Approvals = await fetchApproverDetails(userInfo, cs_id);
     const name = fetchPmName(Approvals.project);
     setPmName(name);
+    setSelectedProject(Approvals.project);
     setApproverHistory(Approvals);
     resetSelectedId();
   };

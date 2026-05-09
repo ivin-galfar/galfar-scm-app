@@ -80,6 +80,8 @@ export const getApproverName = (role) => {
       return "Mr.Vijayan. C.G.";
     case "ceo":
       return "Mr.Sridhar.C";
+    case "pd":
+      return "Mr. Sumon Kuriakose";
     case "fm":
       return "Mr.Suraj Rajan";
   }

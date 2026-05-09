@@ -170,3 +170,9 @@ export const usePmName = create((set) => ({
   setPmName: (name) => set({ pmname: Array.isArray(name) ? name : [] }),
   resetPmName: () => set({ pmname: [] }),
 }));
+
+export const useSelectedProject = create((set) => ({
+  selectedproject: null,
+  setSelectedProject: (project) => set({ selectedproject: project }),
+  resetSelectedProject: () => set({ selectedproject: null }),
+}));

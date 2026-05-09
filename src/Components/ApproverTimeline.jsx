@@ -1,15 +1,27 @@
-import { usePmName } from "../store/logisticsStore";
+import { usePmName, useSelectedProject } from "../store/logisticsStore";
 import {
   formatDateDDMMYYYYHHMMSS,
   formatName,
   getApproverName,
 } from "../Helpers/helperfunctions";
+import { SPECIAL_PROJECTS } from "../../config/ENV";
 
 const ApproverTimeline = ({ approverhistory }) => {
   const info = approverhistory?.approver_info;
   const { pmname } = usePmName();
+  const { selectedproject } = useSelectedProject();
+  const hasPD = SPECIAL_PROJECTS.includes(Number(selectedproject));
 
-  let roles = ["initlg", "incharge", "pm", "gm", "fm", "ceo"];
+  let roles = [
+    "initlg",
+    "incharge",
+    "pm",
+    ...(hasPD ? ["pd"] : []),
+    "gm",
+    "fm",
+    "ceo",
+  ];
+
   const createdBy = approverhistory?.createdby?.split("@")[0];
   const pendingindex = roles.findIndex((role) =>
     approverhistory?.status?.includes(role),
@@ -58,6 +70,8 @@ const ApproverTimeline = ({ approverhistory }) => {
         return approverhistory?.comment_gm;
       case "fm":
         return approverhistory?.comment_fm;
+      case "pd":
+        return approverhistory?.comment_pd;
       case "ceo":
         return approverhistory?.comment_ceo;
       default:
