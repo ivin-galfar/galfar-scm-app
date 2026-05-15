@@ -17,6 +17,7 @@ import { useStatusFilter } from "../store/logisticsStore";
 import {
   is_asset,
   is_buyrent,
+  is_gm,
   is_hod,
   is_logistics,
   is_plant,
@@ -45,6 +46,7 @@ const BRDashboards = () => {
   const isasset = is_asset(userinfo?.role);
   const ishod = is_hod(userinfo?.role);
   const isBuyvsrent = is_buyrent(userinfo?.dept_code);
+  const isgm = is_gm(userinfo?.role);
   const [deletestatement, setDeleteStatement] = useState({
     id: null,
     open: false,
@@ -460,7 +462,8 @@ const BRDashboards = () => {
                           <IoPrint
                             className={
                               userinfo?.is_admin ||
-                              userinfo.role?.includes("inita")
+                              userinfo.role?.includes("inita") ||
+                              isgm
                                 ? "text-black cursor-pointer"
                                 : "text-gray-400 pointer-events-none cursor-not-allowed"
                             }

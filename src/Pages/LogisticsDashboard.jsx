@@ -25,7 +25,12 @@ import {
 } from "../store/logisticsStore";
 import { IoPrint, IoWarningOutline } from "react-icons/io5";
 import DashboardButton from "../Components/DashboardButton";
-import { is_buyrent, is_logistics, is_plant } from "../Helpers/dept_helper";
+import {
+  is_buyrent,
+  is_gm,
+  is_logistics,
+  is_plant,
+} from "../Helpers/dept_helper";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowCircleRight, FaTrash } from "react-icons/fa";
@@ -69,6 +74,8 @@ const LogisticsDashboard = () => {
   const isPlant = is_plant(userInfo?.dept_code);
   const isBuyvsrent = is_buyrent(userInfo?.dept_code);
   const { selectedId, resetSelectedId } = useIdHistory();
+  const isgm = is_gm(userInfo?.role);
+
   const { data: allstatements } = useQuery({
     queryKey: [
       "csid",
@@ -539,7 +546,8 @@ const LogisticsDashboard = () => {
                         <IoPrint
                           className={
                             userInfo?.is_admin ||
-                            userInfo.role?.includes("incharge")
+                            userInfo.role?.includes("incharge") ||
+                            isgm
                               ? "text-black cursor-pointer"
                               : "text-gray-400 pointer-events-none cursor-not-allowed"
                           }

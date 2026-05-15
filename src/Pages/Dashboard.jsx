@@ -33,6 +33,7 @@ import {
   is_plant,
   is_fm,
   is_hod,
+  is_gm,
 } from "../Helpers/dept_helper";
 import {
   fetchReceipt,
@@ -69,6 +70,7 @@ const Dashboard = () => {
   const isasset = is_asset(userInfo?.role);
   const ishod = is_hod(userInfo?.role);
   const isfm = is_fm(userInfo?.role);
+  const isgm = is_gm(userInfo?.role);
   const location = useLocation();
   const { receiptscount, setReceiptsCount } = usetotalReceipts();
   const isPlant = is_plant(userInfo?.dept_code);
@@ -874,7 +876,7 @@ const Dashboard = () => {
                       </Link>
                       <IoPrint
                         className={` ${
-                          !userInfo?.is_admin
+                          !userInfo?.is_admin && !isgm
                             ? "text-gray-400 pointer-events-none cursor-not-allowed"
                             : "text-black cursor-pointer"
                         }`}
