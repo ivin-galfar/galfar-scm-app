@@ -4,6 +4,8 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link, useNavigate } from "react-router-dom";
 import Alerts from "./Alerts";
 import { FiExternalLink } from "react-icons/fi";
+import { updatedocread } from "../APIs/api";
+import { useMutation } from "@tanstack/react-query";
 
 const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +40,20 @@ const UserDropdown = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const { mutate: updateDocReadMutation } = useMutation({
+    mutationFn: updatedocread,
+    onSuccess: (data) => {
+      console.log("User clicked:", data);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  const handleUpdateDocRead = () => {
+    updateDocReadMutation(userInfo);
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -56,7 +72,10 @@ const UserDropdown = () => {
             </p>
           </div>
           <span>
-            <button className="w-full flex text-left px-5 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 transition cursor-pointer">
+            <button
+              className="w-full flex text-left px-5 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 transition cursor-pointer"
+              onClick={handleUpdateDocRead}
+            >
               <Link
                 to="https://www.notion.so/Galfar-Intranet-2a592f8cf63380d5b90ff24cad08c79e"
                 className="flex  items-center gap-2"
