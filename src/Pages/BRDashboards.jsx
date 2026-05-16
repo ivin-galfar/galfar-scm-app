@@ -107,7 +107,6 @@ const BRDashboards = () => {
     }));
     setPageIndex(0);
   };
-  console.log("search", search);
 
   const handleDelete = async (id) => {
     try {
