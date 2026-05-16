@@ -14,7 +14,6 @@ import { RxCrossCircled } from "react-icons/rx";
 import { FaEdit, FaFileUpload } from "react-icons/fa";
 import { FaFileDownload } from "react-icons/fa";
 import fetchParticulars from "../APIs/ParticularsApi";
-import { FaTrash } from "react-icons/fa";
 import Alerts from "../Components/Alerts";
 import { useNavigate, useParams } from "react-router-dom";
 import { LiaSaveSolid } from "react-icons/lia";
@@ -30,6 +29,7 @@ import {
 } from "../store/statementStore";
 import { updateReceipt } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
+import { useRecallAlert } from "../store/helperStore";
 
 const TableHeader = ({ isAdmin }) => {
   const inputRef = useRef(null);
@@ -72,6 +72,7 @@ const TableHeader = ({ isAdmin }) => {
   const { isReverted, setIsReverted, resetIsReverted } = userevertrequest();
   // const [update, setUpdate] = useState(false);
   const { isupdated, setIsupdated, revertisupdated } = useUpdate();
+  const { isAlerted, setIsAlerted, resetIsAlerted } = useRecallAlert();
   const Asset =
     userInfo.role?.includes("inita") || formData.type == "asset" ? true : false;
 
@@ -327,6 +328,7 @@ const TableHeader = ({ isAdmin }) => {
       setShowToast(true);
       setIsReverted();
       setErrormessage("");
+      resetIsAlerted();
       setTimeout(() => {
         setShowToast(false);
         resetIsReverted();
@@ -772,7 +774,7 @@ const TableHeader = ({ isAdmin }) => {
                   Update
                 </button>
                 <button
-                  onClick={() => handleEdit(formData.id, "pending", "reverted")}
+                  onClick={setIsAlerted}
                   className={`flex items-center px-2 py-0.5 bg-cyan-500 text-white text-sm rounded hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition ${formData.status !== "review" && formData.status !== "reverted" && formData.status !== null && formData.status != "Pending For HOD" ? "bg-blue-400 text-white opacity-60 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-700 focus:ring-blue-500 cursor-pointer"}`}
                   disabled={
                     formData.status !== null &&
@@ -933,6 +935,13 @@ const TableHeader = ({ isAdmin }) => {
             </div>
           </div>
         </div>
+      )}
+      {isAlerted && (
+        <Alerts
+          message={"Do you need to recall the statement?"}
+          onCancel={resetIsAlerted}
+          onConfirm={() => handleEdit(formData.id, "pending", "reverted")}
+        />
       )}
       {showToast && !errormessage && isReverted && isEdit && (
         <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">

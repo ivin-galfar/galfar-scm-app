@@ -23,6 +23,8 @@ import { useDashboardType } from "../store/logisticsStore";
 import { IoHelpCircleSharp } from "react-icons/io5";
 import { GiClamp } from "react-icons/gi";
 import { PiFireTruckLight } from "react-icons/pi";
+import { updatedocread } from "../APIs/api";
+import { useMutation } from "@tanstack/react-query";
 
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const { setStatusFilter, setMultiStatusFilter } = useContext(AppContext);
@@ -41,6 +43,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const initfn = userInfo?.role?.includes("initfn");
   const isfm = is_fm(userInfo?.role);
   const isBuyvsrent = is_buyrent(userInfo?.dept_code);
+
   useEffect(() => {
     if (isPlant) {
       setDashboardType("plant");
@@ -53,7 +56,19 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
     }
   }, [userInfo, setIsMenuOpen, isPlant]);
   const dashboardType = isPlant ? "plant" : "bvrplant";
+  const { mutate: updateDocReadMutation } = useMutation({
+    mutationFn: updatedocread,
+    onSuccess: (data) => {
+      console.log("User clicked:", data);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
 
+  const handleUpdateDocRead = () => {
+    updateDocReadMutation(userInfo);
+  };
   return (
     <div
       ref={ref}
@@ -257,7 +272,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
           </div>
         )}
         <hr className="border-0 h-px bg-gray-200 my-1 mx-2" />
-        <button>
+        <button onClick={handleUpdateDocRead}>
           <Link
             to="https://www.notion.so/Galfar-Intranet-2a592f8cf63380d5b90ff24cad08c79e"
             target="_blank"

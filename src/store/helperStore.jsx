@@ -68,3 +68,21 @@ export const useCategories = create((set) => ({
   setCategories: (value) => set(() => ({ categories: value })),
   resetCategories: () => set(() => ({ categories: [] })),
 }));
+
+export const useTypes = create((set) => ({
+  types: [],
+  setTypes: (value) => set(() => ({ types: value })),
+  resetTypes: () => set(() => ({ types: [] })),
+}));
+
+export const useRecallStatement = create((set) => ({
+  isRecalled: false,
+  setIsRecalled: () => set({ isRecalled: true }),
+  resetIsRecalled: () => set({ isRecalled: false }),
+}));
+
+export const useRecallAlert = create((set) => ({
+  isAlerted: false,
+  setIsAlerted: () => set({ isAlerted: true }),
+  resetIsAlerted: () => set({ isAlerted: false }),
+}));

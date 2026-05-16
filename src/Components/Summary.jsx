@@ -8,7 +8,7 @@ const Summary = ({ data }) => {
     Number(data.maintenance_cost_tenure);
   return (
     <div className="my-10">
-      <div className="w-1/2 px-4 py-2 mb-3 text-sm font-semibold text-purple-800 bg-purple-200 border-l-4 border-blue-500 rounded shadow-sm">
+      <div className="w-1/2 px-4 py-2 mb-3 font-semibold text-purple-800 bg-purple-200 border-l-4 border-blue-500 rounded shadow-sm">
         Summary
       </div>
 

@@ -6,6 +6,7 @@ import {
   fetchlastid,
   FnEmailAlert,
   updatefilenotevalues,
+  updateiocintimation,
 } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { act, useEffect, useState } from "react";
@@ -25,6 +26,7 @@ import { format } from "date-fns";
 import {
   dept_finder,
   dept_finder_asadmin,
+  is_hire,
   is_plant,
 } from "../Helpers/dept_helper";
 import { fileNoteTemplate } from "../Helpers/filenote_template";
@@ -36,9 +38,12 @@ import {
   useComments,
   usenewfn,
   useProjectCodes,
+  useRecallAlert,
+  useRecallStatement,
   useSelectedProject,
+  useTypes,
 } from "../store/helperStore";
-import { getcategory } from "../Helpers/category_helper";
+import { getcategory, getTypes } from "../Helpers/category_helper";
 import {
   getCategoryforUI,
   getCCValue,
@@ -59,10 +64,14 @@ const FileNote = () => {
   const [selectedfnvalue, setSelectedFnValue] = useState("");
   const [selectedvalue, setSelectedValue] = useState("");
   const [dataupdated, setDataUpdated] = useState(false);
-  const [recall, setRecall] = useState(false);
+  const { setIsRecalled, resetIsRecalled, isRecalled } = useRecallStatement();
+  const { isAlerted, setIsAlerted, resetIsAlerted } = useRecallAlert();
+  const [iocintimated, setIocintimated] = useState(false);
+  const [clickedinit, setClickedinit] = useState(false);
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
+  const { types, setTypes } = useTypes();
   const navigate = useNavigate();
   const { showmodal, setShowModal, resetShowModal } = useToggleModal();
   const { setDataSaved, resetDataSaved } = useDatasaved();
@@ -78,7 +87,7 @@ const FileNote = () => {
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const isReview = selectedvalue.status == "review";
   const isEdit = selectedvalue.status == "edit";
-
+  const ishire = is_hire(userInfo.role);
   const { data: doc_no, isLoading: isDocLoading } = useQuery({
     queryKey: ["doc_no", userInfo, type, category, selectedproject],
     queryFn: () =>
@@ -218,27 +227,32 @@ const FileNote = () => {
 
   useEffect(() => {
     let cat = [];
-    if (userInfo.role.includes("initpr") || userInfo.role.includes("inith")) {
-      cat = getcategory(type).filter((c) => c.includes("Demob"));
-    } else if (userInfo.role.includes("initdc")) {
-      cat = getcategory(type).filter((c) => c.includes("FWA"));
-    } else {
-      cat = getcategory(type).filter(
-        (c) => !c.includes("Demob") && !c.includes("FWA"),
-      );
-    }
+    let depttypes = [];
+    if (isPlant) {
+      depttypes = getTypes();
+      setTypes(depttypes);
+      if (userInfo.role.includes("initpr") || userInfo.role.includes("inith")) {
+        cat = getcategory(type).filter((c) => c.includes("Demob"));
+      } else if (userInfo.role.includes("initdc")) {
+        cat = getcategory(type).filter((c) => c.includes("FWA"));
+      } else {
+        cat = getcategory(type).filter(
+          (c) => !c.includes("Demob") && !c.includes("FWA"),
+        );
+      }
 
-    setCategories(cat);
+      setCategories(cat);
 
-    if (type && newfn && !isDocLoading && doc_no) {
-      generateTemplate(category, type).then((template) => {
-        setSelectedFnValue(template);
-        localStorage.setItem("editorContent", JSON.stringify(template));
-      });
-    } else if (!type) {
-      setProjectCodes([]);
-      resetSelectedproject();
-      setSelectedFnValue("");
+      if (type && newfn && !isDocLoading && doc_no) {
+        generateTemplate(category, type).then((template) => {
+          setSelectedFnValue(template);
+          localStorage.setItem("editorContent", JSON.stringify(template));
+        });
+      } else if (!type) {
+        setProjectCodes([]);
+        resetSelectedproject();
+        setSelectedFnValue("");
+      }
     }
   }, [type, category, selectedproject, doc_no, isDocLoading, newfn, name]);
 
@@ -306,7 +320,7 @@ const FileNote = () => {
         content: editorinfo,
         attachments,
       });
-      setRecall(false);
+      resetIsRecalled();
     }
   };
   const hasComments = (selectedvalue.approver_info || []).some(
@@ -333,10 +347,32 @@ const FileNote = () => {
     setDataSaved();
   };
 
+  const handleUpdateFlag = async (id) => {
+    try {
+      const updatedflag = await updateiocintimation(
+        userInfo,
+        id,
+        selectedvalue.demob_intimated,
+      );
+
+      if (updatedflag != null) {
+        setErrorMessage("");
+        setShowToast();
+        setTimeout(() => {
+          resetshowtoast();
+          clearErrorMessage();
+          setClickedinit(false);
+        }, 1500);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex flex-grow flex-col ">
       <div className="flex gap-4 p-4 items-center">
-        {userInfo?.is_admin && (
+        {userInfo?.is_admin && !ishire && (
           <div className="w-1/7 py-2 gap-10 flex p-4">
             <button
               type="button"
@@ -418,19 +454,19 @@ const FileNote = () => {
         {userInfo?.is_admin && newfn && (
           <TypeFilter
             isDocLoading={isDocLoading}
-            type={type}
             category={category}
             projectcodes={projectcodes}
             settype={settype}
             setCategory={setCategory}
             setProjectCodes={setProjectCodes}
+            types={types}
             categories={categories}
             selectedproject={selectedproject}
             setSelectedProject={setSelectedProject}
           />
         )}
         {newfn && (
-          <div className="flex items-center gap-1 p-4">
+          <div className="items-center gap-1 p-4">
             <label className="font-medium flex">
               Subject: <BsAsterisk size={6} color="red" />
             </label>
@@ -453,7 +489,7 @@ const FileNote = () => {
         )}
       </div>
       {selectedvalue.doc_no && (
-        <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2 flex items-center">
+        <div className="w-full  bg-white border border-gray-200 rounded-lg shadow-sm p-2 flex items-center">
           {selectedvalue.category !== "FWA" ? (
             <div className="flex-1 flex items-center justify-center gap-2">
               <>
@@ -477,36 +513,46 @@ const FileNote = () => {
               </div>
             </div>
           )}
-          {userInfo?.is_admin && (isReview || isEdit) && (
-            <span className="text-gray-500 cursor-pointer hover:text-gray-700">
-              <IoSave
-                size={20}
-                color="green"
-                onClick={() => handleSave("update")}
-              />
-            </span>
-          )}
-          {selectedvalue.status == "created" && userInfo?.is_admin && (
-            <span className="text-gray-500 cursor-pointer hover:text-gray-700">
-              <MdModeEdit size={20} color="red" onClick={handleEdit} />
-            </span>
-          )}
-          {userInfo?.is_admin &&
-            selectedvalue.status !== "approved" &&
-            selectedvalue.status !== "rejected" &&
-            selectedvalue.status !== "edit" &&
-            selectedvalue.status !== "created" &&
-            selectedvalue.status !== "review" && (
+          <div className="flex justify-between gap-5">
+            {userInfo?.is_admin &&
+              (isReview || isEdit || (iocintimated != null && clickedinit)) && (
+                <span className="text-gray-500 cursor-pointer hover:text-gray-700">
+                  <IoSave
+                    size={20}
+                    color="green"
+                    onClick={() => {
+                      if (isReview || isEdit) {
+                        handleSave("update");
+                      } else {
+                        handleUpdateFlag(selectedvalue.id);
+                      }
+                    }}
+                  />
+                </span>
+              )}
+            {selectedvalue.status == "created" && userInfo?.is_admin && (
               <span className="text-gray-500 cursor-pointer hover:text-gray-700">
-                <FaUndoAlt
-                  size={20}
-                  color="#2563EB"
-                  onClick={() => {
-                    (setRecall(true), handleEdit());
-                  }}
-                />{" "}
+                <MdModeEdit size={20} color="red" onClick={handleEdit} />
               </span>
             )}
+            {userInfo?.is_admin &&
+              !userInfo.role.includes("inith") &&
+              selectedvalue.status !== "approved" &&
+              selectedvalue.status !== "rejected" &&
+              selectedvalue.status !== "edit" &&
+              selectedvalue.status !== "created" &&
+              selectedvalue.status !== "review" && (
+                <span className="text-gray-500 cursor-pointer hover:text-gray-700">
+                  <FaUndoAlt
+                    size={20}
+                    color="#2563EB"
+                    onClick={() => {
+                      setIsAlerted();
+                    }}
+                  />{" "}
+                </span>
+              )}
+          </div>
         </div>
       )}
       <SimpleEditor
@@ -572,7 +618,30 @@ const FileNote = () => {
 
         {((newfn && name != "" && category) ||
           (!newfn && selectedvalue.id !== undefined)) && (
-          <div className="flex mt-4 mr-20 p-5 justify-end items-end ">
+          <div className="flex mt-4 mr-20 p-5 gap-5 justify-end items-end ">
+            {userInfo.is_admin &&
+              selectedvalue.category == "Demob" &&
+              selectedvalue.status == "approved" && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg  hover:bg-gray-200 transition">
+                  <input
+                    type="checkbox"
+                    checked={!!selectedvalue?.demob_intimated}
+                    className="w-4 h-4 accent-blue-600 cursor-pointer"
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setIocintimated(checked);
+                      setClickedinit(true);
+                      setSelectedValue((prev) => ({
+                        ...prev,
+                        demob_intimated: checked,
+                      }));
+                    }}
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    IOC Intimation
+                  </span>
+                </div>
+              )}
             <div>
               <Buttontext
                 issentforapproval={selectedvalue.sentforapproval}
@@ -601,8 +670,15 @@ const FileNote = () => {
           setSelectedValue={setSelectedValue}
         />
       )}
+      {isAlerted && (
+        <Alerts
+          message={"Do you want to recall the statement?"}
+          onCancel={() => resetIsAlerted()}
+          onConfirm={() => (setIsRecalled(), handleEdit(), resetIsAlerted())}
+        />
+      )}
       {showtoast &&
-        recall &&
+        isRecalled &&
         !errormessage &&
         userInfo?.is_admin &&
         !imagesaved &&
@@ -613,7 +689,7 @@ const FileNote = () => {
         )}
       {showtoast &&
         !errormessage &&
-        !recall &&
+        !isRecalled &&
         userInfo?.is_admin &&
         !imagesaved &&
         isEdit && (
@@ -637,7 +713,8 @@ const FileNote = () => {
         !imagesaved &&
         selectedvalue.status !== null &&
         !dataupdated &&
-        !isEdit && (
+        !isEdit &&
+        !selectedvalue.demob_intimated && (
           <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
             ✅ You have successfully created the File Note/IOC!
           </div>
@@ -661,6 +738,15 @@ const FileNote = () => {
         selectedvalue.status == "pending for fm" && (
           <div className="fixed top-5 left-1/2 z-60 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
             ✅ You have approved the File Note/IOC!
+          </div>
+        )}
+      {showtoast &&
+        userInfo?.is_admin &&
+        selectedvalue.demob_intimated != null &&
+        !isEdit &&
+        !dataupdated && (
+          <div className="fixed top-5 left-1/2 z-60 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            ✅ You have marked the ioc intimation successully!
           </div>
         )}
     </div>

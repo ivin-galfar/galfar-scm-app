@@ -3,6 +3,7 @@ import { FaRegUser, FaChevronDown } from "react-icons/fa";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link, useNavigate } from "react-router-dom";
 import Alerts from "./Alerts";
+import { FiExternalLink } from "react-icons/fi";
 
 const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,8 +56,15 @@ const UserDropdown = () => {
             </p>
           </div>
           <span>
-            <button className="w-full text-left px-5 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 transition cursor-pointer">
-              <Link to="/receipts"> Statements </Link>
+            <button className="w-full flex text-left px-5 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 transition cursor-pointer">
+              <Link
+                to="https://www.notion.so/Galfar-Intranet-2a592f8cf63380d5b90ff24cad08c79e"
+                className="flex  items-center gap-2"
+                target="_blank"
+              >
+                {" "}
+                Galfar Wiki <FiExternalLink />
+              </Link>
             </button>
           </span>
           <div className="border-t border-gray-100" />

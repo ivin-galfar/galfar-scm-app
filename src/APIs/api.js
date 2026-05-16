@@ -135,32 +135,16 @@ export const fetchallid = async (userInfo, module) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
+    const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
     const response = await axios.get(`${REACT_SERVER_URL}/logistics/allcs`, {
       ...config,
-      params: { module, project: userInfo.pr_code, role: userInfo.role },
+      params: {
+        module,
+        project: userInfo.pr_code,
+        role: userInfo.role,
+        showinactive,
+      },
     });
-    // let cs = response.data
-    //   .filter(
-    //     (d) =>
-    //       d.status !== null && d.status !== "created" && d.status !== "review",
-    //   )
-    //   .sort((a, b) => b.id - a.id);
-    // if (userInfo.role?.includes("initlg")) {
-    //   cs = response.data.sort((a, b) => b.id - a.id);
-    // }
-    // if (userInfo.role?.includes("pm")) {
-    //   if (userInfo.pr_code.includes(1)) {
-    //     cs = response.data.filter(
-    //       (d) => d.project == "plant" && d.status !== "created",
-    //     );
-    //   } else {
-    //     cs = response.data.filter(
-    //       (d) =>
-    //         userInfo.pr_code.includes(Number(d.project)) &&
-    //         d.status !== "created",
-    //     );
-    //   }
-    // }
 
     return response.data;
   } catch (error) {
@@ -173,7 +157,8 @@ export const fetchallstatements = async (
   userInfo,
   pageSize,
   pageIndex,
-  searchcs,
+  searchcsno,
+  searchcsname,
 ) => {
   try {
     const config = {
@@ -182,40 +167,23 @@ export const fetchallstatements = async (
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
+    const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
     const response = await axios.get(
       `${REACT_SERVER_URL}/logistics/statements`,
       {
         ...config,
         params: {
           statusfilter,
-          searchcs,
+          searchcsno,
+          searchcsname,
           pageIndex,
           pageSize,
           role: userInfo.role[0],
           project: userInfo.pr_code,
+          showinactive,
         },
       },
     );
-
-    // let cs = response.data
-    //   .filter((d) => d.status !== null)
-    //   .sort((a, b) => b.id - a.id);
-    // if (userInfo.role?.includes("initlg")) {
-    //   cs = response.data.sort((a, b) => b.id - a.id);
-    // }
-    // if (userInfo.role?.includes("pm")) {
-    //   if (userInfo.pr_code.includes(1)) {
-    //     cs = response.data.filter(
-    //       (d) => d.project == "plant" && d.status !== "created",
-    //     );
-    //   } else {
-    //     cs = response.data.filter(
-    //       (d) =>
-    //         userInfo.pr_code.includes(Number(d.project)) &&
-    //         d.status !== "created",
-    //     );
-    //   }
-    // }
 
     return response.data;
   } catch (error) {
@@ -324,7 +292,8 @@ export const fetchReceiptCount = async ({
   userInfo,
   status,
   multiStatus,
-  searchcs,
+  searchcsno,
+  searchcsname,
 }) => {
   let type = null;
 
@@ -343,6 +312,7 @@ export const fetchReceiptCount = async ({
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
+    const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
 
     const response = await axios.get(
       `${REACT_SERVER_URL}/receipts/totalreceipts/`,
@@ -355,7 +325,9 @@ export const fetchReceiptCount = async ({
             : null,
           statusfilter: status != "All" ? status : null,
           multiStatus: multiStatus?.length ? multiStatus.join(",") : null,
-          searchcs,
+          searchcsno,
+          searchcsname,
+          showinactive,
         },
       },
     );
@@ -386,7 +358,8 @@ export const fetchApproverDetails = async (userInfo, cs_id) => {
 export const fetchCsCount = async (
   userInfo,
   statusfilter,
-  searchcs,
+  searchcsno,
+  searchcsname,
   project,
 ) => {
   try {
@@ -396,11 +369,20 @@ export const fetchCsCount = async (
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
+    const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
+
     const response = await axios.get(
       `${REACT_SERVER_URL}/logistics/totalreceipts/`,
       {
         ...config,
-        params: { statusfilter, role: userInfo.role[0], searchcs, project },
+        params: {
+          statusfilter,
+          role: userInfo.role[0],
+          searchcsno,
+          searchcsname,
+          project,
+          showinactive,
+        },
       },
     );
 
@@ -525,7 +507,8 @@ export const fetchbrstatement = async (cs_id, userInfo) => {
 export const fetchbrstatements = async ({
   userinfo,
   statusfilter,
-  searchcs,
+  searchcsno,
+  searchcsname,
   page,
   limit,
   module,
@@ -537,6 +520,8 @@ export const fetchbrstatements = async ({
         Authorization: `Bearer ${userinfo.token}`,
       },
     };
+    const showinactive = userinfo?.is_admin || userinfo?.role.includes("hod");
+
     const response = await axios.get(`${REACT_SERVER_URL}/brstatement/`, {
       ...config,
       params: {
@@ -545,7 +530,9 @@ export const fetchbrstatements = async ({
         statusfilter,
         page,
         limit,
-        searchcs,
+        searchcsno,
+        searchcsname,
+        showinactive,
       },
     });
     return response.data;
@@ -557,7 +544,8 @@ export const fetchbrstatements = async ({
 export const fetchbrstatementscount = async (
   userInfo,
   statusfilter,
-  searchcs,
+  searchcsno,
+  searchcsname,
   page,
   limit,
 ) => {
@@ -568,11 +556,21 @@ export const fetchbrstatementscount = async (
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
+    const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
+
     const response = await axios.get(
       `${REACT_SERVER_URL}/brstatement/totalstatements`,
       {
         ...config,
-        params: { statusfilter, role: userInfo.role[0], searchcs, page, limit },
+        params: {
+          statusfilter,
+          role: userInfo.role[0],
+          searchcsno,
+          searchcsname,
+          page,
+          limit,
+          showinactive,
+        },
       },
     );
 
@@ -738,9 +736,11 @@ export const fetchfilenoteids = async ({
   count,
   page,
   limit,
-  searchcs,
+  searchcsno,
+  searchcsname,
   categoryFilter,
   typeFilter,
+  projectFilter,
 }) => {
   try {
     const config = {
@@ -749,6 +749,7 @@ export const fetchfilenoteids = async ({
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
+    const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
     const response = await axios.get(
       `${REACT_SERVER_URL}/filenote/`,
       {
@@ -758,16 +759,20 @@ export const fetchfilenoteids = async ({
           role: userInfo.role.join(","),
           isadmin: userInfo.is_admin,
           dept_id: dept_id.join(","),
-          project_code: Array.isArray(userInfo.pr_code)
-            ? userInfo.pr_code.join(",")
-            : "",
+          project_code: projectFilter
+            ? [projectFilter]?.join(",")
+            : userInfo.pr_code
+              ? userInfo.pr_code.join(",")
+              : "",
           statusfilter,
           count,
           page,
           limit,
-          searchcs,
+          searchcsno,
+          searchcsname,
           categoryFilter,
           typeFilter,
+          showinactive,
         },
       },
       config,
@@ -933,6 +938,50 @@ export const getcategory = async (userInfo, dept_id) => {
       { config, params: { dept_id: dept_id } },
     );
 
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateiocintimation = async (userInfo, fnid, flag) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/filenote/updatedemob/${fnid}`,
+      {
+        flag: flag,
+      },
+      config,
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatedocread = async (userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/users/updatedocread`,
+      {
+        email: userInfo.email,
+        click: 1,
+      },
+      config,
+    );
     return response.data;
   } catch (error) {
     throw error;

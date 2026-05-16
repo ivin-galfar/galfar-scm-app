@@ -41,6 +41,7 @@ import {
   loginUser,
 } from "../APIs/api";
 import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
+import InputSearch from "../Components/InputSearch";
 const Dashboard = () => {
   const {
     receipts,
@@ -59,11 +60,18 @@ const Dashboard = () => {
   const { toggleasset, resetasset } = useToggleAsset();
   const [approversFetched, setApproversFetched] = useState(false);
   const { deleted, resetDeleted, setDeleted } = useDeleteStatement();
-  const [searchcs, setSearchCS] = useState("");
+
   const userInfo = useUserInfo();
   const { dashboardType, setDashboardType, resetDashboardType } =
     useDashboardType();
   const { pagination, setPageIndex, setPageSize } = usePagination();
+  const [searchcsno, setSearchCSNo] = useState(null);
+  const [searchcsname, setSearchCSName] = useState(null);
+  const [search, setSearch] = useState({
+    isNumber: false,
+    isText: true,
+    value: null,
+  });
 
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isasset = is_asset(userInfo?.role);
@@ -167,7 +175,8 @@ const Dashboard = () => {
             limit: pagination.pageSize,
             status: statusFilter,
             multiStatus: multiStatusFilter,
-            search: searchcs,
+            searchcsno: searchcsno,
+            searchcsname: searchcsname,
           });
 
         const totalcount = await fetchReceiptCount({
@@ -175,7 +184,8 @@ const Dashboard = () => {
           userInfo,
           status: statusFilter,
           multiStatus: multiStatusFilter,
-          searchcs: searchcs,
+          searchcsno: searchcsno,
+          searchcsname: searchcsname,
         });
 
         setReceiptsCount(totalcount.receipts_count);
@@ -196,7 +206,8 @@ const Dashboard = () => {
     pagination.pageIndex,
     statusFilter,
     multiStatusFilter,
-    searchcs,
+    searchcsno,
+    searchcsname,
   ]);
 
   const handleDelete = async (mr) => {
@@ -339,7 +350,7 @@ const Dashboard = () => {
         },
       );
     }
-    doc.text(`CS NO: ${updatedFormData.id}`, 200, 32, {
+    doc.text(`Cs No.: ${updatedFormData.id}`, 200, 32, {
       align: "right",
     });
     doc.text(
@@ -569,9 +580,17 @@ const Dashboard = () => {
     window.open(blobUrl);
   };
   const handleSearch = (e) => {
-    (setSearchCS(e.target.value),
-      setStatusFilter("All"),
-      setMultiStatusFilter([]));
+    if (search.isNumber) {
+      setSearchCSNo(e.target.value);
+    } else {
+      setSearchCSName(e.target.value);
+    }
+    (setStatusFilter("All"), setMultiStatusFilter([]));
+    setSearch((prev) => ({
+      ...prev,
+      type: search.isNumber ? search.isNumber : search.isText,
+      value: e.target.value,
+    }));
     setPageIndex(0);
   };
 
@@ -583,7 +602,7 @@ const Dashboard = () => {
     }),
     columnHelper.accessor((row) => row?.formData?.id, {
       id: "mrno",
-      header: "CS NO",
+      header: "Cs No.",
       cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor(
@@ -792,17 +811,13 @@ const Dashboard = () => {
               <DashboardButton />
             </div>
           )}
-          <div className="mb-1 ml-auto">
-            <label className="  ml-auto text-sm font-medium text-gray-700 ">
-              CS Number:
-            </label>
-            <input
-              type="text"
-              name="search"
-              className="border  h-8 flex border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleSearch}
-            />
-          </div>
+          <InputSearch
+            handleSearch={handleSearch}
+            search={search}
+            setSearch={setSearch}
+            setSearchCSNo={setSearchCSNo}
+            setSearchCSName={setSearchCSName}
+          />
         </div>
       </div>
       <div
@@ -846,7 +861,12 @@ const Dashboard = () => {
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 "
+                  className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100 transition duration-200
+                ${
+                  row.original.formData.deleted !== 0
+                    ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                    : ""
+                }`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
@@ -862,13 +882,13 @@ const Dashboard = () => {
                   <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                     <div className="flex items-center justify-center gap-4">
                       <Link
-                        className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
+                        className={`px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 `}
                         to={`/receipts/${row.original?.formData?.id}`}
-                        onClick={() =>
+                        onClick={() => {
                           row.original.formData.type == "hiring"
                             ? resetasset()
-                            : toggleasset()
-                        }
+                            : toggleasset();
+                        }}
                       >
                         View <FaArrowAltCircleRight />
                       </Link>
@@ -880,17 +900,7 @@ const Dashboard = () => {
                         }`}
                         size={25}
                         onClick={() => {
-                          // const { totals, vats, netPrices } = calculateTotals(
-                          //   row.original.tableData,
-                          //   row.original.formData.qty
-                          // );
-                          handlePrint(
-                            row.original,
-                            // totals,
-                            // vats,
-                            // netPrices,
-                            // row.original.formData.currency
-                          );
+                          handlePrint(row.original);
                         }}
                       />
                       <FaTrash
