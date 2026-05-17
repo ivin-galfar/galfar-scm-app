@@ -37,6 +37,7 @@ import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleBrPrint, handlePrint } from "../Helpers/print_helper";
 import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
+import InputSearch from "../Components/InputSearch";
 
 const BRDashboards = () => {
   const location = useLocation();
@@ -56,7 +57,13 @@ const BRDashboards = () => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { resetNewStatement } = useNewStatement();
   const { pagination, setPageIndex, setPageSize } = usePagination();
-  const [searchcs, setSearchCS] = useState("");
+  const [searchcsno, setSearchCSNo] = useState(null);
+  const [searchcsname, setSearchCSName] = useState(null);
+  const [search, setSearch] = useState({
+    isNumber: false,
+    isText: true,
+    value: null,
+  });
   const queryClient = useQueryClient();
 
   const { setStatusFilter, statusfilter, resetStatusFilter } =
@@ -70,13 +77,15 @@ const BRDashboards = () => {
       statusfilter,
       pagination.pageSize,
       pagination.pageIndex,
-      searchcs,
+      searchcsno,
+      searchcsname,
     ],
     queryFn: () =>
       fetchbrstatements({
         userinfo,
         statusfilter,
-        searchcs,
+        searchcsno,
+        searchcsname,
         page: pagination.pageIndex,
         limit: pagination.pageSize,
         module: location.pathname,
@@ -86,8 +95,17 @@ const BRDashboards = () => {
   });
 
   const handleSearch = (e) => {
+    if (search.isNumber) {
+      setSearchCSNo(e.target.value);
+    } else {
+      setSearchCSName(e.target.value);
+    }
+    setStatusFilter("All");
+    setSearch((prev) => ({
+      ...prev,
+      value: e.target.value,
+    }));
     setPageIndex(0);
-    (setSearchCS(e.target.value), setStatusFilter("All"));
   };
 
   const handleDelete = async (id) => {
@@ -144,7 +162,8 @@ const BRDashboards = () => {
         const totalcount = await fetchbrstatementscount(
           userinfo,
           statusfilter,
-          searchcs,
+          searchcsno,
+          searchcsname,
           pagination.pageIndex,
           pagination.pageSize,
         );
@@ -157,7 +176,7 @@ const BRDashboards = () => {
     if (canFetch) {
       fetchStatments();
     }
-  }, [statusfilter, searchcs, canFetch]);
+  }, [statusfilter, searchcsno, searchcsname, , canFetch]);
 
   const columnHelper = createColumnHelper();
   const statusProgress = {
@@ -381,17 +400,14 @@ const BRDashboards = () => {
                 <DashboardButton />
               </div>
             )}
-            <div className="mb-1 ml-auto">
-              <label className="  ml-auto text-sm font-medium text-gray-700 ">
-                BVR Number:
-              </label>
-              <input
-                type="text"
-                name="search"
-                className="border  h-8 flex border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={handleSearch}
-              />
-            </div>
+            <InputSearch
+              handleSearch={handleSearch}
+              search={search}
+              setSearch={setSearch}
+              setSearchCSNo={setSearchCSNo}
+              setSearchCSName={setSearchCSName}
+              module="br"
+            />
           </div>
         </div>
         {
@@ -436,7 +452,11 @@ const BRDashboards = () => {
                   table.getRowModel().rows.map((row) => (
                     <tr
                       key={row.id}
-                      className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 "
+                      className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100   ${
+                        row.original.deleted !== 0
+                          ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                          : ""
+                      }`}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <td

@@ -159,12 +159,6 @@ export const useHistoryData = create((set) => ({
   resetApproverHistory: () => set({ approverhistory: null }),
 }));
 
-export const useRecallStatement = create((set) => ({
-  isRecalled: false,
-  setIsRecalled: () => set({ isRecalled: true }),
-  resetIsRecalled: () => set({ isRecalled: false }),
-}));
-
 export const usePmName = create((set) => ({
   pmname: [],
   setPmName: (name) => set({ pmname: Array.isArray(name) ? name : [] }),

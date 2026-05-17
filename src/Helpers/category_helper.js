@@ -6,6 +6,10 @@ export const getcategory = (type) => {
   return map[type] || [];
 };
 
+export const getTypes = () => {
+  return ["file_note", "ioc"];
+};
+
 export const TypeValue = {
   file_note: "FN",
   ioc: "Ioc",
@@ -14,6 +18,11 @@ export const TypeValue = {
 export const TypeForUi = {
   file_note: "File Note",
   ioc: "Inter Office Correspondence",
+};
+
+export const TypeForFeedUi = {
+  file_note: "File Note",
+  ioc: "Ioc",
 };
 
 export const CategoryForUi = {

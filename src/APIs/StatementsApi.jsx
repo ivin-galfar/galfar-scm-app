@@ -9,7 +9,8 @@ const fetchStatments = async ({
   limit,
   status,
   multiStatus,
-  search,
+  searchcsno,
+  searchcsname,
 }) => {
   try {
     const config = {
@@ -33,6 +34,7 @@ const fetchStatments = async ({
         return;
       }
     }
+    const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
 
     const response = await axios.get(`${REACT_SERVER_URL}/receipts/`, {
       ...config,
@@ -43,10 +45,12 @@ const fetchStatments = async ({
         limit: limit,
         statusfilter: status != "All" ? status : null,
         multiStatus: multiStatus?.join(","),
-        search,
+        searchcsno,
+        searchcsname,
         expectedStatuses: expectedStatuses?.length
           ? expectedStatuses.join(",")
           : null,
+        showinactive,
       },
     });
 

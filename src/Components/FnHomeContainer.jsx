@@ -12,6 +12,7 @@ import { IoDocumentText, IoWarningOutline } from "react-icons/io5";
 import { usePagination } from "../store/statementStore";
 import { useStatusFilter } from "../store/logisticsStore";
 import { useAttachments, usenewfn } from "../store/helperStore";
+import { is_hire } from "../Helpers/dept_helper";
 
 const FnHomeContainer = () => {
   const userInfo = useUserInfo();
@@ -31,9 +32,9 @@ const FnHomeContainer = () => {
   const { setStatusFilter } = useStatusFilter();
   const { newfn, setNewfn } = usenewfn();
   const { attachments, setAttachments } = useAttachments();
-
+  const ishire = is_hire(userInfo.role);
   let pending = userInfo?.is_admin
-    ? data?.count?.review_count
+    ? (data?.count?.review_count ?? 0)
     : (data?.count?.pending_count ?? 0);
   let approved = data?.count?.approved_count ?? 0;
   let review = data?.count?.review_count ?? 0;
@@ -170,7 +171,9 @@ const FnHomeContainer = () => {
             <h2 className="text-base font-medium text-gray-700">
               Recent Statements
             </h2>
-            {userInfo?.is_admin && userInfo.role?.includes("initfn") ? (
+            {userInfo?.is_admin &&
+            userInfo.role?.includes("initfn") &&
+            !ishire ? (
               <Link to="/filenote">
                 <button
                   className="border border-blue-500 text-blue-500 hover:bg-blue-50 text-sm px-3 py-1.5 rounded cursor-pointer"

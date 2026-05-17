@@ -10,7 +10,7 @@ import { deletefn, fetchfilenoteids, fetchfilenoteidvalue } from "../APIs/api";
 import { Link, useLocation } from "react-router-dom";
 import useuserInfo from "../CustomHooks/useUserInfo";
 import { useStatusFilter } from "../store/logisticsStore";
-import { dept_finder } from "../Helpers/dept_helper";
+import { dept_finder, is_plant } from "../Helpers/dept_helper";
 import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
 import { usePagination } from "../store/statementStore";
 import { useEffect, useState } from "react";
@@ -22,16 +22,19 @@ import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleFnPrint } from "../Helpers/print_helper";
 import { formatDateDDMMYYYY, getType } from "../Helpers/helperfunctions";
+import { BiBadgeCheck } from "react-icons/bi";
 import {
   useCategories,
   useDeleteStore,
   usenewfn,
   useProjectCodes,
   useSelectedProject,
+  useTypes,
 } from "../store/helperStore";
 import TypeFilter from "../Components/TypeFilter";
-import { getcategory } from "../Helpers/category_helper";
+import { getcategory, getTypes } from "../Helpers/category_helper";
 import { GrAttachment } from "react-icons/gr";
+import InputSearch from "../Components/InputSearch";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
   const isAdmin = userInfo.is_admin;
@@ -47,11 +50,23 @@ const FnDashboards = () => {
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { pagination, setPageIndex, setPageSize } = usePagination();
-  const [searchcs, setSearchCS] = useState("");
+  const [searchcsno, setSearchCSNo] = useState(null);
+  const [searchcsname, setSearchCSName] = useState(null);
+  const [search, setSearch] = useState({
+    isNumber: false,
+    isText: true,
+    value: null,
+  });
   const queryClient = useQueryClient();
   const { newfn, setNewfn } = usenewfn();
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(() => {
+    const saved = sessionStorage.getItem("filenoteFilters");
+    return saved ? JSON.parse(saved).categoryFilter || "" : "";
+  });
+  const [typeFilter, setTypeFilter] = useState(() => {
+    const saved = sessionStorage.getItem("filenoteFilters");
+    return saved ? JSON.parse(saved).typeFilter || "" : "";
+  });
   const { setStatusFilter, statusfilter, resetStatusFilter } =
     useStatusFilter();
   const { projectcodes, setProjectCodes } = useProjectCodes();
@@ -59,15 +74,18 @@ const FnDashboards = () => {
   const { selectedproject, setSelectedProject } = useSelectedProject();
   // const [categories, setCategories] = useState([]);
   const { categories, setCategories } = useCategories();
+  const { types, setTypes } = useTypes();
   const isgm = userInfo.role.includes("gm");
   const [total, setTotal] = useState(0);
+  const isplant = is_plant(userInfo?.dept_code);
   const { data: fndata } = useQuery({
     queryKey: [
       "fnid",
       statusfilter,
       pagination.pageSize,
       pagination.pageIndex,
-      searchcs,
+      searchcsno,
+      searchcsname,
       categoryFilter,
       typeFilter,
       selectedproject,
@@ -78,7 +96,8 @@ const FnDashboards = () => {
         module: "/dashboardfn",
         dept_id: userInfo.dept_code,
         statusfilter,
-        searchcs,
+        searchcsno,
+        searchcsname,
         page: pagination.pageIndex,
         limit: pagination.pageSize,
         categoryFilter,
@@ -90,8 +109,18 @@ const FnDashboards = () => {
   });
 
   const handleSearch = (e) => {
+    if (search.isNumber) {
+      setSearchCSNo(e.target.value);
+    } else {
+      setSearchCSName(e.target.value);
+    }
+    setStatusFilter("All");
+    setSearch((prev) => ({
+      ...prev,
+      type: search.isNumber ? search.isNumber : search.isText,
+      value: e.target.value,
+    }));
     setPageIndex(0);
-    (setSearchCS(e.target.value), setStatusFilter("All"));
   };
 
   const getstatement = async (fn_id) => {
@@ -117,12 +146,14 @@ const FnDashboards = () => {
           module: "/dashboardfn",
           dept_id: userInfo.dept_code,
           statusfilter,
-          searchcs,
+          searchcsno,
+          searchcsname,
           page: pagination.pageIndex,
           limit: pagination.pageSize,
           count: true,
           categoryFilter,
           typeFilter,
+          projectFilter: selectedproject,
         });
         setTotal(totalcount);
       } catch (error) {
@@ -131,7 +162,14 @@ const FnDashboards = () => {
       }
     };
     fetchStatments();
-  }, [statusfilter, searchcs, categoryFilter, typeFilter]);
+  }, [
+    statusfilter,
+    searchcsno,
+    searchcsname,
+    selectedproject,
+    categoryFilter,
+    typeFilter,
+  ]);
 
   const handleDelete = async (id) => {
     try {
@@ -166,7 +204,9 @@ const FnDashboards = () => {
     columnHelper.accessor((row) => row?.doc_no, {
       id: "doc_id",
       header: "Doc No.",
-      cell: (info) => info.getValue() || "-",
+      cell: (info) =>
+        `${info.row.original?.type == "ioc" ? "I - " : "F -" || ""}${info.getValue() || ""}` ||
+        "-",
     }),
     columnHelper.accessor((row) => row?.name, {
       id: "subject",
@@ -346,32 +386,41 @@ const FnDashboards = () => {
 
   useEffect(() => {
     let cat = [];
+    let depttypes = [];
+    if (isplant) {
+      console.log(userInfo.role);
 
-    if (userInfo.role.includes("gm")) {
-      cat = getcategory(typeFilter);
-    } else if (userInfo.role.includes("initpr")) {
-      cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
-    } else if (userInfo.role.includes("cm") || userInfo.role.includes("pm")) {
-      cat = getcategory(typeFilter).filter(
-        (c) => c.includes("FWA") || c.includes("Demob"),
-      );
-    } else if (
-      (userInfo.role.includes("initfn") && isAdmin) ||
-      userInfo.role.includes("fm")
-    ) {
-      cat = getcategory(typeFilter).filter((c) => !c.includes("FWA"));
-    } else if (userInfo.role.includes("ceo")) {
-      cat = getcategory(typeFilter).filter(
-        (c) => !c.includes("Demob") && !c.includes("FWA"),
-      );
-    } else if (userInfo.role.includes("view")) {
-      cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
-    } else {
-      cat = getcategory(typeFilter).filter(
-        (c) => !c.includes("Demob") && !c.includes("FWA"),
-      );
+      depttypes = getTypes();
+      setTypes(depttypes);
+      if (userInfo.role.includes("gm")) {
+        cat = getcategory(typeFilter);
+      } else if (userInfo.role.includes("initpr")) {
+        cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
+      } else if (userInfo.role.includes("cm") || userInfo.role.includes("pm")) {
+        cat = getcategory(typeFilter).filter(
+          (c) => c.includes("FWA") || c.includes("Demob"),
+        );
+      } else if (userInfo.role.includes("inith")) {
+        cat = getcategory(typeFilter).filter((c) => !c.includes("FWA"));
+      } else if (userInfo.role.includes("initfn") && isAdmin) {
+        cat = getcategory(typeFilter).filter(
+          (c) => !c.includes("FWA") && !c.includes("Demob"),
+        );
+      } else if (userInfo.role.includes("ceo")) {
+        cat = getcategory(typeFilter).filter(
+          (c) => !c.includes("Demob") && !c.includes("FWA"),
+        );
+      } else if (userInfo.role.includes("view")) {
+        cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
+      } else if (userInfo.role.includes("hod")) {
+        cat = getcategory(typeFilter).filter((c) => !c.includes("FWA"));
+      } else {
+        cat = getcategory(typeFilter).filter(
+          (c) => !c.includes("Demob") && !c.includes("FWA"),
+        );
+      }
+      setCategories(cat);
     }
-    setCategories(cat);
   }, [typeFilter, categoryFilter]);
   const cmusers =
     userInfo?.role?.includes("cm") && userInfo?.role?.includes("initfn");
@@ -382,11 +431,17 @@ const FnDashboards = () => {
     !userInfo?.role?.includes("initpr") &&
     !userInfo.role.includes("initdc");
 
+  useEffect(() => {
+    sessionStorage.setItem(
+      "filenoteFilters",
+      JSON.stringify({ categoryFilter, typeFilter }),
+    );
+  }, [categoryFilter, typeFilter]);
   return (
     <div className="flex-grow ">
       <div className="flex-grow w-full px-5">
         <div className="flex border-b justify-between items-center border-gray-300 mb-4">
-          <div>
+          <div className="text-nowrap">
             {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
               (tab) => {
                 const isActive =
@@ -464,9 +519,13 @@ const FnDashboards = () => {
                 settype={setTypeFilter}
                 setCategory={setCategoryFilter}
                 setProjectCodes={setProjectCodes}
+                types={types}
                 categories={categories}
                 selectedproject={selectedproject}
                 setSelectedProject={setSelectedProject}
+                setSearch={setSearch}
+                setSearchCSNo={setSearchCSNo}
+                setSearchCSName={setSearchCSName}
               />
             </div>
           )}
@@ -474,17 +533,14 @@ const FnDashboards = () => {
             {
               <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto"></div>
             }
-            <div className="mb-1 ml-auto">
-              <label className="  ml-auto text-sm font-medium text-gray-700 ">
-                Doc Number:
-              </label>
-              <input
-                type="text"
-                name="search"
-                className="border  h-8 flex border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={handleSearch}
-              />
-            </div>
+            <InputSearch
+              handleSearch={handleSearch}
+              search={search}
+              setSearch={setSearch}
+              setSearchCSNo={setSearchCSNo}
+              setSearchCSName={setSearchCSName}
+              module="fn"
+            />
           </div>
         </div>
         {
@@ -512,6 +568,8 @@ const FnDashboards = () => {
                     <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
                       Created On
                     </th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
                   </tr>
                 ))}
               </thead>
@@ -529,7 +587,11 @@ const FnDashboards = () => {
                   table.getRowModel().rows.map((row) => (
                     <tr
                       key={row.id}
-                      className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 "
+                      className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100 ${
+                        row.original.deleted != 0
+                          ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                          : ""
+                      }`}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <td
@@ -591,6 +653,16 @@ const FnDashboards = () => {
                             <GrAttachment size={12} />
                             <span>{row.original.file_name.length}</span>
                           </span>
+                        )}
+                      </td>
+                      <td>
+                        {" "}
+                        {row.original.demob_intimated && (
+                          <BiBadgeCheck
+                            color="green"
+                            size={20}
+                            title="Intimated"
+                          />
                         )}
                       </td>
                     </tr>

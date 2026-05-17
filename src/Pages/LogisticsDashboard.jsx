@@ -50,6 +50,7 @@ import {
   getlastSubmittedDate,
   getSubmittedDate,
 } from "../Helpers/helperfunctions";
+import InputSearch from "../Components/InputSearch";
 const LogisticsDashboard = () => {
   const userInfo = useUserInfo();
   const { setStatusFilter, statusfilter, resetStatusFilter } =
@@ -61,7 +62,6 @@ const LogisticsDashboard = () => {
   const { dashboardType, setDashboardType } = useDashboardType();
   const { resetPmName, setPmName } = usePmName();
   const isLogistics = is_logistics(userInfo?.dept_code);
-  const [searchcs, setSearchCS] = useState("");
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
   const { receiptscount, setReceiptsCount } = usetotalReceipts();
@@ -74,6 +74,13 @@ const LogisticsDashboard = () => {
   const isPlant = is_plant(userInfo?.dept_code);
   const isBuyvsrent = is_buyrent(userInfo?.dept_code);
   const { selectedId, resetSelectedId } = useIdHistory();
+  const [searchcsno, setSearchCSNo] = useState(null);
+  const [searchcsname, setSearchCSName] = useState(null);
+  const [search, setSearch] = useState({
+    isNumber: false,
+    isText: true,
+    value: null,
+  });
   const isgm = is_gm(userInfo?.role);
 
   const { data: allstatements } = useQuery({
@@ -82,7 +89,8 @@ const LogisticsDashboard = () => {
       pagination.pageSize,
       statusfilter,
       pagination.pageIndex,
-      searchcs,
+      searchcsno,
+      searchcsname,
     ],
     queryFn: () =>
       fetchallstatements(
@@ -90,15 +98,26 @@ const LogisticsDashboard = () => {
         userInfo,
         pagination.pageSize,
         pagination.pageIndex,
-        searchcs,
+        searchcsno,
+        searchcsname,
       ),
     enabled: !!userInfo,
     keepPreviousData: true,
   });
 
   const handleSearch = (e) => {
+    if (search.isNumber) {
+      setSearchCSNo(e.target.value);
+    } else {
+      setSearchCSName(e.target.value);
+    }
+    setStatusFilter("All");
+    setSearch((prev) => ({
+      ...prev,
+      type: search.isNumber ? search.isNumber : search.isText,
+      value: e.target.value,
+    }));
     setPageIndex(0);
-    (setSearchCS(e.target.value), setStatusFilter("All"));
   };
 
   const getstatement = async (cs_id) => {
@@ -191,7 +210,8 @@ const LogisticsDashboard = () => {
         const totalcount = await fetchCsCount(
           userInfo,
           statusfilter,
-          searchcs,
+          searchcsno,
+          searchcsname,
           userInfo.pr_code,
         );
         setReceiptsCount(totalcount.receipts_count);
@@ -201,7 +221,7 @@ const LogisticsDashboard = () => {
       }
     };
     fetchStatments();
-  }, [statusfilter, searchcs]);
+  }, [statusfilter, searchcsno, searchcsname]);
 
   useEffect(() => {
     setDashboardType("logistics");
@@ -231,7 +251,7 @@ const LogisticsDashboard = () => {
     }),
     columnHelper.accessor((row) => row?.id, {
       id: "csno",
-      header: "CS NO",
+      header: "Cs No.",
       cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.project, {
@@ -295,7 +315,7 @@ const LogisticsDashboard = () => {
             </span>
 
             <div
-              className="relative max-w-2/3 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner cursor-pointer"
+              className="relative  h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner cursor-pointer"
               onClick={() => handleApprovalHistory(info.row.original.id)}
             >
               <div
@@ -459,17 +479,15 @@ const LogisticsDashboard = () => {
               <DashboardButton />
             </div>
           )}
-          <div className="mb-1 ml-auto">
-            <label className="  ml-auto text-sm font-medium text-gray-700 ">
-              Shipment Number:
-            </label>
-            <input
-              type="text"
-              name="search"
-              className="border  h-8 flex border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleSearch}
-            />
-          </div>
+
+          <InputSearch
+            handleSearch={handleSearch}
+            search={search}
+            setSearch={setSearch}
+            setSearchCSNo={setSearchCSNo}
+            setSearchCSName={setSearchCSName}
+            module="lg"
+          />
         </div>
       </div>
       {statusfilter !== "Approval History" && (
@@ -521,7 +539,11 @@ const LogisticsDashboard = () => {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 "
+                    className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100   ${
+                      row.original.deleted !== 0
+                        ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                        : ""
+                    }`}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td

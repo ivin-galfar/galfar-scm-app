@@ -47,7 +47,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
   }, [fn_no, comments]);
 
   return (
-    <div className="flex bg-gradient-to-r from-slate-50 to-blue-50 items-center hadow-md p-4  rounded-lg gap-4">
+    <div className="flex bg-gradient-to-r from-slate-50 to-blue-50 items-center hadow-md p-2  rounded-lg gap-4">
       <label className="ml-4 flex font-medium justify-center items-center text-nowrap">
         Choose Document
       </label>

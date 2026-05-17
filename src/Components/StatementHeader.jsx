@@ -14,11 +14,11 @@ import {
   useNewStatement,
   useParticular,
   useParticularValues,
-  useRecallStatement,
   useSelectCS,
   useSelectCSValue,
   useStatement,
 } from "../store/logisticsStore";
+import { useRecallAlert, useRecallStatement } from "../store/helperStore";
 import fetchParticulars from "../APIs/ParticularsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import axios from "axios";
@@ -36,6 +36,7 @@ import { MdModeEdit } from "react-icons/md";
 import { IoMdSave } from "react-icons/io";
 import { GrRevert } from "react-icons/gr";
 import { IoSave } from "react-icons/io5";
+import Alerts from "./Alerts";
 
 const StatementHeader = () => {
   const { formData, setFormData, setTableData, resetData, tableData } =
@@ -48,6 +49,7 @@ const StatementHeader = () => {
   const { setParticularValue, resetparticularvalue } = useParticularValues();
   const { setErrorMessage, clearErrorMessage } = useErrorMessage();
   const { setShowToast, resetshowtoast } = useToast();
+  const { isAlerted, setIsAlerted, resetIsAlerted } = useRecallAlert();
   const { setCsSelected } = useSelectCS();
   const { columns, resetcolumns } = usecolumns();
   const { cs_no } = useParams();
@@ -332,6 +334,7 @@ const StatementHeader = () => {
     recallStatementValues(userInfo, formData.id, formData.recalled_times + 1);
     resetFreeze();
     setShowToast();
+    resetIsAlerted();
     setTimeout(() => {
       resetshowtoast();
     }, 1500);
@@ -842,7 +845,7 @@ const StatementHeader = () => {
                   <button
                     type="button"
                     className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "rejected" ? "visible" : "invisible"}`}
-                    onClick={recallStatement}
+                    onClick={setIsAlerted}
                   >
                     <FaUndoAlt size={15} title="Recall" />
                   </button>
@@ -895,6 +898,13 @@ const StatementHeader = () => {
           <div />
         </div>
       </form>
+      {isAlerted && (
+        <Alerts
+          message={"Do you need to recall the statement?"}
+          onCancel={resetIsAlerted}
+          onConfirm={recallStatement}
+        />
+      )}
     </div>
   );
 };

@@ -1,7 +1,12 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { categoryapprovers, prevRole, roles } from "./roles_helper";
-import { CategoryForUi, TypeForUi, TypeValue } from "./category_helper";
+import {
+  CategoryForUi,
+  TypeForFeedUi,
+  TypeForUi,
+  TypeValue,
+} from "./category_helper";
 import { getcmpmNames } from "../APIs/api";
 
 export const handleRemoveFile = (index, formData, setFormData) => {
@@ -252,6 +257,10 @@ export const getTypeCode = (type) => {
 
 export const getType = (type) => {
   return TypeForUi[type] || "";
+};
+
+export const getFeedType = (type) => {
+  return TypeForFeedUi[type] || "";
 };
 
 export const getCategoryforUI = (category) => {

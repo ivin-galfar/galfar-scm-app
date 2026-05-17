@@ -9,8 +9,8 @@ const Accounting = ({ data }) => {
 
   return (
     <div>
-      <div className="w-1/2 px-4 py-2 mb-3 text-sm font-semibold text-purple-800 bg-purple-200 border-l-4 border-blue-500 rounded shadow-sm">
-        Accounting Gain / Loss
+      <div className="w-1/2 px-4 py-2 mb-3  font-semibold text-purple-800 bg-purple-200 border-l-4 border-blue-500 rounded shadow-sm">
+        Accounting Gain / Loss [{formatPrice(data?.fin_tenure)} years]
       </div>
 
       <table className="w-full border border-gray-400">
@@ -56,7 +56,7 @@ const Accounting = ({ data }) => {
           <tr className="hover:bg-gray-50 font-semibold">
             <td className="p-2">Total Expenses - Rentals</td>
             <td className="p-2 text-right border-l border-gray-400 font-semibold">
-              {formatPrice(data.total_rental_cost)}
+              {formatPrice(data.cash_outflow_renting)}
             </td>
           </tr>
 
@@ -73,9 +73,10 @@ const Accounting = ({ data }) => {
                   [{data.chosentype?.trim()}]
                 </span>
               )}
+              {formatPrice(data?.fin_tenure)} years
             </td>
             <td className="p-2 text-right border-l border-gray-400 font-semibold">
-              {formatPrice(data.total_rental_cost - accounting_buying)}
+              {formatPrice(data.cash_outflow_renting - accounting_buying)}
             </td>
           </tr>
         </tbody>
