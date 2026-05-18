@@ -73,7 +73,7 @@ const StatementHeader = () => {
     const fetchParticularsData = async () => {
       try {
         const allParticulars = await fetchParticulars(userInfo, dept_id);
-        setParticulars(allParticulars.Particulars);
+        setParticulars(allParticulars?.Particulars);
       } catch (error) {
         console.error(error);
       }

@@ -250,7 +250,7 @@ const Dashboard = () => {
     tableData.forEach((row, index) => {
       if (index === 0) return;
       if (
-        ["RATING", "ICV SCORE"].includes(row.particulars?.trim().toUpperCase())
+        ["RATING", "ICV SCORE"].includes(row?.particulars?.trim().toUpperCase())
       )
         return;
       Object.entries(row.vendors).forEach(([_, val], vIdx) => {
@@ -636,6 +636,7 @@ const Dashboard = () => {
         const status = info.getValue() || "";
         const rowData = info.row.original.formData || {};
         const approverDetails = rowData.approverdetails || [];
+        const isDeleted = rowData.deleted;
 
         const rejectedby =
           approverDetails.length > 0 &&
@@ -660,7 +661,7 @@ const Dashboard = () => {
                     : status === "Pending for CEO"
                       ? "bg-violet-600"
                       : "bg-gray-300";
-
+        const displayStatus = isDeleted ? "Deleted" : status;
         return (
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-gray-700 flex gap-2 items-center">
@@ -674,7 +675,7 @@ const Dashboard = () => {
                 typeof rejectedby === "string" ? (
                 <span>{"Rejected By " + rejectedby.toUpperCase()}</span>
               ) : (
-                <span>{status || "Not Sent For Approval"}</span>
+                <span>{displayStatus || "Not Sent For Approval"}</span>
               )}
             </span>
 

@@ -145,14 +145,17 @@ const PlantHome = () => {
           r?.formData?.status?.toLowerCase().startsWith("pending") &&
           userInfo?.role?.some((role) =>
             r?.formData?.status?.toLowerCase().includes(role.toLowerCase()),
-          ),
+          ) &&
+          r?.formData?.deleted == 0,
       )
-    : allreceipts?.filter((r) =>
-        r?.formData?.status?.toLowerCase().startsWith("pending"),
+    : allreceipts?.filter(
+        (r) =>
+          r?.formData?.status?.toLowerCase().startsWith("pending") &&
+          r?.formData?.deleted == 0,
       );
 
   const reviewReceipts = allreceipts?.filter(
-    (r) => r?.formData?.status == "review",
+    (r) => r?.formData?.status == "review" && r?.formData?.deleted == 0,
   );
 
   const today = new Date();

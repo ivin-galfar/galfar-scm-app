@@ -277,9 +277,10 @@ const LogisticsDashboard = () => {
               word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase(),
           )
           .join(" ");
-
+        const rowData = info.row.original.formData;
+        const isDeleted = rowData.deleted;
         const progress = statusProgress[formattedstatus] || 0;
-
+        const displayStatus = isDeleted ? "Deleted" : formattedstatus;
         const progressColor =
           formattedstatus === "Rejected"
             ? "bg-rose-500"
@@ -304,13 +305,13 @@ const LogisticsDashboard = () => {
         return (
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-gray-700 flex gap-2 items-center">
-              {formattedstatus === "Review" ? (
+              {displayStatus === "Review" ? (
                 <>
                   <IoWarningOutline className="text-yellow-500" size={18} />
                   <span>To be Reviewed</span>
                 </>
               ) : (
-                formattedstatus || "Not Sent For Approval"
+                displayStatus || "Not Sent For Approval"
               )}
             </span>
 

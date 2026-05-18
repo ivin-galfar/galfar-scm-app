@@ -33,12 +33,12 @@ const TypeFilter = ({
     if (category == "Demob" || category == "FWA") {
       const projects = await fetchProjectDetails(userInfo);
       const projectids = projects.map((pr) => pr.project);
-      console.log(projectids);
 
       const allocatedprcodes = userInfo.pr_code;
-      const matchedprcodes = userInfo.role.includes("gm")
-        ? projectids
-        : projectids.filter((project) => allocatedprcodes?.includes(project));
+      const matchedprcodes =
+        userInfo.role.includes("gm") || userInfo?.role.includes("hod")
+          ? projectids
+          : projectids.filter((project) => allocatedprcodes?.includes(project));
 
       setProjectCodes(matchedprcodes);
     } else {
@@ -50,7 +50,8 @@ const TypeFilter = ({
     userInfo?.role.includes("initpr") ||
     userInfo?.role.includes("cm") ||
     userInfo?.role.includes("view") ||
-    userInfo?.role.includes("pm");
+    userInfo?.role.includes("pm") ||
+    userInfo?.role.includes("hod");
 
   const fwausers = userInfo.role.includes("initdc");
   const viewusers = userInfo.role.includes("view");

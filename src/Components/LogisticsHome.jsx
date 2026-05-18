@@ -35,18 +35,24 @@ const LogisticsHome = () => {
 
   const pendingstatements = cs_id?.filter((item) => {
     if (userInfo.is_admin) {
-      return item.status?.includes("pending");
+      return item.status?.includes("pending") && item.status.deleted == 0;
     } else {
-      return userInfo?.role.some((role) =>
-        item.status?.toLowerCase()?.includes(role.toLowerCase()),
+      return userInfo?.role.some(
+        (role) =>
+          item.status?.toLowerCase()?.includes(role.toLowerCase()) &&
+          item.status.deleted == 0,
       );
     }
   });
   const approvedstatements =
-    cs_id?.filter((item) => item.status?.includes("approved")) || [];
+    cs_id?.filter(
+      (item) => item.status?.includes("approved") && item.status.deleted == 0,
+    ) || [];
 
   const rejectedstatements =
-    cs_id?.filter((item) => item.status?.includes("rejected")) || [];
+    cs_id?.filter(
+      (item) => item.status?.includes("rejected") && item.status.deleted == 0,
+    ) || [];
 
   const today = new Date();
   const { setStatusFilter } = useStatusFilter();
