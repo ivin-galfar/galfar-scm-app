@@ -277,7 +277,7 @@ const LogisticsDashboard = () => {
               word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase(),
           )
           .join(" ");
-        const rowData = info.row.original.formData;
+        const rowData = info.row.original;
         const isDeleted = rowData.deleted;
         const progress = statusProgress[formattedstatus] || 0;
         const displayStatus = isDeleted ? "Deleted" : formattedstatus;
