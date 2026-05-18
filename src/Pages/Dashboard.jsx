@@ -665,12 +665,12 @@ const Dashboard = () => {
         return (
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-gray-700 flex gap-2 items-center">
-              {status === "review" ? (
+              {displayStatus === "review" ? (
                 <>
                   <IoWarningOutline className="text-yellow-500" size={18} />
                   <span>To be Reviewed</span>
                 </>
-              ) : status === "Rejected" &&
+              ) : displayStatus === "Rejected" &&
                 rejectedby &&
                 typeof rejectedby === "string" ? (
                 <span>{"Rejected By " + rejectedby.toUpperCase()}</span>
