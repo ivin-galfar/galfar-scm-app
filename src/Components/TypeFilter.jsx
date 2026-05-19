@@ -4,7 +4,7 @@ import { BsAsterisk } from "react-icons/bs";
 import { fetchProjectDetails } from "../APIs/api";
 import { useLocation } from "react-router-dom";
 import { usePagination } from "../store/statementStore";
-import { is_gm } from "../Helpers/dept_helper";
+import { is_gm, is_hod } from "../Helpers/dept_helper";
 import { getFeedType } from "../Helpers/helperfunctions";
 import { CiCircleRemove } from "react-icons/ci";
 
@@ -50,8 +50,8 @@ const TypeFilter = ({
     userInfo?.role.includes("initpr") ||
     userInfo?.role.includes("cm") ||
     userInfo?.role.includes("view") ||
-    userInfo?.role.includes("pm") ||
-    userInfo?.role.includes("hod");
+    userInfo?.role.includes("pm");
+  const ishod = is_hod(userInfo?.role);
 
   const fwausers = userInfo.role.includes("initdc");
   const viewusers = userInfo.role.includes("view");
@@ -116,7 +116,7 @@ const TypeFilter = ({
               ))}
             </select>
           </div>
-          {(demobusers || fwausers || isgm || hireusers) &&
+          {(demobusers || fwausers || isgm || hireusers || ishod) &&
             (category == "FWA" || category == "Demob") && (
               <div className="px-4">
                 <label className="text-gray-500 font-medium text-small flex gap-2">
