@@ -1197,7 +1197,6 @@ export const handleFnPrint = async (data, userInfo) => {
   } else {
     names = getApproverNames(Flow, "FNIOC");
   }
-  console.log(names);
 
   let approvers = categoryapprovers.FNIOCM;
 

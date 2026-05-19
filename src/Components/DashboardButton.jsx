@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
-import { is_asset, is_fm, is_hod } from "../Helpers/dept_helper";
+import { is_asset, is_fm, is_hod, is_pd, is_pm } from "../Helpers/dept_helper";
 import useUserInfo from "../CustomHooks/useUserInfo";
 
 const DashboardButton = () => {
@@ -12,6 +12,8 @@ const DashboardButton = () => {
   const isasset = is_asset(userInfo?.role);
   const isfm = is_fm(userInfo?.role);
   const ishod = is_hod(userInfo?.role);
+  const ispm = is_pm(userInfo.role);
+  const ispd = is_pd(userInfo.role);
 
   const colorMap = {
     plant: {
@@ -48,6 +50,9 @@ const DashboardButton = () => {
       path: "/dashboardlg",
     },
   ].filter((dash) => {
+    if (ispm || ispd) {
+      return dash.key === "logistics";
+    }
     if (isasset) {
       return dash.key !== "logistics";
     }

@@ -388,8 +388,6 @@ const FnDashboards = () => {
     let cat = [];
     let depttypes = [];
     if (isplant) {
-      console.log(userInfo.role);
-
       depttypes = getTypes();
       setTypes(depttypes);
       if (userInfo.role.includes("gm")) {
@@ -434,9 +432,13 @@ const FnDashboards = () => {
   useEffect(() => {
     sessionStorage.setItem(
       "filenoteFilters",
-      JSON.stringify({ categoryFilter, typeFilter }),
+      JSON.stringify({
+        categoryFilter,
+        typeFilter,
+        projectFilter: selectedproject,
+      }),
     );
-  }, [categoryFilter, typeFilter]);
+  }, [categoryFilter, typeFilter, selectedproject]);
   return (
     <div className="flex-grow ">
       <div className="flex-grow w-full px-5">

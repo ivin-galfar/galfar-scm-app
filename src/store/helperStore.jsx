@@ -57,8 +57,20 @@ export const usenewfn = create((set) => ({
     })),
 }));
 
+const getInitialProjectFilter = () => {
+  const saved = sessionStorage.getItem("filenoteFilters");
+
+  if (!saved) return "";
+
+  try {
+    return JSON.parse(saved).projectFilter || "";
+  } catch {
+    return "";
+  }
+};
+
 export const useSelectedProject = create((set) => ({
-  selectedproject: "",
+  selectedproject: getInitialProjectFilter(),
   setSelectedProject: (value) => set(() => ({ selectedproject: value })),
   resetSelectedproject: () => set(() => ({ selectedproject: "" })),
 }));
