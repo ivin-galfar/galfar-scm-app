@@ -43,6 +43,7 @@ import {
 } from "../APIs/api";
 import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
+import Loading from "../Components/Loading";
 const Dashboard = () => {
   const {
     receipts,
@@ -699,8 +700,13 @@ const Dashboard = () => {
           .map((item) => {
             return (
               <span key={item.id} className="block">
-                <span className="font-bold ">{item.role.toUpperCase()}</span>:{" "}
-                {item.comments}
+                <span className="font-bold ">
+                  {item.role.toUpperCase() != "INITH" &&
+                  item.role.toUpperCase() != "INITA"
+                    ? item.role.toUpperCase()
+                    : "Initiator"}
+                </span>
+                : {item.comments}
               </span>
             );
           });
@@ -827,6 +833,7 @@ const Dashboard = () => {
         className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
         style={{ height: `calc(93vh - 140px)` }}
       >
+        <Loading isLoading={receipts.length > 0 ? false : true} />
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="top-0 z-10 sticky  bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -845,7 +852,7 @@ const Dashboard = () => {
                   Action
                 </th>
                 <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
-                  Created On
+                  Created
                 </th>
               </tr>
             ))}

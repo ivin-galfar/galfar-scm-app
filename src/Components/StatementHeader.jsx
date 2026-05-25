@@ -57,6 +57,7 @@ const StatementHeader = () => {
   const { isFreeze, setFreeze, resetFreeze } = useFreeze();
   const location = useLocation();
   const { setIsRecalled, resetIsRecalled, isRecalled } = useRecallStatement();
+  const isReview = formData.status == "review";
 
   const form = useForm({
     defaultValues: {
@@ -466,7 +467,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -497,7 +498,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -528,7 +529,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -559,7 +560,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -597,7 +598,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -628,7 +629,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -659,7 +660,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -690,7 +691,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -725,7 +726,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -756,7 +757,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -787,7 +788,7 @@ const StatementHeader = () => {
                       }));
                     }}
                     className={inputClass}
-                    disabled={isFreeze}
+                    disabled={isFreeze && !isReview}
                   />
                 </div>
               )}
@@ -798,7 +799,7 @@ const StatementHeader = () => {
               <div className="block gap-2">
                 <label
                   htmlFor="receiptfile"
-                  className={`flex gap-2 text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg ${formData?.created_at && isFreeze ? "cursor-auto" : "cursor-pointer"}  hover:bg-blue-200 transition-all`}
+                  className={`flex gap-2 text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg ${formData?.created_at && isFreeze && !isReview ? "cursor-auto" : "cursor-pointer"}  hover:bg-blue-200 transition-all`}
                 >
                   Upload File
                   <FaFileUpload size={20} />
@@ -817,7 +818,7 @@ const StatementHeader = () => {
                   accept="image/*"
                   className={`hidden `}
                   onChange={handleFileUpload}
-                  disabled={isFreeze}
+                  disabled={isFreeze && !isReview}
                 />
                 <div className="pt-5 flex items-center gap-4">
                   <button
@@ -832,19 +833,19 @@ const StatementHeader = () => {
                     Edit Statement
                   </button>
                   <button
-                    className={`text-xl text-gray-600 ${isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${(formData.created_at == "" || formData.status != "created") && !isRecalled ? "invisible" : ""}`}
+                    className={`text-xl text-gray-600 ${isEditing || isReview ? "cursor-pointer hover:text-gray-800 " : ""} ${(formData.created_at == "" || formData.status != "created") && !isRecalled && !isReview ? "invisible" : ""}`}
                     onClick={() => {
                       handleSave();
                       resetIsEditing();
                       resetIsRecalled();
                     }}
-                    disabled={!isEditing}
+                    disabled={!isEditing && !isReview}
                   >
                     <IoSave size={20} color="green" title="save" />
                   </button>
                   <button
                     type="button"
-                    className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "rejected" ? "visible" : "invisible"}`}
+                    className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "review" && formData.status != "rejected" && formData.status != "created" ? "visible" : "invisible"}`}
                     onClick={setIsAlerted}
                   >
                     <FaUndoAlt size={15} title="Recall" />

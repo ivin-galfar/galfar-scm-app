@@ -6,11 +6,17 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useErrorMessage } from "../store/errorStore";
 import { statusExpected } from "../Helpers/statusfinder";
 import { FnEmailAlert, updatefilenotevalues } from "../APIs/api";
+import { handleFnPrint } from "../Helpers/print_helper";
+import {
+  generatePDF,
+} from "../Helpers/helperfunctions";
 import { useComments } from "../store/helperStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
+import { useNavigate } from "react-router-dom";
+import { useStatusFilter } from "../store/logisticsStore";
 
 const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const userInfo = useUserInfo();
@@ -25,19 +31,27 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const SpecialProjects = userInfo?.pr_code?.some((code) =>
     SPECIAL_PROJECTS.includes(Number(code)),
   );
-
+  const navigate = useNavigate();
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
+  const { setStatusFilter } = useStatusFilter();
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatefilenotevalues,
-    onSuccess: async (data) => {
+    onSuccess: async (responseData) => {
+      const pdfUrl = await generatePDF(responseData, userInfo);
+      const finalResponse = pdfUrl
+        ? { ...responseData, exportedstatement: pdfUrl }
+        : responseData;
+      setSelectedValue(finalResponse);
       setShowToast();
       setTimeout(() => {
         resetshowtoast();
         resetShowModal();
         resetComments();
+        navigate("/dashboardfn", { replace: true });
+        setStatusFilter("Pending");
       }, 1500);
       try {
-        await FnEmailAlert(data.id, userInfo, dept, data);
+        await FnEmailAlert(finalResponse.id, userInfo, dept, finalResponse);
       } catch (err) {
         const message = err?.response?.data || err?.message || "Email failed";
         setErrorMessage(message);
@@ -53,8 +67,13 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       }, 1500);
     },
   });
-  const submitApproval = (status) => {
+  const submitApproval = async (status) => {
     let updatedstatus = "";
+    const updatedData = {
+      ...data,
+      status: data.status,
+    };
+
     if (status == "approved") {
       updatedstatus = statusExpected(
         userInfo?.role,
@@ -64,26 +83,19 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         data.project_code,
         SpecialProjects,
       );
-
-      setSelectedValue((prev) => ({
-        ...prev,
-        status: updatedstatus,
-      }));
+      updatedData.status = updatedstatus;
+      setSelectedValue(updatedData);
     } else if (status == "rejected") {
       updatedstatus = "rejected";
-      setSelectedValue((prev) => ({
-        ...prev,
-        status: updatedstatus,
-      }));
+      updatedData.status = updatedstatus;
+      setSelectedValue(updatedData);
     } else {
       updatedstatus = "review";
-      setSelectedValue((prev) => ({
-        ...prev,
-        status: updatedstatus,
-      }));
+      updatedData.status = updatedstatus;
+      setSelectedValue(updatedData);
     }
 
-    updatestatement({
+    const payload = {
       status: updatedstatus,
       fnid: data.id,
       userInfo,
@@ -92,7 +104,9 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       category: data.category,
       sentforapproval: "yes",
       project_code: data.project_code,
-    });
+    };
+
+    updatestatement(payload);
   };
 
   return (
@@ -107,17 +121,15 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">
           Approve/Reject
         </h2>
-        {(isreviewclicked || isHod || isGm) && (
-          <div className="flex w-full">
-            <textarea
-              rows={3}
-              placeholder="Enter your comments here..."
-              className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
-              onChange={(e) => setComments(e.target.value)}
-              value={comments}
-            />
-          </div>
-        )}
+        <div className="flex w-full">
+          <textarea
+            rows={3}
+            placeholder="Enter your comments here..."
+            className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+            onChange={(e) => setComments(e.target.value)}
+            value={comments}
+          />
+        </div>
         <div className="mt-6 flex justify-end space-x-2">
           <button
             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
@@ -133,20 +145,14 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
           </button>
           <button
             className={`px-4 py-2 flex items-center gap-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition ${isreviewclicked && !comments?.trim() ? "cursor-pointer" : "cursor-pointer"}`}
-            onClick={() => {
-              if (isreviewclicked || isHod || isGm) {
-                submitApproval("review");
-              } else {
-                setIsReviewClicked(true);
-              }
-            }}
+            onClick={() => submitApproval("review")}
           >
             <LuRotateCcwSquare /> Send For Review
           </button>
         </div>
         {showtoast && !errormessage && data.status == "review" && (
           <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-            ✅ You have send this Statement for review!
+            ✅ You have sent this Statement for review!
           </div>
         )}{" "}
         {showtoast &&

@@ -11,10 +11,10 @@ import {
 } from "../store/statementStore";
 import { RxCross1 } from "react-icons/rx";
 import { is_plant } from "../Helpers/dept_helper";
+import { useComments } from "../store/helperStore";
 
 const ApproveModal = ({ setShowmodal, cs_id }) => {
   const userInfo = useUserInfo();
-  const [comments, setComments] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [errormessage, setErrormessage] = useState("");
   const [lastAction, setLastAction] = useState("");
@@ -29,6 +29,7 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
 
   const { setClearTable } = useClearStatementTable();
   const { resetSortVendors } = useSortVendors();
+  const { comments, setComments, resetComments } = useComments();
   const navigate = useNavigate();
   const submitApproval = async (cs_id, status) => {
     let finalStatus = "";
@@ -100,7 +101,7 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
         });
         navigate("/receipts", { replace: true });
         setShowToast(true);
-        setComments("");
+        resetComments();
         setErrormessage("");
         // setTimeout(() => {
         //   setShowmodal(false);

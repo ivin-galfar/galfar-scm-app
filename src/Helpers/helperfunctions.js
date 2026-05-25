@@ -1,5 +1,5 @@
 import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
+import { REACT_SERVER_URL, SPECIAL_PROJECTS } from "../../config/ENV";
 import { categoryapprovers, prevRole, roles } from "./roles_helper";
 import {
   CategoryForUi,
@@ -8,6 +8,7 @@ import {
   TypeValue,
 } from "./category_helper";
 import { getcmpmNames } from "../APIs/api";
+import { handleFnPrint } from "./print_helper";
 
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
@@ -223,19 +224,28 @@ export const getApproverNames = (flow, dept) => {
   });
 };
 
-export const getSubmittedDate = (approverinfo = [], role) => {
+export const getSubmittedDate = (approverinfo = [], role, module) => {
   let lastsubmissiondate = "";
-  const prevrole = prevRole(role);
-  const prevapprover = approverinfo?.find((a) => a.role == prevrole);
-  if (!prevapprover || !prevapprover.datetime) return "";
-  lastsubmissiondate = formatDateDDMMYYYY(prevapprover?.datetime);
+  const prevrole = prevRole(role, module);
+  const prevapprover = Array.isArray(prevrole)
+    ? [...(approverinfo || [])]
+        .reverse()
+        .find((a) => prevrole.includes(a.role?.toLowerCase()))
+    : [...(approverinfo || [])]
+        .reverse()
+        .find((a) => a.role?.toLowerCase() === prevrole?.toLowerCase());
+  if (!prevapprover || (!prevapprover.datetime && !prevapprover.date))
+    return "";
+  const lastdate = prevapprover?.date || prevapprover?.datetime;
+  lastsubmissiondate = formatDateDDMMYYYYHHMMSS(lastdate);
   return lastsubmissiondate;
 };
 
 export const getlastSubmittedDate = (approverinfo = [], role) => {
   let lastsubmissiondate = "";
+  const lastItem = approverinfo?.[approverinfo.length - 1];
   lastsubmissiondate = formatDateDDMMYYYYHHMMSS(
-    approverinfo?.[approverinfo.length - 1]?.datetime,
+    lastItem?.datetime || lastItem?.date,
   );
   return lastsubmissiondate;
 };
@@ -316,12 +326,14 @@ export const getToValue = (category) => {
 export const getCCValue = async (category, project_code, userInfo) => {
   const pmName =
     project_code != "" ? await getcmpmNames("pm", project_code, userInfo) : "";
-
+  const pdName = SPECIAL_PROJECTS.includes(Number(project_code))
+    ? await getcmpmNames("pd", project_code, userInfo)
+    : "";
   switch (category) {
     case "Demob":
-      return `C.G. Vijayan (General Manager), ${pmName} (SPM/PM)`;
+      return `C.G. Vijayan (General Manager), ${pmName} (SPM/PM)${pdName ? `, ${pdName} (PD)` : ""}`;
     case "FWA":
-      return `${pmName} (SPM/PM)`;
+      return `${pmName} (SPM/PM)${pdName ? `, ${pdName} (PD)` : ""}`;
   }
 };
 
@@ -400,4 +412,32 @@ export const formatName = (name) => {
   }
 
   return `Mr. ${trimmed}`;
+};
+
+export const generatePDF = async (responseData, userInfo) => {
+  if (responseData?.status !== "approved") return null;
+
+  try {
+    const result = await handleFnPrint(responseData, userInfo, true);
+    const pdfBlob = result?.pdfBlob;
+
+    if (!pdfBlob) return null;
+
+    const pdfFile = new File(
+      [pdfBlob],
+      `Approved_Statement_${responseData.doc_no}.pdf`,
+      {
+        type: "application/pdf",
+      },
+    );
+
+    const uploadedFiles = await handleAttachmentsUpload([pdfFile], userInfo);
+    if (uploadedFiles && uploadedFiles.length > 0) {
+      return uploadedFiles[0].fileUrl || uploadedFiles[0].url || null;
+    }
+  } catch (err) {
+    console.error("PDF generation/upload failed:", err);
+  }
+
+  return null;
 };

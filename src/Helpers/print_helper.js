@@ -897,7 +897,7 @@ export const handleBrPrint = (formData) => {
   window.open(blobUrl);
 };
 
-export const handleFnPrint = async (data, userInfo) => {
+export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   const doc = new jsPDF();
 
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -1131,7 +1131,10 @@ export const handleFnPrint = async (data, userInfo) => {
   if (skipSfm) {
     approverLabels = ["(HOD)", "(GM)", "(CEO)"];
   } else if (demob) {
-    approverLabels = ["(CM / SCM)"];
+    approverLabels = ["(CM / SCM)", "(PM)"];
+    if (SPECIAL_PROJECTS.includes(data.project_code)) {
+      approverLabels.push("(PD)");
+    }
   } else if (
     fwa &&
     data.project_code != 1501 &&
@@ -1162,7 +1165,9 @@ export const handleFnPrint = async (data, userInfo) => {
           ? [0, 1, 2, 3]
           : [0, 1, 2];
   } else if (demob) {
-    approverIndexes = [0];
+    approverIndexes = SPECIAL_PROJECTS.includes(data.project_code)
+      ? [0, 1, 2]
+      : [0, 1];
   } else if (fwa && data.project_code !== 1501) {
     approverIndexes = [0, 1, 2];
   } else {
@@ -1177,12 +1182,24 @@ export const handleFnPrint = async (data, userInfo) => {
     Flow = "FNIOCM";
   }
   let names = [];
+  let pmName = "";
+  let pdName = "";
 
   if (category == "Demob") {
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
     names.push(cmName);
+    if (data.project_code != 1501) {
+      pmName = await getcmpmNames("pm", data.project_code, userInfo);
+      names.push(pmName);
+    }
+    if (
+      data.project_code != 1501 &&
+      SPECIAL_PROJECTS.includes(data.project_code)
+    ) {
+      pdName = await getcmpmNames("pd", data.project_code, userInfo);
+      names.push(pdName);
+    }
   } else if (category == "FWA") {
-    let pmName = "";
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
     names.push(cmName);
     if (data.project_code != 1501) {
@@ -1190,7 +1207,7 @@ export const handleFnPrint = async (data, userInfo) => {
       names.push(pmName);
     }
     if (SPECIAL_PROJECTS.includes(data.project_code)) {
-      let pdName = await getcmpmNames("pd", data.project_code, userInfo);
+      pdName = await getcmpmNames("pd", data.project_code, userInfo);
       names.push(pdName);
     }
     names.push(roles.GM);
@@ -1300,5 +1317,12 @@ export const handleFnPrint = async (data, userInfo) => {
 
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
+
+  if (emailPdf) {
+    return { pdfBlob, blobUrl };
+  }
+
   window.open(blobUrl);
+
+  return blobUrl;
 };

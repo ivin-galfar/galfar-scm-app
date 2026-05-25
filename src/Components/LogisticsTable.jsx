@@ -9,7 +9,7 @@ import {
   useSelectCSValue,
   useStatement,
 } from "../store/logisticsStore";
-import { useRecallStatement } from "../store/helperStore";
+import { useComments, useRecallStatement } from "../store/helperStore";
 import { EmailAlert, feedlgstatement } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
 import useUserInfo from "../CustomHooks/useUserInfo";
@@ -52,6 +52,8 @@ const LogisticsTable = () => {
   const navigate = useNavigate();
   const { isFreeze } = useFreeze();
   const { isRecalled } = useRecallStatement();
+  const { comments, setComments } = useComments();
+  const isReview = formData.status == "review";
 
   // const [selectedVendor, setSelectedVendor] = useState(0);
   // const { selectedindex, setSelectedIndex } = useSelectedIndex();
@@ -71,8 +73,9 @@ const LogisticsTable = () => {
       resetnewStatement();
       // resetcolumns();
       // console.log(data.data.receipts.id);
-
-      navigate(`/lstatements/${data.data.receipts.id}`, { replace: true });
+      setTimeout(() => {
+        navigate(`/lstatements/${data.data.receipts.id}`, { replace: true });
+      }, 1000);
     },
     onError: (error) => {
       const message = error?.response?.data.message || error.message;
@@ -138,7 +141,7 @@ const LogisticsTable = () => {
     setTimeout(() => {
       setShowmodal(false);
       resetshowtoast();
-    }, 1500);
+    }, 1000);
 
     // resetData();
   };
@@ -222,6 +225,7 @@ const LogisticsTable = () => {
     sentforapproval,
     selected_vendor_index,
     recommendation_reason,
+    comments,
   ) => {
     const updatedFormData = {
       ...formData,
@@ -229,6 +233,7 @@ const LogisticsTable = () => {
       sentforapproval: sentforapproval,
       selected_vendor_index: selected_vendor_index,
       recommendation_reason: recommendation_reason,
+      comments: comments,
     };
     try {
       setShowmodal(true);
@@ -247,6 +252,7 @@ const LogisticsTable = () => {
           sentforapproval,
           selected_vendor_index,
           recommendation_reason,
+          comments_init: comments,
         },
         config,
       );
@@ -315,7 +321,8 @@ const LogisticsTable = () => {
     (buttontxt?.toLowerCase().includes("pending") &&
       nextstatus != "Approve/Reject") ||
     buttontxt == "approved" ||
-    buttontxt == "rejected"
+    buttontxt == "rejected" ||
+    buttontxt == "review"
       ? "px-10 py-2  bg-gray-400 cursor-not-allowed"
       : buttontxt != ""
         ? "px-10 py-2 bg-blue-600  hover:bg-blue-700 cursor-pointer"
@@ -350,7 +357,7 @@ const LogisticsTable = () => {
         !errormessage &&
         formData.edited_count > 0 &&
         !isRecalled &&
-        formData.status !== "rejected" && (
+        formData.status == "created" && (
           <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in z-[1100]">
             <SiTicktick /> Statement Saved successfully!
           </div>
@@ -435,8 +442,10 @@ const LogisticsTable = () => {
                           <input
                             type="text"
                             disabled={
-                              (formData.sentforapproval && !isRecalled) ||
-                              isFreeze
+                              (formData.sentforapproval &&
+                                !isRecalled &&
+                                !isReview) ||
+                              (isFreeze && !isReview)
                             }
                             value={
                               tableData.find((r) => r?.r_id === rowIndex)
@@ -514,7 +523,9 @@ const LogisticsTable = () => {
                           selected_vendor_index: colIndex,
                         })
                       }
-                      disabled={formData.sentforapproval && isFreeze}
+                      disabled={
+                        formData.sentforapproval && isFreeze && !isReview
+                      }
                       className="accent-green-600 w-4 h-4 sr-only"
                     />
 
@@ -557,8 +568,10 @@ const LogisticsTable = () => {
                         onClick={() =>
                           handleRemoveFile(index, formData, setFormData)
                         }
-                        disabled={formData?.created_at != "" && !isEditing}
-                        className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${formData?.created_at != "" && !isEditing ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                        disabled={
+                          formData?.created_at != "" && !isEditing && !isReview
+                        }
+                        className={`absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs font-bold ${formData?.created_at != "" && !isEditing && !isReview ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                         title="Remove file"
                       >
                         ✕
@@ -622,7 +635,7 @@ const LogisticsTable = () => {
               })
             }
             value={formData.recommendation_reason}
-            disabled={formData.sentforapproval && isFreeze}
+            disabled={formData.sentforapproval && isFreeze && !isReview}
           />
         </div>
       )}
@@ -691,21 +704,25 @@ const LogisticsTable = () => {
           onConfirm={() => handleSubmit()}
         />
       )}
-      {showmodal && userInfo.is_admin && formData.id != null && (
-        <Alerts
-          message={"Are you sure to Sent this statement for Approval?"}
-          onCancel={() => setShowmodal(false)}
-          onConfirm={() =>
-            updateStatement(
-              formData.id,
-              changestatus,
-              true,
-              formData.selected_vendor_index,
-              formData.recommendation_reason,
-            )
-          }
-        />
-      )}
+      {showmodal &&
+        userInfo.is_admin &&
+        formData.id != null &&
+        !newstatement && (
+          <Alerts
+            message={"Are you sure to Sent this statement for Approval?"}
+            onCancel={() => setShowmodal(false)}
+            onConfirm={() =>
+              updateStatement(
+                formData.id,
+                changestatus,
+                true,
+                formData.selected_vendor_index,
+                formData.recommendation_reason,
+                comments,
+              )
+            }
+          />
+        )}
       {showmodal && !userInfo.is_admin && (
         <ApproveModallog setShowmodal={setShowmodal} cs_id={formData.id} />
       )}

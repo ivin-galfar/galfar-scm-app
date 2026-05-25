@@ -51,6 +51,7 @@ import {
   getSubmittedDate,
 } from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
+import Loading from "../Components/Loading";
 const LogisticsDashboard = () => {
   const userInfo = useUserInfo();
   const { setStatusFilter, statusfilter, resetStatusFilter } =
@@ -83,7 +84,7 @@ const LogisticsDashboard = () => {
   });
   const isgm = is_gm(userInfo?.role);
 
-  const { data: allstatements } = useQuery({
+  const { data: allstatements, isLoading } = useQuery({
     queryKey: [
       "csid",
       pagination.pageSize,
@@ -333,36 +334,24 @@ const LogisticsDashboard = () => {
 
     columnHelper.accessor(
       (row) => {
-        const comment_incharge = row.comment_in ?? "";
-        const comment_pm = row.comment_pm ?? "";
-        const comment_pd = row.comment_pd ?? "";
-        const comment_gm = row.comment_gm ?? "";
+        const approverComments = Array.isArray(row.approver_info)
+          ? [...row.approver_info]
+              .filter((r) => r.comments)
+              .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
+          : [];
 
-        const comment_fm = row.comment_fm ?? "";
-        const comment_ceo = row.comment_ceo ?? "";
+        const fallbackComments = [
+          row.comment_ceo && { role: "ceo", comments: row.comment_ceo },
+          row.comment_fm && { role: "fm", comments: row.comment_fm },
+          row.comment_gm && { role: "gm", comments: row.comment_gm },
+          row.comment_pd && { role: "pd", comments: row.comment_pd },
+          row.comment_pm && { role: "pm", comments: row.comment_pm },
+          row.comment_in && { role: "incharge", comments: row.comment_in },
+        ].filter(Boolean);
 
-        const comments_group = {};
-        if (comment_ceo !== "") {
-          comments_group.ceo = comment_ceo;
-        }
-        if (comment_fm !== "") {
-          comments_group.fm = comment_fm;
-        }
-        if (comment_gm !== "") {
-          comments_group.gm = comment_gm;
-        }
-        if (comment_pd !== "") {
-          comments_group.pd = comment_pd;
-        }
-        if (comment_pm !== "") {
-          comments_group.pm = comment_pm;
-        }
-        if (comment_incharge != "") {
-          comments_group.incharge = comment_incharge;
-        }
-        let comments = comments_group;
-
-        return comments;
+        return approverComments.length > 0
+          ? approverComments
+          : fallbackComments;
       },
       {
         id: "comments",
@@ -373,15 +362,21 @@ const LogisticsDashboard = () => {
           if (
             comments &&
             typeof comments === "object" &&
-            Object.keys(comments).length > 0
+            comments?.length > 0
           ) {
             return (
               <div className="space-y-1 overflow-y-auto max-h-30 ">
-                {Object.entries(comments).map(([key, value]) => (
-                  <div key={key}>
-                    <strong className="capitalize">{key}:</strong> {value}
-                  </div>
-                ))}
+                {comments
+                  .filter((c) => c?.comments)
+                  .reverse()
+                  .map((item, index) => (
+                    <div key={`${item.role}-${index}`}>
+                      <strong className="capitalize">
+                        {item.role == "initlg" ? "Initiator" : item.role}:
+                      </strong>{" "}
+                      {item.comments}
+                    </div>
+                  ))}
               </div>
             );
           } else {
@@ -405,74 +400,83 @@ const LogisticsDashboard = () => {
   return (
     <div className="flex-grow w-full px-5">
       <div className="flex border-b  border-gray-300 mb-4">
-        {["All", "Approved", "Rejected", "Pending", "Approval History"].map(
-          (tab) => {
-            const isActive =
-              (tab === "All" && statusfilter === "All") ||
-              (tab === "Approved" && statusfilter === "Approved") ||
-              (tab === "Rejected" && statusfilter === "Rejected") ||
-              (tab === "Pending" && statusfilter === "Pending") ||
-              (tab === "Approval History" &&
-                statusfilter === "Approval History");
+        {[
+          "All",
+          "Approved",
+          "Rejected",
+          "Pending",
+          "Under Review",
+          "Approval History",
+        ].map((tab) => {
+          const isActive =
+            (tab === "All" && statusfilter === "All") ||
+            (tab === "Approved" && statusfilter === "Approved") ||
+            (tab === "Rejected" && statusfilter === "Rejected") ||
+            (tab === "Pending" && statusfilter === "Pending") ||
+            (tab === "Under Review" && statusfilter === "Review") ||
+            (tab === "Approval History" && statusfilter === "Approval History");
 
-            let activeColor = "border-blue-500 text-blue-600";
-            let inactiveColor =
-              "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+          let activeColor = "border-blue-500 text-blue-600";
+          let inactiveColor =
+            "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
 
-            if (tab === "Approved") {
-              activeColor = "border-green-500 text-green-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-green-500";
-            } else if (tab === "Rejected") {
-              activeColor = "border-red-500 text-red-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-red-500";
-            } else if (tab === "Pending") {
-              activeColor = "border-yellow-500 text-yellow-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-yellow-500";
-            } else if (tab === "Approval History") {
-              activeColor = "border-cyan-500 text-cyan-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-cyan-500";
-            }
+          if (tab === "Approved") {
+            activeColor = "border-green-500 text-green-600";
+            inactiveColor =
+              "border-transparent text-gray-500 hover:text-green-500";
+          } else if (tab === "Rejected") {
+            activeColor = "border-red-500 text-red-600";
+            inactiveColor =
+              "border-transparent text-gray-500 hover:text-red-500";
+          } else if (tab === "Pending") {
+            activeColor = "border-yellow-500 text-yellow-600";
+            inactiveColor =
+              "border-transparent text-gray-500 hover:text-yellow-500";
+          } else if (tab === "Approval History") {
+            activeColor = "border-cyan-500 text-cyan-600";
+            inactiveColor =
+              "border-transparent text-gray-500 hover:text-cyan-500";
+          }
 
-            return (
-              <button
-                key={tab}
-                onClick={() => {
-                  switch (tab) {
-                    case "All":
-                      setStatusFilter("All");
-                      setPageIndex(0);
-                      break;
-                    case "Approved":
-                      setStatusFilter("Approved");
-                      setPageIndex(0);
-                      break;
-                    case "Rejected":
-                      setStatusFilter("Rejected");
-                      setPageIndex(0);
-                      break;
-                    case "Pending":
-                      setStatusFilter("Pending");
-                      setPageIndex(0);
-                      break;
-                    case "Approval History":
-                      setStatusFilter("Approval History");
-                      setPageIndex(0);
-                      break;
-                  }
-                }}
-                className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                  isActive ? activeColor : inactiveColor
-                }`}
-              >
-                {tab}
-              </button>
-            );
-          },
-        )}
+          return (
+            <button
+              key={tab}
+              onClick={() => {
+                switch (tab) {
+                  case "All":
+                    setStatusFilter("All");
+                    setPageIndex(0);
+                    break;
+                  case "Approved":
+                    setStatusFilter("Approved");
+                    setPageIndex(0);
+                    break;
+                  case "Rejected":
+                    setStatusFilter("Rejected");
+                    setPageIndex(0);
+                    break;
+                  case "Pending":
+                    setStatusFilter("Pending");
+                    setPageIndex(0);
+                    break;
+                  case "Under Review":
+                    setStatusFilter("Review");
+                    setPageIndex(0);
+                    break;
+                  case "Approval History":
+                    setStatusFilter("Approval History");
+                    setPageIndex(0);
+                    break;
+                }
+              }}
+              className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
+                isActive ? activeColor : inactiveColor
+              }`}
+            >
+              {tab}
+            </button>
+          );
+        })}
 
         <div className="flex justify-between ml-auto">
           {isLogistics && (isPlant || isBuyvsrent) && (
@@ -496,6 +500,7 @@ const LogisticsDashboard = () => {
           className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
           style={{ height: `calc(93vh - 140px)` }}
         >
+          <Loading isLoading={isLoading} />
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="top-0 z-10 sticky  bg-gray-50">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -514,10 +519,10 @@ const LogisticsDashboard = () => {
                     Action
                   </th>
                   <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
-                    {userInfo?.is_admin ? "Last Activity" : "Submitted on"}
+                    Created
                   </th>
                   <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
-                    Created On
+                    {userInfo?.is_admin ? "Last Activity" : "Submitted"}
                   </th>
                   <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
                     {" "}
@@ -597,7 +602,10 @@ const LogisticsDashboard = () => {
                         />
                       </div>
                     </td>
-                    <td className="border-gray-300 border-b px-4 py-2 text-[13px] text-gray-700 text-center max-w-1">
+                    <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
+                      {formatDateDDMMYYYY(row.original.created_at)}
+                    </td>
+                    <td className="border-gray-300 border-b px-4 py-2 text-[13px] text-gray-700 text-center w-32">
                       {userInfo?.is_admin
                         ? getlastSubmittedDate(
                             row?.original?.approver_info,
@@ -606,10 +614,8 @@ const LogisticsDashboard = () => {
                         : getSubmittedDate(
                             row?.original?.approver_info,
                             userInfo?.role[0],
+                            "logistics",
                           ) || ""}
-                    </td>
-                    <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                      {formatDateDDMMYYYY(row.original.created_at)}
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                       <div

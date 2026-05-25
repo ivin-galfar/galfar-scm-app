@@ -8,6 +8,7 @@ import { expectedstatusplant } from "../Helpers/statusfinder";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
 import { is_buyrent } from "../Helpers/dept_helper";
+import { useComments } from "../store/helperStore";
 
 const ApproveButton = () => {
   const { brtabledata, setbrtabledata } = useBrTableData();
@@ -17,6 +18,7 @@ const ApproveButton = () => {
   const { setErrorMessage, clearErrorMessage } = useErrorMessage();
   const { setShowToast, resetshowtoast } = useToast();
   const dept = is_buyrent(userInfo?.dept_code) ? "buyvsrent" : "";
+  const { comments, resetComments } = useComments();
 
   const updateStatement = async (cs_id, changestatus) => {
     let file = "";
@@ -32,6 +34,7 @@ const ApproveButton = () => {
         userInfo,
         file,
         filename,
+        comments,
       });
       BrEmailAlert(cs_id, userInfo, dept, brtabledata).catch((err) => {
         const message = err?.response?.data || err?.message || "Email failed";
@@ -47,6 +50,7 @@ const ApproveButton = () => {
       setTimeout(() => {
         resetshowtoast();
         resetShowModal();
+        resetComments();
       }, 1500);
     } catch (error) {
       const message = error?.response?.data || error.message;
@@ -107,7 +111,7 @@ const ApproveButton = () => {
       </button>
       {showmodal && userInfo?.is_admin && (
         <Alerts
-          message={"Are you sure to Sent this statement for Approval?"}
+          message={"Do you want to Sent this statement for Approval?"}
           onCancel={() => resetShowModal()}
           onConfirm={() => updateStatement(brtabledata.id, changestatus)}
         />
