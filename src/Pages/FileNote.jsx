@@ -595,7 +595,7 @@ const FileNote = () => {
                       <span
                         className={`font-semibold ${roleColors[role] || "text-orange-600"}`}
                       >
-                        {role != "inita" ? "Initiator" : ""}:
+                        {role == "inita" ? "Initiator" : role}:
                       </span>
                     )}{" "}
                     {val.comment}

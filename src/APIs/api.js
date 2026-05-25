@@ -900,7 +900,7 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
         created_at: data.created_at,
         is_admin: userInfo.is_admin,
         project_code: data.project_code,
-        exportedstatement: data.exported_statement,
+        exportedstatement: data.exportedstatement,
         file: data.file,
         file_name: data.file_name,
       },

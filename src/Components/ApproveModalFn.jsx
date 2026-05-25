@@ -7,13 +7,16 @@ import { useErrorMessage } from "../store/errorStore";
 import { statusExpected } from "../Helpers/statusfinder";
 import { FnEmailAlert, updatefilenotevalues } from "../APIs/api";
 import { handleFnPrint } from "../Helpers/print_helper";
-import { handleAttachmentsUpload } from "../Helpers/helperfunctions";
+import {
+  generatePDF,
+} from "../Helpers/helperfunctions";
 import { useComments } from "../store/helperStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
 import { useNavigate } from "react-router-dom";
+import { useStatusFilter } from "../store/logisticsStore";
 
 const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const userInfo = useUserInfo();
@@ -30,19 +33,25 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   );
   const navigate = useNavigate();
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
+  const { setStatusFilter } = useStatusFilter();
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatefilenotevalues,
-    onSuccess: async (data) => {
+    onSuccess: async (responseData) => {
+      const pdfUrl = await generatePDF(responseData, userInfo);
+      const finalResponse = pdfUrl
+        ? { ...responseData, exportedstatement: pdfUrl }
+        : responseData;
+      setSelectedValue(finalResponse);
       setShowToast();
       setTimeout(() => {
         resetshowtoast();
         resetShowModal();
         resetComments();
-        navigate("/dashboardlg", { replace: true });
+        navigate("/dashboardfn", { replace: true });
         setStatusFilter("Pending");
       }, 1500);
       try {
-        await FnEmailAlert(data.id, userInfo, dept, data);
+        await FnEmailAlert(finalResponse.id, userInfo, dept, finalResponse);
       } catch (err) {
         const message = err?.response?.data || err?.message || "Email failed";
         setErrorMessage(message);
@@ -60,6 +69,11 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   });
   const submitApproval = async (status) => {
     let updatedstatus = "";
+    const updatedData = {
+      ...data,
+      status: data.status,
+    };
+
     if (status == "approved") {
       updatedstatus = statusExpected(
         userInfo?.role,
@@ -69,23 +83,16 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         data.project_code,
         SpecialProjects,
       );
-
-      setSelectedValue((prev) => ({
-        ...prev,
-        status: updatedstatus,
-      }));
+      updatedData.status = updatedstatus;
+      setSelectedValue(updatedData);
     } else if (status == "rejected") {
       updatedstatus = "rejected";
-      setSelectedValue((prev) => ({
-        ...prev,
-        status: updatedstatus,
-      }));
+      updatedData.status = updatedstatus;
+      setSelectedValue(updatedData);
     } else {
       updatedstatus = "review";
-      setSelectedValue((prev) => ({
-        ...prev,
-        status: updatedstatus,
-      }));
+      updatedData.status = updatedstatus;
+      setSelectedValue(updatedData);
     }
 
     const payload = {
@@ -98,34 +105,6 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       sentforapproval: "yes",
       project_code: data.project_code,
     };
-    if (updatedstatus === "approved") {
-      setShowToast();
-      try {
-        const result = await handleFnPrint(data, userInfo, true);
-        const pdfBlob = result?.pdfBlob;
-
-        if (pdfBlob) {
-          const pdfFile = new File(
-            [pdfBlob],
-            `Approved_Statement_${data.doc_no}.pdf`,
-            {
-              type: "application/pdf",
-            },
-          );
-          const uploadedFiles = await handleAttachmentsUpload(
-            [pdfFile],
-            userInfo,
-          );
-
-          if (uploadedFiles && uploadedFiles.length > 0) {
-            const file = uploadedFiles[0];
-            payload.exportedstatement = file.fileUrl || file.url;
-          }
-        }
-      } catch (err) {
-        console.error("PDF generation/upload failed:", err);
-      }
-    }
 
     updatestatement(payload);
   };

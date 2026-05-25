@@ -10,6 +10,7 @@ import { expectedstatusplant } from "../Helpers/statusfinder";
 import { useComments } from "../store/helperStore";
 import { is_buyrent } from "../Helpers/dept_helper";
 import { useNavigate } from "react-router-dom";
+import { useStatusFilter } from "../store/logisticsStore";
 
 const ApprovalModalBR = () => {
   const { setShowModal, resetShowModal } = useToggleModal();
@@ -20,6 +21,7 @@ const ApprovalModalBR = () => {
   const { comments, setComments, resetComments } = useComments();
   const dept = is_buyrent(userInfo?.dept_code) ? "buyvsrent" : "";
   const navigate = useNavigate();
+  const { setStatusFilter } = useStatusFilter();
 
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatebrstatements,

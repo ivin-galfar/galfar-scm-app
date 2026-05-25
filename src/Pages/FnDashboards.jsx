@@ -644,6 +644,7 @@ const FnDashboards = () => {
                             className={
                               userInfo?.is_admin ||
                               userInfo.role?.includes("initpr") ||
+                              demob_intimators ||
                               isgm ||
                               row.original.category == "Demob"
                                 ? "text-black cursor-pointer"
