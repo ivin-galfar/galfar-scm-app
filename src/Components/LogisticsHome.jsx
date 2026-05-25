@@ -5,7 +5,7 @@ import { SiQuicktime } from "react-icons/si";
 import { GrDocumentStore } from "react-icons/gr";
 import { Link, useNavigate } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
-import { IoDocumentText } from "react-icons/io5";
+import { IoDocumentText, IoWarningOutline } from "react-icons/io5";
 import { MdOutlinePendingActions } from "react-icons/md";
 import { TiTick } from "react-icons/ti";
 import { RxCross1 } from "react-icons/rx";
@@ -93,6 +93,23 @@ const LogisticsHome = () => {
           </Link>
         </div>
         <ul className="p-2 space-y-3 ">
+          <li>
+            <Link to="/dashboardlg">
+              <button
+                className="w-full flex text-left px-3 py-2 justify-between bg-cyan-300 hover:bg-cyan-400 rounded font-medium cursor-pointer"
+                onClick={() => {
+                  setPageIndex(0);
+                  setStatusFilter("Review");
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <IoWarningOutline size={18} />
+                  <span>Under Review</span>
+                </div>
+                <p>{pendingstatements?.length}</p>
+              </button>
+            </Link>
+          </li>
           <li>
             <Link to="/dashboardlg">
               <button

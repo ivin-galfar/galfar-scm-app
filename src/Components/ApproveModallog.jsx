@@ -10,6 +10,7 @@ import { RxCross1 } from "react-icons/rx";
 import { EmailAlert } from "../APIs/api";
 import { is_logistics } from "../Helpers/dept_helper";
 import { useNavigate } from "react-router-dom";
+import { LuRotateCcwSquare } from "react-icons/lu";
 
 const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const { setErrorMessage, errormessage, clearErrorMessage } =
@@ -43,12 +44,15 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
 
     if (status == "approved") {
       updatedstatus = expectedstatus(userInfo.role, project);
+    } else if (status == "review") {
+      updatedstatus = "review";
     } else {
       updatedstatus = "rejected";
     }
     let updatedFormData = {
       ...formData,
       status: updatedstatus,
+      comments,
     };
 
     let comments_role = role_finder(userInfo.role);
@@ -148,12 +152,12 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
             >
               Reject
             </button>
-            {/* <button
+            <button
               className="px-4 py-2 flex items-center gap-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition cursor-pointer"
               onClick={() => submitApproval(cs_id, "review")}
             >
               <LuRotateCcwSquare /> Send For Review
-            </button> */}
+            </button>
           </div>
           {showtoast &&
             !errormessage &&
@@ -170,12 +174,11 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
               </div>
             </div>
           )}
-          {/* {showtoast && lastAction == "review" && !errormessage && (
+          {showtoast && formData.status == "review" && !errormessage && (
             <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-              You have successfully sent back the statement to Initiator for
-              Review!!
+              You have successfully sent back the statement for Review!!
             </div>
-          )} */}
+          )}
         </div>
       </div>
     </div>

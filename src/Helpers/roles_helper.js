@@ -18,7 +18,7 @@ export const categoryapprovers = {
   BUYRENT: ["HOD", "FM", "GM", "CEO"],
   FNIOC: ["HOD", "FM", "GM", "CEO"],
   FNIOCM: ["HOD", "GM", "CEO"],
-  FNDEMOB: ["CM"],
+  FNDEMOB: ["CM", "PM", "PD"],
   FNFWA: ["CM", "PM", "GM"],
   FNFWASP: ["CM", "PM", "PD", "GM"],
   FNFWAS: ["CM", "GM"],
@@ -69,8 +69,8 @@ export const nextRole = (role, category, project_code) => {
         : roleMapfwa[normalizedRole] || null;
 };
 
-export const prevRole = (role) => {
-  const roleMap = {
+export const prevRole = (role, module) => {
+  const logisticsRoleMap = {
     ceo: "fm",
     fm: "gm",
     gm: "pm",
@@ -78,5 +78,28 @@ export const prevRole = (role) => {
     incharge: "initlg",
     initlg: "initlg",
   };
-  return roleMap[role.toLowerCase()] || null;
+
+  const bvrRoleMap = {
+    ceo: "gm",
+    gm: "fm",
+    fm: "hod",
+    hod: "inita",
+  };
+  const fnRoleMap = {
+    ceo: ["gm"],
+    gm: ["fm", "hod", "pm"],
+    fm: ["hod"],
+    hod: ["init", "inita", "initpr", "initdc"],
+    pm: ["cm"],
+    cm: ["initpr", "initdc"],
+  };
+
+  const roleMap =
+    module?.toLowerCase() === "bvr"
+      ? bvrRoleMap
+      : module?.toLowerCase() === "fn"
+        ? fnRoleMap
+        : logisticsRoleMap;
+
+  return roleMap[role?.toLowerCase()] || null;
 };

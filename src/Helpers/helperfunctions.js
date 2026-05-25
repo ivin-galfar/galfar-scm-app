@@ -223,19 +223,28 @@ export const getApproverNames = (flow, dept) => {
   });
 };
 
-export const getSubmittedDate = (approverinfo = [], role) => {
+export const getSubmittedDate = (approverinfo = [], role, module) => {
   let lastsubmissiondate = "";
-  const prevrole = prevRole(role);
-  const prevapprover = approverinfo?.find((a) => a.role == prevrole);
-  if (!prevapprover || !prevapprover.datetime) return "";
-  lastsubmissiondate = formatDateDDMMYYYY(prevapprover?.datetime);
+  const prevrole = prevRole(role, module);
+  const prevapprover = Array.isArray(prevrole)
+    ? [...(approverinfo || [])]
+        .reverse()
+        .find((a) => prevrole.includes(a.role?.toLowerCase()))
+    : [...(approverinfo || [])]
+        .reverse()
+        .find((a) => a.role?.toLowerCase() === prevrole?.toLowerCase());
+  if (!prevapprover || (!prevapprover.datetime && !prevapprover.date))
+    return "";
+  const lastdate = prevapprover?.date || prevapprover?.datetime;
+  lastsubmissiondate = formatDateDDMMYYYYHHMMSS(lastdate);
   return lastsubmissiondate;
 };
 
 export const getlastSubmittedDate = (approverinfo = [], role) => {
   let lastsubmissiondate = "";
+  const lastItem = approverinfo?.[approverinfo.length - 1];
   lastsubmissiondate = formatDateDDMMYYYYHHMMSS(
-    approverinfo?.[approverinfo.length - 1]?.datetime,
+    lastItem?.datetime || lastItem?.date,
   );
   return lastsubmissiondate;
 };

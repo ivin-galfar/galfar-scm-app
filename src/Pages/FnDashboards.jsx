@@ -21,7 +21,12 @@ import { useToast } from "../store/toastStore";
 import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleFnPrint } from "../Helpers/print_helper";
-import { formatDateDDMMYYYY, getType } from "../Helpers/helperfunctions";
+import {
+  formatDateDDMMYYYY,
+  getlastSubmittedDate,
+  getSubmittedDate,
+  getType,
+} from "../Helpers/helperfunctions";
 import { BiBadgeCheck } from "react-icons/bi";
 import {
   useCategories,
@@ -35,6 +40,7 @@ import TypeFilter from "../Components/TypeFilter";
 import { getcategory, getTypes } from "../Helpers/category_helper";
 import { GrAttachment } from "react-icons/gr";
 import InputSearch from "../Components/InputSearch";
+import Loading from "../Components/Loading";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
   const isAdmin = userInfo.is_admin;
@@ -78,7 +84,9 @@ const FnDashboards = () => {
   const isgm = userInfo.role.includes("gm");
   const [total, setTotal] = useState(0);
   const isplant = is_plant(userInfo?.dept_code);
-  const { data: fndata } = useQuery({
+  const demob_intimators =
+    userInfo.role.includes("inith") || userInfo.role.includes("hod");
+  const { data: fndata, isLoading } = useQuery({
     queryKey: [
       "fnid",
       statusfilter,
@@ -204,34 +212,11 @@ const FnDashboards = () => {
     columnHelper.accessor((row) => row?.doc_no, {
       id: "doc_id",
       header: "Doc No.",
-      cell: (info) =>
-        `${info.row.original?.type == "ioc" ? "I - " : "F -" || ""}${info.getValue() || ""}` ||
-        "-",
-    }),
-    columnHelper.accessor((row) => row?.name, {
-      id: "subject",
-      header: "Subject",
-      meta: { className: "max-w-70  whitespace-pre-wrap break-words" },
-      cell: (info) => info.getValue() || "-",
-    }),
-    ...(hasProjectColumn
-      ? [
-          columnHelper.accessor((row) => row?.project_code, {
-            id: "project",
-            header: "Project",
-            cell: (info) => info.getValue() || "-",
-          }),
-        ]
-      : []),
-    columnHelper.accessor((row) => getType(row?.type), {
-      id: "type",
-      header: "Type",
-      cell: (info) => info.getValue() || "-",
-    }),
-    columnHelper.accessor((row) => row?.category, {
-      id: "category",
-      header: "Category",
-      cell: (info) => info.getValue() || "-",
+      cell: (info) => {
+        const type = info.row.original?.type == "ioc" ? "IOC" : "FN";
+        const category = info.row.original?.category.toUpperCase();
+        return `${type}/  ${category} -  ${info.getValue() || ""}`;
+      },
     }),
     ...(hideDepartColumn
       ? [
@@ -248,7 +233,32 @@ const FnDashboards = () => {
           ),
         ]
       : []),
+    ...(hasProjectColumn
+      ? [
+          columnHelper.accessor((row) => row?.project_code, {
+            id: "project",
+            header: "Project",
+            cell: (info) => info.getValue() || "-",
+          }),
+        ]
+      : []),
 
+    columnHelper.accessor((row) => getType(row?.type), {
+      id: "type",
+      header: "Type",
+      cell: (info) => info.getValue() || "-",
+    }),
+    columnHelper.accessor((row) => row?.category, {
+      id: "category",
+      header: "Category",
+      cell: (info) => info.getValue() || "-",
+    }),
+    columnHelper.accessor((row) => row?.name, {
+      id: "subject",
+      header: "Subject",
+      meta: { className: "max-w-70  whitespace-pre-wrap break-words" },
+      cell: (info) => info.getValue() || "-",
+    }),
     columnHelper.accessor((row) => row?.status, {
       id: "status",
       header: "Status",
@@ -295,7 +305,9 @@ const FnDashboards = () => {
               };
             } else if (row?.category === "Demob") {
               return {
-                "Pending For Cm": 50,
+                "Pending For Cm": 30,
+                "Pending For Pm": 70,
+                "Pending For Pd": 85,
                 Approved: 100,
                 Rejected: 100,
               };
@@ -311,7 +323,8 @@ const FnDashboards = () => {
           }
           return {};
         };
-
+        const isDeleted = rowData.deleted;
+        const displayStatus = isDeleted ? "Deleted" : formattedstatus;
         const progressMap = getStatusProgress(rowData);
         const progress = progressMap[formattedstatus] || 0;
 
@@ -341,13 +354,13 @@ const FnDashboards = () => {
         return (
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-gray-700 flex gap-2 items-center">
-              {formattedstatus === "Review" ? (
+              {displayStatus === "Review" ? (
                 <>
                   <IoWarningOutline className="text-yellow-500" size={18} />
                   <span>To be Reviewed</span>
                 </>
               ) : (
-                formattedstatus || "Not Sent For Approval"
+                displayStatus || "Not Sent For Approval"
               )}
             </span>
 
@@ -394,7 +407,11 @@ const FnDashboards = () => {
         cat = getcategory(typeFilter);
       } else if (userInfo.role.includes("initpr")) {
         cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
-      } else if (userInfo.role.includes("cm") || userInfo.role.includes("pm")) {
+      } else if (
+        userInfo.role.includes("cm") ||
+        userInfo.role.includes("pm") ||
+        userInfo.role.includes("pd")
+      ) {
         cat = getcategory(typeFilter).filter(
           (c) => c.includes("FWA") || c.includes("Demob"),
         );
@@ -547,9 +564,10 @@ const FnDashboards = () => {
         </div>
         {
           <div
-            className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
+            className="relative overflow-y-auto bg-white shadow rounded border border-gray-200"
             style={{ height: `calc(93vh - 140px)` }}
           >
+            <Loading isLoading={isLoading} />
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="top-0 z-10 sticky  bg-gray-50">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -568,9 +586,11 @@ const FnDashboards = () => {
                       Action
                     </th>
                     <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
-                      Created On
+                      Created
                     </th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
+                      {userInfo?.is_admin ? "Last Activity" : "Submitted"}
+                    </th>
                     <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
                   </tr>
                 ))}
@@ -649,6 +669,18 @@ const FnDashboards = () => {
                       <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                         {formatDateDDMMYYYY(row.original.created_at)}
                       </td>
+                      <td className="border-gray-300 border-b px-4 py-2 text-[13px] text-gray-700 text-center w-32">
+                        {userInfo?.is_admin
+                          ? getlastSubmittedDate(
+                              row?.original?.approver_info,
+                              userInfo?.role[0],
+                            ) || ""
+                          : getSubmittedDate(
+                              row?.original?.approver_info,
+                              userInfo?.role[0],
+                              "fn",
+                            ) || ""}
+                      </td>
                       <td>
                         {row.original.file_name?.length > 0 && (
                           <span className="flex items-center gap-1 text-gray-400 text-xs">
@@ -659,11 +691,15 @@ const FnDashboards = () => {
                       </td>
                       <td>
                         {" "}
-                        {row.original.demob_intimated && (
+                        {row.original.demob_intimated && demob_intimators && (
                           <BiBadgeCheck
                             color="green"
                             size={20}
-                            title="Intimated"
+                            title={
+                              row.original.intimated_by
+                                ? "Intimated by" + row.original.intimated_by
+                                : "Intimated"
+                            }
                           />
                         )}
                       </td>

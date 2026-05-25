@@ -9,6 +9,7 @@ import { useErrorMessage } from "../store/errorStore";
 import { expectedstatusplant } from "../Helpers/statusfinder";
 import { useComments } from "../store/helperStore";
 import { is_buyrent } from "../Helpers/dept_helper";
+import { useNavigate } from "react-router-dom";
 
 const ApprovalModalBR = () => {
   const { setShowModal, resetShowModal } = useToggleModal();
@@ -18,13 +19,13 @@ const ApprovalModalBR = () => {
   const { brtabledata: data, setbrtabledata } = useBrTableData();
   const { comments, setComments, resetComments } = useComments();
   const dept = is_buyrent(userInfo?.dept_code) ? "buyvsrent" : "";
+  const navigate = useNavigate();
+
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatebrstatements,
     onSuccess: (data) => {
       setShowToast();
       BrEmailAlert(data.id, userInfo, dept, data).catch((err) => {
-        console.log(err);
-
         const message =
           err?.response?.data.error || err?.message || "Email failed";
         setErrorMessage(message);
@@ -33,6 +34,8 @@ const ApprovalModalBR = () => {
         resetshowtoast();
         resetShowModal();
         resetComments();
+        navigate("/dashboardbr", { replace: true });
+        setStatusFilter("Pending");
       }, 1500);
     },
 
@@ -121,7 +124,7 @@ const ApprovalModalBR = () => {
         </div>
         {showtoast && !errormessage && data.status == "review" && (
           <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-            ✅ You have send this Statement for review!
+            ✅ You have sent this Statement for review!
           </div>
         )}{" "}
         {showtoast &&

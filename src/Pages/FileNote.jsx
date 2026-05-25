@@ -81,6 +81,7 @@ const FileNote = () => {
   const { attachments, setAttachments } = useAttachments();
   const { imagesaved } = useImageSaved();
   const { projectcodes, setProjectCodes } = useProjectCodes();
+  const { comments, resetComments } = useComments();
   const { selectedproject, setSelectedProject, resetSelectedproject } =
     useSelectedProject();
   const { categories, setCategories } = useCategories();
@@ -138,6 +139,7 @@ const FileNote = () => {
         clearErrorMessage();
         resetShowModal();
         setDataUpdated(false);
+        resetComments();
       }, 1500);
       try {
         if (data?.sentforapproval === "yes") {
@@ -171,7 +173,7 @@ const FileNote = () => {
     const ref_no = [
       typedefined ?? "",
       category !== "Demob" ? dept || "" : "",
-      category ?? "",
+      category.toUpperCase() ?? "",
       selectedproject ?? "",
       (doc_no?.last_no ?? 0) + 1,
     ]
@@ -248,7 +250,8 @@ const FileNote = () => {
           setSelectedFnValue(template);
           localStorage.setItem("editorContent", JSON.stringify(template));
         });
-      } else if (!type) {
+      } else if (!type && newfn) {
+        sessionStorage.removeItem("filenoteFilters");
         setProjectCodes([]);
         resetSelectedproject();
         setSelectedFnValue("");
@@ -319,6 +322,7 @@ const FileNote = () => {
         action: "save",
         content: editorinfo,
         attachments,
+        comments: comments,
       });
       resetIsRecalled();
     }
@@ -454,6 +458,7 @@ const FileNote = () => {
         {userInfo?.is_admin && newfn && (
           <TypeFilter
             isDocLoading={isDocLoading}
+            type={type}
             category={category}
             projectcodes={projectcodes}
             settype={settype}
@@ -590,7 +595,7 @@ const FileNote = () => {
                       <span
                         className={`font-semibold ${roleColors[role] || "text-orange-600"}`}
                       >
-                        {role}:
+                        {role != "inita" ? "Initiator" : ""}:
                       </span>
                     )}{" "}
                     {val.comment}

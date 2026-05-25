@@ -192,7 +192,8 @@ export const fetchallstatements = async (
 };
 
 export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
-  const { project, cargo_details, status, shipment_no, rejectedby } = formData;
+  const { project, cargo_details, status, shipment_no, rejectedby, comments } =
+    formData;
 
   let project_code = 1;
   if (project != "plant") {
@@ -217,6 +218,7 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
         cargo_details,
         shipment_no,
         rejectedby,
+        comments,
       },
       config,
     );
@@ -695,6 +697,7 @@ export const updatefilenotevalues = async ({
   content,
   attachments,
   project_code,
+  exportedstatement,
 }) => {
   try {
     const config = {
@@ -717,6 +720,7 @@ export const updatefilenotevalues = async ({
         content,
         attachments,
         project_code,
+        exportedstatement,
       },
       config,
     );
@@ -896,6 +900,9 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
         created_at: data.created_at,
         is_admin: userInfo.is_admin,
         project_code: data.project_code,
+        exportedstatement: data.exported_statement,
+        file: data.file,
+        file_name: data.file_name,
       },
       config,
     );
@@ -956,6 +963,7 @@ export const updateiocintimation = async (userInfo, fnid, flag) => {
       `${REACT_SERVER_URL}/filenote/updatedemob/${fnid}`,
       {
         flag: flag,
+        email: userInfo.email.split("@")[0],
       },
       config,
     );

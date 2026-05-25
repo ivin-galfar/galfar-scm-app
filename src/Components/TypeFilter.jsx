@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 import { usePagination } from "../store/statementStore";
 import { is_gm, is_hod } from "../Helpers/dept_helper";
 import { getFeedType } from "../Helpers/helperfunctions";
-import { CiCircleRemove } from "react-icons/ci";
+import { FaRegTimesCircle } from "react-icons/fa";
 
 const TypeFilter = ({
   isDocLoading,
@@ -50,7 +50,8 @@ const TypeFilter = ({
     userInfo?.role.includes("initpr") ||
     userInfo?.role.includes("cm") ||
     userInfo?.role.includes("view") ||
-    userInfo?.role.includes("pm");
+    userInfo?.role.includes("pm") ||
+    userInfo?.role.includes("pd");
   const ishod = is_hod(userInfo?.role);
 
   const fwausers = userInfo.role.includes("initdc");
@@ -101,7 +102,7 @@ const TypeFilter = ({
               <BsAsterisk size={6} color="red" className="mt-2" />{" "}
             </label>
             <select
-              disabled={isDocLoading}
+              disabled={isDocLoading || !type}
               value={category}
               onChange={(e) => handleDocumentcategorytype(e.target.value)}
               className="w-48 md:w-56 lg:w-48 appearance-none rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 bg-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-shadow duration-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-no-repeat bg-right pr-10"
@@ -159,7 +160,7 @@ const TypeFilter = ({
                 setSearchCSName("");
               }}
             >
-              <CiCircleRemove color="red" size={20} />
+              <FaRegTimesCircle color="red" size={15} />
             </span>
           )}
         </div>

@@ -36,8 +36,13 @@ import axios from "axios";
 import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleBrPrint, handlePrint } from "../Helpers/print_helper";
-import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
+import {
+  formatDateDDMMYYYY,
+  getlastSubmittedDate,
+  getSubmittedDate,
+} from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
+import Loading from "../Components/Loading";
 
 const BRDashboards = () => {
   const location = useLocation();
@@ -71,7 +76,7 @@ const BRDashboards = () => {
   const { brcount, setBRCount } = usetotalBRstatements();
   const canFetch = !!userinfo && isBuyvsrent;
 
-  const { data: brstatements } = useQuery({
+  const { data: brstatements, isLoading } = useQuery({
     queryKey: [
       "csid",
       statusfilter,
@@ -222,8 +227,10 @@ const BRDashboards = () => {
               word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase(),
           )
           .join(" ");
-
         const progress = statusProgress[formattedstatus] || 0;
+        const rowData = info.row.original;
+        const isDeleted = rowData.deleted;
+        const displayStatus = isDeleted ? "Deleted" : formattedstatus;
 
         const progressColor =
           formattedstatus === "Rejected"
@@ -245,13 +252,13 @@ const BRDashboards = () => {
         return (
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-gray-700 flex gap-2 items-center">
-              {formattedstatus === "Review" ? (
+              {displayStatus === "Review" ? (
                 <>
                   <IoWarningOutline className="text-yellow-500" size={18} />
                   <span>To be Reviewed</span>
                 </>
               ) : (
-                formattedstatus || "Not Sent For Approval"
+                displayStatus || "Not Sent For Approval"
               )}
             </span>
 
@@ -294,7 +301,9 @@ const BRDashboards = () => {
                         {value.comment !== "" && (
                           <>
                             <strong className="capitalize">
-                              {value.role + ":"}
+                              {value.role != "inita"
+                                ? value.role
+                                : "Initiator" + ":"}
                             </strong>{" "}
                             {value.comment}
                           </>
@@ -415,6 +424,7 @@ const BRDashboards = () => {
             className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
             style={{ height: `calc(93vh - 140px)` }}
           >
+            <Loading isLoading={isLoading} />
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="top-0 z-10 sticky  bg-gray-50">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -433,7 +443,10 @@ const BRDashboards = () => {
                       Action
                     </th>
                     <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
-                      Created On
+                      Created
+                    </th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
+                      {userinfo?.is_admin ? "Last Activity" : "Submitted"}
                     </th>
                   </tr>
                 ))}
@@ -511,6 +524,18 @@ const BRDashboards = () => {
 
                       <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                         {formatDateDDMMYYYY(row.original.created_at)}
+                      </td>
+                      <td className="border-gray-300 border-b px-4 py-2 text-[13px] text-gray-700 text-center w-32">
+                        {userinfo?.is_admin
+                          ? getlastSubmittedDate(
+                              row?.original?.approver_info,
+                              userinfo?.role[0],
+                            ) || ""
+                          : getSubmittedDate(
+                              row?.original?.approver_info,
+                              userinfo?.role[0],
+                              "bvr",
+                            ) || ""}
                       </td>
                     </tr>
                   ))
