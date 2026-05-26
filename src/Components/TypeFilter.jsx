@@ -113,7 +113,9 @@ const TypeFilter = ({
             >
               <option value="">📋 - Select Category - </option>
               {categories?.map((category) => (
-                <option key={category}>{category}</option>
+                <option key={category} value={category}>
+                  {category !== "FWA" ? category : "HWA"}
+                </option>
               ))}
             </select>
           </div>

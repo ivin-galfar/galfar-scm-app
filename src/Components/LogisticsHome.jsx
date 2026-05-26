@@ -53,6 +53,10 @@ const LogisticsHome = () => {
     cs_id?.filter(
       (item) => item.status?.includes("rejected") && item.deleted == 0,
     ) || [];
+  const reviewstatements =
+    cs_id?.filter(
+      (item) => item.status?.includes("review") && item.deleted == 0,
+    ) || [];
 
   const today = new Date();
   const { setStatusFilter } = useStatusFilter();
@@ -106,7 +110,7 @@ const LogisticsHome = () => {
                   <IoWarningOutline size={18} />
                   <span>Under Review</span>
                 </div>
-                <p>{pendingstatements?.length}</p>
+                <p>{reviewstatements?.length}</p>
               </button>
             </Link>
           </li>

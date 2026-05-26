@@ -251,7 +251,10 @@ const FnDashboards = () => {
     columnHelper.accessor((row) => row?.category, {
       id: "category",
       header: "Category",
-      cell: (info) => info.getValue() || "-",
+      cell: (info) => {
+        const value = info.getValue();
+        return value === "FWA" ? "HWA" : value || "-";
+      },
     }),
     columnHelper.accessor((row) => row?.name, {
       id: "subject",
