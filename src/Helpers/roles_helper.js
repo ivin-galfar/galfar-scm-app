@@ -89,7 +89,7 @@ export const prevRole = (role, module) => {
     ceo: ["gm"],
     gm: ["fm", "hod", "pm"],
     fm: ["hod"],
-    hod: ["init", "inita", "initpr", "initdc"],
+    hod: ["init", "inita", "initpr", "initdc", "initfn"],
     pm: ["cm"],
     cm: ["initpr", "initdc"],
   };
