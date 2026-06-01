@@ -192,6 +192,8 @@ const LogisticsDashboard = () => {
     const Approvals = await fetchApproverDetails(userInfo, cs_id);
     const name = fetchPmName(Approvals.project);
     setPmName(name);
+    console.log("approvals", Approvals);
+
     setSelectedProject(Approvals.project);
     setApproverHistory(Approvals);
     resetSelectedId();
