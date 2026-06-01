@@ -24,13 +24,16 @@ const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
   const isLoginPage = location.pathname === "/login";
-  // useEffect(() => {
-  //   if (localStorage.getItem("app_version") !== APP_VERSION) {
-  //     localStorage.removeItem("userInfo");
-  //     localStorage.setItem("app_version", APP_VERSION);
-  //     window.location.href = "/login";
-  //   }
-  // }, []);
+
+  useEffect(() => {
+    const storedAppVersion = localStorage.getItem("app_version");
+
+    if (storedAppVersion !== APP_VERSION) {
+      localStorage.removeItem("userInfo");
+      localStorage.setItem("app_version", APP_VERSION);
+      window.location.replace("/login");
+    }
+  }, []);
 
   return (
     <div

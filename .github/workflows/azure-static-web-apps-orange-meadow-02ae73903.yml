@@ -18,6 +18,7 @@ jobs:
       VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
       VITE_REACT_PROD_SERVER_URL: ${{ secrets.VITE_REACT_PROD_SERVER_URL }}
       VITE_SPECIAL_PROJECTS: ${{ secrets.VITE_SPECIAL_PROJECTS }}
+      VITE_APP_VERSION: ${{ secrets.VITE_APP_VERSION }}
     steps:
       - uses: actions/checkout@v3
         with:
