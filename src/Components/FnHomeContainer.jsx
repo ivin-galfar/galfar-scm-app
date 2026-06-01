@@ -32,7 +32,7 @@ const FnHomeContainer = () => {
   const { setStatusFilter } = useStatusFilter();
   const { newfn, setNewfn } = usenewfn();
   const { attachments, setAttachments } = useAttachments();
-  const ishire = is_hire(userInfo.role);
+  const ishire = is_hire(userInfo?.role);
   let pending = userInfo?.is_admin
     ? (data?.count?.review_count ?? 0)
     : (data?.count?.pending_count ?? 0);

@@ -18,16 +18,17 @@ import BRDashboards from "./Pages/BRDashboards";
 import FileNote from "./Pages/FileNote";
 import { is_fnote } from "./Helpers/dept_helper";
 import FnDashboards from "./Pages/FnDashboards";
+import { APP_VERSION } from "../config/ENV";
 
 const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
   const isLoginPage = location.pathname === "/login";
-
   useEffect(() => {
-    if (!localStorage.getItem("app_version")) {
-      localStorage.setItem("app_version", "1.7.5");
+    if (localStorage.getItem("app_version") !== APP_VERSION) {
       localStorage.removeItem("userInfo");
+      localStorage.setItem("app_version", APP_VERSION);
+      window.location.href = "/login";
     }
   }, []);
 
