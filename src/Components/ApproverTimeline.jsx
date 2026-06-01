@@ -11,10 +11,6 @@ const ApproverTimeline = ({ approverhistory }) => {
   const { pmname } = usePmName();
   const { selectedproject } = useSelectedProject();
   const hasPD = SPECIAL_PROJECTS.includes(Number(selectedproject));
-  console.log("haspd", selectedproject);
-  console.log("type", typeof selectedproject);
-
-  console.log("spl", SPECIAL_PROJECTS);
 
   let roles = [
     "initlg",
@@ -82,7 +78,6 @@ const ApproverTimeline = ({ approverhistory }) => {
         return "";
     }
   };
-  // console.log("roles", roles);
 
   return (
     <div className="overflow-y-auto w-3xl ">
