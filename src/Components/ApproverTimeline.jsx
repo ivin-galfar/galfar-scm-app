@@ -11,6 +11,8 @@ const ApproverTimeline = ({ approverhistory }) => {
   const { pmname } = usePmName();
   const { selectedproject } = useSelectedProject();
   const hasPD = SPECIAL_PROJECTS.includes(Number(selectedproject));
+  console.log("haspd", hasPD);
+  console.log("spl", SPECIAL_PROJECTS);
 
   let roles = [
     "initlg",
@@ -78,6 +80,7 @@ const ApproverTimeline = ({ approverhistory }) => {
         return "";
     }
   };
+  console.log("roles", roles);
 
   return (
     <div className="overflow-y-auto w-3xl ">
@@ -92,6 +95,7 @@ const ApproverTimeline = ({ approverhistory }) => {
                 : getApproverName(ap);
           const circleColor = colorMap[index];
           const comment = getComment(ap, approverhistory);
+          console.log("name", name);
 
           return (
             <div
