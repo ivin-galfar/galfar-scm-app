@@ -207,6 +207,7 @@ const FnDashboards = () => {
   const columns = [
     columnHelper.accessor("sl", {
       header: "Sl. No.",
+      meta: { className: "w-20  whitespace-pre-wrap break-words" },
       cell: ({ row }) => row.index + 1,
     }),
     columnHelper.accessor((row) => row?.doc_no, {
@@ -217,6 +218,12 @@ const FnDashboards = () => {
         const category = info.row.original?.category.toUpperCase();
         return `${type}/  ${category} -  ${info.getValue() || ""}`;
       },
+    }),
+    columnHelper.accessor((row) => row?.name, {
+      id: "subject",
+      header: "Subject",
+      meta: { className: "max-w-70  whitespace-pre-wrap break-words" },
+      cell: (info) => info.getValue() || "-",
     }),
     ...(hideDepartColumn
       ? [
@@ -256,12 +263,7 @@ const FnDashboards = () => {
         return value === "FWA" ? "HWA" : value || "-";
       },
     }),
-    columnHelper.accessor((row) => row?.name, {
-      id: "subject",
-      header: "Subject",
-      meta: { className: "max-w-70  whitespace-pre-wrap break-words" },
-      cell: (info) => info.getValue() || "-",
-    }),
+
     columnHelper.accessor((row) => row?.status, {
       id: "status",
       header: "Status",
