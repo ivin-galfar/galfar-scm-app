@@ -211,7 +211,7 @@ const FnDashboards = () => {
     }),
     columnHelper.accessor((row) => row?.doc_no, {
       id: "doc_id",
-      header: "Doc No.",
+      header: "Doc. No.",
       cell: (info) => {
         const type = info.row.original?.type == "ioc" ? "IOC" : "FN";
         const category = info.row.original?.category.toUpperCase();

@@ -201,7 +201,7 @@ const BRDashboards = () => {
     }),
     columnHelper.accessor((row) => row?.id, {
       id: "cs_no",
-      header: "Cs No.",
+      header: "Doc. No.",
       cell: (info) => "BVR - " + info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.item, {
@@ -496,7 +496,8 @@ const BRDashboards = () => {
                             className={
                               userinfo?.is_admin ||
                               userinfo.role?.includes("inita") ||
-                              isgm
+                              isgm ||
+                              ishod
                                 ? "text-black cursor-pointer"
                                 : "text-gray-400 pointer-events-none cursor-not-allowed"
                             }

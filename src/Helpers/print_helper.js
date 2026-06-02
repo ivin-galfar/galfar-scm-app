@@ -68,7 +68,7 @@ export const handlePrint = async (formData, tableData, userInfo) => {
   const labelX = 230;
   const valueX = 250;
 
-  doc.text("CS No.:", labelX, 38);
+  doc.text("Doc. No.:", labelX, 38);
   doc.text(formData.id.toString(), valueX, 38);
 
   doc.text("Date:", labelX, 45);
