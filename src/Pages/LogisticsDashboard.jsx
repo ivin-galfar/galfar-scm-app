@@ -245,14 +245,14 @@ const LogisticsDashboard = () => {
       header: "Sl. No.",
       cell: ({ row }) => row.index + 1,
     }),
+    columnHelper.accessor((row) => row?.id, {
+      id: "csno",
+      header: "Doc. No.",
+      cell: (info) => info.getValue() || "-",
+    }),
     columnHelper.accessor((row) => row?.shipment_no, {
       id: "shipment",
       header: "Shipment No.",
-      cell: (info) => info.getValue() || "-",
-    }),
-    columnHelper.accessor((row) => row?.id, {
-      id: "csno",
-      header: "Cs No.",
       cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.project, {
@@ -356,7 +356,7 @@ const LogisticsDashboard = () => {
       {
         id: "comments",
         header: "Approver Comments",
-        meta: { className: "w-50 max-w-xs whitespace-pre-wrap break-words" },
+        meta: { className: "w-48 max-w-xs whitespace-pre-wrap break-words" },
         cell: (info) => {
           const comments = info.getValue();
           if (

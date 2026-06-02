@@ -353,7 +353,7 @@ const Dashboard = () => {
         },
       );
     }
-    doc.text(`Cs No.: ${updatedFormData.id}`, 200, 32, {
+    doc.text(`Doc. No.: ${updatedFormData.id}`, 200, 32, {
       align: "right",
     });
     doc.text(
@@ -363,11 +363,15 @@ const Dashboard = () => {
       { align: "right" },
     );
 
-    const activeVendorIndexes = totals
-      .map((t, idx) => (t > 0 ? idx : -1))
-      .filter((idx) => idx !== -1);
-
     const vendorNames = Object.values(tableData[0].vendors || {});
+    const activeVendorIndexes = vendorNames.reduce((acc, val, idx) => {
+      if (val !== "") {
+        acc.push(idx);
+      }
+
+      return acc;
+    }, []);
+
     const vendorHeaders = activeVendorIndexes.map((i) => vendorNames[i]);
 
     const headerRow1 = [
@@ -605,7 +609,21 @@ const Dashboard = () => {
     }),
     columnHelper.accessor((row) => row?.formData?.id, {
       id: "mrno",
-      header: "Cs No.",
+      header: "Doc. No.",
+      cell: (info) => {
+        const id =
+          info.row?.original?.formData?.type == "hiring"
+            ? "H - " + info.getValue() || "-"
+            : "A -" + info.getValue() || "-";
+        console.log(info.row.formData);
+
+        return id;
+      },
+    }),
+    columnHelper.accessor((row) => row?.formData?.hiringname, {
+      id: "hiring.name",
+      header: "Subject",
+      meta: { className: "w-70 max-w-xs whitespace-pre-wrap break-words" },
       cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor(
@@ -618,13 +636,6 @@ const Dashboard = () => {
         cell: (info) => info.getValue() || "-",
       },
     ),
-
-    columnHelper.accessor((row) => row?.formData?.hiringname, {
-      id: "hiring.name",
-      header: "Hiring/Asset Name",
-      meta: { className: "w-80 max-w-xs whitespace-pre-wrap break-words" },
-      cell: (info) => info.getValue() || "-",
-    }),
     columnHelper.accessor((row) => row?.formData?.qty, {
       id: "quantity",
       header: "Quantity",
@@ -904,7 +915,7 @@ const Dashboard = () => {
                       </Link>
                       <IoPrint
                         className={` ${
-                          !userInfo?.is_admin && !isgm
+                          !userInfo?.is_admin && !isgm && !ishod
                             ? "text-gray-400 pointer-events-none cursor-not-allowed"
                             : "text-black cursor-pointer"
                         }`}

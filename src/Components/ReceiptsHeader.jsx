@@ -644,7 +644,7 @@ const TableHeader = ({ isAdmin }) => {
           {particularname == "" ? (
             <div className="flex flex-col flex-grow ">
               <label htmlFor="mrNo" className=" text-left text-gray-700 mb-1">
-                Choose CS No.
+                Choose Doc. No.
               </label>
               <select
                 id="mrNo"

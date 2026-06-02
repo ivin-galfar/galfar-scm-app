@@ -26,7 +26,7 @@ const ApprovalHistory = () => {
       <div className="flex  items-start ">
         <div className="flex items-center gap-5">
           <div className="text-sm font-medium text-gray-700 text-nowrap justify-center">
-            Select CS NO:
+            Select Doc. NO:
           </div>
           <div className="text-sm font-medium text-gray-700">
             <select
