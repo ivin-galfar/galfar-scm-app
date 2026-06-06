@@ -64,6 +64,8 @@ const TableHeader = ({ isAdmin }) => {
   const [triggerdelete, setTriggerdelete] = useState(false);
   const navigate = useNavigate();
   const { mrnumber } = useParams();
+  const selectedOptionValue =
+    selectedmr || formData?.id || mrnumber || "default";
   const { setQuantity } = useUpdateQuantity();
   const { setSortVendors, resetSortVendors } = useSortVendors();
   const { setClearTable } = useClearStatementTable();
@@ -513,20 +515,18 @@ const TableHeader = ({ isAdmin }) => {
             }
           </div>
         </div>
-        <div className="flex-1 flex justify-center mr-35">
-          <h2 className="text-xl font-medium uppercase text-center p-2 ml-5">
-            GALFAR ENGINEERING & CONTRACTING WLL EMIRATES
-          </h2>
-        </div>
 
         <div className="w-[250px]" />
       </div>
       <div className="flex justify-between items-center w-full relative">
         <div className="w-1/3" />
-        <div className="flex w-1/4">
-          <h3 className="text-md font-medium text-center left-1/2 ml-10 absolute transform -translate-x-1/2 italic">
-            COMPARATIVE STATEMENT
-          </h3>
+        <div className="text-center">
+          <p className="text-l font-semibold uppercase tracking-[0.3em] text-slate-500">
+            Galfar Engineering & Contracting WLL Emirates
+          </p>
+          <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-700">
+            Comparative Statement
+          </h2>
         </div>
 
         <div className="flex w-1/4 justify-between">
@@ -649,19 +649,34 @@ const TableHeader = ({ isAdmin }) => {
               <select
                 id="mrNo"
                 className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                value={formData?.id || mrnumber || "default"}
+                value={selectedOptionValue}
                 onChange={(e) => {
-                  handleChange("equipmrnovalue")(e);
-                  if (e.target.value !== "default") {
-                    fetchReceipt(e.target.value);
+                  const selectedId = e.target.value;
+                  const optionList = isAdmin ? mrno : reqmrno;
+                  const selectedOption = optionList?.find(
+                    (item) => item.id === selectedId,
+                  );
+                  const selectedDocNo = selectedOption?.doc_no || "";
+
+                  setSharedTableData((prev) => ({
+                    ...prev,
+                    formData: {
+                      ...prev.formData,
+                      equipmrnovalue:
+                        selectedId !== "default" ? selectedDocNo : "",
+                    },
+                  }));
+
+                  if (selectedId !== "default") {
+                    fetchReceipt(selectedId);
                     setIsMRSelected(true);
-                    setSelectedMr(e.target.value);
+                    setSelectedMr(selectedId);
                     setfreezeQuantity(true);
                   } else {
                     resetSortVendors();
                     setClearTable();
                     setIsMRSelected(false);
-                    setSelectedMr(e.target.value);
+                    setSelectedMr(selectedId);
                     setSharedTableData({ formData: {}, tableData: [] });
                     navigate("/receipts", { replace: true });
                   }
@@ -669,8 +684,8 @@ const TableHeader = ({ isAdmin }) => {
               >
                 <option value="default">Select an option</option>
                 {(isAdmin ? mrno : reqmrno)?.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
+                  <option key={value.id} value={value.id}>
+                    {value.doc_no || value.id}
                   </option>
                 ))}
               </select>
@@ -775,12 +790,8 @@ const TableHeader = ({ isAdmin }) => {
                 </button>
                 <button
                   onClick={setIsAlerted}
-                  className={`flex items-center px-2 py-0.5 bg-cyan-500 text-white text-sm rounded hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition ${formData.status !== "review" && formData.status !== "reverted" && formData.status !== null && formData.status != "Pending For HOD" ? "bg-blue-400 text-white opacity-60 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-700 focus:ring-blue-500 cursor-pointer"}`}
-                  disabled={
-                    formData.status !== null &&
-                    formData.status != "Pending For HOD" &&
-                    formData.status !== "reverted"
-                  }
+                  className={`flex items-center px-2 py-0.5 bg-cyan-500 text-white text-sm rounded hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition ${formData.status == null ? "bg-blue-400 text-white opacity-60 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-700 focus:ring-blue-500 cursor-pointer"}`}
+                  disabled={formData.status == null}
                   type="button"
                 >
                   <FaEdit className="mr-1" size={14} />

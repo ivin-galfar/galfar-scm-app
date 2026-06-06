@@ -595,7 +595,10 @@ const FileNote = () => {
                       <span
                         className={`font-semibold ${roleColors[role] || "text-orange-600"}`}
                       >
-                        {role == "inita" ? "Initiator" : role}:
+                        {role == "Initfn" || role == "Inita"
+                          ? "Initiator"
+                          : role.toUpperCase()}{" "}
+                        :
                       </span>
                     )}{" "}
                     {val.comment}

@@ -19,13 +19,15 @@ import {
   is_plant,
   is_pm,
 } from "../Helpers/dept_helper";
-import PlantHome from "./PlantHome";
 import LogisticsHome from "./LogisticsHome";
 import { useDashboardType } from "../store/logisticsStore";
 import { getDeptConfig } from "../Helpers/Permissions";
 import HomeContainer from "./HomeContainer";
 import { IoDocument } from "react-icons/io5";
 import FnHomeContainer from "./FnHomeContainer";
+import HiringHome from "./HiringHome";
+import AssetHome from "./AssetHome";
+import { FaToolbox } from "react-icons/fa6";
 
 const Home = () => {
   const userInfo = useUserInfo();
@@ -48,8 +50,14 @@ const Home = () => {
 
   const departments = [
     {
-      key: "plant",
-      name: "Hiring / Asset",
+      key: "hiring",
+      name: "Hiring CS",
+      icon: <FaToolbox size={18} />,
+      color: " bg-blue-600",
+    },
+    {
+      key: "asset",
+      name: "Asset CS",
       icon: <LuFactory size={18} />,
       color: " bg-blue-600",
     },
@@ -61,7 +69,7 @@ const Home = () => {
     },
     {
       key: "logistics",
-      name: "Logistics",
+      name: "Logistics CS",
       icon: <FaTruck size={18} />,
       color: "bg-indigo-600",
     },
@@ -146,7 +154,8 @@ const Home = () => {
       </div>
 
       <div className="bg-white border-white rounded-b-md pl-10 mt-0 shadow">
-        {isPlant && selectedDept === "plant" && <PlantHome />}
+        {isPlant && selectedDept === "hiring" && <HiringHome />}
+        {isPlant && selectedDept === "asset" && <AssetHome />}
         {isLogistics && selectedDept === "logistics" && <LogisticsHome />}
         {(isasset || isfm || ishod || isceo || isgm) &&
           selectedDept === "bvrplant" && <HomeContainer />}

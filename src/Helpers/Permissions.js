@@ -12,9 +12,9 @@ export const getDeptConfig = ({
   isdc,
   ishire,
 }) => {
-  let defaultDept = "plant";
-  let activeDept = "plant";
-  let allowedDept = ["logistics", "bvrplant", "plant", "fn"];
+  let defaultDept = "";
+  let activeDept = "";
+  let allowedDept = ["fn"];
   if (isfm) {
     defaultDept = "bvrplant";
     activeDept = "bvrplant";
@@ -39,32 +39,31 @@ export const getDeptConfig = ({
         allowedDept = ["logistics"];
       }
     } else if (isPlant) {
-      allowedDept = ["plant"];
-      activeDept = "plant";
-      defaultDept = "plant";
       if (isasset) {
-        allowedDept.push("bvrplant", "fn");
+        allowedDept.push("asset", "bvrplant", "fn");
+        activeDept = "asset";
+        defaultDept = "asset";
       } else if (isdc) {
         allowedDept.push("fn");
         allowedDept.push("fn");
         activeDept = "fn";
         defaultDept = "fn";
-        allowedDept = allowedDept.filter((dept) => dept !== "plant");
       } else if (isfnote) {
         activeDept = "fn";
         defaultDept = "fn";
         allowedDept.push("fn");
 
-        if (ishire || isasset) {
-          allowedDept.push("plant");
-          activeDept = "plant";
-          defaultDept = "plant";
-        } else {
-          // remove plant when only fnote (with or without asset)
-          allowedDept = allowedDept.filter((dept) => dept !== "plant");
+        if (ishire) {
+          allowedDept.push("hiring");
+          activeDept = "hiring";
+          defaultDept = "hiring";
         }
       }
     }
+  } else {
+    allowedDept = ["logistics", "bvrplant", "fn", "hiring", "asset"];
+    activeDept = "hiring";
+    defaultDept = "hiring";
   }
 
   return {

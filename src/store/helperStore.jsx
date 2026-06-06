@@ -98,3 +98,9 @@ export const useRecallAlert = create((set) => ({
   setIsAlerted: () => set({ isAlerted: true }),
   resetIsAlerted: () => set({ isAlerted: false }),
 }));
+
+export const useLoading = create((set) => ({
+  isLoading: false,
+  setIsLoading: () => set({ isLoading: true }),
+  resetIsLoading: () => set({ isLoading: false }),
+}));

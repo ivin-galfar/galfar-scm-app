@@ -6,11 +6,15 @@ import { AppContext } from "./Context";
 import { useState } from "react";
 import ApproveModal from "./ApproveModal";
 import ReasonForSelection from "./ReasonForSelection";
+import Loading from "./Loading";
 import fetchStatments from "../APIs/StatementsApi";
 import { useMutation } from "@tanstack/react-query";
 import { feedReceipt, updateReceipt } from "../APIs/api";
 import { useEdit, useSortVendors, useUpdate } from "../store/statementStore";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelectedDept } from "../store/userStore";
+import { useDashboardType } from "../store/logisticsStore";
+import { useLoading } from "../store/helperStore";
 
 const Receipts = () => {
   const userInfo = useUserInfo();
@@ -19,6 +23,8 @@ const Receipts = () => {
   const [showcalc, setShowcalc] = useState(false);
   const [showmodal, setShowmodal] = useState(false);
   const { isEdit, resetIsEdit } = useEdit();
+  const { dashboardType } = useDashboardType();
+  const { isLoading, setIsLoading, resetIsLoading } = useLoading();
   const navigate = useNavigate();
   const {
     sharedTableData,
@@ -234,11 +240,13 @@ const Receipts = () => {
 
   useEffect(() => {
     const fetchMR = async () => {
+      setIsLoading();
       try {
         const { reqMrValues, mrValues } = await fetchStatments({
           expectedStatuses,
           userInfo,
           module: location.pathname,
+          type: dashboardType,
         });
 
         setReqMrno(reqMrValues);
@@ -246,6 +254,8 @@ const Receipts = () => {
       } catch (error) {
         let message = error?.response?.data?.message;
         setErrormessage(message ? message : error.message);
+      } finally {
+        resetIsLoading();
       }
     };
     fetchMR();
@@ -315,6 +325,7 @@ const Receipts = () => {
 
   return (
     <div className="pt-1 pl-10 pr-5 pb-28 relative  flex-grow">
+      <Loading isLoading={isLoading} />
       <h1 className="font-bold mb-4">
         <TableHeader isAdmin={userInfo?.is_admin} />
       </h1>
@@ -409,7 +420,7 @@ const Receipts = () => {
                       setShowmodal(true);
                     }}
                     disabled={statusclass != ""}
-                    className={`px-4 py-2 ${buttonText == "Approved" || buttonText == "Rejected" ? "ml-96" : buttonText == "under Review" ? "ml-90" : "ml-80"} max-h-10 text-white font-semibold  ${
+                    className={`px-4 py-2 ${buttonText == "Approved" || buttonText == "Rejected" ? "ml-96" : buttonText == "under Review" ? "ml-90" : "ml-85"} max-h-10 text-white font-semibold  ${
                       buttonClass
                     } ${buttonText == "Already Requested" ? "cursor-not-allowed" : ""} focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75  transition duration-300 ease-in-out"
                   `}
@@ -454,7 +465,7 @@ const Receipts = () => {
                 <div className="justify-end flex">
                   <button
                     disabled={statusclass != ""}
-                    className={`px-10 py-2  text-white font-semibold rounded max-h-10 ${buttonText === "Approved" || buttonText === "Rejected" ? "ml-86" : "ml-70"}  ${buttonClass}`}
+                    className={`px-10 py-2  text-white font-semibold rounded max-h-10 ${buttonText === "Approved" || buttonText === "Rejected" ? "ml-86" : "ml-75"}  ${buttonClass}`}
                     onClick={() => setShowmodal(true)}
                   >
                     {buttonText}

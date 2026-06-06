@@ -15,6 +15,7 @@ import {
   is_gm,
   is_ceo,
   is_dc,
+  is_hire,
 } from "../Helpers/dept_helper";
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
@@ -32,6 +33,7 @@ const Header = () => {
   const isPlant = is_plant(userInfo?.dept_code);
   const isfm = is_fm(userInfo?.role);
   const isasset = is_asset(userInfo?.role);
+  const ishire = is_hire(userInfo?.role);
   const isdc = is_dc(userInfo?.role);
 
   const ishod = is_hod(userInfo?.role);
@@ -63,13 +65,26 @@ const Header = () => {
     isceo,
     isgm,
     isdc,
+    ishire,
   });
+
+  const effectiveDept = selectedDept || defaultDept;
+  const dashboardLink =
+    effectiveDept === "hiring" || effectiveDept === "asset"
+      ? "/dashboard"
+      : effectiveDept === "logistics"
+        ? "/dashboardlg"
+        : effectiveDept === "fn"
+          ? "/dashboardfn"
+          : effectiveDept === "bvrplant"
+            ? "/dashboardbr"
+            : "/dashboard";
 
   useEffect(() => {
     if (!userInfo) return;
     setSelectedDept(defaultDept);
     setDashboardType(defaultDept);
-  }, [userInfo, isLogistics, isfm, isPlant, isasset]);
+  }, [userInfo, isLogistics, isfm, isPlant, isasset, defaultDept]);
   const isDisabled =
     (userInfo?.is_admin &&
       !userInfo?.role?.includes("inith") &&
@@ -99,13 +114,7 @@ const Header = () => {
                   Home
                 </NavLink>
                 <NavLink
-                  to={
-                    selectedDept == "plant"
-                      ? "/dashboard"
-                      : selectedDept == "logistics"
-                        ? "/dashboardlg"
-                        : "/dashboardbr"
-                  }
+                  to={dashboardLink}
                   className={() => {
                     const isActive =
                       path === "/dashboard" ||
@@ -113,7 +122,6 @@ const Header = () => {
                       path.startsWith("/receipts") ||
                       path === "/dashboardlg" ||
                       path.startsWith("/lstatements") ||
-                      path === "/dashboardbr" ||
                       path.startsWith("/brstatement");
 
                     return `text-gray-700 hover:text-blue-600 ${
@@ -124,11 +132,11 @@ const Header = () => {
                     setStatusFilter("All");
                     setStatusFilterzustand("All");
                     setMultiStatusFilter([]);
-                    setDashboardType(selectedDept);
+                    setDashboardType(effectiveDept);
                     setPageSize(20);
                   }}
                 >
-                  Comp. Statements
+                  Comparative Statements
                 </NavLink>
 
                 <NavLink
@@ -146,9 +154,6 @@ const Header = () => {
                   FN/IOC
                 </NavLink>
 
-                {/* <NavLink to="/filenote" className={navLinkClasses}>
-                  Documents
-                </NavLink> */}
                 {userInfo?.email && <UserDropdown />}
               </nav>
             </div>

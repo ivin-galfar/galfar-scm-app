@@ -16,10 +16,15 @@ const DashboardButton = () => {
   const ispd = is_pd(userInfo.role);
 
   const colorMap = {
-    plant: {
+    hiring: {
       border: "border-blue-500",
       text: "text-blue-600",
       hover: "hover:text-blue-700",
+    },
+    asset: {
+      border: "border-violet-500",
+      text: "text-violet-600",
+      hover: "hover:text-violet-700",
     },
     logistics: {
       border: "border-emerald-500",
@@ -27,16 +32,21 @@ const DashboardButton = () => {
       hover: "hover:text-emerald-700",
     },
     bvrplant: {
-      border: "border-amber-500",
-      text: "text-amber-600",
-      hover: "hover:text-amber-700",
+      border: "border-orange-500",
+      text: "text-orange-600",
+      hover: "hover:text-orange-700",
     },
   };
 
   const dashboards = [
     {
-      key: "plant",
-      label: "Hiring/Asset",
+      key: "hiring",
+      label: "Hiring CS",
+      path: "/dashboard",
+    },
+    {
+      key: "asset",
+      label: "Asset CS",
       path: "/dashboard",
     },
     {
@@ -54,10 +64,10 @@ const DashboardButton = () => {
       return dash.key === "logistics";
     }
     if (isasset) {
-      return dash.key !== "logistics";
+      return dash.key !== "logistics" && dash.key !== "hiring";
     }
     if (isfm) {
-      return dash.key !== "plant";
+      return dash.key !== "hiring" && dash.key !== "asset";
     }
     return true;
   });

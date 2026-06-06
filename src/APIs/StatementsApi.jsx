@@ -11,6 +11,7 @@ const fetchStatments = async ({
   multiStatus,
   searchcsno,
   searchcsname,
+  type,
 }) => {
   try {
     const config = {
@@ -20,20 +21,7 @@ const fetchStatments = async ({
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    let type = null;
-    if (userInfo?.is_admin) {
-      const role = userInfo.role || "";
 
-      if (role.includes("inita")) {
-        type = "asset";
-      } else if (role.includes("inith")) {
-        type = "hiring";
-      }
-
-      if (!role.includes("inita") && !role.includes("inith")) {
-        return;
-      }
-    }
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
 
     const response = await axios.get(`${REACT_SERVER_URL}/receipts/`, {
@@ -59,7 +47,11 @@ const fetchStatments = async ({
     let categorizedReceipts = receipts;
 
     const mrValues = categorizedReceipts
-      .map((receipt) => receipt.formData?.id)
+      .map((receipt) => {
+        const id = receipt.formData?.id;
+        const doc_no = receipt.formData?.doc_no;
+        return id ? { id, doc_no } : null;
+      })
       .filter(Boolean);
 
     const filteredReceipts = categorizedReceipts.filter((receipt) => {
@@ -76,7 +68,11 @@ const fetchStatments = async ({
     });
 
     const reqMrValues = filteredReceipts
-      .map((receipt) => receipt.formData?.id)
+      .map((receipt) => {
+        const id = receipt.formData?.id;
+        const doc_no = receipt.formData?.doc_no;
+        return id ? { id, doc_no } : null;
+      })
       .filter(Boolean);
 
     return {
