@@ -207,7 +207,7 @@ const FnDashboards = () => {
   const columns = [
     columnHelper.accessor("sl", {
       header: "Sl. No.",
-      meta: { className: "w-20  whitespace-pre-wrap break-words" },
+      meta: { className: "min-w-20  whitespace-pre-wrap break-words" },
       cell: ({ row }) => row.index + 1,
     }),
     columnHelper.accessor((row) => row?.doc_no, {
@@ -225,21 +225,7 @@ const FnDashboards = () => {
       meta: { className: "max-w-70  whitespace-pre-wrap break-words" },
       cell: (info) => info.getValue() || "-",
     }),
-    ...(hideDepartColumn
-      ? [
-          columnHelper.accessor(
-            (row) => {
-              const dept = dept_finder(row?.department_id);
-              return dept === "Plant & Equipment" ? "P&E" : dept;
-            },
-            {
-              id: "department",
-              header: "Department",
-              cell: (info) => info.getValue() || "-",
-            },
-          ),
-        ]
-      : []),
+
     ...(hasProjectColumn
       ? [
           columnHelper.accessor((row) => row?.project_code, {
@@ -263,6 +249,21 @@ const FnDashboards = () => {
         return value === "FWA" ? "HWA" : value || "-";
       },
     }),
+    ...(hideDepartColumn
+      ? [
+          columnHelper.accessor(
+            (row) => {
+              const dept = dept_finder(row?.department_id);
+              return dept === "Plant & Equipment" ? "P&E" : dept;
+            },
+            {
+              id: "department",
+              header: "Dept.",
+              cell: (info) => info.getValue() || "-",
+            },
+          ),
+        ]
+      : []),
 
     columnHelper.accessor((row) => row?.status, {
       id: "status",
@@ -390,6 +391,50 @@ const FnDashboards = () => {
         );
       },
     }),
+    columnHelper.accessor(
+      (row) => {
+        const comments = row.approver_info ?? "";
+        return comments;
+      },
+      {
+        id: "comments",
+        header: "Comments",
+        meta: { className: "w-60 max-w-xs whitespace-pre-wrap break-words" },
+        cell: (info) => {
+          const comments = info.getValue();
+          if (
+            comments &&
+            typeof comments === "object" &&
+            Object.keys(comments).length > 0
+          ) {
+            return (
+              <div className="space-y-1 overflow-y-auto max-h-22 ">
+                {Object.entries(comments)
+                  .reverse()
+                  .map(([key, value]) =>
+                    value.comment?.trim() ? (
+                      <div key={key}>
+                        {value.comment !== "" && (
+                          <>
+                            <strong className="capitalize">
+                              {value.role != "initfn" && value.role != "inita"
+                                ? value.role.toUpperCase() + ":"
+                                : "Initiator" + ":"}
+                            </strong>{" "}
+                            {value.comment}
+                          </>
+                        )}
+                      </div>
+                    ) : null,
+                  )}
+              </div>
+            );
+          } else {
+            return "-";
+          }
+        },
+      },
+    ),
   ];
   const table = useReactTable({
     data: fndata || [],
@@ -597,6 +642,7 @@ const FnDashboards = () => {
                       {userInfo?.is_admin ? "Last Activity" : "Submitted"}
                     </th>
                     <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
                   </tr>
                 ))}
               </thead>
@@ -632,7 +678,7 @@ const FnDashboards = () => {
                         </td>
                       ))}
 
-                      <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
+                      <td className="border-gray-300 border-b px-2 py-2 text-sm text-gray-700 text-center">
                         <div className="flex items-center justify-center gap-4">
                           <Link
                             className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"

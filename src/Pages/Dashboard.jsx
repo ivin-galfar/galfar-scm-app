@@ -34,6 +34,7 @@ import {
   is_fm,
   is_hod,
   is_gm,
+  is_hire,
 } from "../Helpers/dept_helper";
 import {
   fetchReceipt,
@@ -44,6 +45,8 @@ import {
 import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
+import { useLoading } from "../store/helperStore";
+import { useSelectedDept } from "../store/userStore";
 const Dashboard = () => {
   const {
     receipts,
@@ -74,7 +77,7 @@ const Dashboard = () => {
     isText: true,
     value: null,
   });
-
+  const ishire = is_hire(userInfo?.role);
   const isLogistics = is_logistics(userInfo?.dept_code);
   const isasset = is_asset(userInfo?.role);
   const ishod = is_hod(userInfo?.role);
@@ -144,7 +147,7 @@ const Dashboard = () => {
   const [errormessage, setErrormessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [deleteMr, setdeleteMr] = useState("");
-
+  const { isLoading, setIsLoading, resetIsLoading } = useLoading();
   const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
     (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
   );
@@ -159,6 +162,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchReceipts = async () => {
       try {
+        setIsLoading();
         // FM users should not fetch receipts
         if (isfm) {
           setReceiptsCount(0);
@@ -166,8 +170,12 @@ const Dashboard = () => {
           setReqMrno([]);
           setReceipts([]);
           setMrno([]);
+          resetIsLoading();
           return;
         }
+
+        const effectiveDashboardType =
+          ishire && userInfo?.is_admin ? "hiring" : dashboardType;
 
         const { filteredReceipts, reqMrValues, categorizedReceipts, mrValues } =
           await fetchStatments({
@@ -180,6 +188,7 @@ const Dashboard = () => {
             multiStatus: multiStatusFilter,
             searchcsno: searchcsno,
             searchcsname: searchcsname,
+            type: effectiveDashboardType,
           });
 
         const totalcount = await fetchReceiptCount({
@@ -189,6 +198,7 @@ const Dashboard = () => {
           multiStatus: multiStatusFilter,
           searchcsno: searchcsno,
           searchcsname: searchcsname,
+          type: effectiveDashboardType,
         });
 
         setReceiptsCount(totalcount.receipts_count);
@@ -196,9 +206,11 @@ const Dashboard = () => {
         setReqMrno(reqMrValues);
         setReceipts(categorizedReceipts);
         setMrno(mrValues);
+        resetIsLoading();
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
         console.error("Fetch receipts error:", message);
+        resetIsLoading();
       }
     };
 
@@ -211,6 +223,7 @@ const Dashboard = () => {
     multiStatusFilter,
     searchcsno,
     searchcsname,
+    dashboardType,
   ]);
 
   const handleDelete = async (mr) => {
@@ -600,25 +613,17 @@ const Dashboard = () => {
     }));
     setPageIndex(0);
   };
-
+  const hasproject = dashboardType === "hiring";
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.accessor("sl", {
       header: "Sl. No.",
       cell: ({ row }) => row.index + 1,
     }),
-    columnHelper.accessor((row) => row?.formData?.id, {
+    columnHelper.accessor((row) => row?.formData?.doc_no, {
       id: "mrno",
       header: "Doc. No.",
-      cell: (info) => {
-        const id =
-          info.row?.original?.formData?.type == "hiring"
-            ? "H - " + info.getValue() || "-"
-            : "A -" + info.getValue() || "-";
-        console.log(info.row.formData);
-
-        return id;
-      },
+      cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.formData?.hiringname, {
       id: "hiring.name",
@@ -626,6 +631,16 @@ const Dashboard = () => {
       meta: { className: "w-70 max-w-xs whitespace-pre-wrap break-words" },
       cell: (info) => info.getValue() || "-",
     }),
+    ...(hasproject
+      ? [
+          columnHelper.accessor((row) => row?.formData?.projectvalue, {
+            id: "project.value",
+            header: "Project",
+            cell: (info) => info.getValue() || "-",
+          }),
+        ]
+      : ""),
+
     columnHelper.accessor(
       (row) =>
         row?.formData?.type.charAt(0).toUpperCase() +
@@ -844,7 +859,7 @@ const Dashboard = () => {
         className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
         style={{ height: `calc(93vh - 140px)` }}
       >
-        <Loading isLoading={receipts.length > 0 ? false : true} />
+        <Loading isLoading={isLoading} />
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="top-0 z-10 sticky  bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (

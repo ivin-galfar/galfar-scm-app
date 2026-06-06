@@ -379,35 +379,43 @@ export default function VerticalTable({ showcalc }) {
   }
 
   return (
-    <div className="overflow-x-auto w-full">
-      <table className="table border-collapse border border-gray-300 w-4xl text-sm">
-        <thead className="text-center bg-gray-100">
+    <div className="overflow-x-auto  rounded-3xl p-4 ">
+      <table className="table border-collapse border border-gray-300 w-4xl text-sm  bg-slate-50 p-4 shadow-sm">
+        <thead className="bg-slate-100 text-slate-700">
           <tr>
-            <th colSpan={2} className="border px-4 py-2 align-bottom w-64">
+            <th
+              colSpan={2}
+              className="border border-slate-200 bg-slate-100 px-3 py-2 align-bottom w-36 text-left text-slate-700 uppercase tracking-[0.06em] text-[11px] font-semibold"
+            >
               Description
             </th>
             {vendorInfoWithTotal.map((vendor) => (
-              <th key={vendor.id} className="border px-4 py-2 w-40">
-                <div className="flex flex-col items-center">
-                  <span className="font-medium">Vendor {vendor.id}</span>
+              <th
+                key={vendor.id}
+                className="border border-slate-200 bg-slate-100 px-3 py-2 w-24 text-left text-slate-700 uppercase tracking-[0.06em] text-[11px] font-semibold"
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="font-semibold">Vendor {vendor.id}</span>
                 </div>
               </th>
             ))}
           </tr>
           <tr>
-            <th className="border px-4 py-2 w-20 whitespace-nowrap">Sl. No.</th>
-            <th className="border px-4 py-2 w-96 whitespace-nowrap">
+            <th className="border border-slate-200 bg-slate-100 px-3 py-2 w-8 whitespace-nowrap text-left text-slate-600 text-xs uppercase tracking-[0.08em] font-semibold">
+              Sl. No.
+            </th>
+            <th className="border border-slate-200 bg-slate-100 px-3 py-2 w-48 whitespace-nowrap text-left text-slate-600 text-xs uppercase tracking-[0.08em] font-semibold">
               Particulars
             </th>
 
             {vendorInfoWithTotal.map((vendor) => (
               <th
                 key={vendor.id}
-                className="border px-4 py-2 text-xs text-gray-600 w-40"
+                className="border border-slate-200 bg-slate-100 px-3 py-2 text-left text-slate-600 text-xs uppercase tracking-[0.08em] w-20"
               >
-                <div className="flex justify-center gap-1">
-                  <span>UNIT PRICE</span>
-                  <span className="text-xs font-medium w-4 text-gray-500">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold">Unit Price</span>
+                  <span className="text-xs font-medium text-slate-500">
                     {currencysymbol}
                   </span>
                 </div>
@@ -421,11 +429,14 @@ export default function VerticalTable({ showcalc }) {
               row.original.particulars.trim().toUpperCase() === "NET PRICE";
             const cells = row.getVisibleCells();
             return (
-              <tr key={row.id}>
+              <tr
+                key={row.id}
+                className={rowIndex % 2 === 0 ? "bg-slate-50" : "bg-white"}
+              >
                 {rowIndex === 0 && (
                   <td
                     rowSpan={table.getRowModel().rows.length}
-                    className="border px-4 py-2 align-top text-center font-semibold"
+                    className="border border-slate-200 px-3 py-2 align-top text-center font-semibold text-slate-700"
                   >
                     1
                   </td>
@@ -443,8 +454,10 @@ export default function VerticalTable({ showcalc }) {
                     return (
                       <td
                         key={cell.id}
-                        className={`border px-4 py-2 align-top whitespace-nowrap  ${
-                          isTotalRow ? "bg-yellow-100" : ""
+                        className={`border border-slate-200 px-3 py-2 align-top whitespace-normal break-words ${
+                          isTotalRow
+                            ? "bg-yellow-100 text-slate-800"
+                            : "text-slate-700"
                         }`}
                       >
                         {isTotalRow && isVendorColumn
@@ -462,7 +475,7 @@ export default function VerticalTable({ showcalc }) {
           <tr>
             <td
               colSpan={2}
-              className="border px-4 py-2 font-semibold bg-yellow-50  text-center gap-2"
+              className="border border-slate-200 px-3 py-2 font-semibold bg-yellow-50 text-center text-slate-800 gap-2"
             >
               Total Price (Excl. VAT)
               {sharedTableData.formData?.currency && (
@@ -474,7 +487,7 @@ export default function VerticalTable({ showcalc }) {
             {vendorTotals.map((val, idx) => (
               <td
                 key={`total_${idx}`}
-                className="border px-4 py-2 font-semibold text-center bg-yellow-100"
+                className="border border-slate-200 px-3 py-2 font-semibold text-center bg-yellow-100 text-slate-800"
               >
                 {val.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -486,14 +499,14 @@ export default function VerticalTable({ showcalc }) {
           <tr>
             <td
               colSpan={2}
-              className="border px-4 py-2 font-semibold text-center"
+              className="border border-slate-200 px-3 py-2 font-semibold text-center text-slate-700"
             >
               VAT @5%
             </td>
             {vendorVATs.map((val, idx) => (
               <td
                 key={`vat_${idx}`}
-                className="border px-4 py-2 font-semibold text-center"
+                className="border border-slate-200 px-3 py-2 font-semibold text-center bg-slate-50 text-slate-700"
               >
                 {val.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -506,7 +519,7 @@ export default function VerticalTable({ showcalc }) {
           <tr>
             <td
               colSpan={2}
-              className="border px-4 py-2 font-semibold text-center"
+              className="border border-slate-200 px-3 py-2 font-semibold text-center text-slate-700"
             >
               Net Price (Incl. VAT)
               {sharedTableData.formData?.currency && (
@@ -518,7 +531,7 @@ export default function VerticalTable({ showcalc }) {
             {vendorNetPrices.map((val, idx) => (
               <td
                 key={`net_${idx}`}
-                className="border px-4 py-2 font-semibold text-center"
+                className="border border-slate-200 px-3 py-2 font-semibold text-center bg-slate-50 text-slate-700"
               >
                 {val.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -530,7 +543,7 @@ export default function VerticalTable({ showcalc }) {
           <tr>
             <td
               colSpan={2}
-              className="border px-4 py-2 font-semibold text-center"
+              className="border border-slate-200 px-4 py-3 font-semibold text-center text-slate-700"
             >
               Rating
             </td>
@@ -539,7 +552,7 @@ export default function VerticalTable({ showcalc }) {
               return (
                 <td
                   key={`rating_${idx}`}
-                  className="border px-4 py-2 font-semibold text-center"
+                  className="border border-slate-200 px-3 py-2 font-semibold text-center bg-slate-50 text-slate-700"
                 >
                   {isMRSelected && rank ? `L${rank}` : "-"}
                 </td>
@@ -555,17 +568,17 @@ export default function VerticalTable({ showcalc }) {
               <tr>
                 <td
                   colSpan={2}
-                  className="border px-4 py-2 font-semibold bg-green-50 text-green-800 text-center"
+                  className="border px-4 py-2  border-slate-200 font-semibold bg-green-50 text-green-800 text-center"
                 >
                   Selected Vendor
                 </td>
                 {vendorTotals.map((_, index) => (
                   <td
                     key={index}
-                    className={`border px-4 py-2 text-center font-semibold ${
+                    className={`border border-slate-200 px-3 py-2 text-center font-semibold ${
                       index === selectedVendorIndex
                         ? "bg-green-100 text-green-700"
-                        : "text-gray-400"
+                        : "text-slate-500"
                     }`}
                   >
                     <label

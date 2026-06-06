@@ -12,8 +12,9 @@ import { IoDocumentText, IoWarningOutline } from "react-icons/io5";
 import fetchParticulars from "../APIs/ParticularsApi";
 import { RxCross1 } from "react-icons/rx";
 import { usePagination } from "../store/statementStore";
+import { useSelectedDept } from "../store/userStore";
 
-const PlantHome = () => {
+const AssetHome = () => {
   const {
     setReceipts,
     receipts,
@@ -30,6 +31,8 @@ const PlantHome = () => {
   } = useContext(AppContext);
   const userInfo = useUserInfo();
   const { setPageSize, setPageIndex } = usePagination();
+  const { selectedDept } = useSelectedDept();
+
   const isAdmin = userInfo?.is_admin;
   const statusMapping = {
     inita: [
@@ -119,6 +122,7 @@ const PlantHome = () => {
           await fetchStatments({
             expectedStatuses,
             userInfo,
+            type: selectedDept,
           });
 
         setAllReceipts(filteredReceipts);
@@ -388,4 +392,4 @@ const PlantHome = () => {
   );
 };
 
-export default PlantHome;
+export default AssetHome;
