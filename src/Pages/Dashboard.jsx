@@ -620,11 +620,20 @@ const Dashboard = () => {
       header: "Sl. No.",
       cell: ({ row }) => row.index + 1,
     }),
-    columnHelper.accessor((row) => row?.formData?.doc_no, {
-      id: "mrno",
-      header: "Doc. No.",
-      cell: (info) => info.getValue() || "-",
-    }),
+    columnHelper.accessor(
+      (row) => {
+        const doc = row?.formData?.doc_no;
+
+        if (!doc) return null;
+
+        return doc.replace("/P&E", "");
+      },
+      {
+        id: "mrno",
+        header: "Doc. No.",
+        cell: (info) => info.getValue() || "-",
+      },
+    ),
     columnHelper.accessor((row) => row?.formData?.hiringname, {
       id: "hiring.name",
       header: "Subject",
@@ -641,16 +650,6 @@ const Dashboard = () => {
         ]
       : ""),
 
-    columnHelper.accessor(
-      (row) =>
-        row?.formData?.type.charAt(0).toUpperCase() +
-        row?.formData?.type.slice(1),
-      {
-        id: "type",
-        header: "Statement Type",
-        cell: (info) => info.getValue() || "-",
-      },
-    ),
     columnHelper.accessor((row) => row?.formData?.qty, {
       id: "quantity",
       header: "Quantity",

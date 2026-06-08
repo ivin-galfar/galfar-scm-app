@@ -749,7 +749,7 @@ const FnDashboards = () => {
                             size={20}
                             title={
                               row.original.intimated_by
-                                ? "Intimated by" + row.original.intimated_by
+                                ? "Intimated by " + row.original.intimated_by
                                 : "Intimated"
                             }
                           />
