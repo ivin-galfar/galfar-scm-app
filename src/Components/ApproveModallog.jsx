@@ -26,6 +26,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const submitApproval = async (cs_id, status) => {
     let definedprojects = [
       7092, 7112, 7099, 7110, 7111, 7114, 7108, 7105, 7097, 7102, 7104, 7106, 1,
+      7115,
     ];
     let project = Number(formData.project?.trim());
     if (!definedprojects.includes(project)) {

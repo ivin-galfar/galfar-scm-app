@@ -524,7 +524,7 @@ const TableHeader = ({ isAdmin }) => {
           <p className="text-l font-semibold uppercase tracking-[0.3em] text-slate-500">
             Galfar Engineering & Contracting WLL Emirates
           </p>
-          <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-700">
+          <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-700 mr-10">
             Comparative Statement
           </h2>
         </div>
@@ -758,7 +758,7 @@ const TableHeader = ({ isAdmin }) => {
                   (sharedTableData.formData.status == null && isupdated)
                 }
                 onChange={handleChange("hiringname")}
-                className="border-b border-gray-500 outline-none text-sm font-medium text-center px-2 py-1"
+                className="border-b border-gray-500 outline-none text-sm font-medium text-center px-2 py-1 w-full sm:w-auto"
               />
             </>
           ) : (
@@ -847,7 +847,7 @@ const TableHeader = ({ isAdmin }) => {
             </div>
           </div>
 
-          <div className="flex flex-col space-y-1 text-center w-1/3">
+          <div className="flex flex-col space-y-1 text-center w-1/3 ml-10">
             <p>
               <span className="font-medium">Equip Mr No:</span>{" "}
               {isAdmin ? (
