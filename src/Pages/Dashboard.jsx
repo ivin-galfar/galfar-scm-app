@@ -366,7 +366,7 @@ const Dashboard = () => {
         },
       );
     }
-    doc.text(`Doc. No.: ${updatedFormData.Doc.No}`, 200, 32, {
+    doc.text(`Doc. No.: ${updatedFormData.doc_no}`, 200, 32, {
       align: "right",
     });
     doc.text(

@@ -127,6 +127,7 @@ const Receipts = () => {
       requirementdurationvalue,
       currency,
       hiringname,
+      qty,
     } = sharedTableData.formData;
 
     const isReview = sharedTableData.formData.status === "review";
@@ -140,7 +141,8 @@ const Receipts = () => {
         !hiringname ||
         !requireddatevalue ||
         !requirementdurationvalue ||
-        !currency)
+        !currency ||
+        !qty)
     ) {
       setShowToast(true);
       setErrormessage("Please fill all required fields!!");
