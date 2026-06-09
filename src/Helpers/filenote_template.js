@@ -818,30 +818,6 @@ export const fileNoteTemplate = (
           content: [
             {
               type: "text",
-              text: "V. Urgent / Urgent/ For Info / Action.",
-              marks: [{ type: "underline" }],
-            },
-          ],
-        },
-        {
-          type: "paragraph",
-          content: [
-            {
-              type: "text",
-              text: "SUBJECT : ",
-            },
-            {
-              type: "text",
-              text: "Demobilization of Galfar Equipment from the project",
-              marks: [{ type: "bold" }, { type: "underline" }],
-            },
-          ],
-        },
-        {
-          type: "paragraph",
-          content: [
-            {
-              type: "text",
               text: "PROJECT :  ",
               marks: [{ type: "bold" }],
             },

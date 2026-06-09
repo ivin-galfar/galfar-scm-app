@@ -212,6 +212,7 @@ const FnDashboards = () => {
     }),
     columnHelper.accessor((row) => row?.doc_no, {
       id: "doc_id",
+      meta: { className: "w-50  whitespace-pre-wrap break-words" },
       header: "Doc. No.",
       cell: (info) => {
         const type = info.row.original?.type == "ioc" ? "IOC" : "FN";
@@ -268,6 +269,7 @@ const FnDashboards = () => {
     columnHelper.accessor((row) => row?.status, {
       id: "status",
       header: "Status",
+      meta: { className: "w-50  whitespace-pre-wrap break-words" },
       cell: (info) => {
         const status = info.getValue() || "";
         const formattedstatus = status
@@ -718,7 +720,7 @@ const FnDashboards = () => {
                         </div>
                       </td>
 
-                      <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
+                      <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center w-20">
                         {formatDateDDMMYYYY(row.original.created_at)}
                       </td>
                       <td className="border-gray-300 border-b px-4 py-2 text-[13px] text-gray-700 text-center w-32">
