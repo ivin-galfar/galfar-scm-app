@@ -52,6 +52,7 @@ import {
 } from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
+import { GrAttachment } from "react-icons/gr";
 const LogisticsDashboard = () => {
   const userInfo = useUserInfo();
   const { setStatusFilter, statusfilter, resetStatusFilter } =
@@ -528,6 +529,7 @@ const LogisticsDashboard = () => {
                     {" "}
                     Approvals History
                   </th>
+                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap"></th>
                 </tr>
               ))}
             </thead>
@@ -627,6 +629,14 @@ const LogisticsDashboard = () => {
                       >
                         <FaHistory />
                       </div>
+                    </td>
+                    <td className="border-gray-300 border-b text-sm text-gray-700 text-center">
+                      {row.original.filename?.length > 0 && (
+                        <span className="flex items-center gap-1 text-gray-400 text-xs">
+                          <GrAttachment size={12} />
+                          <span>{row.original.filename.length}</span>
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))
