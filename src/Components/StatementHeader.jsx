@@ -64,11 +64,18 @@ const StatementHeader = () => {
       ...formData,
     },
   });
-  let dept_id = Array.isArray(userInfo.dept_code)
+  let dept_id = Array.isArray(userInfo?.dept_code)
     ? userInfo.dept_code.includes(2)
       ? 2
       : userInfo?.dept_code[0]
-    : userInfo.dept_code;
+    : userInfo?.dept_code;
+
+  useEffect(() => {
+    // If there's no user info or token, redirect to login
+    if (!userInfo || !userInfo.token) {
+      navigate("/login");
+    }
+  }, [userInfo, navigate]);
 
   useEffect(() => {
     const fetchParticularsData = async () => {

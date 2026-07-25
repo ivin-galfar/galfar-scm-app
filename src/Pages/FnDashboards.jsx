@@ -311,6 +311,15 @@ const FnDashboards = () => {
                 Approved: 100,
                 Rejected: 100,
               };
+            } else if (row?.category === "Insurance") {
+              return {
+                "Pending For Hod": 20,
+                "Pending For Sfm": 40,
+                "Pending For Gm": 60,
+                "Pending For Ceo": 80,
+                Approved: 100,
+                Rejected: 100,
+              };
             } else if (row?.category === "Demob") {
               return {
                 "Pending For Cm": 30,

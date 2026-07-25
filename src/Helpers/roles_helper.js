@@ -28,7 +28,7 @@ export const nextRole = (role, category, project_code) => {
   const normalizedRole = role?.toLowerCase();
   const normalizedCategory = category?.toLowerCase();
 
-  const fmCategories = ["ap", "adtsren", "adtsnew"];
+  const fmCategories = ["ap", "adtsren", "adtsnew", "insurance"];
 
   if (normalizedRole === "hod") {
     return fmCategories.includes(normalizedCategory) ? "fm" : "gm";
