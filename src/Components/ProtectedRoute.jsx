@@ -4,7 +4,8 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 const ProtectedRoute = ({ children }) => {
   const userInfo = useUserInfo();
 
-  if (!userInfo) {
+  // If there's no user or no token, redirect to login
+  if (!userInfo || !userInfo.token) {
     return <Navigate to="/login" replace />;
   }
   return children;

@@ -1118,7 +1118,7 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
 
-  const skipSfmCategories = ["tfw", "general", "insurance", "fc", "pr", "dpr"];
+  const skipSfmCategories = ["tfw", "general", "fc", "pr", "dpr"];
   const categoryKey = String(data?.category || "")
     .trim()
     .toLowerCase();
@@ -1176,7 +1176,12 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   let Flow;
   const category = data?.category;
 
-  if (category === "Ap" || category === "ADTSNew" || category === "ADTSRen") {
+  if (
+    category === "Ap" ||
+    category === "ADTSNew" ||
+    category === "ADTSRen" ||
+    category === "Insurance"
+  ) {
     Flow = "FNIOC";
   } else {
     Flow = "FNIOCM";
@@ -1220,7 +1225,8 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   if (
     data?.category == "Ap" ||
     data.category == "ADTSNew" ||
-    data.category == "ADTSRen"
+    data.category == "ADTSRen" ||
+    data.category == "Insurance"
   ) {
     approvers = categoryapprovers.FNIOC;
   } else if (data.category == "Demob") {

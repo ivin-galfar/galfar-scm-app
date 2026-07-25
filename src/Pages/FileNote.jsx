@@ -274,6 +274,7 @@ const FileNote = () => {
 
     const file_names = files.map((file) => file.name);
     const file_urls = files.map((file) => file.url);
+    resetShowModal();
     let status = "";
     if (action != "update") {
       // status = statusExpected(userInfo?.role, "save", type, category);
@@ -665,8 +666,8 @@ const FileNote = () => {
         <Alerts
           message={
             newfn
-              ? "Are you sure to create the file note?"
-              : "Are you confirm to send this filenote for approval?"
+              ? `Are you sure to create the ${type == "ioc" ? "IOC" : "File Note"}?`
+              : `Are you confirm to send this ${type == "ioc" ? "IOC" : "File Note"} for approval?`
           }
           onCancel={() => resetShowModal()}
           onConfirm={() => handleSave(newfn ? "create" : "update")}
