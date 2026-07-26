@@ -536,6 +536,7 @@ const Receipts = () => {
         <ApproveModal
           setShowmodal={setShowmodal}
           cs_id={sharedTableData?.formData?.id}
+          doc_no={sharedTableData?.formData?.doc_no}
         />
       )}
       {showmodal && userInfo?.is_admin && (
@@ -546,6 +547,7 @@ const Receipts = () => {
           setErrormessage={setErrormessage}
           setreqApprovalstatus={setreqApprovalstatus}
           selectedVendorIndex={selectedVendorIndex}
+          doc_no={sharedTableData.formData.doc_no}
         />
       )}
     </div>

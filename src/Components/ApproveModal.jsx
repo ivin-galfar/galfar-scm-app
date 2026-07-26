@@ -13,7 +13,7 @@ import { RxCross1 } from "react-icons/rx";
 import { is_plant } from "../Helpers/dept_helper";
 import { useComments } from "../store/helperStore";
 
-const ApproveModal = ({ setShowmodal, cs_id }) => {
+const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
   const userInfo = useUserInfo();
   const [showToast, setShowToast] = useState(false);
   const [errormessage, setErrormessage] = useState("");
@@ -131,6 +131,7 @@ const ApproveModal = ({ setShowmodal, cs_id }) => {
             userInfo,
             formData: sharedTableData.formData,
             status: finalStatus,
+            doc_no: doc_no,
           },
           config,
         )

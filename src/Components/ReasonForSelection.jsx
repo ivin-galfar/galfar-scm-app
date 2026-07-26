@@ -13,6 +13,7 @@ const ReasonForSelection = ({
   setErrormessage,
   setreqApprovalstatus,
   selectedVendorIndex,
+  doc_no,
 }) => {
   const { setSharedTableData, setfreezeQuantity, sharedTableData } =
     useContext(AppContext);
@@ -112,6 +113,7 @@ const ReasonForSelection = ({
             userInfo,
             formData: sharedTableData.formData,
             status: statusMap[userInfo.role[0]],
+            doc_no: doc_no,
           },
           config,
         )
