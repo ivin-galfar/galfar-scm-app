@@ -217,7 +217,7 @@ const FnDashboards = () => {
       cell: (info) => {
         const type = info.row.original?.type == "ioc" ? "IOC" : "FN";
         const category = info.row.original?.category.toUpperCase();
-        return `${type}/  ${category} -  ${info.getValue() || ""}`;
+        return `${type}/  ${category == "FWA" ? "HWA" : category} -  ${info.getValue() || ""}`;
       },
     }),
     columnHelper.accessor((row) => row?.name, {
@@ -466,6 +466,13 @@ const FnDashboards = () => {
       setTypes(depttypes);
       if (userInfo.role.includes("gm")) {
         cat = getcategory(typeFilter);
+      } else if (
+        userInfo.role.includes("initpr") &&
+        userInfo.role.includes("initdc")
+      ) {
+        cat = getcategory(typeFilter).filter(
+          (c) => c.includes("Demob") || c.includes("FWA"),
+        );
       } else if (userInfo.role.includes("initpr")) {
         cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
       } else if (
@@ -506,7 +513,10 @@ const FnDashboards = () => {
     userInfo?.role?.includes("initfn") &&
     !userInfo?.role?.includes("initpr") &&
     !userInfo.role.includes("initdc");
-
+  const multiinit =
+    userInfo?.role?.includes("initfn") &&
+    userInfo?.role?.includes("initpr") &&
+    userInfo.role.includes("initdc");
   useEffect(() => {
     sessionStorage.setItem(
       "filenoteFilters",
@@ -590,7 +600,7 @@ const FnDashboards = () => {
               },
             )}
           </div>
-          {(cmusers || pmusers || initusers) && (
+          {(cmusers || pmusers || initusers || multiinit) && (
             <div className="ml-auto flex">
               <TypeFilter
                 type={typeFilter}
@@ -606,6 +616,7 @@ const FnDashboards = () => {
                 setSearch={setSearch}
                 setSearchCSNo={setSearchCSNo}
                 setSearchCSName={setSearchCSName}
+                multiinit={multiinit}
               />
             </div>
           )}

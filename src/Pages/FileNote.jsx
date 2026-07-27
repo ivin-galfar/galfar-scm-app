@@ -173,7 +173,7 @@ const FileNote = () => {
     const ref_no = [
       typedefined ?? "",
       category !== "Demob" ? dept || "" : "",
-      category.toUpperCase() ?? "",
+      category == "FWA" ? "HWA" : (category.toUpperCase() ?? ""),
       selectedproject ?? "",
       (doc_no?.last_no ?? 0) + 1,
     ]
@@ -233,7 +233,17 @@ const FileNote = () => {
     if (isPlant) {
       depttypes = getTypes();
       setTypes(depttypes);
-      if (userInfo.role.includes("initpr") || userInfo.role.includes("inith")) {
+      if (
+        userInfo.role.includes("initpr") &&
+        userInfo.role.includes("initdc")
+      ) {
+        cat = getcategory(type).filter(
+          (c) => c.includes("Demob") || c.includes("FWA"),
+        );
+      } else if (
+        userInfo.role.includes("initpr") ||
+        userInfo.role.includes("inith")
+      ) {
         cat = getcategory(type).filter((c) => c.includes("Demob"));
       } else if (userInfo.role.includes("initdc")) {
         cat = getcategory(type).filter((c) => c.includes("FWA"));
