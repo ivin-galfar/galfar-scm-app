@@ -78,7 +78,8 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
                 : "";
           return (
             <option key={d.id} value={d.id}>
-              {getTypeCode(d.type)}/{dept}/ {d.category} - {d.doc_no}
+              {getTypeCode(d.type)}/{dept}/{" "}
+              {d.category == "FWA" ? "HWA" : d.category} - {d.doc_no}
             </option>
           );
         })}

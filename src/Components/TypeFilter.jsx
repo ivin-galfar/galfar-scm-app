@@ -23,6 +23,7 @@ const TypeFilter = ({
   setSearchCSNo,
   setSearchCSName,
   types,
+  multiinit,
 }) => {
   const userInfo = useUserInfo();
   const { setPageIndex } = usePagination();
@@ -120,7 +121,8 @@ const TypeFilter = ({
             </select>
           </div>
           {(demobusers || fwausers || isgm || hireusers || ishod) &&
-            (category == "FWA" || category == "Demob") && (
+            (category == "FWA" || category == "Demob") &&
+            !multiinit && (
               <div className="px-4">
                 <label className="text-gray-500 font-medium text-small flex gap-2">
                   Project:{" "}
