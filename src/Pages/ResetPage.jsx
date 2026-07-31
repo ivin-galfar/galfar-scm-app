@@ -38,7 +38,6 @@ const ResetPage = () => {
     const verifyToken = async () => {
       try {
         const user = await VerifyResetToken(token);
-        console.log(user);
         if (user) {
           setChangePassword(true);
         }
@@ -90,8 +89,6 @@ const ResetPage = () => {
         }, 1500);
         return;
       }
-      console.log("coming");
-
       const validate = await validateemail(email);
 
       if (validate.email) {
