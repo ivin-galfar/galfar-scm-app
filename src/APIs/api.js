@@ -987,3 +987,66 @@ export const updatedocread = async (userInfo) => {
     throw error;
   }
 };
+
+export const validateemail = async (email) => {
+  try {
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/users/validateemail`,
+      {
+        email: email,
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const ResetEmail = async (email, resetToken, expiry) => {
+  try {
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/pwdresetreq`,
+      {
+        email: email,
+        resettoken: resetToken,
+        expiry: expiry,
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const VerifyResetToken = async (resetToken) => {
+  try {
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/verifyresettoken`,
+      {
+        resettoken: resetToken,
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+export const ResetUserPassword = async (token, password) => {
+  try {
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/pwdreset`,
+      {
+        token,
+        password,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+
+    throw error;
+  }
+};

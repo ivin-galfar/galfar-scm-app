@@ -1,6 +1,6 @@
 import { useState } from "react";
 import galfarlogo from "../assets/Images/logo-new.png";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser, registerUser } from "../APIs/api";
 import { SiTicktick } from "react-icons/si";
@@ -125,12 +125,20 @@ const Login = () => {
               />
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-700">
+            <div className="flex flex-col items-start text-sm gap-2 mb-4">
+              <NavLink
+                to={`/resetpwd?email=${email}`}
+                type="button"
+                className="text-gray-700 hover:text-indigo-600 underline-offset-2 hover:underline cursor-pointer"
+              >
+                Forgotten your password?
+              </NavLink>
+
+              <div className="text-gray-700">
                 {newuser
                   ? "Already have an account?"
                   : "Contact Admin for new accounts!"}
-              </span>
+              </div>
             </div>
 
             <div>
