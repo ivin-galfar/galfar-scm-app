@@ -43,7 +43,7 @@ import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
-  const isAdmin = userInfo.is_admin;
+  const isAdmin = userInfo?.is_admin;
   const deleteStatement = useDeleteStore((state) => state.deleteStatement);
   const setDeleteStatement = useDeleteStore(
     (state) => state.setDeleteStatement,
@@ -81,11 +81,11 @@ const FnDashboards = () => {
   // const [categories, setCategories] = useState([]);
   const { categories, setCategories } = useCategories();
   const { types, setTypes } = useTypes();
-  const isgm = userInfo.role.includes("gm");
+  const isgm = userInfo?.role.includes("gm");
   const [total, setTotal] = useState(0);
   const isplant = is_plant(userInfo?.dept_code);
   const demob_intimators =
-    userInfo.role.includes("inith") || userInfo.role.includes("hod");
+    userInfo?.role?.includes("inith") || userInfo?.role.includes("hod");
   const { data: fndata, isLoading } = useQuery({
     queryKey: [
       "fnid",
