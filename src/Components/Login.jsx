@@ -131,7 +131,7 @@ const Login = () => {
                 type="button"
                 className="text-gray-700 hover:text-indigo-600 underline-offset-2 hover:underline cursor-pointer"
               >
-                Forgotten your password?
+                Forgot your password?
               </NavLink>
 
               <div className="text-gray-700">
