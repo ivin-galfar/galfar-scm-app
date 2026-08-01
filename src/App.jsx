@@ -19,12 +19,13 @@ import FileNote from "./Pages/FileNote";
 import { is_fnote } from "./Helpers/dept_helper";
 import FnDashboards from "./Pages/FnDashboards";
 import { APP_VERSION } from "../config/ENV";
+import ResetPwd from "./Pages/ResetPage";
 
 const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
   const isLoginPage = location.pathname === "/login";
-
+  const isresetPage = location.pathname === "/resetpwd";
   useEffect(() => {
     const storedAppVersion = localStorage.getItem("app_version");
 
@@ -37,15 +38,15 @@ const App = () => {
 
   return (
     <div
-      className={`${location.pathname !== "/login" && "pl-12"} flex flex-col  min-h-screen`}
+      className={`${location.pathname !== "/login" && !isresetPage && "pl-12"} flex flex-col  min-h-screen`}
     >
-      {!userInfo && (
+      {!userInfo && !isresetPage && (
         <FloatingNotification
           message={"Login to view statements"}
           duration={4000}
         />
       )}{" "}
-      {!isLoginPage && <Header />}
+      {!isLoginPage && !isresetPage && <Header />}
       <Suspense
         fallback={
           <div className="flex justify-center items-center h-64">
@@ -101,8 +102,8 @@ const App = () => {
           <Route path="/dashboardlg" element={<LogisticsDashboard />} />
           <Route path="/dashboardbr" element={<BRDashboards />} />
           <Route path="/dashboardfn" element={<FnDashboards />} />
-
           <Route path="/contact" element={<Contact />} />
+          <Route path="/resetpwd" element={<ResetPwd />} />
           <Route path="/brstatement" element={<BrStatement />} />
 
           <>
@@ -126,7 +127,7 @@ const App = () => {
           <Route path="/brstatement/:cs_no" element={<BrStatement />} />
         </Routes>
       </Suspense>
-      {!isLoginPage && (
+      {!isLoginPage && !isresetPage && (
         <div className="flex flex-grow">
           <Footer />
         </div>
