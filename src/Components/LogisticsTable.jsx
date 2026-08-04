@@ -234,6 +234,7 @@ const LogisticsTable = () => {
       selected_vendor_index: selected_vendor_index,
       recommendation_reason: recommendation_reason,
       comments: comments,
+      created_at: new Date(formData.created_at).toLocaleDateString("en-AE"),
     };
     try {
       setShowmodal(true);

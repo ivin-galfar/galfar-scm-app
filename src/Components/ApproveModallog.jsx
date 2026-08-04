@@ -11,12 +11,13 @@ import { EmailAlert } from "../APIs/api";
 import { is_logistics } from "../Helpers/dept_helper";
 import { useNavigate } from "react-router-dom";
 import { LuRotateCcwSquare } from "react-icons/lu";
+import { generatePDFLG } from "../Helpers/helperfunctions";
 
 const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const { setErrorMessage, errormessage, clearErrorMessage } =
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
-  const { formData, setFormData, setTableData } = useStatement();
+  const { formData, setFormData, setTableData, tableData } = useStatement();
   const [comments, setComments] = useState("");
   const userInfo = useUserInfo();
   const dept = is_logistics(userInfo?.dept_code) ? "logistics" : "";
@@ -53,8 +54,14 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
     let updatedFormData = {
       ...formData,
       status: updatedstatus,
+      created_at: new Date(formData.created_at).toLocaleDateString("en-AE"),
       comments,
     };
+
+    if (updatedstatus.toLowerCase() === "approved") {
+      const pdfUrl = await generatePDFLG(updatedFormData, tableData, userInfo);
+      updatedFormData.approvedPdfUrl = pdfUrl;
+    }
 
     let comments_role = role_finder(userInfo.role);
     try {

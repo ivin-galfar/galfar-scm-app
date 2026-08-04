@@ -15,7 +15,12 @@ import { categoryapprovers, nextRole, roles } from "./roles_helper";
 import { getcmpmNames } from "../APIs/api";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
 
-export const handlePrint = async (formData, tableData, userInfo) => {
+export const handlePrint = async (
+  formData,
+  tableData,
+  userInfo,
+  emailPdf = false,
+) => {
   const doc = new jsPDF({
     orientation: "landscape",
   });
@@ -226,7 +231,7 @@ export const handlePrint = async (formData, tableData, userInfo) => {
   const currentStatus = formData.status?.toLowerCase() || "";
   let pendingIndex = -1;
 
-  const rejectedRole = formData.rejectedby;
+  const rejectedRole = formData.status == "rejected" ? formData.rejectedby : "";
   if (currentStatus.startsWith("pending for")) {
     const pendingRole = currentStatus.replace("pending for ", "").trim();
     pendingIndex = rolesToShow.findIndex(
@@ -353,10 +358,13 @@ export const handlePrint = async (formData, tableData, userInfo) => {
   }
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
+  if (emailPdf) {
+    return { pdfBlob, blobUrl };
+  }
   window.open(blobUrl);
 };
 
-export const handleBrPrint = (formData) => {
+export const handleBrPrint = (formData, emailPdf = false) => {
   const doc = new jsPDF("portrait", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = 10;
@@ -894,6 +902,10 @@ export const handleBrPrint = (formData) => {
 
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
+
+  if (emailPdf) {
+    return { pdfBlob, blobUrl };
+  }
   window.open(blobUrl);
 };
 

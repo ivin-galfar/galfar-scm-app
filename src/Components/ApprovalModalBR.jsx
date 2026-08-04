@@ -11,6 +11,7 @@ import { useComments } from "../store/helperStore";
 import { is_buyrent } from "../Helpers/dept_helper";
 import { useNavigate } from "react-router-dom";
 import { useStatusFilter } from "../store/logisticsStore";
+import { generateBvrPDF } from "../Helpers/helperfunctions";
 
 const ApprovalModalBR = () => {
   const { setShowModal, resetShowModal } = useToggleModal();
@@ -25,9 +26,20 @@ const ApprovalModalBR = () => {
 
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatebrstatements,
-    onSuccess: (data) => {
+    onSuccess: async (responseData) => {
+      const generatedPdfUrl = await generateBvrPDF(responseData, userInfo);
+      const finalResponseData = {
+        ...(responseData || {}),
+        approvedPdfUrl: generatedPdfUrl,
+      };
+
       setShowToast();
-      BrEmailAlert(data.id, userInfo, dept, data).catch((err) => {
+      BrEmailAlert(
+        responseData?.id || data?.id,
+        userInfo,
+        dept,
+        finalResponseData,
+      ).catch((err) => {
         const message =
           err?.response?.data.error || err?.message || "Email failed";
         setErrorMessage(message);
