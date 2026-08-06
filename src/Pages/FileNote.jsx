@@ -9,10 +9,10 @@ import {
   updateiocintimation,
 } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import FileNoteDropDown from "../Components/FileNoteDropDown";
 import { FaPlus } from "react-icons/fa6";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Buttontext from "../Components/Buttontext";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
@@ -73,7 +73,7 @@ const FileNote = () => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { types, setTypes } = useTypes();
   const navigate = useNavigate();
-  const { showmodal, setShowModal, resetShowModal } = useToggleModal();
+  const { showmodal, resetShowModal } = useToggleModal();
   const { setDataSaved, resetDataSaved } = useDatasaved();
   const isPlant = is_plant(userInfo?.dept_code);
   const [type, settype] = useState("");
@@ -277,7 +277,7 @@ const FileNote = () => {
       ? "Sent for Approval"
       : selectedvalue?.status !== "review"
         ? selectedvalue.status
-        : "" || "";
+        : "";
 
   const handleSave = (action) => {
     const files = JSON.parse(localStorage.getItem("editorAttachments")) || [];

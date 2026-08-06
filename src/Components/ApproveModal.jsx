@@ -12,6 +12,8 @@ import {
 import { RxCross1 } from "react-icons/rx";
 import { is_plant } from "../Helpers/dept_helper";
 import { useComments } from "../store/helperStore";
+import { generatePDFHire } from "../Helpers/helperfunctions";
+import { fetchReceiptsApproverDetails } from "../APIs/api";
 
 const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
   const userInfo = useUserInfo();
@@ -34,6 +36,8 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
   const submitApproval = async (cs_id, status) => {
     let finalStatus = "";
     let rejectedBy = "";
+    let approverDetails = [];
+    let generatedPdfUrl = "";
     if (status === "rejected") {
       finalStatus = "Rejected";
       rejectedBy = userInfo.role;
@@ -42,6 +46,11 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
     } else if (userInfo.role?.includes("gm") && status === "approved") {
       finalStatus = "Pending for CEO";
     } else if (userInfo.role?.includes("ceo") && status === "approved") {
+      approverDetails = await fetchReceiptsApproverDetails(
+        sharedTableData.formData.id,
+        userInfo,
+      );
+
       finalStatus = "Approved";
     } else if (status === "review") {
       finalStatus = "review";
@@ -54,7 +63,7 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
           Authorization: `Bearer ${userInfo.token}`,
         },
       };
-      await axios.put(
+      const currentApproval = await axios.put(
         `${REACT_SERVER_URL}/receipts/approver/${cs_id}`,
         {
           userId: userInfo.id,
@@ -67,6 +76,7 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
         },
         config,
       );
+      approverDetails.push(currentApproval.data[0]);
       setErrormessage("");
       setShowToast(true);
       setTimeout(() => {
@@ -103,25 +113,29 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
         setShowToast(true);
         resetComments();
         setErrormessage("");
-        // setTimeout(() => {
-        //   setShowmodal(false);
-
-        // }, 500);
         setTimeout(() => {
           setShowmodal(false);
           setShowToast(false);
         }, 1500);
       } else {
-        setSharedTableData((prev) => ({
-          ...prev,
+        const updatedSharedTableData = {
+          ...sharedTableData,
           formData: {
-            ...prev.formData,
+            ...sharedTableData.formData,
             status: finalStatus,
             approverstatus: finalStatus,
             rejectedby: rejectedBy,
             approverComments: comments,
+            approverdetails: approverDetails,
           },
-        }));
+        };
+
+        setSharedTableData(updatedSharedTableData);
+        generatedPdfUrl = await generatePDFHire(
+          updatedSharedTableData,
+          userInfo,
+          true,
+        );
       }
 
       axios
@@ -132,6 +146,7 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
             formData: sharedTableData.formData,
             status: finalStatus,
             doc_no: doc_no,
+            approvedPdfUrl: generatedPdfUrl,
           },
           config,
         )

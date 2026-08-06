@@ -192,8 +192,18 @@ export const fetchallstatements = async (
 };
 
 export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
-  const { project, cargo_details, status, shipment_no, rejectedby, comments } =
-    formData;
+  const {
+    project,
+    cargo_details,
+    status,
+    shipment_no,
+    rejectedby,
+    comments,
+    created_at,
+    approvedPdfUrl,
+    file,
+    filename,
+  } = formData;
 
   let project_code = 1;
   if (project != "plant") {
@@ -219,6 +229,10 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
         shipment_no,
         rejectedby,
         comments,
+        created_at,
+        approvedPdfUrl,
+        file,
+        filename,
       },
       config,
     );
@@ -280,6 +294,31 @@ export const fetchReceipt = async (id, userInfo) => {
         config,
       );
       const receipt = response.data;
+      return receipt;
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    return [];
+  }
+};
+
+export const fetchReceiptsApproverDetails = async (id, userInfo) => {
+  if (id && id != "default") {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+      const response = await axios.get(
+        `${REACT_SERVER_URL}/receipts/approverdetails/${id}`,
+        config,
+      );
+      const receipt = response.data.approverDetails;
+
       return receipt;
     } catch (error) {
       throw error;
@@ -624,9 +663,12 @@ export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
           role: userInfo.role[0],
         },
         type: data.chosentype,
-        date: data.created_at,
+        created_at: data.created_at,
         status: data.status,
         item: data.item,
+        file: data.file,
+        filename: data.filename,
+        approvedPdfUrl: data.approvedPdfUrl,
       },
       config,
     );

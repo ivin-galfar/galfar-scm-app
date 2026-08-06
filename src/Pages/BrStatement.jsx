@@ -9,10 +9,8 @@ import EditStatement from "../Components/EditStatement";
 import { useBrCsIds, useBrTableData, useImageSaved } from "../store/brStore";
 import { fetchbrstatements } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import FileContainer from "../Components/FileContainer";
 import { useIsEditing } from "../store/helperStore";
 import { useNewStatement } from "../store/brStore";
-import { useNavigate } from "react-router-dom";
 import { is_hod } from "../Helpers/dept_helper";
 
 const BrStatement = () => {
@@ -23,8 +21,7 @@ const BrStatement = () => {
   const userinfo = useUserInfo();
   const { resetbrtabledata, brtabledata } = useBrTableData();
   const { isedit } = useIsEditing();
-  const { newstatement, setNewStatement, resetNewStatement } =
-    useNewStatement();
+  const { setNewStatement } = useNewStatement();
   const { imagesaved } = useImageSaved();
   const ishod = is_hod(userinfo?.role);
 

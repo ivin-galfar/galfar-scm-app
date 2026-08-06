@@ -771,6 +771,7 @@ const TableHeader = ({ isAdmin }) => {
         <div className="w-1/3 flex justify-end">
           {isAdmin &&
             formData.status != "review" &&
+            formData.status != "Approved" &&
             selectedmr !== "" &&
             selectedmr !== null &&
             selectedmr !== "default" && (
