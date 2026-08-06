@@ -12,7 +12,7 @@ import {
   isBold,
 } from "./helperfunctions";
 import { categoryapprovers, nextRole, roles } from "./roles_helper";
-import { getcmpmNames } from "../APIs/api";
+import { fetchReceipt, getcmpmNames } from "../APIs/api";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
 
 export const handlePrint = async (
@@ -1343,4 +1343,358 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   window.open(blobUrl);
 
   return blobUrl;
+};
+
+const calculateTotals = (tableData, formData) => {
+  let qty = formData.qty;
+  if (!tableData || tableData.length === 0)
+    return { totals: [], vats: [], netPrices: [] };
+
+  const vendorCount = Object.keys(tableData[0].vendors || {}).length;
+  const totals = new Array(vendorCount).fill(0);
+
+  tableData.forEach((row, index) => {
+    if (index === 0) return;
+    if (
+      ["RATING", "ICV SCORE"].includes(row?.particulars?.trim().toUpperCase())
+    )
+      return;
+    Object.entries(row.vendors).forEach(([_, val], vIdx) => {
+      const value = parseFloat(val) || 0;
+      totals[vIdx] += qty > 0 ? value * qty : value;
+    });
+  });
+
+  const vatRate = formData.vatRate ?? 0.05;
+  const vats = totals.map((t) => parseFloat((t * vatRate).toFixed(2)));
+  const netPrices = totals.map((t, idx) =>
+    parseFloat((t + vats[idx]).toFixed(2)),
+  );
+
+  return { totals, vats, netPrices };
+};
+
+export const handleHirePrint = async (
+  printcontents,
+  userInfo,
+  emailPdf,
+  // totals,
+  // vats,
+  // netPrices,
+  // currency
+) => {
+  const doc = new jsPDF();
+  let { formData } = printcontents;
+
+  const { formData: updatedFormData, tableData } = await fetchReceipt(
+    formData.id,
+    userInfo,
+  );
+
+  const { totals, vats, netPrices } = calculateTotals(
+    tableData,
+    updatedFormData,
+  );
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const logoWidth = 60;
+  const logoHeight = 10;
+  doc.setFontSize(14);
+  const logoX = (pageWidth - logoWidth) / 2;
+  const logoY = 2;
+
+  doc.addImage(galfarlogo, "PNG", logoX, logoY, logoWidth, logoHeight);
+
+  doc.setFontSize(12);
+  if (updatedFormData.type != "asset") {
+    doc.text(`COMPARATIVE STATEMENT `, 105, 22, { align: "center" });
+    doc.text(` ${updatedFormData.hiringname}`, 105, 30, { align: "center" });
+    doc.text(
+      `(${updatedFormData?.type?.charAt(0).toUpperCase() + updatedFormData?.type?.slice(1)})`,
+      105,
+      updatedFormData.type == "hiring" ? 35 : 22,
+      { align: "center" },
+    );
+  }
+  if (updatedFormData.type === "asset") {
+    const title = `COMPARATIVE STATEMENT - ${updatedFormData.hiringname}`;
+    const subtitle = `Asset Purchase`;
+
+    const maxWidth = 120;
+
+    const wrappedTitle = doc.splitTextToSize(title, maxWidth);
+    const wrappedSubtitle = doc.splitTextToSize(subtitle, maxWidth);
+
+    const centerX = 105;
+
+    const titleY = 35;
+    const subtitleY = titleY + wrappedTitle.length * 7 + 1;
+
+    doc.text(wrappedTitle, centerX, titleY, { align: "center" });
+    doc.text(wrappedSubtitle, centerX, subtitleY, { align: "center" });
+  }
+  doc.setFontSize(10);
+  if (updatedFormData.type != "asset") {
+    doc.text(`Project: ${updatedFormData.projectvalue}`, 14, 52);
+    doc.text(`Location: ${updatedFormData.locationvalue}`, 14, 46);
+  }
+  doc.text(`Quantity: ${updatedFormData.qty}`, 14, 40);
+  if (updatedFormData.type != "asset") {
+    doc.text(`EQUIP MR NO: ${updatedFormData.equipmrnovalue}`, 105, 42, {
+      align: "center",
+    });
+    doc.text(`EM REF NO: ${updatedFormData.emrefnovalue}`, 105, 48, {
+      align: "center",
+    });
+    doc.text(
+      `Required date: ${new Date(updatedFormData.requireddatevalue).toLocaleDateString()}`,
+      200,
+      46,
+      { align: "right" },
+    );
+    doc.text(
+      `Required Duration: ${updatedFormData.requirementdurationvalue}`,
+      200,
+      52,
+      {
+        align: "right",
+      },
+    );
+  }
+  doc.text(`Doc. No.: ${updatedFormData.doc_no}`, 200, 32, {
+    align: "right",
+  });
+  doc.text(
+    `Date: ${new Date(updatedFormData.datevalue).toLocaleDateString()}`,
+    200,
+    40,
+    { align: "right" },
+  );
+
+  const vendorNames = Object.values(tableData[0].vendors || {});
+  const activeVendorIndexes = vendorNames.reduce((acc, val, idx) => {
+    if (val !== "") {
+      acc.push(idx);
+    }
+
+    return acc;
+  }, []);
+
+  const vendorHeaders = activeVendorIndexes.map((i) => vendorNames[i]);
+
+  const headerRow1 = [
+    { content: "Particulars", rowSpan: 2 },
+    ...vendorHeaders.map((_, idx) => ({ content: `Vendor ${idx + 1}` })),
+  ];
+  const headerRow2 = vendorHeaders;
+  const tableHead = [headerRow1, headerRow2];
+
+  const tableBody = tableData
+    .filter((row, idx) => idx !== 0)
+    .map((row, i) => {
+      let rowvalues = [];
+      const vendors = Object.values(row.vendors || {});
+
+      rowvalues = activeVendorIndexes.map((i) => vendors[i] || 0);
+
+      return [row.particulars, ...rowvalues];
+    });
+  const vendorRanks = activeVendorIndexes
+    .map((i) => ({ index: i, value: totals[i] }))
+    .filter((v) => v.value > 0)
+    .sort((a, b) => a.value - b.value)
+    .map((vendor, rank) => ({ ...vendor, rank: rank + 1 }));
+  const getRankLabel = (i) => {
+    const vendor = vendorRanks.find((v) => v.index === i);
+    return vendor ? `L${vendor.rank}` : "--";
+  };
+
+  const leftMargin = 8;
+  const rightMargin = 8;
+  const availableWidth = pageWidth - leftMargin - rightMargin;
+
+  const vendorCount = activeVendorIndexes.length;
+
+  const minParticulars = 55;
+  const desiredParticulars = 80;
+
+  let particularsWidth = Math.min(
+    desiredParticulars,
+    Math.max(minParticulars, availableWidth - vendorCount * 22),
+  );
+
+  let vendorWidth = Math.floor(
+    (availableWidth - particularsWidth) / Math.max(1, vendorCount),
+  );
+
+  const minVendorWidth = 22;
+  if (vendorWidth < minVendorWidth) {
+    vendorWidth = minVendorWidth;
+    particularsWidth = Math.max(
+      minParticulars,
+      availableWidth - vendorCount * minVendorWidth,
+    );
+  }
+
+  const columnStyles = { 0: { cellWidth: particularsWidth } };
+  for (let c = 0; c < vendorCount; c++)
+    columnStyles[c + 1] = { cellWidth: vendorWidth };
+
+  tableBody.push(
+    [
+      `Total (Excl. VAT) ${updatedFormData.currency ?? ""}`,
+      ...activeVendorIndexes.map((i) => totals[i].toFixed(2)),
+    ],
+    [
+      `VAT @5% ${updatedFormData.currency ?? ""}`,
+      ...activeVendorIndexes.map((i) => vats[i].toFixed(2)),
+    ],
+    [
+      `Net Price (Incl. VAT) ${updatedFormData.currency ?? ""}`,
+      ...activeVendorIndexes.map((i) => netPrices[i].toFixed(2)),
+    ],
+    ["Rating", ...activeVendorIndexes.map((i) => getRankLabel(i))],
+    [
+      {
+        content: "Selected",
+        styles: { fontStyle: "bold" },
+      },
+      ...activeVendorIndexes.map((_, idx) => ({
+        content: idx === updatedFormData.selectedvendorindex ? "Yes" : "--",
+        styles: {
+          fontStyle:
+            idx === updatedFormData.selectedvendorindex ? "bold" : "normal",
+          textColor:
+            idx === updatedFormData.selectedvendorindex
+              ? [0, 128, 0]
+              : [0, 0, 0],
+          fontSize: idx === updatedFormData.selectedvendorindex ? 9 : 8,
+        },
+      })),
+    ],
+  );
+  autoTable(doc, {
+    startY: 65,
+    head: tableHead,
+    body: tableBody,
+    margin: { left: leftMargin, right: rightMargin },
+    tableWidth: availableWidth,
+    styles: { fontSize: 10, overflow: "linebreak", cellPadding: 2 },
+    headStyles: { fillColor: [200, 200, 200], textColor: 0 },
+    columnStyles,
+  });
+
+  let startYLabel =
+    doc.previousAutoTable?.finalY || doc.lastAutoTable?.finalY || 65;
+  const pageHeight = doc.internal.pageSize.height;
+  const labelWidth = 60;
+  const spacing = 10;
+  const approvalHeight = 60; // approximate space needed for approvals
+  // If not enough space on current page, add a new page
+  if (startYLabel + approvalHeight > pageHeight) {
+    doc.addPage();
+    startYLabel = 2; // top margin for new page
+  }
+
+  const roleDisplayMap = {
+    hod: "Mr.Pramoj.R",
+    gm: "Mr.Vijayan.C",
+    ceo: "Mr.Sridhar. C",
+  };
+  const approvalsStatus =
+    formData?.approverdetails?.reduce((acc, d) => {
+      if (d.action !== "review") {
+        acc[d.role] = d.action;
+      }
+      return acc;
+    }, {}) || {};
+
+  const rolesToShow = ["hod", "gm", "ceo"];
+  rolesToShow.forEach((dbRole, index) => {
+    const rawStatus = approvalsStatus[dbRole] || "--";
+    const status =
+      rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+    const displayName = roleDisplayMap[dbRole] || dbRole;
+    const displayRole = `(${dbRole.toUpperCase()})`;
+
+    const labelX = 20 + index * (labelWidth + spacing);
+    const labelY = startYLabel + 25;
+
+    let textColor = [0, 0, 0];
+    if (status === "Approved") {
+      textColor = [0, 128, 0];
+    } else if (status === "Rejected") {
+      textColor = [200, 0, 0];
+    } else {
+      textColor = [255, 165, 0];
+    }
+
+    const offsetY = 10;
+    const statusWidth = doc.getTextWidth(status);
+    const roleWidth = doc.getTextWidth(displayName);
+
+    const lineWidth = Math.max(statusWidth, roleWidth);
+
+    const statusX = labelX + (lineWidth - statusWidth) / 2;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...textColor);
+    doc.text(status, statusX, labelY + offsetY);
+
+    doc.line(
+      labelX,
+      labelY + offsetY + 1.5,
+      labelX + lineWidth,
+      labelY + offsetY + 1.5,
+    );
+    const roleX = labelX + (lineWidth - roleWidth) / 2;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    doc.text(displayName, roleX, labelY + offsetY + 6);
+    doc.text(displayRole, roleX + 5, labelY + offsetY + 12);
+  });
+  const rightText = `Generated on: ${new Date().toLocaleString()}`;
+  const footerPadding = 6;
+  const pageCount = doc.internal.getNumberOfPages();
+  const rightWidth = doc.getTextWidth(rightText);
+
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+
+    doc.text(
+      `System Generated Comparative Statement `,
+      14,
+      pageHeight - footerPadding,
+    );
+
+    doc.text(
+      rightText,
+      pageWidth - rightWidth - 48,
+      pageHeight - footerPadding,
+    );
+
+    doc.text(
+      `Page ${i} of ${pageCount}`,
+      pageWidth - 14,
+      pageHeight - footerPadding,
+      {
+        align: "right",
+      },
+    );
+
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.2);
+  }
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+
+  if (emailPdf) {
+    return { pdfBlob, blobUrl };
+  }
+  window.open(blobUrl);
 };

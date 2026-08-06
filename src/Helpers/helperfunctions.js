@@ -8,8 +8,12 @@ import {
   TypeValue,
 } from "./category_helper";
 import { getcmpmNames } from "../APIs/api";
-import { handleBrPrint, handleFnPrint, handlePrint } from "./print_helper";
-
+import {
+  handleBrPrint,
+  handleFnPrint,
+  handleHirePrint,
+  handlePrint,
+} from "./print_helper";
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
   const updatedFiles = [...formData.file];
@@ -472,7 +476,7 @@ export const generateBvrPDF = async (responseData, userInfo) => {
   if (responseData?.status !== "approved") return null;
 
   try {
-    const result = await handleBrPrint(responseData, true);
+    const result = handleBrPrint(responseData, true);
 
     const pdfBlob = result?.pdfBlob;
 
@@ -491,11 +495,37 @@ export const generateBvrPDF = async (responseData, userInfo) => {
     if (uploadedFiles && uploadedFiles.length > 0) {
       return uploadedFiles[0].fileUrl || uploadedFiles[0].url || null;
     }
-  } catch (err) {
-    console.log(err);
-
-    console.error("PDF generation/upload failed:", err);
-  }
+  } catch (err) {}
 
   return null;
+};
+
+export const generatePDFHire = async (responseData, userInfo) => {
+  if (responseData.formData?.status.toLowerCase() !== "approved") return null;
+  try {
+    const result = await handleHirePrint(
+      responseData,
+      userInfo,
+      responseData.tableData,
+      true,
+    );
+
+    const pdfBlob = result?.pdfBlob;
+
+    if (!pdfBlob) return null;
+
+    const pdfFile = new File(
+      [pdfBlob],
+      `Approved_Statement_${responseData.formData.id}.pdf`,
+      {
+        type: "application/pdf",
+      },
+    );
+    const uploadedFiles = await handleAttachmentsUpload([pdfFile], userInfo);
+    if (uploadedFiles && uploadedFiles.length > 0) {
+      return uploadedFiles[0].fileUrl || uploadedFiles[0].url || null;
+    }
+  } catch (error) {
+    console.error("PDF generation/upload failed:", error);
+  }
 };

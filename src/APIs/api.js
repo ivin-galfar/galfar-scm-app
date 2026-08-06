@@ -303,6 +303,31 @@ export const fetchReceipt = async (id, userInfo) => {
   }
 };
 
+export const fetchReceiptsApproverDetails = async (id, userInfo) => {
+  if (id && id != "default") {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+      const response = await axios.get(
+        `${REACT_SERVER_URL}/receipts/approverdetails/${id}`,
+        config,
+      );
+      const receipt = response.data.approverDetails;
+
+      return receipt;
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    return [];
+  }
+};
+
 export const fetchReceiptCount = async ({
   expectedStatuses,
   userInfo,

@@ -12,7 +12,6 @@ import { useMutation } from "@tanstack/react-query";
 import { feedReceipt, updateReceipt } from "../APIs/api";
 import { useEdit, useSortVendors, useUpdate } from "../store/statementStore";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelectedDept } from "../store/userStore";
 import { useDashboardType } from "../store/logisticsStore";
 import { useLoading } from "../store/helperStore";
 
@@ -20,7 +19,7 @@ const Receipts = () => {
   const userInfo = useUserInfo();
   const [showToast, setShowToast] = useState(false);
   const [errormessage, setErrormessage] = useState("");
-  const [showcalc, setShowcalc] = useState(false);
+  const [showcalc] = useState(false);
   const [showmodal, setShowmodal] = useState(false);
   const { isEdit, resetIsEdit } = useEdit();
   const { dashboardType } = useDashboardType();
@@ -43,7 +42,6 @@ const Receipts = () => {
     setfreezeQuantity,
     selectedVendorReason,
     setSelectedVendorReason,
-    freezequantity,
   } = useContext(AppContext);
   const Asset = userInfo.role?.includes("inita") ? true : false;
   const { setIsupdated } = useUpdate();
@@ -88,7 +86,7 @@ const Receipts = () => {
       setErrormessage("");
       setfreezeQuantity(false);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       setIsupdated();
       resetIsEdit();
       setShowToast(true);
@@ -379,6 +377,7 @@ const Receipts = () => {
                       <a
                         href={url}
                         target="_blank"
+                        rel='noreferrer'
                         download
                         className="text-xs text-blue-600 hover:underline mt-1"
                       >
