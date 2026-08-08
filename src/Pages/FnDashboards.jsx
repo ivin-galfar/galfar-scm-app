@@ -274,9 +274,11 @@ const FnDashboards = () => {
         const status = info.getValue() || "";
         const formattedstatus = status
           .split(" ")
-          .map(
-            (word) =>
-              word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase(),
+          .map((word, index) =>
+            index == 2
+              ? word.toUpperCase()
+              : word.charAt(0).toUpperCase() +
+                word.slice(1).toLocaleLowerCase(),
           )
           .join(" ");
 
@@ -285,18 +287,18 @@ const FnDashboards = () => {
           if (row?.type === "file_note") {
             if (row?.category === "General" || row?.category === "TFW") {
               return {
-                "Pending For Hod": 40,
-                "Pending For Gm": 60,
-                "Pending For Ceo": 80,
+                "Pending For HOD": 40,
+                "Pending For GM": 60,
+                "Pending For CEO": 80,
                 Approved: 100,
                 Rejected: 100,
               };
             } else {
               return {
-                "Pending For Hod": 20,
-                "Pending For Sfm": 40,
-                "Pending For Gm": 60,
-                "Pending For Ceo": 80,
+                "Pending For HOD": 20,
+                "Pending For SFM": 40,
+                "Pending For GM": 60,
+                "Pending For CEO": 80,
                 Approved: 100,
                 Rejected: 100,
               };
@@ -304,35 +306,35 @@ const FnDashboards = () => {
           } else if (row?.type === "ioc") {
             if (row?.category === "FWA") {
               return {
-                "Pending For Cm": 35,
-                "Pending For Pm": 50,
-                "Pending For Pd": 60,
-                "Pending For Gm": 80,
+                "Pending For CM": 35,
+                "Pending For PM": 50,
+                "Pending For PD": 60,
+                "Pending For GM": 80,
                 Approved: 100,
                 Rejected: 100,
               };
             } else if (row?.category === "Insurance") {
               return {
-                "Pending For Hod": 20,
-                "Pending For Sfm": 40,
-                "Pending For Gm": 60,
-                "Pending For Ceo": 80,
+                "Pending For HOD": 20,
+                "Pending For SFM": 40,
+                "Pending For GM": 60,
+                "Pending For CEO": 80,
                 Approved: 100,
                 Rejected: 100,
               };
             } else if (row?.category === "Demob") {
               return {
-                "Pending For Cm": 30,
-                "Pending For Pm": 70,
-                "Pending For Pd": 85,
+                "Pending For CM": 30,
+                "Pending For PM": 70,
+                "Pending For PD": 85,
                 Approved: 100,
                 Rejected: 100,
               };
             } else {
               return {
-                "Pending For Hod": 40,
-                "Pending For Gm": 60,
-                "Pending For Ceo": 80,
+                "Pending For HOD": 40,
+                "Pending For GM": 60,
+                "Pending For CEO": 80,
                 Approved: 100,
                 Rejected: 100,
               };
@@ -352,19 +354,19 @@ const FnDashboards = () => {
               ? "bg-green-500"
               : formattedstatus === "review"
                 ? "bg-amber-500"
-                : formattedstatus === "Pending For Hod"
+                : formattedstatus === "Pending For HOD"
                   ? "bg-yellow-400"
-                  : formattedstatus === "Pending For Sfm"
+                  : formattedstatus === "Pending For SFM"
                     ? "bg-indigo-400"
-                    : formattedstatus === "Pending For Cm"
+                    : formattedstatus === "Pending For CM"
                       ? "bg-amber-500"
-                      : formattedstatus === "Pending For Gm"
+                      : formattedstatus === "Pending For GM"
                         ? "bg-orange-500"
-                        : formattedstatus === "Pending For Pm"
+                        : formattedstatus === "Pending For PM"
                           ? "bg-lime-500"
-                          : formattedstatus === "Pending For Pd"
+                          : formattedstatus === "Pending For PD"
                             ? "bg-teal-500"
-                            : formattedstatus === "Pending For Ceo"
+                            : formattedstatus === "Pending For CEO"
                               ? "bg-violet-600"
                               : "bg-gray-400";
 
