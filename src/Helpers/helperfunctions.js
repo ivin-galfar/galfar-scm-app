@@ -516,7 +516,7 @@ export const generatePDFHire = async (responseData, userInfo) => {
 
     const pdfFile = new File(
       [pdfBlob],
-      `Approved_Statement_${responseData.formData.id}.pdf`,
+      `Approved_Statement_${responseData.formData.doc_no}.pdf`,
       {
         type: "application/pdf",
       },
