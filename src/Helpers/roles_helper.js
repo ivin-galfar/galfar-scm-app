@@ -103,3 +103,50 @@ export const prevRole = (role, module) => {
 
   return roleMap[role?.toLowerCase()] || null;
 };
+export const statusMapping = {
+  inita: [
+    "Pending for HOD",
+    "Pending for GM",
+    "Pending for CEO",
+    "Approved",
+    "Rejected",
+    "review",
+    "reverted",
+    "",
+  ],
+  inith: [
+    "Pending for HOD",
+    "Pending for GM",
+    "Pending for CEO",
+    "Approved",
+    "Rejected",
+    "review",
+    "reverted",
+    "",
+  ],
+
+  hod: [
+    "Pending For HOD",
+    "Pending For GM",
+    "Pending For CEO",
+    "review",
+    "Rejected",
+    "Approved",
+  ],
+  gm: [
+    "Pending For HOD",
+    "Pending for GM",
+    "Pending for CEO",
+    "review",
+    "Approved",
+    "Rejected",
+  ],
+  ceo: [
+    "Pending For HOD",
+    "Pending for GM",
+    "Pending for CEO",
+    "review",
+    "Approved",
+    "Rejected",
+  ],
+};

@@ -14,6 +14,7 @@ import { is_plant } from "../Helpers/dept_helper";
 import { useComments } from "../store/helperStore";
 import { generatePDFHire } from "../Helpers/helperfunctions";
 import { fetchReceiptsApproverDetails } from "../APIs/api";
+import { statusMapping } from "../Helpers/roles_helper";
 
 const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
   const userInfo = useUserInfo();
@@ -27,12 +28,25 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
     sharedTableData,
     setIsMRSelected,
     setSelectedMr,
+    setMultiStatusFilter,
   } = useContext(AppContext);
 
   const { setClearTable } = useClearStatementTable();
   const { resetSortVendors } = useSortVendors();
   const { comments, setComments, resetComments } = useComments();
   const navigate = useNavigate();
+
+  const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
+    (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
+  );
+  const pendingStatuses = !userInfo?.is_admin
+    ? expectedStatuses.filter(
+        (s) =>
+          s.startsWith("pending") &&
+          userInfo.role?.some((r) => s.includes(r.toLowerCase())),
+      )
+    : expectedStatuses.filter((s) => s.startsWith("pending"));
+
   const submitApproval = async (cs_id, status) => {
     let finalStatus = "";
     let rejectedBy = "";
@@ -80,6 +94,8 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
       setErrormessage("");
       setShowToast(true);
       setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+        setMultiStatusFilter(pendingStatuses);
         setShowToast(false);
       }, 1500);
       setTimeout(() => {
@@ -109,7 +125,8 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
           },
           tableData: [],
         });
-        navigate("/receipts", { replace: true });
+        navigate("/dashboard", { replace: true });
+        setMultiStatusFilter(pendingStatuses);
         setShowToast(true);
         resetComments();
         setErrormessage("");

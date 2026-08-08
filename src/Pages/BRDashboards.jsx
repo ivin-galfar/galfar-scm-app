@@ -185,10 +185,10 @@ const BRDashboards = () => {
 
   const columnHelper = createColumnHelper();
   const statusProgress = {
-    "Pending For Hod": 20,
-    "Pending For Fm": 40,
-    "Pending For Gm": 60,
-    "Pending For Ceo": 80,
+    "Pending For HOD": 20,
+    "Pending For FM": 40,
+    "Pending For GM": 60,
+    "Pending For CEO": 80,
     Approved: 100,
     Rejected: 100,
     "": 0,
@@ -222,9 +222,11 @@ const BRDashboards = () => {
         const status = info.getValue() || "";
         const formattedstatus = status
           .split(" ")
-          .map(
-            (word) =>
-              word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase(),
+          .map((word, index) =>
+            index == 2
+              ? word.toUpperCase()
+              : word.charAt(0).toUpperCase() +
+                word.slice(1).toLocaleLowerCase(),
           )
           .join(" ");
         const progress = statusProgress[formattedstatus] || 0;
@@ -239,13 +241,13 @@ const BRDashboards = () => {
               ? "bg-green-500"
               : formattedstatus === "review"
                 ? "bg-amber-500"
-                : formattedstatus === "Pending For Hod"
+                : formattedstatus === "Pending For HOD"
                   ? "bg-yellow-400"
-                  : formattedstatus === "Pending For Fm"
+                  : formattedstatus === "Pending For FM"
                     ? "bg-indigo-400"
-                    : formattedstatus === "Pending For Gm"
+                    : formattedstatus === "Pending For GM"
                       ? "bg-amber-500"
-                      : formattedstatus === "Pending For Ceo"
+                      : formattedstatus === "Pending For CEO"
                         ? "bg-violet-600"
                         : "bg-gray-400";
 
