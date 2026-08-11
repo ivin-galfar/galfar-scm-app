@@ -83,9 +83,9 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
         config,
       );
 
-      if (updatedstatus.toLowerCase() == "rejected") {
+      if (updatedstatus?.toLowerCase() == "rejected") {
         updatedFormData = {
-          ...formData,
+          ...updatedFormData,
           rejectedby: userInfo.role?.[0] ?? "",
           status: updatedstatus,
         };
