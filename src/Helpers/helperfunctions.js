@@ -509,14 +509,16 @@ export const generatePDFHire = async (responseData, userInfo) => {
       responseData.tableData,
       true,
     );
-
+    const type = responseData.formData.type;
+    const doc_no = responseData.formData.doc_no.split("/")[4].trim();
+    const formattedType = type.charAt(0).toUpperCase() + type.slice(1);
     const pdfBlob = result?.pdfBlob;
 
     if (!pdfBlob) return null;
 
     const pdfFile = new File(
       [pdfBlob],
-      `Approved_Statement_${responseData.formData.doc_no}.pdf`,
+      `CS_${formattedType + "_" + doc_no}.pdf`,
       {
         type: "application/pdf",
       },
