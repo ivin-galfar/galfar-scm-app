@@ -254,6 +254,7 @@ const LogisticsTable = () => {
           selected_vendor_index,
           recommendation_reason,
           comments_init: comments,
+          role: userInfo.role[0],
         },
         config,
       );

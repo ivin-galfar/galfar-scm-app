@@ -79,6 +79,8 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
           [comments_role]: comments,
           rejectedby:
             updatedstatus === "rejected" ? userInfo.role[0] : undefined,
+          role: userInfo.role[0],
+          project: project,
         },
         config,
       );
@@ -88,6 +90,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
           ...updatedFormData,
           rejectedby: userInfo.role?.[0] ?? "",
           status: updatedstatus,
+          project: project,
         };
       }
 

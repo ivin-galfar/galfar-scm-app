@@ -348,6 +348,7 @@ const LogisticsDashboard = () => {
           row.comment_pd && { role: "pd", comments: row.comment_pd },
           row.comment_pm && { role: "pm", comments: row.comment_pm },
           row.comment_in && { role: "incharge", comments: row.comment_in },
+          row.comment_init && { role: "initlg", comments: row.comment_init },
         ].filter(Boolean);
 
         return approverComments.length > 0
