@@ -88,7 +88,7 @@ export const prevRole = (role, module) => {
   };
   const fnRoleMap = {
     ceo: ["gm"],
-    gm: ["fm", "hod", "pm"],
+    gm: ["fm", "hod", "pm", "pd"],
     fm: ["hod"],
     hod: ["init", "inita", "initpr", "initdc", "initfn"],
     pm: ["cm"],
