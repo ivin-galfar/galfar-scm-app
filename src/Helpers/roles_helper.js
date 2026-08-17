@@ -73,7 +73,7 @@ export const prevRole = (role, module) => {
   const logisticsRoleMap = {
     ceo: "fm",
     fm: "gm",
-    gm: "pm",
+    gm: ["pm", "pd"],
     pd: "pm",
     pm: "incharge",
     incharge: "initlg",
