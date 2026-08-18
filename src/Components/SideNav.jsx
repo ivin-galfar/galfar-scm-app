@@ -272,19 +272,31 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
           </div>
         )}
         <hr className="border-0 h-px bg-gray-200 my-1 mx-2" />
-        <button onClick={handleUpdateDocRead}>
-          <Link
-            to="https://www.notion.so/Galfar-Intranet-2a592f8cf63380d5b90ff24cad08c79e"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`}
-          >
-            <IoHelpCircleSharp className="text-lg" />
-            {isOpen && (
-              <span className="whitespace-nowrap">Help & Resources</span>
-            )}
-          </Link>
-        </button>
+        <div className="relative">
+          <button onClick={handleUpdateDocRead}>
+            <Link
+              to="https://app.notion.com/p/Changelogs-2a792f8cf633815fabb5e328963521fa"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+            >
+              <IoHelpCircleSharp className="text-lg" />
+
+              {isOpen && (
+                <span className="whitespace-nowrap">What's New ⭐</span>
+              )}
+              <span
+                className={`${
+                  !isOpen
+                    ? "absolute -top-3 -right-2"
+                    : "relative top-0 right-0"
+                } rounded-full bg-red-700 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-white shadow-sm transition-all duration-300`}
+              >
+                NEW
+              </span>
+            </Link>
+          </button>
+        </div>
 
         <button
           className="flex gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"

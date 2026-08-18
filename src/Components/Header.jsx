@@ -68,7 +68,7 @@ const Header = () => {
     ishire,
   });
 
-  const effectiveDept = selectedDept || defaultDept;
+  const effectiveDept = defaultDept || selectedDept;
   const dashboardLink =
     effectiveDept === "hiring" || effectiveDept === "asset"
       ? "/dashboard"
