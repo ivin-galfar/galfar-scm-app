@@ -466,7 +466,7 @@ const FnDashboards = () => {
     if (isplant) {
       depttypes = getTypes();
       setTypes(depttypes);
-      if (userInfo.role.includes("gm")) {
+      if (userInfo.role.includes("gm") || userInfo.role.includes("ceo")) {
         cat = getcategory(typeFilter);
       } else if (
         userInfo.role.includes("initpr") &&
@@ -490,10 +490,6 @@ const FnDashboards = () => {
       } else if (userInfo.role.includes("initfn") && isAdmin) {
         cat = getcategory(typeFilter).filter(
           (c) => !c.includes("FWA") && !c.includes("Demob"),
-        );
-      } else if (userInfo.role.includes("ceo")) {
-        cat = getcategory(typeFilter).filter(
-          (c) => !c.includes("Demob") && !c.includes("FWA"),
         );
       } else if (userInfo.role.includes("view")) {
         cat = getcategory(typeFilter).filter((c) => c.includes("Demob"));
