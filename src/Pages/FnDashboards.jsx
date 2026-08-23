@@ -515,6 +515,7 @@ const FnDashboards = () => {
     userInfo?.role?.includes("initfn") &&
     userInfo?.role?.includes("initpr") &&
     userInfo.role.includes("initdc");
+  const multiprojects = userInfo?.pr_code?.length > 1;
   useEffect(() => {
     sessionStorage.setItem(
       "filenoteFilters",
@@ -598,7 +599,7 @@ const FnDashboards = () => {
               },
             )}
           </div>
-          {(cmusers || pmusers || initusers || multiinit) && (
+          {(cmusers || pmusers || initusers || multiinit || multiprojects) && (
             <div className="ml-auto flex">
               <TypeFilter
                 type={typeFilter}

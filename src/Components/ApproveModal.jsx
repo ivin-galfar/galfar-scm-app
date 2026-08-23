@@ -97,6 +97,7 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
         navigate("/dashboard", { replace: true });
         setMultiStatusFilter(pendingStatuses);
         setShowToast(false);
+        resetComments();
       }, 1500);
       setTimeout(() => {
         setShowmodal(false);
@@ -128,7 +129,6 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
         navigate("/dashboard", { replace: true });
         setMultiStatusFilter(pendingStatuses);
         setShowToast(true);
-        resetComments();
         setErrormessage("");
         setTimeout(() => {
           setShowmodal(false);

@@ -942,8 +942,6 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
