@@ -136,7 +136,6 @@ const FileNote = () => {
       setShowToast();
       setTimeout(() => {
         resetshowtoast();
-        clearErrorMessage();
         resetShowModal();
         setDataUpdated(false);
         resetComments();
@@ -146,11 +145,15 @@ const FileNote = () => {
           await FnEmailAlert(data.id, userInfo, dept, data);
         }
       } catch (err) {
-        console.log(err);
-
         const message =
           err?.response?.data?.message || err?.message || "Email failed";
+        setShowToast();
         setErrorMessage(message);
+        setTimeout(() => {
+          resetshowtoast();
+          clearErrorMessage();
+          resetShowModal();
+        }, 1500);
       }
     },
 
@@ -747,9 +750,14 @@ const FileNote = () => {
         userInfo?.is_admin &&
         (selectedvalue.status == "pending for hod" ||
           selectedvalue.status == "pending for cm") && (
-          <div className="fixed top-5 left-1/2 z-60 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-            ✅ You have requested the document for approval!{" "}
-            {errormessage ? `but ${errormessage}` : ""}
+          <div
+            className={`fixed top-5 left-1/2 z-60 transform -translate-x-1/2 ${errormessage ? "bg-red-500" : "bg-green-500"}  text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in`}
+          >
+            {!errormessage
+              ? `✅ You have requested the document for
+            approval!`
+              : ""}{" "}
+            {errormessage ? `${errormessage}` : ""}
           </div>
         )}
       {showtoast &&
