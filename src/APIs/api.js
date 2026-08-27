@@ -1090,3 +1090,25 @@ export const ResetUserPassword = async (token, password) => {
     throw error;
   }
 };
+
+export const GetAnalyticsData = async (userInfo) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/analytics/approvals`,
+      config,
+    );
+    console.log(response.data);
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+
+    throw error;
+  }
+};

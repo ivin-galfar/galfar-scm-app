@@ -135,6 +135,14 @@ export const formatDateDDMMYYYY = (date) =>
     timeZone: "Asia/Dubai",
   });
 
+export const formatDateDMY = (date) =>
+  new Date(date).toLocaleDateString("en-AE", {
+    timeZone: "Asia/Dubai",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+
 export const formatDateDDMMYYYYHHMMSS = (date) => {
   if (!date) return "";
 
