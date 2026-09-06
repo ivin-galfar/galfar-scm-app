@@ -204,3 +204,7 @@ tbody tr:hover {
     @apply font-sans;
   }
 }
+
+.recharts-legend-wrapper {
+  top: 26px !important;
+}

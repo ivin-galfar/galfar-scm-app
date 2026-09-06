@@ -2,10 +2,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table";
+import {
+  createExpandedRowModel,
+  createPaginatedRowModel,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  tableFeatures,
+} from "@tanstack/table-core";
 import {
   fetchbrstatement,
   fetchbrstatements,
@@ -322,15 +327,27 @@ const BRDashboards = () => {
       },
     ),
   ];
-  const table = useReactTable({
+  const tableFeaturesConfig = tableFeatures({
+    rowPaginationFeature,
+    paginatedRowModel: createPaginatedRowModel(),
+    rowExpandingFeature,
+    expandedRowModel: createExpandedRowModel(),
+  });
+
+  const table = useTable({
     data: brstatements?.rows || [],
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    features: tableFeaturesConfig,
     state: { pagination },
     manualPagination: true,
-    onPaginationChange: setPageSize,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function" ? updater(pagination) : updater;
+      if (!next) return;
+      setPageIndex(next.pageIndex ?? pagination.pageIndex);
+      setPageSize(next.pageSize ?? pagination.pageSize);
+    },
     pageCount: Math.ceil(brcount / pagination.pageSize),
-    getExpandedRowModel: getExpandedRowModel(),
   });
 
   return (
@@ -473,17 +490,19 @@ const BRDashboards = () => {
                           : ""
                       }`}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className || ""}`}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </td>
-                      ))}
+                      {(row.getVisibleCells?.() ?? row.getAllCells()).map(
+                        (cell) => (
+                          <td
+                            key={cell.id}
+                            className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className || ""}`}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </td>
+                        ),
+                      )}
 
                       <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                         <div className="flex items-center justify-center gap-4">

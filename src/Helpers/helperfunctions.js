@@ -539,3 +539,39 @@ export const generatePDFHire = async (responseData, userInfo) => {
     console.error("PDF generation/upload failed:", error);
   }
 };
+export const getGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour < 12) return "Good Morning";
+  if (hour < 18) return "Good Afternoon";
+  return "Good Evening";
+};
+
+export const getPath = (label) => {
+  switch (label) {
+    case "Asset CS":
+      return "receipts";
+    case "Hiring CS":
+      return "receipts";
+    case "Logistics CS":
+      return "lstatements";
+    case "File Note":
+      return "filenote";
+    case "IOC":
+      return "filenote";
+    case "Buy Vs Rent":
+      return "brstatement";
+    default:
+      return "";
+  }
+};
+
+export const initiatorRoles = [
+  "inita",
+  // "initfn", //directly used this role wherever required
+  "inith",
+  "initpr",
+  "initdc",
+  "view",
+  "initlg",
+];

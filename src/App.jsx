@@ -20,6 +20,7 @@ import { is_fnote } from "./Helpers/dept_helper";
 import FnDashboards from "./Pages/FnDashboards";
 import { APP_VERSION } from "../config/ENV";
 import ResetPwd from "./Pages/ResetPage";
+import PendingDashboard from "./Pages/PendingDashboard";
 
 const App = () => {
   const location = useLocation();
@@ -102,6 +103,7 @@ const App = () => {
             <Route path="/dashboardlg" element={<LogisticsDashboard />} />
             <Route path="/dashboardbr" element={<BRDashboards />} />
             <Route path="/dashboardfn" element={<FnDashboards />} />
+            <Route path="/pendingdashboard" element={<PendingDashboard />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/resetpwd" element={<ResetPwd />} />
             <Route path="/brstatement" element={<BrStatement />} />

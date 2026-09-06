@@ -1,10 +1,15 @@
 import {
   createColumnHelper,
-  getCoreRowModel,
-  getExpandedRowModel,
-  useReactTable,
   flexRender,
+  useTable,
 } from "@tanstack/react-table";
+import {
+  createExpandedRowModel,
+  createPaginatedRowModel,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  tableFeatures,
+} from "@tanstack/table-core";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../Components/Context";
 import fetchStatments from "../APIs/StatementsApi";
@@ -45,7 +50,7 @@ import {
 import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
-import { useLoading } from "../store/helperStore";
+import { useLoading, useQuickAccess } from "../store/helperStore";
 import { useSelectedDept } from "../store/userStore";
 import { handleHirePrint } from "../Helpers/print_helper";
 const Dashboard = () => {
@@ -66,7 +71,7 @@ const Dashboard = () => {
   const { toggleasset, resetasset } = useToggleAsset();
   const [approversFetched, setApproversFetched] = useState(false);
   const { deleted, resetDeleted, setDeleted } = useDeleteStatement();
-
+  const { isClicked, setIsClicked } = useQuickAccess();
   const userInfo = useUserInfo();
   const { dashboardType, setDashboardType, resetDashboardType } =
     useDashboardType();
@@ -176,7 +181,13 @@ const Dashboard = () => {
         }
 
         const effectiveDashboardType =
-          ishire && userInfo?.is_admin ? "hiring" : dashboardType;
+          (ishire || isasset) && userInfo?.is_admin
+            ? isClicked
+              ? dashboardType
+              : ishire
+                ? "hiring"
+                : "asset"
+            : dashboardType;
 
         const { filteredReceipts, reqMrValues, categorizedReceipts, mrValues } =
           await fetchStatments({
@@ -409,15 +420,27 @@ const Dashboard = () => {
     ),
   ];
 
-  const table = useReactTable({
+  const tableFeaturesConfig = tableFeatures({
+    rowPaginationFeature,
+    paginatedRowModel: createPaginatedRowModel(),
+    rowExpandingFeature,
+    expandedRowModel: createExpandedRowModel(),
+  });
+
+  const table = useTable({
     data: receipts || [],
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    features: tableFeaturesConfig,
     state: { pagination },
     manualPagination: true,
-    onPaginationChange: setPageSize,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function" ? updater(pagination) : updater;
+      if (!next) return;
+      setPageIndex(next.pageIndex ?? pagination.pageIndex);
+      setPageSize(next.pageSize ?? pagination.pageSize);
+    },
     pageCount: Math.ceil(receiptscount / pagination.pageSize),
-    getExpandedRowModel: getExpandedRowModel(),
   });
 
   return (
@@ -559,17 +582,19 @@ const Dashboard = () => {
                     : ""
                 }`}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className}`}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </td>
-                  ))}
+                  {(row.getVisibleCells?.() ?? row.getAllCells()).map(
+                    (cell) => (
+                      <td
+                        key={cell.id}
+                        className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className}`}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    ),
+                  )}
                   <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
                     <div className="flex items-center justify-center gap-4">
                       <Link

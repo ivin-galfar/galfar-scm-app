@@ -11,44 +11,65 @@ import StatusSummary from "./StatusSummary";
 import { Button, Card, CardContent } from "./ui";
 import { transformAnalyticsData } from "./transformAnalyticsData";
 import WorkflowSummary from "./WorkflowSummary";
+import { getGreeting, initiatorRoles } from "../../Helpers/helperfunctions";
+import Annoucements from "./Announcements";
+import Greetings from "./Greetings";
 
 const emptyAnalytics = {
   summary: { approved: 0, pending: 0, inProgress: 0, rejected: 0, all: 0 },
   pendingForYou: [],
   nearingReminder: [],
   workflowSummary: [],
+  retuned_to_you: [],
 };
 
-const buildStatuses = (summary) => [
-  {
-    title: "Total Approved",
-    value: summary.total_approved,
-    description: "Total approved",
-    status: "approved",
-  },
-  {
-    title: "Pending for You",
-    value: summary.pending,
-    description: "Awaiting action",
-    status: "pending",
-  },
+const buildStatuses = (summary, intiator) => [
+  ...(!intiator
+    ? [
+        {
+          title: "Awaiting For Your Approval",
+          value: summary.pending,
+          description: "Awaiting your action",
+          status: "pending",
+          // trend: "up",
+        },
+      ]
+    : [
+        {
+          title: "Returned to You",
+          value: summary?.returned_to_you?.length,
+          description: "Awaiting your action",
+          status: "pending",
+          // trend: "down",
+        },
+      ]),
   {
     title: "In Progress",
     value: summary.inProgress,
     description: "Currently processing",
     status: "inProgress",
+    trend: "down",
+  },
+  {
+    title: "Approved",
+    value: summary.total_approved,
+    description: "Total approved",
+    status: "approved",
+    // trend: "down",
   },
   {
     title: "Rejected",
     value: summary.total_rejected,
     description: "Total rejected",
     status: "rejected",
+    // trend: "neutral",
   },
   {
-    title: "All",
+    title: "All Statements",
     value: summary.all,
     description: "Total statements",
     status: "all",
+    // trend: "neutral",
   },
 ];
 
@@ -79,53 +100,70 @@ const Dashboard = () => {
     select: transformAnalyticsData,
   });
   const analyticsData = data || emptyAnalytics;
-  const statuses = buildStatuses(analyticsData.summary);
-  console.log("data", analyticsData);
+  const initiator =
+    initiatorRoles.some((r) => userInfo.role.includes(r)) ||
+    userInfo.role.every((role) => role === "initfn");
+  const statuses = buildStatuses(analyticsData.summary, initiator);
+  const userName = userInfo.email.split("@")[0];
 
   return (
-    <main className="min-w-0 min-h-0 flex-1 overflow-x-hidden bg-muted/30 px-3 py-4 sm:px-5 lg:h-full lg:px-6 lg:py-3">
-      <div className="mx-auto min-w-0 max-w-[1500px] space-y-3">
+    <main className="min-w-0 min-h-0 flex-1 overflow-x-hidden bg-gradient-to-br from-muted/50 via-background to-muted/20 px-3 py-4 sm:px-5 lg:h-full lg:px-6 lg:py-3">
+      <div className="mx-auto min-w-0 max-w-[2000px] space-y-3">
         <div className="space-y-1">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Analytics dashboard
-            </h1>
+          <div className="flex  justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                Analytics dashboard
+              </h1>
+              <span className="rounded-2xs border border-border/70 bg-card/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-xs">
+                Operations overview
+              </span>
+            </div>
 
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Operations overview
-            </span>
+            <div className="flex max-w-md flex-col items-start gap-1 text-right">
+              <Greetings userName={userName} />
+            </div>
           </div>
         </div>
         {isError && <DashboardError onRetry={refetch} />}
         <StatusSummary statuses={statuses} loading={isLoading} />
         <section
-          className="grid grid-cols-2 gap-3 lg:grid-cols-1 xl:grid-cols-6"
+          className="grid grid-cols-2  gap-3 lg:grid-cols-1 xl:grid-cols-12 "
           aria-label="Work requiring attention"
         >
-          <div className="min-w-0 xl:col-span-3">
-            <PendingForYou items={analyticsData.pendingForYou} />
+          <div className="min-w-0  xl:col-span-5">
+            <PendingForYou
+              items={analyticsData.pendingForYou}
+              pending_count={analyticsData.summary.pending}
+            />
           </div>
-          <div className="min-w-0 xl:col-span-2">
+          <div className="min-w-0 xl:col-span-4">
             <QuickAccess />
           </div>
-          <div className="min-w-0 xl:col-span-1">
-            <DashboardPlaceholder />
+          <div className="min-w-0  xl:col-span-3">
+            <Annoucements userInfo={userInfo} />
           </div>
         </section>
         <section
-          className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-5"
+          className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-12"
           aria-label="Workflow analysis"
         >
-          <div className="min-w-0 xl:col-span-2">
-            <WorkflowSummary data={analyticsData.workflowSummary} />
+          <div className="min-w-0 xl:col-span-4">
+            <WorkflowSummary
+              data={analyticsData.workflowSummary}
+              loading={isLoading}
+            />
           </div>
-          <div className="min-w-0 xl:col-span-2">
-            <NearingReminder items={analyticsData.nearingReminder} />
+          <div className="min-w-0 xl:col-span-5">
+            <NearingReminder
+              items={analyticsData.nearingReminder}
+              escalated_times={analyticsData.summary.escalated_times}
+            />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 xl:col-span-3">
             <DashboardPlaceholder
-              title="More insights"
-              description="Additional workflow insights will appear here when available."
+              title="Coming Soon"
+              description="Average Turn Around Time for each category/dept. will appear here in upcoming release."
             />
           </div>
         </section>

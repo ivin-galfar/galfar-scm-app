@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useContext, useEffect } from "react";
+import { useState, useMemo, useContext, useEffect } from "react";
 import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
   createColumnHelper,
+  flexRender,
+  useTable,
 } from "@tanstack/react-table";
+import { tableFeatures } from "@tanstack/table-core";
 import { AppContext } from "./Context";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { REACT_SERVER_URL } from "../../config/ENV";
@@ -362,10 +362,12 @@ export default function VerticalTable({ showcalc }) {
     setHasInputActivity(hasInput);
   }, [tableData]);
 
-  const table = useReactTable({
+  const features = tableFeatures({});
+
+  const table = useTable({
     data: tableData,
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    features,
   });
   const ranks = [...vendorNetPrices]
     .map((v, i) => ({ value: v, index: i }))
@@ -427,7 +429,7 @@ export default function VerticalTable({ showcalc }) {
           {table.getRowModel().rows.map((row, rowIndex) => {
             const isTotalRow =
               row.original.particulars.trim().toUpperCase() === "NET PRICE";
-            const cells = row.getVisibleCells();
+            const cells = row.getVisibleCells?.() ?? row.getAllCells();
             return (
               <tr
                 key={row.id}

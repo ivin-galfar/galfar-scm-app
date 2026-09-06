@@ -2,7 +2,7 @@ import Dashboard from "./analytics/Dashboard";
 
 const Home = () => {
   return (
-    <div className="w-full h-full px-5 flex-grow relative">
+    <div className="w-full h-full  flex-grow relative">
       <Dashboard />
     </div>
   );

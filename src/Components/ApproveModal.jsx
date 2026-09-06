@@ -11,7 +11,7 @@ import {
 } from "../store/statementStore";
 import { RxCross1 } from "react-icons/rx";
 import { is_plant } from "../Helpers/dept_helper";
-import { useComments } from "../store/helperStore";
+import { useClickFromDashboard, useComments } from "../store/helperStore";
 import { generatePDFHire } from "../Helpers/helperfunctions";
 import { fetchReceiptsApproverDetails } from "../APIs/api";
 import { statusMapping } from "../Helpers/roles_helper";
@@ -35,6 +35,7 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
   const { resetSortVendors } = useSortVendors();
   const { comments, setComments, resetComments } = useComments();
   const navigate = useNavigate();
+  const { isClicked } = useClickFromDashboard();
 
   const expectedStatuses = (userInfo?.role || []).flatMap((role) =>
     (statusMapping[role.toLowerCase()] || []).map((s) => s.toLowerCase()),
@@ -94,7 +95,11 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
       setErrormessage("");
       setShowToast(true);
       setTimeout(() => {
-        navigate("/dashboard", { replace: true });
+        if (isClicked) {
+          navigate("/pendingdashboard", { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
+        }
         setMultiStatusFilter(pendingStatuses);
         setShowToast(false);
         resetComments();

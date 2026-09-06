@@ -104,3 +104,14 @@ export const useLoading = create((set) => ({
   setIsLoading: () => set({ isLoading: true }),
   resetIsLoading: () => set({ isLoading: false }),
 }));
+
+export const useQuickAccess = create((set) => ({
+  isClicked: false,
+  setIsClicked: () => set({ isClicked: true }),
+  resetIsClicked: () => set({ isClicked: false }),
+}));
+export const useClickFromDashboard = create((set) => ({
+  isClicked: false,
+  setIsClicked: () => set({ isClicked: true }),
+  resetIsClicked: () => set({ isClicked: false }),
+}));

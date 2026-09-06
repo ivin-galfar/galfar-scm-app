@@ -377,7 +377,7 @@ const Receipts = () => {
                       <a
                         href={url}
                         target="_blank"
-                        rel='noreferrer'
+                        rel="noreferrer"
                         download
                         className="text-xs text-blue-600 hover:underline mt-1"
                       >

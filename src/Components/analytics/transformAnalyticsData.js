@@ -48,19 +48,17 @@ export const transformAnalyticsData = (response) => {
     ["pending_data_for_you"],
     undefined,
   );
-  console.log(nearingRecords);
 
   const summary = {
     total_approved: firstValue(data, ["total_approved"]),
-    //actual pending for you records
-    pending_for_you: pendingRecordsValue,
-    //pending for you (count)
     pending: pendingRecords,
     inProgress: firstValue(data, ["in_progress"]),
     approved_by_you: firstValue(data, ["approved_by_you"]),
     submitted_by_you: firstValue(data, ["submitted_by_you"]),
+    returned_to_you: firstValue(data, ["retuned_to_you"]),
     total_rejected: firstValue(data, ["total_rejected"]),
     all: firstValue(data, ["all_statements"]),
+    escalated_times: firstValue(data, ["escalations_triggered"]),
   };
 
   return {
@@ -68,9 +66,10 @@ export const transformAnalyticsData = (response) => {
     pendingForYou: pendingRecordsValue,
     nearingReminder: nearingRecords.map(normalizeItem),
     workflowSummary: [
-      { name: " Approved", value: summary.total_approved },
-      { name: "Submitted By You", value: summary.submitted_by_you },
+      { name: "Approved", value: summary.total_approved },
+      // { name: "Submitted By You", value: summary.submitted_by_you }, //phase II
       { name: "Pending For You", value: summary.pending },
+      { name: "Returned to You", value: summary.returned_to_you?.length },
       { name: "In Progress", value: summary.inProgress },
       { name: "Rejected", value: summary.total_rejected },
     ],

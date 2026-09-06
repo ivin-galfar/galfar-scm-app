@@ -35,7 +35,7 @@ const Button = ({ variant = "default", className = "", ...props }) => (
 
 const Badge = ({ className = "", ...props }) => (
   <span
-    className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium ${className}`}
+    className={`inline-flex min-w-6  items-center justify-center rounded-sm border  text-[10px]  px-1.5 text-xs  leading-none ${className}`}
     {...props}
   />
 );
