@@ -24,6 +24,7 @@ import { transformAnalyticsData } from "../Components/analytics/transformAnalyti
 import { GetAnalyticsData } from "../APIs/api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { MdRestartAlt } from "react-icons/md";
 
 const PendingDashboard = () => {
   const { pagination, setPageIndex, setPageSize } = usePagination();
@@ -144,29 +145,45 @@ const PendingDashboard = () => {
                 : "Requests that require your attention"}
             </p>
           </div>
-          {unique_labels.length > 1 && (
-            <select
-              value={filtertype}
-              className="w-60 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2.5 text-sm font-medium
+          <div className="flex  justify-center items-center gap-2">
+            {unique_labels.length > 1 && (
+              <select
+                value={filtertype}
+                className="w-60 appearance-none rounded-lg border-2 border-gray-300 px-5 py-2.5 text-sm font-medium
                 text-gray-800 bg-white shadow-md cursor-pointer
                 hover:border-blue-400 hover:shadow-lg transition-all duration-200
                 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200
                 bg-no-repeat bg-right pr-12"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundPosition: "right 0.9rem center",
-              }}
-              onChange={(e) => {
-                setFilterType(e.target.value);
-                setPageIndex(0);
-              }}
-            >
-              <option value="">📋 All type of Doc.</option>
-              {unique_labels.map((label) => {
-                return <option key={label}>{label}</option>;
-              })}
-            </select>
-          )}
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                  backgroundPosition: "right 0.9rem center",
+                }}
+                onChange={(e) => {
+                  setFilterType(e.target.value);
+                  setPageIndex(0);
+                }}
+              >
+                <option value="">📋 All type of Doc.</option>
+                {unique_labels.map((label) => {
+                  return <option key={label}>{label}</option>;
+                })}
+              </select>
+            )}
+            {filtertype && (
+              <button
+                type="button"
+                aria-label="Clear document filter"
+                title="Clear document filter"
+                onClick={() => {
+                  setFilterType("");
+                  setPageIndex(0);
+                }}
+                className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
+              >
+                <MdRestartAlt size={30} aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </header>
 
         <div className="flex-grow ">
