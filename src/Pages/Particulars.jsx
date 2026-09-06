@@ -1,10 +1,13 @@
 import {
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table";
+import {
+  createExpandedRowModel,
+  rowExpandingFeature,
+  tableFeatures,
+} from "@tanstack/table-core";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import fetchParticulars from "../APIs/ParticularsApi";
@@ -79,17 +82,21 @@ const Particulars = () => {
       cell: (info) => info.getValue() || "-",
     }),
   ];
-  const table = useReactTable({
+  const features = tableFeatures({
+    rowExpandingFeature,
+    expandedRowModel: createExpandedRowModel(),
+  });
+
+  const table = useTable({
     data: particulars,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
+    features,
   });
 
   const latestDate =
     particulars.length > 0
       ? new Date(
-          Math.max(...particulars.map((item) => new Date(item.created_at)))
+          Math.max(...particulars.map((item) => new Date(item.created_at))),
         )
       : null;
   const formattedLatestDate = latestDate
@@ -111,7 +118,7 @@ const Particulars = () => {
       };
       const { data } = await axios.delete(
         `${REACT_SERVER_URL}/particulars/${deletetemplate}`,
-        config
+        config,
       );
 
       setShowToast(true);
@@ -194,17 +201,19 @@ const Particulars = () => {
                     key={row.id}
                     className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 cursor-pointer"
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="border-b border-gray-300 px-4 py-2 text-sm text-gray-700"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
+                    {(row.getVisibleCells?.() ?? row.getAllCells()).map(
+                      (cell) => (
+                        <td
+                          key={cell.id}
+                          className="border-b border-gray-300 px-4 py-2 text-sm text-gray-700"
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      ),
+                    )}
                     <td className="border-b border-gray-300 px-4 py-2 text-red-600 text-center">
                       <button
                         onClick={() => {

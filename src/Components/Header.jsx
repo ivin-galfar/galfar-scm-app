@@ -20,6 +20,7 @@ import {
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
 import { getDeptConfig } from "../Helpers/Permissions";
+import { useQuickAccess } from "../store/helperStore";
 
 const Header = () => {
   const userInfo = useUserInfo();
@@ -53,6 +54,7 @@ const Header = () => {
   };
   const { dashboardType, setDashboardType } = useDashboardType();
   const { setPageSize } = usePagination();
+  const { resetIsClicked } = useQuickAccess();
 
   const location = useLocation();
   const path = location.pathname;
@@ -129,6 +131,7 @@ const Header = () => {
                     }${isDisabled ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`;
                   }}
                   onClick={() => {
+                    resetIsClicked();
                     setStatusFilter("All");
                     setStatusFilterzustand("All");
                     setMultiStatusFilter([]);
