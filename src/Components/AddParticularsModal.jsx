@@ -53,7 +53,7 @@ const AddParticularsModal = ({ setShowmodal }) => {
           },
           dept_code: dept_id,
         },
-        config
+        config,
       );
 
       setShowToast(true);
@@ -68,6 +68,7 @@ const AddParticularsModal = ({ setShowmodal }) => {
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
+        setErrormessage("");
       }, 1500);
     }
   };

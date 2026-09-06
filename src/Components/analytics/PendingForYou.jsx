@@ -27,7 +27,6 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
   const { setIsClicked } = useClickFromDashboard();
   const isAdmin = userInfo?.is_admin;
   const roles = userInfo?.role || [];
-  console.log(items);
 
   const filteredItems = isAdmin
     ? items
