@@ -114,7 +114,11 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
                       <Badge className="justify-center  border-rose-200 bg-rose-50 font-semibold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
                         {item.status
                           .split(" ")
-                          .map((v) => v.charAt(0).toUpperCase() + v.slice(1))
+                          .map((v, i) =>
+                            i === 2
+                              ? v?.toUpperCase()
+                              : v?.charAt(0).toUpperCase() + v.slice(1),
+                          )
                           .join(" ")}
                       </Badge>
                     </div>
