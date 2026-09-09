@@ -212,12 +212,12 @@ const FnDashboards = () => {
   const columns = [
     columnHelper.accessor("sl", {
       header: "Sl. No.",
-      meta: { className: "min-w-20  whitespace-pre-wrap break-words" },
+      meta: { className: "min-w-[36px] whitespace-pre-wrap break-words" },
       cell: ({ row }) => row.index + 1,
     }),
     columnHelper.accessor((row) => row?.doc_no, {
       id: "doc_id",
-      meta: { className: "w-50  whitespace-pre-wrap break-words" },
+      meta: { className: "min-w-[120px] whitespace-pre-wrap break-words" },
       header: "Doc. No.",
       cell: (info) => {
         const type = info.row.original?.type == "ioc" ? "IOC" : "FN";
@@ -228,7 +228,10 @@ const FnDashboards = () => {
     columnHelper.accessor((row) => row?.name, {
       id: "subject",
       header: "Subject",
-      meta: { className: "max-w-70  whitespace-pre-wrap break-words" },
+      meta: {
+        className:
+          "min-w-[160px] max-w-[220px] whitespace-pre-wrap break-words",
+      },
       cell: (info) => info.getValue() || "-",
     }),
 
@@ -255,26 +258,26 @@ const FnDashboards = () => {
         return value === "FWA" ? "HWA" : value || "-";
       },
     }),
-    ...(hideDepartColumn
-      ? [
-          columnHelper.accessor(
-            (row) => {
-              const dept = dept_finder(row?.department_id);
-              return dept === "Plant & Equipment" ? "P&E" : dept;
-            },
-            {
-              id: "department",
-              header: "Dept.",
-              cell: (info) => info.getValue() || "-",
-            },
-          ),
-        ]
-      : []),
+    // ...(hideDepartColumn
+    //   ? [
+    //       columnHelper.accessor(
+    //         (row) => {
+    //           const dept = dept_finder(row?.department_id);
+    //           return dept === "Plant & Equipment" ? "P&E" : dept;
+    //         },
+    //         {
+    //           id: "department",
+    //           header: "Dept.",
+    //           cell: (info) => info.getValue() || "-",
+    //         },
+    //       ),
+    //     ]
+    //   : []),
 
     columnHelper.accessor((row) => row?.status, {
       id: "status",
       header: "Status",
-      meta: { className: "w-50  whitespace-pre-wrap break-words" },
+      meta: { className: "min-w-[180px] whitespace-pre-wrap break-words" },
       cell: (info) => {
         const status = info.getValue() || "";
         const formattedstatus = status
@@ -417,7 +420,10 @@ const FnDashboards = () => {
       {
         id: "comments",
         header: "Comments",
-        meta: { className: "w-60 max-w-xs whitespace-pre-wrap break-words" },
+        meta: {
+          className:
+            "min-w-[150px] max-w-[200px] whitespace-pre-wrap break-words",
+        },
         cell: (info) => {
           const comments = info.getValue();
           if (
@@ -652,18 +658,18 @@ const FnDashboards = () => {
         </div>
         {
           <div
-            className="relative overflow-y-auto bg-white shadow rounded border border-gray-200"
+            className="relative overflow-x-hidden overflow-y-auto bg-white shadow rounded border border-gray-200"
             style={{ height: `calc(93vh - 140px)` }}
           >
             <Loading isLoading={isLoading} />
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="w-full min-w-0 divide-y divide-gray-200">
               <thead className="top-0 z-10 sticky  bg-gray-50">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="border-b border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700"
+                        className="border-b border-gray-300 px-4  text-left text-sm font-semibold text-gray-700"
                       >
                         {header.isPlaceholder
                           ? null
@@ -708,7 +714,7 @@ const FnDashboards = () => {
                         (cell) => (
                           <td
                             key={cell.id}
-                            className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className || ""}`}
+                            className={`border-b  border-gray-300 px-2 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className || ""}`}
                           >
                             {flexRender(
                               cell.column.columnDef.cell,

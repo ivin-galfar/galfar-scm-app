@@ -42,7 +42,6 @@ const Receipts = () => {
     setfreezeQuantity,
     selectedVendorReason,
     setSelectedVendorReason,
-    particulars,
   } = useContext(AppContext);
   const Asset = userInfo.role?.includes("inita") ? true : false;
   const { setIsupdated } = useUpdate();
@@ -240,7 +239,6 @@ const Receipts = () => {
   );
 
   useEffect(() => {
-    setParticularName(particulars[0]?.id);
     const fetchMR = async () => {
       setIsLoading();
       try {

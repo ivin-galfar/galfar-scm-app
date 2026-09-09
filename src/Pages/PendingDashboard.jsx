@@ -52,6 +52,15 @@ const PendingDashboard = () => {
         if (roles.includes("inita")) {
           return item.type === "asset" || item.type === "buyvsrent";
         }
+        if (roles.includes("initlg")) {
+          return item.type === "logistics";
+        }
+        if (roles.includes("initpr") || roles.includes("initdc")) {
+          return item.type === "ioc";
+        }
+        if (roles.every((v) => v.includes("initfn"))) {
+          return item.type === "filenote" || item.type === "ioc";
+        }
 
         return false;
       })
