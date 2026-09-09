@@ -11,7 +11,7 @@ import StatusSummary from "./StatusSummary";
 import { Button, Card, CardContent } from "./ui";
 import { transformAnalyticsData } from "./transformAnalyticsData";
 import WorkflowSummary from "./WorkflowSummary";
-import { getGreeting, initiatorRoles } from "../../Helpers/helperfunctions";
+import { initiatorRoles } from "../../Helpers/helperfunctions";
 import Annoucements from "./Announcements";
 import Greetings from "./Greetings";
 
@@ -101,10 +101,10 @@ const Dashboard = () => {
   });
   const analyticsData = data || emptyAnalytics;
   const initiator =
-    initiatorRoles.some((r) => userInfo.role.includes(r)) ||
-    userInfo.role.every((role) => role === "initfn");
+    initiatorRoles?.some((r) => userInfo?.role?.includes(r)) ||
+    userInfo?.role?.every((role) => role === "initfn");
   const statuses = buildStatuses(analyticsData.summary, initiator);
-  const userName = userInfo.email.split("@")[0];
+  const userName = userInfo?.email.split("@")[0];
 
   return (
     <main className="min-w-0 min-h-0 flex-1 overflow-x-hidden bg-gradient-to-br from-muted/50 via-background to-muted/20 px-3 py-4 sm:px-5 lg:h-full lg:px-6 lg:py-3">

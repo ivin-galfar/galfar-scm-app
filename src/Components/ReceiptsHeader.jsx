@@ -15,7 +15,7 @@ import { FaEdit, FaFileUpload } from "react-icons/fa";
 import { FaFileDownload } from "react-icons/fa";
 import fetchParticulars from "../APIs/ParticularsApi";
 import Alerts from "../Components/Alerts";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LiaSaveSolid } from "react-icons/lia";
 
 import {
@@ -63,6 +63,7 @@ const TableHeader = ({ isAdmin }) => {
   const [showToast, setShowToast] = useState(false);
   const [triggerdelete, setTriggerdelete] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { mrnumber } = useParams();
   const selectedOptionValue =
     selectedmr || formData?.id || mrnumber || "default";
@@ -92,7 +93,7 @@ const TableHeader = ({ isAdmin }) => {
       }
     };
     loadParticulars();
-  }, []);
+  }, [newMr]);
 
   useEffect(() => {
     if (userInfo?.is_admin) {
@@ -304,6 +305,40 @@ const TableHeader = ({ isAdmin }) => {
       });
     }
   }, [isupdated]);
+
+  const createNewReceipt = () => {
+    setClearTable();
+    setSharedTableData({
+      formData: {
+        equipmrnovalue: "",
+        emrefnovalue: "",
+        hiringname: "",
+        locationvalue: "",
+        projectvalue: "",
+        requirementdurationvalue: "",
+        file: [],
+        filename: [],
+        qty: "",
+        currency: "",
+        requireddatevalue: new Date(),
+        datevalue: new Date(),
+        type: userInfo.role?.includes("inita") ? "asset" : "hiring",
+      },
+      tableData: [],
+    });
+    resetSortVendors();
+
+    setNewMr(true);
+    setSelectedMr(null);
+    setParticularName([]);
+    setIsMRSelected(false);
+    setfreezeQuantity(false);
+    navigate("/receipts", { replace: true, state: null });
+  };
+
+  useEffect(() => {
+    if (location.state?.createNew === "receipts") createNewReceipt();
+  }, [location.state]);
   const handleEdit = async (cs_id, approvalstatus, status) => {
     try {
       const config = {
@@ -423,36 +458,9 @@ const TableHeader = ({ isAdmin }) => {
   return (
     <div className="text-center mb-6 space-y-2">
       <div className="flex justify-between items-center w-full">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 py-2">
           <button
-            onClick={() => {
-              setClearTable();
-              setSharedTableData({
-                formData: {
-                  equipmrnovalue: "",
-                  emrefnovalue: "",
-                  hiringname: "",
-                  locationvalue: "",
-                  projectvalue: "",
-                  requirementdurationvalue: "",
-                  file: [],
-                  filename: [],
-                  qty: "",
-                  currency: "",
-                  requireddatevalue: new Date(),
-                  datevalue: new Date(),
-                  type: userInfo.role?.includes("inita") ? "asset" : "hiring",
-                },
-                tableData: [],
-              });
-              resetSortVendors();
-              setNewMr(true);
-              setSelectedMr(null);
-              setParticularName([]);
-              setIsMRSelected(false);
-              setfreezeQuantity(false);
-              navigate("/receipts", { replace: true });
-            }}
+            onClick={createNewReceipt}
             className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-xl shadow-md transition duration-200 cursor-pointer ${
               !userInfo?.is_admin ? "hidden" : ""
             }`}

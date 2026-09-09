@@ -1116,7 +1116,7 @@ export const GetAnnouncementsData = async ({ userInfo }) => {
     const config = {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
+        Authorization: `Bearer ${userInfo?.token}`,
       },
     };
     const response = await axios.get(

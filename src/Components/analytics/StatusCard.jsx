@@ -28,9 +28,9 @@ const statusStyles = {
   },
 
   pending: {
-    card: "border-amber-500 bg-amber-50/80 shadow-md shadow-amber-100/70 dark:border-amber-800 dark:bg-amber-950/25 dark:shadow-none",
-    text: "text-amber-700 dark:text-amber-300",
-    icon: "bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-300",
+    card: "border-amber-400 bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-50 shadow-lg shadow-amber-200/80 dark:border-amber-600 dark:from-amber-900/35 dark:via-amber-900/20 dark:to-amber-950/25 dark:shadow-none",
+    text: "text-amber-900 dark:text-amber-200",
+    icon: "bg-amber-500 text-white ring-2 ring-amber-200 shadow-sm dark:bg-amber-400 dark:text-amber-950 dark:ring-amber-600/50",
     accent: "bg-amber-500",
   },
 
@@ -87,8 +87,8 @@ const StatusCard = ({ title, value, description, status, trend, loading }) => {
           <div className="flex min-w-0 items-center gap-2">
             {isPending && (
               <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-bounce rounded-full bg-amber-500 opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+                <span className="absolute inline-flex size-full animate-bounce rounded-full bg-orange-500 opacity-80" />
+                <span className="relative inline-flex size-2 rounded-full bg-orange-500" />
               </span>
             )}
 
@@ -113,7 +113,7 @@ const StatusCard = ({ title, value, description, status, trend, loading }) => {
             <Skeleton className="h-8 w-16" />
           ) : (
             <p
-              className={` font-bold leading-none tracking-tight ${title == "Awaiting For Your Approval" ? "text-3xl" : "text-2xl"}`}
+              className={` font-bold leading-none tracking-tight ${title == "Awaiting For Your Approval" ? "text-[32px]" : "text-2xl"}`}
             >
               {value}
             </p>

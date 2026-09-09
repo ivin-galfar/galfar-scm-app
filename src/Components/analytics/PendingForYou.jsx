@@ -21,6 +21,7 @@ import useUserInfo from "../../CustomHooks/useUserInfo";
 import { useClickFromDashboard } from "../../store/helperStore";
 import { FiFileText } from "react-icons/fi";
 import { MdPendingActions } from "react-icons/md";
+import ZeroPendings from "../../Components/ZeroPendings";
 
 const PendingForYou = ({ items, pending_count = 0 }) => {
   const userInfo = useUserInfo();
@@ -54,8 +55,9 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
           <span className="flex gap-3">
             <CardTitle className="flex gap-2 items-center">
               <MdPendingActions size={19} className="text-amber-500" />
-              {initiatorRoles.some((r) => userInfo.role.includes(r)) ||
-              userInfo.role.every((role) => role === "initfn")
+              <span className="font-bold text-lg items-start flex"></span>
+              {initiatorRoles.some((r) => userInfo?.role.includes(r)) ||
+              userInfo?.role.every((role) => role === "initfn")
                 ? "Pending Statements"
                 : "Awaiting your Action"}
             </CardTitle>
@@ -66,8 +68,8 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
             )}
           </span>
           <CardDescription className="mt-1">
-            {initiatorRoles.some((r) => userInfo.role.includes(r)) ||
-            userInfo.role.every((role) => role === "initfn")
+            {initiatorRoles.some((r) => userInfo?.role.includes(r)) ||
+            userInfo?.role.every((role) => role === "initfn")
               ? "Statments which are still in progress"
               : "Requests that require your attention"}
           </CardDescription>
@@ -143,9 +145,11 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
             ))}
           </div>
         ) : (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            Nothing is waiting for your attention.
-          </p>
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            <ZeroPendings
+              message={"Great job! All statements have been approved."}
+            />
+          </div>
         )}
       </CardContent>
     </Card>

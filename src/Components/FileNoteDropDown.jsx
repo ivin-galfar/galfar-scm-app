@@ -2,7 +2,7 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useQuery } from "@tanstack/react-query";
 import { fetchfilenoteidvalue, fetchfilenoteids } from "../APIs/api";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useErrorMessage } from "../store/errorStore";
 import { useParams } from "react-router-dom";
 import { useDatasaved } from "../store/brStore";
@@ -23,7 +23,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
   });
 
   const navigate = useNavigate();
-  const { setErrorMessage, clearErrorMessage } = useErrorMessage();
+  const { setErrorMessage } = useErrorMessage();
 
   const fetchfn = async () => {
     try {
@@ -32,7 +32,7 @@ const FileNoteDropDown = ({ setSelectedFnValue, setSelectedValue }) => {
       setSelectedValue(fetchedval);
     } catch (error) {
       let message =
-        error.response.data || error.message || "Something went wrong!";
+        error.response?.data || error?.message || "Something went wrong!";
       setErrorMessage(message);
     }
   };

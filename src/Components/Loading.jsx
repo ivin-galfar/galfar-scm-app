@@ -15,7 +15,7 @@ const Loading = ({ isLoading }) => {
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-gray-700">
-                Loading Statements
+                Loading Statement (s)
               </p>
               <p className="text-xs text-gray-500 mt-1">Please wait...</p>
             </div>

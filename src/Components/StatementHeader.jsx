@@ -352,6 +352,44 @@ const StatementHeader = () => {
     ? "border-b-2 border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-64"
     : "border-gray-400  p-1 text-gray-800 outline-none transition-all duration-200 w-70";
 
+  const createNewLogisticsStatement = () => {
+    resetcolumns();
+    resetData();
+    setNewStatement();
+    resetparticularvalue();
+    form.reset({
+      cargo_details: "",
+      gross_weight: "",
+      chargeable_weight: "",
+      description: "",
+      supplier: "",
+      scopeofwork: "",
+      mode: "",
+      date: "",
+      edited_count: "",
+      shipment_no: "",
+      po: "",
+      project: "",
+      status: "",
+      sentforapproval: "",
+      recommendation_reason: "",
+      file: [],
+      filename: [],
+      lastupdated: null,
+      created_at: "",
+      rejectedby: "",
+      createdby: "",
+      recalled_times: 0,
+    });
+    navigate("/lstatements", { replace: true });
+  };
+
+  useEffect(() => {
+    if (location.state?.createNew === "logistics") {
+      createNewLogisticsStatement();
+    }
+  }, [location.state]);
+
   return (
     <div>
       <form className="flex max-w-full h-1/4 p-5">
@@ -359,37 +397,7 @@ const StatementHeader = () => {
           {userInfo.role?.includes("initlg") && (
             <span
               className="flex   justify-center font-semibold text-sm px-2 py-2 gap-2 h-10 bg-blue-600 rounded-2xl text-white items-center cursor-pointer"
-              onClick={() => {
-                resetcolumns();
-                resetData();
-                setNewStatement();
-                resetparticularvalue();
-                form.reset({
-                  cargo_details: "",
-                  gross_weight: "",
-                  chargeable_weight: "",
-                  description: "",
-                  supplier: "",
-                  scopeofwork: "",
-                  mode: "",
-                  date: "",
-                  edited_count: "",
-                  shipment_no: "",
-                  po: "",
-                  project: "",
-                  status: "",
-                  sentforapproval: "",
-                  recommendation_reason: "",
-                  file: [],
-                  filename: [],
-                  lastupdated: null,
-                  created_at: "",
-                  rejectedby: "",
-                  createdby: "",
-                  recalled_times: 0,
-                });
-                navigate(`/lstatements`, { replace: true });
-              }}
+              onClick={createNewLogisticsStatement}
             >
               {" "}
               <FaPlus />

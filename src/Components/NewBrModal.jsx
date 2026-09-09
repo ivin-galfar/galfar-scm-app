@@ -14,9 +14,8 @@ import { useErrorMessage } from "../store/errorStore";
 import FileUpload from "./FileUpload";
 import { useIsEditing } from "../store/helperStore";
 import { useNavigate } from "react-router-dom";
-import { is_hod } from "../Helpers/dept_helper";
 
-const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
+const NewBrModal = ({ resetIsOpen, clickedsave, setClickedSave }) => {
   const { formData, setFormData, resetFormData } = useBrStatement();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { setErrorMessage, errormessage, clearErrorMessage } =
@@ -42,7 +41,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
         replace: true,
       });
       setShowToast();
-      setIsopen(false);
+      resetIsOpen();
       setDataSaved();
       setClickedSave(false);
       setTimeout(() => {
@@ -62,7 +61,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
     mutationFn: updatebrstatement,
     onSuccess: (data) => {
       setShowToast();
-      setIsopen(false);
+      resetIsOpen();
       setDataSaved();
       setClickedSave(false);
       setTimeout(() => {
@@ -180,7 +179,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
           <button
             className="text-gray-400 hover:text-gray-600 cursor-pointer text-xl"
             onClick={() => {
-              setIsopen(false);
+              resetIsOpen();
               resetFormData();
               setClickedSave(false);
             }}
@@ -630,7 +629,7 @@ const NewBrModal = ({ setIsopen, clickedsave, setClickedSave }) => {
           <button
             className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer"
             onClick={() => {
-              setIsopen(false);
+              resetIsOpen();
               resetFormData();
               setClickedSave(false);
               resetIsEdit();
