@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaPlus } from "react-icons/fa6";
 import NewBrModal from "../Components/NewBrModal";
 import { useToast } from "../store/toastStore";
@@ -6,7 +7,12 @@ import BrHeader from "../Components/BrHeader";
 import BrTable from "../Components/BrTable";
 import BrDropdown from "../Components/BrDropdown";
 import EditStatement from "../Components/EditStatement";
-import { useBrCsIds, useBrTableData, useImageSaved } from "../store/brStore";
+import {
+  useBrCsIds,
+  useBrTableData,
+  useImageSaved,
+  useIsOpen,
+} from "../store/brStore";
 import { fetchbrstatements } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useIsEditing } from "../store/helperStore";
@@ -14,7 +20,7 @@ import { useNewStatement } from "../store/brStore";
 import { is_hod } from "../Helpers/dept_helper";
 
 const BrStatement = () => {
-  const [isOpen, setIsopen] = useState(false);
+  const { isOpen, setIsopen, resetIsopen } = useIsOpen();
   const { showtoast } = useToast();
   const [clickedsave, setClickedSave] = useState(false);
   const { setBrCs_ids } = useBrCsIds();
@@ -24,6 +30,19 @@ const BrStatement = () => {
   const { setNewStatement } = useNewStatement();
   const { imagesaved } = useImageSaved();
   const ishod = is_hod(userinfo?.role);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const createNewBuyVsRent = () => {
+    setIsopen();
+    resetbrtabledata();
+    setNewStatement();
+    navigate("/brstatement", { replace: true });
+  };
+
+  useEffect(() => {
+    if (location.state?.createNew === "bvr") createNewBuyVsRent();
+  }, [location.state]);
 
   useEffect(() => {
     const fetchAllIds = async () => {
@@ -53,9 +72,7 @@ const BrStatement = () => {
               className="text-white bg-brand border border-transparent hover:bg-brand-strong shadow-xs font-medium leading-5 rounded-lg text-sm px-4 py-2.5  focus:outline-none cursor-pointer"
               type="button"
               onClick={() => {
-                setIsopen(true);
-                resetbrtabledata();
-                setNewStatement();
+                createNewBuyVsRent();
               }}
             >
               Create Statement
@@ -92,7 +109,7 @@ const BrStatement = () => {
           <div className="flex justify-between items-center w-full mb-3">
             <BrDropdown />
             {(userinfo?.is_admin || ishod) && brtabledata.id && (
-              <EditStatement onClick={() => setIsopen(true)} />
+              <EditStatement onClick={() => setIsopen()} />
             )}
           </div>
 
@@ -102,7 +119,7 @@ const BrStatement = () => {
 
       {isOpen && (
         <NewBrModal
-          setIsopen={setIsopen}
+          resetIsOpen={resetIsopen}
           clickedsave={clickedsave}
           setClickedSave={setClickedSave}
         />

@@ -4,14 +4,13 @@ import { AiFillAlert } from "react-icons/ai";
 
 import {
   Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
   Separator,
 } from "./ui";
+import ZeroPendings from "../../Components/ZeroPendings";
 
 const NearingReminder = ({ items, escalated_times }) => {
   return (
@@ -68,9 +67,11 @@ const NearingReminder = ({ items, escalated_times }) => {
             ))}
           </div>
         ) : (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No reminders are currently due.
-          </p>
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            <ZeroPendings
+              message={"All statements are within their required timelines."}
+            />
+          </div>
         )}
       </CardContent>
     </Card>

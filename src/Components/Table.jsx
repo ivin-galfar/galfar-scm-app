@@ -68,7 +68,7 @@ export default function VerticalTable({ showcalc }) {
   };
 
   useEffect(() => {
-    if (particularname?.length === 0) {
+    if (particularname?.length === 0 || particularname == undefined) {
       return;
     }
     fetchParticular(particularname);

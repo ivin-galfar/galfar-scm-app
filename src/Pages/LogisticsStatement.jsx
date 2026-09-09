@@ -27,7 +27,7 @@ const LogisticsStatement = () => {
     }
   }, [formData.id, formData.status, newstatement, setFreeze, resetFreeze]);
   return (
-    <div className="flex-grow px-5">
+    <div className="relative flex-grow px-5">
       <StatementHeader />
       <LogisticsTable />
     </div>

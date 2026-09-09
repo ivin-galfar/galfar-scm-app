@@ -35,7 +35,7 @@ const WorkflowSummary = ({ data, loading }) => {
             </div>
           </div>
         ) : (
-          <WorkflowChart data={data} role={userinfo.role} />
+          <WorkflowChart data={data} role={userinfo?.role} />
         )}
       </CardContent>
     </Card>

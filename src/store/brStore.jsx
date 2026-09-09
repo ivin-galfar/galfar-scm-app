@@ -119,3 +119,9 @@ export const useImageSaved = create((set) => ({
   setImageSaved: () => set({ imagesaved: true }),
   resetImageSaved: () => set({ imagesaved: false }),
 }));
+
+export const useIsOpen = create((set) => ({
+  isOpen: false,
+  setIsopen: () => set({ isOpen: true }),
+  resetIsopen: () => set({ isOpen: false }),
+}));

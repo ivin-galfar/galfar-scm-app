@@ -7,6 +7,7 @@ import FileContainer from "./FileContainer";
 
 import { formatPrice } from "../Helpers/helperfunctions";
 import ApproveButton from "./ApproveButton";
+import Loading from "./Loading";
 
 const BrTable = () => {
   const { brtabledata } = useBrTableData();
@@ -17,7 +18,8 @@ const BrTable = () => {
   const maintainence_cost_rental = formatPrice(data.maint_rental);
 
   return (
-    <div className="rounded-xl border border-gray-300 p-2">
+    <div className="relative rounded-xl border border-gray-300 p-2">
+      <Loading isLoading={Object.keys(brtabledata).length == 0} />
       <div className="flex items-center gap-2  pb-2">
         {
           <div className="flex items-center gap-2 bg-gray-50  border border-gray-200 rounded-md px-3 py-1.5 ">

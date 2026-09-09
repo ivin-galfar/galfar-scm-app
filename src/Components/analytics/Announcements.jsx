@@ -63,7 +63,7 @@ const Annoucements = (userInfo) => {
               return (
                 <article
                   key={announcement.id}
-                  className="flex h-14 min-h-14 shrink-0 items-start gap-3 overflow-hidden border-b border-border/70 px-4 py-2 last:border-b-0"
+                  className="flex shrink-0 max-h-16  items-start gap-3 overflow-hidden border-b border-border/70 px-4 py-2 last:border-b-0"
                 >
                   <span
                     className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border border-border/60 bg-muted/70 text-${color}-600`}
@@ -79,7 +79,7 @@ const Annoucements = (userInfo) => {
                         {formatDateDMY(announcement.created_date)}
                       </h3>
                     </span>
-                    <p className="mt-1 truncate text-[11px] leading-4 text-muted-foreground">
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-muted-foreground">
                       {announcement.desc}
                     </p>
                   </div>

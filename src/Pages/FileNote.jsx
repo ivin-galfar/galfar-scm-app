@@ -12,7 +12,7 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useEffect, useState } from "react";
 import FileNoteDropDown from "../Components/FileNoteDropDown";
 import { FaPlus } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Buttontext from "../Components/Buttontext";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
@@ -73,6 +73,7 @@ const FileNote = () => {
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { types, setTypes } = useTypes();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showmodal, resetShowModal } = useToggleModal();
   const { setDataSaved, resetDataSaved } = useDatasaved();
   const isPlant = is_plant(userInfo?.dept_code);
@@ -101,7 +102,10 @@ const FileNote = () => {
   const { mutate: newfilenote } = useMutation({
     mutationFn: createfilenote,
     onSuccess: (data) => {
-      navigate(`/filenote/${data.id}`);
+      navigate(`/filenote/${data.id}`, {
+        replace: true,
+        state: null,
+      });
       setErrorMessage("");
       setShowToast();
       setSelectedValue(data);
@@ -387,23 +391,32 @@ const FileNote = () => {
     }
   };
 
+  const createNewFileNote = () => {
+    setNewfn();
+    setSelectedFnValue("");
+    setSelectedValue("");
+    setName("");
+    navigate("/filenote", { replace: true });
+    setCategory("");
+    setAttachments("");
+    settype("");
+  };
+
+  useEffect(() => {
+    if (location.state?.createNew === "filenote") {
+      createNewFileNote();
+      setNewfn(true);
+    }
+  }, [location.state]);
+
   return (
-    <div className="flex flex-grow flex-col ">
+    <div className=" relative flex flex-grow flex-col ">
       <div className="flex gap-4 p-4 items-center">
         {userInfo?.is_admin && !ishire && (
           <div className="w-1/7 py-2 gap-10 flex p-4">
             <button
               type="button"
-              onClick={() => {
-                setNewfn();
-                setSelectedFnValue("");
-                setSelectedValue("");
-                setName("");
-                navigate("/filenote");
-                setCategory("");
-                setAttachments("");
-                settype("");
-              }}
+              onClick={createNewFileNote}
               className="flex items-center justify-center gap-2 w-full h-12 p-4 
                bg-blue-600 hover:bg-blue-700 
                text-white font-semibold text-sm 

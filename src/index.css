@@ -208,3 +208,33 @@ tbody tr:hover {
 .recharts-legend-wrapper {
   top: 26px !important;
 }
+@keyframes empty-state-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes icon-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(22 163 74 / 0%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgb(22 163 74 / 14%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-state,
+  .empty-state__icon {
+    animation: none;
+  }
+}
+
