@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
+import { Mark, mergeAttributes } from "@tiptap/core";
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
@@ -83,6 +84,26 @@ import UploadAttachments from "../../../../Components/UploadAttachments";
 
 // import content from "@/components/tiptap-templates/simple/data/content.json";
 
+const ReadOnlyText = Mark.create({
+  name: "readOnlyText",
+  inclusive: false,
+
+  parseHTML() {
+    return [{ tag: "span[data-readonly-text]" }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "span",
+      mergeAttributes(HTMLAttributes, {
+        "data-readonly-text": "true",
+        contenteditable: "false",
+      }),
+      0,
+    ];
+  },
+});
+
 const MainToolbarContent = ({
   onHighlighterClick,
   onLinkClick,
@@ -90,6 +111,7 @@ const MainToolbarContent = ({
   isreview,
   isedit,
   newfn,
+  isloading,
 }) => {
   const { editor } = useContext(EditorContext);
 
@@ -152,7 +174,6 @@ const MainToolbarContent = ({
           }
         />
       </ToolbarGroup>
-
       <ToolbarSeparator />
       <ToolbarGroup>
         <MarkButton
@@ -335,6 +356,17 @@ const MainToolbarContent = ({
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
+        <div
+          className={`flex min-h-[52px] min-w-[140px] items-center justify-center ${isloading ? "" : "invisible"}`}
+          role="status"
+          aria-live="polite"
+          aria-hidden={!isloading}
+        >
+          <span className="flex h-7 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-2.5 text-xs font-medium text-slate-500 shadow-sm">
+            <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+            Fetching ID
+          </span>
+        </div>
         <UploadAttachments
           styles={
             newfn || isreview || isedit
@@ -375,7 +407,14 @@ const MobileToolbarContent = ({ type, onBack }) => (
   </>
 );
 
-export function SimpleEditor({ content, newfn, is_admin, isreview, isedit }) {
+export function SimpleEditor({
+  content,
+  newfn,
+  is_admin,
+  isreview,
+  isedit,
+  isloading,
+}) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState("main");
@@ -425,6 +464,7 @@ export function SimpleEditor({ content, newfn, is_admin, isreview, isedit }) {
       Superscript,
       Subscript,
       Selection,
+      ReadOnlyText,
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
@@ -487,6 +527,7 @@ export function SimpleEditor({ content, newfn, is_admin, isreview, isedit }) {
                 isreview={isreview}
                 isedit={isedit}
                 newfn={newfn}
+                isloading={isloading}
               />
             ) : (
               <MobileToolbarContent

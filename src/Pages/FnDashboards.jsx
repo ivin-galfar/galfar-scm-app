@@ -207,7 +207,7 @@ const FnDashboards = () => {
 
   const columnHelper = createColumnHelper();
   const hasProjectColumn = fndata?.some((row) => row.project_code);
-  const hideDepartColumn = fndata?.some((row) => row.category !== "FWA");
+  // const hideDepartColumn = fndata?.some((row) => row.category !== "FWA");
 
   const columns = [
     columnHelper.accessor("sl", {
@@ -414,7 +414,9 @@ const FnDashboards = () => {
     }),
     columnHelper.accessor(
       (row) => {
-        const comments = row.approver_info ?? "";
+        const comments = row?.approver_info?.filter(
+          (a) => a.comment != undefined,
+        );
         return comments;
       },
       {
@@ -426,35 +428,53 @@ const FnDashboards = () => {
         },
         cell: (info) => {
           const comments = info.getValue();
+          const rowData = info.row.original;
+          const ischanged = rowData["w.e.f_changed"] ?? false;
           if (
             comments &&
             typeof comments === "object" &&
-            Object.keys(comments).length > 0
+            Object.values(comments).length > 0
           ) {
             return (
-              <div className="space-y-1 overflow-y-auto max-h-22 ">
-                {Object.entries(comments)
-                  .reverse()
-                  .map(([key, value]) =>
-                    value.comment?.trim() ? (
-                      <div key={key}>
-                        {value.comment !== "" && (
-                          <>
-                            <strong className="capitalize">
-                              {value.role != "initfn" && value.role != "inita"
-                                ? value.role.toUpperCase() + ":"
-                                : "Initiator" + ":"}
-                            </strong>{" "}
-                            {value.comment}
-                          </>
-                        )}
-                      </div>
-                    ) : null,
-                  )}
+              <div className="space-y-1">
+                {ischanged && (
+                  <span className="inline-flex rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                    W.E.F. date changed
+                  </span>
+                )}
+                <div className="max-h-22 space-y-1 overflow-y-auto">
+                  {Object.entries(comments)
+                    .reverse()
+                    .map(([key, value]) =>
+                      value.comment?.trim() ? (
+                        <div key={key}>
+                          {value.comment !== "" && (
+                            <>
+                              <strong className="capitalize">
+                                {value.role != "initfn" && value.role != "inita"
+                                  ? value.role.toUpperCase() + ":"
+                                  : "Initiator" + ":"}
+                              </strong>{" "}
+                              {value.comment}
+                            </>
+                          )}
+                        </div>
+                      ) : null,
+                    )}
+                </div>
               </div>
             );
           } else {
-            return "-";
+            return (
+              <div className="space-y-1">
+                {ischanged && (
+                  <span className="inline-flex rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                    W.E.F. date changed
+                  </span>
+                )}
+                {!ischanged && "-"}
+              </div>
+            );
           }
         },
       },

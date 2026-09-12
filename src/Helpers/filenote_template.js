@@ -13,6 +13,7 @@ export const fileNoteTemplate = (
   category,
   ccvalue,
   cmname,
+  selectedDate,
 ) => {
   let basecontent = [];
 
@@ -855,15 +856,16 @@ export const fileNoteTemplate = (
         {
           type: "paragraph",
           content: [
-            {
-              type: "text",
-              text: "w.e.f ",
-            },
-            {
-              type: "text",
-              marks: [{ type: "underline" }],
-              text: "          .",
-            },
+            { type: "text", text: "w.e.f    " },
+            ...(selectedDate
+              ? [
+                  {
+                    type: "text",
+                    marks: [{ type: "bold" }, { type: "readOnlyText" }],
+                    text: selectedDate,
+                  },
+                ]
+              : []),
           ],
         },
         { type: "paragraph" },
