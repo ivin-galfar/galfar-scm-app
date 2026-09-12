@@ -45,6 +45,7 @@ import {
 } from "../store/helperStore";
 import { getcategory, getTypes } from "../Helpers/category_helper";
 import {
+  formatDateDMY,
   getCategoryforUI,
   getCCValue,
   getCMFromValue,
@@ -78,6 +79,7 @@ const FileNote = () => {
   const { setDataSaved, resetDataSaved } = useDatasaved();
   const isPlant = is_plant(userInfo?.dept_code);
   const [type, settype] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [category, setCategory] = useState("");
   const { attachments, setAttachments } = useAttachments();
   const { imagesaved } = useImageSaved();
@@ -98,6 +100,19 @@ const FileNote = () => {
     staleTime: 0,
     gcTime: 0,
   });
+
+  const minimumDate = new Date();
+  minimumDate.setDate(minimumDate.getDate() + 7);
+
+  const minDate = [
+    minimumDate.getFullYear(),
+    String(minimumDate.getMonth() + 1).padStart(2, "0"),
+    String(minimumDate.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  const formattedSelectedDate = selectedDate
+    ? selectedDate.split("-").reverse().join("-")
+    : "";
 
   const { mutate: newfilenote } = useMutation({
     mutationFn: createfilenote,
@@ -205,6 +220,7 @@ const FileNote = () => {
       cleanCategory,
       ccvalue,
       cmname,
+      formattedSelectedDate,
     );
   };
 
@@ -274,7 +290,16 @@ const FileNote = () => {
         setSelectedFnValue("");
       }
     }
-  }, [type, category, selectedproject, doc_no, isDocLoading, newfn, name]);
+  }, [
+    type,
+    category,
+    selectedproject,
+    doc_no,
+    isDocLoading,
+    newfn,
+    name,
+    selectedDate,
+  ]);
 
   const nextstatus = userInfo.role.some((r) =>
     selectedvalue?.status?.toLowerCase().includes(r?.toLowerCase()),
@@ -320,6 +345,7 @@ const FileNote = () => {
         userInfo,
         project: selectedproject,
         sentforapproval: null,
+        wef: selectedDate || null,
       });
     } else {
       const editorinfo = useEditorInfo();
@@ -498,32 +524,44 @@ const FileNote = () => {
           />
         )}
         {newfn && (
-          <div className="items-center gap-1 p-4">
-            <label className="font-medium flex">
-              Subject: <BsAsterisk size={6} color="red" />
-            </label>
-            <input
-              type="text"
-              placeholder="Enter file note/IOC subject name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border p-2 border-gray-300 rounded-lg w-84"
-            />
-          </div>
-        )}
-        {isDocLoading && newfn && (
-          <div className="flex items-center justify-center gap-2 p-4">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-            <span className="text-sm text-gray-600 font-medium">
-              Fetching ID...
-            </span>
+          <div className="flex items-end gap-4 p-4">
+            <div>
+              <label className="mb-1 flex font-medium">
+                Subject: <BsAsterisk size={6} color="red" />
+              </label>
+
+              <input
+                type="text"
+                placeholder="Enter File Note/IOC subject name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-84 rounded-lg border border-gray-300 p-2"
+              />
+            </div>
+
+            {category == "Demob" && (
+              <div>
+                <label className="mb-1 flex font-medium">
+                  W.E.F: <BsAsterisk size={6} color="red" />
+                </label>
+
+                <input
+                  type="date"
+                  value={selectedDate}
+                  min={minDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="rounded-lg border border-gray-300 p-2"
+                  required
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
       {selectedvalue.doc_no && (
         <div className="w-full  bg-white border border-gray-200 rounded-lg shadow-sm p-2 flex items-center">
           {selectedvalue.category !== "FWA" ? (
-            <div className="flex-1 flex items-center justify-center gap-2">
+            <div className="relative left-1/2 flex -translate-x-1/2 items-center justify-center gap-2">
               <>
                 <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
                   Department
@@ -545,54 +583,87 @@ const FileNote = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-between gap-5">
-            {userInfo?.is_admin &&
-              (isReview || isEdit || (iocintimated != null && clickedinit)) && (
+          <div className="ml-auto flex items-center gap-4">
+            {selectedvalue.category == "Demob" &&
+              selectedvalue["w.e.f_changed"] && (
+                <div className="flex max-w-md items-center">
+                  <div
+                    className="rounded-md border border-amber-300 bg-amber-50 px-3 py-1 text-amber-950 shadow-sm"
+                    role="status"
+                    aria-label="W.E.F date changed based on the Final approved date"
+                  >
+                    <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-amber-800">
+                      W.E.F date changed based on the Final approved date
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold leading-5">
+                      <span className="text-amber-800">Previous:</span>
+                      <span className="rounded bg-white px-1.5 py-0.5 text-amber-950">
+                        {formatDateDMY(selectedvalue["w.e.f"])}
+                      </span>
+                      <span className="text-amber-700" aria-hidden="true">
+                        →
+                      </span>
+                      <span className="text-amber-800">Effective:</span>
+                      <span className="rounded bg-amber-200 px-1.5 py-0.5 font-bold text-amber-950">
+                        {formatDateDMY(selectedvalue["w.e.f_changed_date"])}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            <div className="flex justify-between gap-5">
+              {userInfo?.is_admin &&
+                (isReview ||
+                  isEdit ||
+                  (iocintimated != null && clickedinit)) && (
+                  <span className="text-gray-500 cursor-pointer hover:text-gray-700">
+                    <IoSave
+                      size={20}
+                      color="green"
+                      onClick={() => {
+                        if (isReview || isEdit) {
+                          handleSave("update");
+                        } else {
+                          handleUpdateFlag(selectedvalue.id);
+                        }
+                      }}
+                    />
+                  </span>
+                )}
+              {selectedvalue.status == "created" && userInfo?.is_admin && (
                 <span className="text-gray-500 cursor-pointer hover:text-gray-700">
-                  <IoSave
-                    size={20}
-                    color="green"
-                    onClick={() => {
-                      if (isReview || isEdit) {
-                        handleSave("update");
-                      } else {
-                        handleUpdateFlag(selectedvalue.id);
-                      }
-                    }}
-                  />
+                  <MdModeEdit size={20} color="red" onClick={handleEdit} />
                 </span>
               )}
-            {selectedvalue.status == "created" && userInfo?.is_admin && (
-              <span className="text-gray-500 cursor-pointer hover:text-gray-700">
-                <MdModeEdit size={20} color="red" onClick={handleEdit} />
-              </span>
-            )}
-            {userInfo?.is_admin &&
-              !userInfo.role.includes("inith") &&
-              selectedvalue.status !== "approved" &&
-              selectedvalue.status !== "rejected" &&
-              selectedvalue.status !== "edit" &&
-              selectedvalue.status !== "created" &&
-              selectedvalue.status !== "review" && (
-                <span className="text-gray-500 cursor-pointer hover:text-gray-700">
-                  <FaUndoAlt
-                    size={20}
-                    color="#2563EB"
-                    onClick={() => {
-                      setIsAlerted();
-                    }}
-                  />{" "}
-                </span>
-              )}
+              {userInfo?.is_admin &&
+                !userInfo.role.includes("inith") &&
+                selectedvalue.status !== "approved" &&
+                selectedvalue.status !== "rejected" &&
+                selectedvalue.status !== "edit" &&
+                selectedvalue.status !== "created" &&
+                selectedvalue.status !== "review" && (
+                  <span className="text-gray-500 cursor-pointer hover:text-gray-700">
+                    <FaUndoAlt
+                      size={20}
+                      color="#2563EB"
+                      onClick={() => {
+                        setIsAlerted();
+                      }}
+                    />{" "}
+                  </span>
+                )}
+            </div>
           </div>
         </div>
       )}
+
       <SimpleEditor
         content={selectedfnvalue}
         newfn={newfn}
         is_admin={userInfo.is_admin}
         isreview={isReview}
         isedit={isEdit}
+        isloading={isDocLoading && newfn}
       />
       {hasComments && (
         <div className="sticky bottom-5 flex px-25">
@@ -687,7 +758,6 @@ const FileNote = () => {
           </div>
         )}
       </div>
-
       {showmodal && userInfo?.is_admin && (
         <Alerts
           message={
@@ -741,7 +811,6 @@ const FileNote = () => {
             ✅Document updated successfully!!
           </div>
         )}
-
       {showtoast &&
         !errormessage &&
         userInfo?.is_admin &&

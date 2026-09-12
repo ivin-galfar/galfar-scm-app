@@ -6,11 +6,8 @@ import useUserInfo from "../CustomHooks/useUserInfo";
 import { useErrorMessage } from "../store/errorStore";
 import { statusExpected } from "../Helpers/statusfinder";
 import { FnEmailAlert, updatefilenotevalues } from "../APIs/api";
-import { handleFnPrint } from "../Helpers/print_helper";
-import {
-  generatePDF,
-} from "../Helpers/helperfunctions";
-import { useComments } from "../store/helperStore";
+import { compareWefDate, generatePDF } from "../Helpers/helperfunctions";
+import { useChangingWefDate, useComments } from "../store/helperStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -25,6 +22,7 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { setComments, comments, resetComments } = useComments();
+  const { setIsChanged } = useChangingWefDate();
   const [isreviewclicked, setIsReviewClicked] = useState(false);
   const isHod = userInfo.role.includes("hod");
   const isGm = userInfo.role.includes("gm");
@@ -73,6 +71,29 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       ...data,
       status: data.status,
     };
+    const isDemob = data.category === "Demob";
+
+    let wef_changed = false;
+    let updated_date = null;
+
+    const isSpecialProject = SPECIAL_PROJECTS?.includes(
+      Number(data?.project_code),
+    );
+
+    const shouldCheckWef =
+      isDemob &&
+      ((isSpecialProject && userInfo?.role?.includes("pd")) ||
+        (!isSpecialProject && userInfo?.role?.includes("pm")));
+
+    if (shouldCheckWef) {
+      const { wefChanged, updatedDate } = compareWefDate(data["w.e.f"]);
+
+      if (wefChanged) {
+        wef_changed = wefChanged;
+        updated_date = updatedDate;
+        setIsChanged();
+      }
+    }
 
     if (status == "approved") {
       updatedstatus = statusExpected(
@@ -104,6 +125,8 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       category: data.category,
       sentforapproval: "yes",
       project_code: data.project_code,
+      wefchanged: wef_changed,
+      wefchangeddate: updated_date,
     };
 
     updatestatement(payload);
