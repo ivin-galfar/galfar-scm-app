@@ -163,7 +163,7 @@ const Dashboard = () => {
           <div className="min-w-0 xl:col-span-3">
             <DashboardPlaceholder
               title="Coming Soon"
-              description="Average Turn Around Time for each category/dept. will appear here in upcoming release."
+              description="Additional insights and metrics will be available in upcoming releases."
             />
           </div>
         </section>

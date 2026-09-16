@@ -13,6 +13,8 @@ export const fileNoteTemplate = (
   category,
   ccvalue,
   cmname,
+  selectedDate,
+  project,
 ) => {
   let basecontent = [];
 
@@ -823,7 +825,7 @@ export const fileNoteTemplate = (
             },
             {
               type: "text",
-              text: "       ",
+              text: project,
               marks: [{ type: "bold" }, { type: "underline" }],
             },
           ],
@@ -843,26 +845,12 @@ export const fileNoteTemplate = (
           content: [
             {
               type: "text",
-              text: "We are hereby demobilizing the below-listed Galfar Equipment from Project ",
+              text: "We are hereby demobilizing the below-listed Fleet (with driver/operator) from the Project w.e.f., ",
             },
             {
               type: "text",
-              marks: [{ type: "underline" }],
-              text: "      .",
-            },
-          ],
-        },
-        {
-          type: "paragraph",
-          content: [
-            {
-              type: "text",
-              text: "w.e.f ",
-            },
-            {
-              type: "text",
-              marks: [{ type: "underline" }],
-              text: "          .",
+              marks: [{ type: "bold" }, { type: "readOnlyText" }],
+              text: selectedDate ? selectedDate + "." : "  ",
             },
           ],
         },

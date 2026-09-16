@@ -453,7 +453,6 @@ const TableHeader = ({ isAdmin }) => {
       setErrormessage(message ? message : error.message);
     }
   };
-  console.log(particularname);
 
   return (
     <div className="text-center mb-6 space-y-2">
@@ -649,7 +648,7 @@ const TableHeader = ({ isAdmin }) => {
       </div>
       <div className="flex items-center w-full p-0.5">
         <div className="space-y-1 px-4 flex items-start gap-10 text-sm font-medium w-full max-w-md">
-          {particularname?.length == 0 ? (
+          {particularname == "" ? (
             <div className="flex flex-col flex-grow ">
               <label htmlFor="mrNo" className=" text-left text-gray-700 mb-1">
                 Choose Doc. No.

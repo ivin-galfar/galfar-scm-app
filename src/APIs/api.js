@@ -688,6 +688,7 @@ export const createfilenote = async ({
   type,
   userInfo,
   project,
+  wef,
 }) => {
   try {
     const config = {
@@ -707,6 +708,7 @@ export const createfilenote = async ({
         file_names,
         file_urls,
         project,
+        wef,
       },
       config,
     );
@@ -732,6 +734,8 @@ export const updatefilenotevalues = async ({
   attachments,
   project_code,
   exportedstatement,
+  wefchanged,
+  wefchangeddate,
 }) => {
   try {
     const config = {
@@ -755,6 +759,8 @@ export const updatefilenotevalues = async ({
         attachments,
         project_code,
         exportedstatement,
+        wefchanged,
+        wefchangeddate,
       },
       config,
     );

@@ -115,3 +115,9 @@ export const useClickFromDashboard = create((set) => ({
   setIsClicked: () => set({ isClicked: true }),
   resetIsClicked: () => set({ isClicked: false }),
 }));
+
+export const useChangingWefDate = create((set) => ({
+  isChanged: false,
+  setIsChanged: () => set({ isChanged: true }),
+  resetIsChanged: () => set({ isChanged: false }),
+}));

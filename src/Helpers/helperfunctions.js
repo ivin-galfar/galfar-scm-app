@@ -143,6 +143,16 @@ export const formatDateDMY = (date) =>
     day: "2-digit",
   });
 
+export const compareWefDate = (wefDate) => {
+  const currentDate = new Date();
+  const wefDateValue = new Date(wefDate);
+
+  return {
+    wefChanged: wefDateValue < currentDate,
+    updatedDate: wefDateValue < currentDate ? currentDate : null,
+  };
+};
+
 export const formatDateDDMMYYYYHHMMSS = (date) => {
   if (!date) return "";
 
