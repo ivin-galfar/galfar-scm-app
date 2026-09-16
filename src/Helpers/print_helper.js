@@ -1058,6 +1058,14 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
 
           let xPos = marginLeft;
 
+          while (
+            charIndex < fullText.length &&
+            /\s/.test(fullText[charIndex]) &&
+            wrappedLine[0] !== fullText[charIndex]
+          ) {
+            charIndex++;
+          }
+
           // Render each character/segment with proper formatting
           for (let i = 0; i < wrappedLine.length; i++) {
             const char = wrappedLine[i];

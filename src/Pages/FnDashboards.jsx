@@ -439,7 +439,7 @@ const FnDashboards = () => {
               <div className="space-y-1">
                 {ischanged && (
                   <span className="inline-flex rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-                    W.E.F. date changed
+                    Demob date changed
                   </span>
                 )}
                 <div className="max-h-22 space-y-1 overflow-y-auto">

@@ -6,15 +6,15 @@ import {
   formatwords,
 } from "../Helpers/helperfunctions";
 import { useState } from "react";
-import { IoArrowForward, IoWarningSharp } from "react-icons/io5";
+import { IoWarningSharp } from "react-icons/io5";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
-import { IoIosArrowForward } from "react-icons/io";
-import { TiMediaFastForward, TiMediaFastForwardOutline } from "react-icons/ti";
+import { TiMediaFastForwardOutline } from "react-icons/ti";
+import { CgSandClock } from "react-icons/cg";
 
 const Buttontext = ({ issentforapproval, nextstatus, data }) => {
   const userInfo = useUserInfo();
   const { setShowModal } = useToggleModal();
-  const [showWefNotice, setShowWefNotice] = useState(false);
+  const [wefNoticeStep, setWefNoticeStep] = useState(null);
 
   const buttontxt = issentforapproval
     ? nextstatus
@@ -45,7 +45,7 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
     Number(data?.project_code),
   );
   const isDemob = data?.category == "Demob";
-  const shouldCheckWef =
+  const finalDemobApprover =
     isDemob &&
     ((isSpecialProject && userInfo?.role?.includes("pd")) ||
       (!isSpecialProject && userInfo?.role?.includes("pm")));
@@ -53,10 +53,11 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
     isDemob &&
     (buttontxt === "Sent for Approval" || buttontxt === "Approve/Reject");
   const { wefChanged, updatedDate } = compareWefDate(data["w.e.f"]);
+  const isPassedDateNotice = wefNoticeStep === "date";
 
   const handleClick = () => {
     if (requiresWefNotice) {
-      setShowWefNotice(true);
+      setWefNoticeStep("general");
       return;
     }
     setShowModal();
@@ -71,54 +72,78 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
       >
         {formatwords(buttontxt)}
       </button>
-      {showWefNotice && (
+      {wefNoticeStep && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <span className="flex gap-2 items-center mb-4">
-              <IoWarningSharp size={20} className="text-amber-600" />
-              <h2 className="text-lg font-semibold text-amber-800 justify-between flex flex-1">
-                Important Note{" "}
+          <div
+            className={`w-full max-w-md rounded-xl border-t-4 bg-white p-6 shadow-xl ${
+              isPassedDateNotice ? "border-red-500" : "border-amber-500"
+            }`}
+          >
+            <span className="mb-4 flex items-center gap-3">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                  isPassedDateNotice
+                    ? "bg-red-100 text-red-600"
+                    : "bg-amber-100 text-amber-600"
+                }`}
+              >
+                {isPassedDateNotice ? (
+                  <CgSandClock size={22} />
+                ) : (
+                  <IoWarningSharp size={22} />
+                )}
+              </span>
+              <h2
+                className={`flex flex-1 items-center justify-between text-lg font-semibold ${
+                  isPassedDateNotice ? "text-red-800" : "text-amber-800"
+                }`}
+              >
+                {isPassedDateNotice
+                  ? "Demobilization Date Passed"
+                  : "Important Note"}{" "}
                 <button
-                  className="cursor-pointer"
-                  onClick={() => setShowWefNotice(false)}
+                  className="cursor-pointer text-gray-400 transition hover:text-gray-700"
+                  onClick={() => setWefNoticeStep(null)}
+                  aria-label="Close notice"
                 >
                   ✕
                 </button>
               </h2>
             </span>
-            <p className="mb-6 text-gray-600">
-              {wefChanged ? (
-                <>
-                  {" "}
-                  The W.E.F. date has been crossed. Therefore, the W.E.F date
-                  will be updated from
-                  <strong> {formatDateDMY(data["w.e.f"])} </strong>
-                  <>
-                    to&nbsp;
-                    {shouldCheckWef ? (
-                      <>
-                        final approval date{" "}
-                        <strong>({formatDateDMY(updatedDate)}).</strong>
-                      </>
-                    ) : (
-                      <strong> final approval date.</strong>
-                    )}
-                  </>
-                </>
-              ) : (
-                <>
-                  If the final approval date is later than the W.E.F. date, the
-                  W.E.F. date will be automatically changed based on the
-                  approval date.
-                </>
-              )}
-            </p>
+            {isPassedDateNotice ? (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-gray-700">
+                <p>
+                  The selected demobilization date has passed in the IOC.
+                  Approving this IOC will automatically update the Actual
+                  Demobilization Date to today's date.
+                  {finalDemobApprover ? (
+                    <strong className="text-red-700">
+                      {" "}
+                      {formatDateDMY(updatedDate)}.
+                    </strong>
+                  ) : (
+                    "final approval date."
+                  )}
+                </p>
+              </div>
+            ) : (
+              <p className="mb-6 text-gray-600">
+                If the final approver approves the demobilization IOC after the
+                selected date, then the actual demobilization date will be the
+                final approval date.
+              </p>
+            )}
 
             <div className="flex justify-end ">
               <button
                 type="button"
                 onClick={() => {
-                  setShowWefNotice(false);
+                  if (wefNoticeStep === "general" && wefChanged) {
+                    setWefNoticeStep("date");
+                    return;
+                  }
+
+                  setWefNoticeStep(null);
                   setShowModal();
                 }}
                 className="flex items-center gap-2 rounded bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700 cursor-pointer"

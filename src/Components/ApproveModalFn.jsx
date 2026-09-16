@@ -80,12 +80,12 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
       Number(data?.project_code),
     );
 
-    const shouldCheckWef =
+    const finalDemobApprover =
       isDemob &&
       ((isSpecialProject && userInfo?.role?.includes("pd")) ||
         (!isSpecialProject && userInfo?.role?.includes("pm")));
 
-    if (shouldCheckWef) {
+    if (finalDemobApprover) {
       const { wefChanged, updatedDate } = compareWefDate(data["w.e.f"]);
 
       if (wefChanged) {

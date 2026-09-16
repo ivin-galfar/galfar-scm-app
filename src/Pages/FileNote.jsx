@@ -221,6 +221,7 @@ const FileNote = () => {
       ccvalue,
       cmname,
       formattedSelectedDate,
+      selectedproject,
     );
   };
 
@@ -593,7 +594,8 @@ const FileNote = () => {
                     aria-label="W.E.F date changed based on the Final approved date"
                   >
                     <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-amber-800">
-                      W.E.F date changed based on the Final approved date
+                      Demobilization date changed based on the Final approved
+                      date
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold leading-5">
                       <span className="text-amber-800">Previous:</span>
