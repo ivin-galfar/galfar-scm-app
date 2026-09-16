@@ -88,7 +88,7 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
                 }`}
               >
                 {isPassedDateNotice ? (
-                  <CgSandClock size={22} />
+                  <IoWarningSharp size={22} />
                 ) : (
                   <IoWarningSharp size={22} />
                 )}
@@ -99,7 +99,7 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
                 }`}
               >
                 {isPassedDateNotice
-                  ? "Demobilization Date Passed"
+                  ? "Warning: Late Approval Detected"
                   : "Important Note"}{" "}
                 <button
                   className="cursor-pointer text-gray-400 transition hover:text-gray-700"
@@ -115,22 +115,21 @@ const Buttontext = ({ issentforapproval, nextstatus, data }) => {
                 <p>
                   The selected demobilization date has passed in the IOC.
                   Approving this IOC will automatically update the Actual
-                  Demobilization Date to today's date.
+                  Demobilization Date to
                   {finalDemobApprover ? (
                     <strong className="text-red-700">
                       {" "}
-                      {formatDateDMY(updatedDate)}.
+                      {"today (" + formatDateDMY(updatedDate) + ")"}.
                     </strong>
                   ) : (
-                    "final approval date."
+                    " final approval date."
                   )}
                 </p>
               </div>
             ) : (
               <p className="mb-6 text-gray-600">
-                If the final approver approves the demobilization IOC after the
-                selected date, then the actual demobilization date will be the
-                final approval date.
+                Delayed approval will automatically set the Actual
+                Demobilization Date to the Final Approval Date.
               </p>
             )}
 
