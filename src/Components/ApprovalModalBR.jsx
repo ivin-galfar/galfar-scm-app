@@ -7,7 +7,7 @@ import { useToast } from "../store/toastStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useErrorMessage } from "../store/errorStore";
 import { expectedstatusplant } from "../Helpers/statusfinder";
-import { useComments } from "../store/helperStore";
+import { useClickFromDashboard, useComments } from "../store/helperStore";
 import { is_buyrent } from "../Helpers/dept_helper";
 import { useNavigate } from "react-router-dom";
 import { useStatusFilter } from "../store/logisticsStore";
@@ -23,6 +23,7 @@ const ApprovalModalBR = () => {
   const dept = is_buyrent(userInfo?.dept_code) ? "buyvsrent" : "";
   const navigate = useNavigate();
   const { setStatusFilter } = useStatusFilter();
+  const { isClicked } = useClickFromDashboard();
 
   const { mutate: updatestatement } = useMutation({
     mutationFn: updatebrstatements,
@@ -48,7 +49,11 @@ const ApprovalModalBR = () => {
         resetshowtoast();
         resetShowModal();
         resetComments();
-        navigate("/dashboardbr", { replace: true });
+        if (isClicked) {
+          navigate("/pendingdashboard", { replace: true });
+        } else {
+          navigate("/dashboardbr", { replace: true });
+        }
         setStatusFilter("Pending");
       }, 1500);
     },

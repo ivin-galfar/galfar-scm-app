@@ -146,6 +146,7 @@ const PendingDashboard = () => {
               userInfo.role.every((role) => role === "initfn")
                 ? "Pending Statements"
                 : "Awaiting for your Action"}
+              {"   "}({selectedFilteredItems?.length})
             </h1>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
               {initiatorRoles.some((r) => userInfo.role.includes(r)) ||

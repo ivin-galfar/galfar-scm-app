@@ -8,21 +8,27 @@ import {
   rowExpandingFeature,
   tableFeatures,
 } from "@tanstack/table-core";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
 import fetchParticulars from "../APIs/ParticularsApi";
 import { useContext } from "react";
 import { AppContext } from "../Components/Context";
 import ParticularsAccordion from "../Components/ParticularsAccordion";
-import { FaPlus } from "react-icons/fa6";
 import AddParticularsModal from "../Components/AddParticularsModal";
-import { MdDelete } from "react-icons/md";
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import Alerts from "../Components/Alerts";
 import { useStatementupdated } from "../store/statementStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useParams } from "react-router-dom";
+import {
+  LuCalendarClock,
+  LuInbox,
+  LuLayoutTemplate,
+  LuPencil,
+  LuPlus,
+  LuTrash2,
+} from "react-icons/lu";
 
 const Particulars = () => {
   const { particulars, setParticulars } = useContext(AppContext);
@@ -31,7 +37,7 @@ const Particulars = () => {
   const [errormessage, setErrormessage] = useState("");
   const [triggerdelete, setTriggerdelete] = useState(false);
   const [deletetemplate, setDeletetemplate] = useState("");
-
+  const [editTemplate, setEditTemplate] = useState(null);
   const { showupdated, setshowupdated, resetshowupdated } =
     useStatementupdated();
   const userInfo = useUserInfo();
@@ -94,7 +100,7 @@ const Particulars = () => {
   });
 
   const latestDate =
-    particulars.length > 0
+    particulars?.length > 0
       ? new Date(
           Math.max(...particulars.map((item) => new Date(item.created_at))),
         )
@@ -137,109 +143,183 @@ const Particulars = () => {
     }
   };
 
-  return (
-    <div>
-      <div className="flex flex-col min-h-screen">
-        <h1 className="text-2xl font-semibold text-gray-800 px-5 pt-5 pb-3 border-b border-gray-200">
-          Customize Particulars
-        </h1>
+  const handleEdit = (template) => {
+    setEditTemplate(template);
+    setShowmodal(true);
+    resetshowupdated();
+  };
 
-        <div className="bg-white shadow-md p-5">
-          <div className="mt-2 flex items-center justify-between">
-            <button
-              className="flex items-center px-4 py-2 gap-2.5 bg-blue-600 text-white rounded shadow cursor-pointer"
-              onClick={() => {
-                setShowmodal(true);
-                resetshowupdated();
-              }}
-            >
-              <FaPlus /> New Template
-            </button>
-            {formattedLatestDate != "-" ? (
-              <span className="text-sm text-gray-500">
-                Last updated: {formattedLatestDate}
+  const handleCloseModal = () => {
+    setShowmodal(false);
+    setEditTemplate(null);
+  };
+
+  return (
+    <div className="flex-grow ">
+      <div className="flex-grow w-full px-5 py-2">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 py-1">
+            <span className="flex size-11 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 shadow-sm">
+              <LuLayoutTemplate size={22} strokeWidth={1.8} />
+            </span>
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                Customize Templates
+              </h1>
+              <p className="mt-0.5 text-sm text-slate-500">
+                Create and manage particulars templates for your department.
+              </p>
+            </div>
+          </div>
+          {(userInfo.role.includes("inita") ||
+            userInfo.role.includes("inith") ||
+            userInfo.role.includes("initlg")) && (
+            <div className="flex items-center gap-3">
+              {formattedLatestDate != "-" && (
+                <span className="hidden items-center gap-1.5 text-xs font-medium text-slate-500 sm:flex">
+                  <LuCalendarClock size={15} />
+                  Updated {formattedLatestDate}
+                </span>
+              )}
+              <button
+                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-2"
+                onClick={() => {
+                  setEditTemplate(null);
+                  setShowmodal(true);
+                  resetshowupdated();
+                }}
+              >
+                <LuPlus size={18} strokeWidth={2.4} /> New Template
+              </button>
+            </div>
+          )}
+        </header>
+
+        <section className="min-h-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-800">
+                Template Library
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-500">
+                {particulars.length}{" "}
+                {particulars.length === 1 ? "template" : "templates"} available
+              </p>
+            </div>
+            {formattedLatestDate != "-" && (
+              <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500 sm:hidden">
+                <LuCalendarClock size={14} />
+                {formattedLatestDate}
               </span>
-            ) : (
-              ""
             )}
           </div>
-        </div>
-        <section className="overflow-auto max-h-[calc(100vh-300px)]">
-          <table className="min-w-full border border-gray-300 rounded-lg overflow-hidden">
-            <thead className="bg-gray-200">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="border-b border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : header.column.columnDef.header}
-                    </th>
-                  ))}
-                  <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
-                    Action
-                  </th>
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={columns.length}
-                    className="text-center py-4 text-gray-500"
-                  >
-                    No templates found
-                  </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="even:bg-white odd:bg-gray-50 hover:bg-blue-100 cursor-pointer"
-                  >
-                    {(row.getVisibleCells?.() ?? row.getAllCells()).map(
-                      (cell) => (
-                        <td
-                          key={cell.id}
-                          className="border-b border-gray-300 px-4 py-2 text-sm text-gray-700"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </td>
-                      ),
-                    )}
-                    <td className="border-b border-gray-300 px-4 py-2 text-red-600 text-center">
-                      <button
-                        onClick={() => {
-                          setTriggerdelete(true);
-                          setDeletetemplate(row.original.id);
-                        }}
-                        className="hover:text-red-800 cursor-pointer"
+
+          <div className="max-h-[calc(100vh-250px)] overflow-auto">
+            <table className="min-w-full border-separate border-spacing-0">
+              <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="border-b border-slate-200 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500"
                       >
-                        <MdDelete size={18} />
-                      </button>
+                        {header.isPlaceholder
+                          ? null
+                          : header.column.columnDef.header}
+                      </th>
+                    ))}
+                    <th className="border-b border-slate-200 px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Actions
+                    </th>
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={columns.length + 1}
+                      className="py-16 text-center"
+                    >
+                      <div className="flex flex-col items-center">
+                        <span className="mb-3 flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                          <LuInbox size={22} />
+                        </span>
+                        <p className="text-sm font-medium text-slate-700">
+                          No templates found
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          Create a template to get started.
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="group transition-colors hover:bg-blue-50/40"
+                    >
+                      {(row.getVisibleCells?.() ?? row.getAllCells()).map(
+                        (cell) => (
+                          <td
+                            key={cell.id}
+                            className="border-b border-slate-100 px-5 py-3.5 text-sm text-slate-700"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </td>
+                        ),
+                      )}
+                      <td className="border-b border-slate-100 px-5 py-3.5 text-center">
+                        <div className="flex justify-center gap-1.5">
+                          <button
+                            aria-label="Edit template"
+                            title="Edit template"
+                            onClick={() => {
+                              handleEdit(row.original);
+                            }}
+                            className="flex size-8 cursor-pointer items-center justify-center rounded-md text-slate-500 transition hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          >
+                            <LuPencil size={16} />
+                          </button>
+                          <button
+                            aria-label="Delete template"
+                            title="Delete template"
+                            onClick={() => {
+                              setTriggerdelete(true);
+                              setDeletetemplate(row.original.id);
+                            }}
+                            className="flex size-8 cursor-pointer items-center justify-center rounded-md text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                          >
+                            <LuTrash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
-      {showmodal && <AddParticularsModal setShowmodal={setShowmodal} />}
+      {showmodal && (
+        <AddParticularsModal
+          setShowmodal={handleCloseModal}
+          editTemplate={editTemplate}
+        />
+      )}
       {showToast && errormessage && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="animate-slide-in fixed left-1/2 top-5 z-[9999] -translate-x-1/2 rounded-lg border border-rose-600 bg-rose-600 px-5 py-3 text-sm font-medium text-white shadow-lg transition-all duration-300">
           {errormessage}
         </div>
       )}
       {showToast && !errormessage && (
-        <div className="z-[9999] fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="animate-slide-in fixed left-1/2 top-5 z-[9999] -translate-x-1/2 rounded-lg border border-emerald-600 bg-emerald-600 px-5 py-3 text-sm font-medium text-white shadow-lg transition-all duration-300">
           ✅ Particular template has been removed successfully!
         </div>
       )}

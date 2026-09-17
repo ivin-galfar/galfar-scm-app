@@ -118,6 +118,14 @@ const QuickAccess = ({ items = actions }) => {
               >
                 Buy vs Rent
               </button>
+              <button
+                type="button"
+                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-muted cursor-pointer"
+                onClick={() => navigateToCreate("/filenote", "filenote")}
+                role="menuitem"
+              >
+                File Note / IOC
+              </button>
             </div>
           )}
         </div>

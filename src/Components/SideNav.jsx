@@ -153,9 +153,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               }`}
             >
               <HiDocumentText />
-              {isOpen && (
-                <>Particulars {!userInfo?.is_admin ? <FaLock /> : ""}</>
-              )}
+              {isOpen && <>Templates {!userInfo?.is_admin ? <FaLock /> : ""}</>}
             </Link>
             <Link
               to={isPlant ? "/dashboard" : "/dashboardbr"}
@@ -253,9 +251,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               }`}
             >
               <HiDocumentText />
-              {isOpen && (
-                <>Particulars {!userInfo?.is_admin ? <FaLock /> : ""}</>
-              )}
+              {isOpen && <>Templates {!userInfo?.is_admin ? <FaLock /> : ""}</>}
             </Link>
 
             <Link

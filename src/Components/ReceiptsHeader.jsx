@@ -779,6 +779,7 @@ const TableHeader = ({ isAdmin }) => {
           {isAdmin &&
             formData.status != "review" &&
             formData.status != "Approved" &&
+            formData.status != "Rejected" &&
             selectedmr !== "" &&
             selectedmr !== null &&
             selectedmr !== "default" && (
@@ -798,8 +799,7 @@ const TableHeader = ({ isAdmin }) => {
                 </button>
                 <button
                   onClick={setIsAlerted}
-                  className={`flex items-center px-2 py-0.5 bg-cyan-500 text-white text-sm rounded hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition ${formData.status == null ? "bg-blue-400 text-white opacity-60 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-700 focus:ring-blue-500 cursor-pointer"}`}
-                  disabled={formData.status == null}
+                  className={`flex items-center px-2 py-0.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-700  cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500 transition`}
                   type="button"
                 >
                   <FaEdit className="mr-1" size={14} />
@@ -957,7 +957,7 @@ const TableHeader = ({ isAdmin }) => {
       )}
       {isAlerted && (
         <Alerts
-          message={"Do you need to recall the statement?"}
+          message={"Do you want to Edit / recall the statement?"}
           onCancel={resetIsAlerted}
           onConfirm={() => handleEdit(formData.id, "pending", "reverted")}
         />

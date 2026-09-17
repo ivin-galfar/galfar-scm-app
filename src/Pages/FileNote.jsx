@@ -52,7 +52,7 @@ import {
   getType,
 } from "../Helpers/helperfunctions";
 import TypeFilter from "../Components/TypeFilter";
-import { IoSave } from "react-icons/io5";
+import { IoSave, IoWarning } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { FaUndoAlt } from "react-icons/fa";
 
@@ -142,7 +142,7 @@ const FileNote = () => {
         resetshowtoast();
         clearErrorMessage();
         resetShowModal();
-      }, 1500);
+      }, 2000);
     },
   });
 
@@ -335,6 +335,18 @@ const FileNote = () => {
         }, 1500);
         return;
       }
+
+      if (category == "Demob" && !selectedDate) {
+        setErrorMessage("Please select the Demobilization W.E.F Date");
+        setShowToast();
+        setTimeout(() => {
+          resetshowtoast();
+          clearErrorMessage();
+          resetShowModal();
+        }, 1500);
+        return;
+      }
+
       newfilenote({
         name,
         type,
@@ -552,6 +564,7 @@ const FileNote = () => {
                   min={minDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="rounded-lg border border-gray-300 p-2"
+                  onKeyDown={(e) => e.preventDefault()}
                   required
                 />
               </div>
@@ -826,8 +839,9 @@ const FileNote = () => {
           </div>
         )}
       {showtoast && errormessage && userInfo?.is_admin && !imagesaved && (
-        <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-          {errormessage}
+        <div className="fixed top-5 flex items-center gap-2 left-1/2 z-60  transform -translate-x-1/2 bg-red-500  px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+          <IoWarning color="yellow" />
+          <span className="text-white">{errormessage}</span>
         </div>
       )}
       {showtoast &&
