@@ -309,7 +309,7 @@ const BRDashboards = () => {
                           <>
                             <strong className="capitalize">
                               {value.role != "inita"
-                                ? value.role
+                                ? value.role + ":"
                                 : "Initiator" + ":"}
                             </strong>{" "}
                             {value.comment}

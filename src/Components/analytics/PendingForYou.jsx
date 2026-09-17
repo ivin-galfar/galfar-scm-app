@@ -28,6 +28,9 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
   const { setIsClicked } = useClickFromDashboard();
   const isAdmin = userInfo?.is_admin;
   const roles = userInfo?.role || [];
+  const isInitiator =
+    initiatorRoles.some((role) => roles.includes(role)) ||
+    roles.every((role) => role === "initfn");
 
   const filteredItems = isAdmin
     ? items
@@ -49,17 +52,20 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
     : items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return (
-    <Card className="flex h-full min-h-10 flex-col shadow-sm">
+    <Card
+      className={`relative flex h-full min-h-10 flex-col overflow-hidden shadow-sm border-amber-200/80 bg-amber-50/35 dark:border-amber-900/60 dark:bg-amber-950/15"`}
+    >
+      <span className="absolute inset-y-0 left-0 w-1 bg-amber-400" />
       <CardHeader className="shrink-0 flex-row items-start justify-between gap-3 space-y-0 p-4 pb-3">
         <div>
           <span className="flex gap-3">
-            <CardTitle className="flex gap-2 items-center">
+            <CardTitle
+              className={`flex items-center gap-2 
+                  "text-amber-900 dark:text-amber-200"`}
+            >
               <MdPendingActions size={19} className="text-amber-500" />
               <span className="font-bold text-lg items-start flex"></span>
-              {initiatorRoles.some((r) => userInfo?.role.includes(r)) ||
-              userInfo?.role.every((role) => role === "initfn")
-                ? "Pending Statements"
-                : "Awaiting your Action"}
+              {isInitiator ? "Pending Statements" : "Awaiting your Action"}
             </CardTitle>
             {filteredItems.length > 0 && (
               <Badge className="min-w-5 h-5 px-1.5 rounded-t-lg bg-red-500 text-white items-center text-xs font-semibold border-0">
@@ -68,8 +74,7 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
             )}
           </span>
           <CardDescription className="mt-1">
-            {initiatorRoles.some((r) => userInfo?.role.includes(r)) ||
-            userInfo?.role.every((role) => role === "initfn")
+            {isInitiator
               ? "Statments which are still in progress"
               : "Requests that require your attention"}
           </CardDescription>
@@ -82,7 +87,6 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
           View All
           <LuArrowRight />
         </Link>
-        {/* </Button> */}
       </CardHeader>
       <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pb-4">
         {filteredItems.length ? (

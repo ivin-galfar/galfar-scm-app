@@ -7,7 +7,11 @@ import { useErrorMessage } from "../store/errorStore";
 import { statusExpected } from "../Helpers/statusfinder";
 import { FnEmailAlert, updatefilenotevalues } from "../APIs/api";
 import { compareWefDate, generatePDF } from "../Helpers/helperfunctions";
-import { useChangingWefDate, useComments } from "../store/helperStore";
+import {
+  useChangingWefDate,
+  useClickFromDashboard,
+  useComments,
+} from "../store/helperStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -29,6 +33,8 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
   const SpecialProjects = userInfo?.pr_code?.some((code) =>
     SPECIAL_PROJECTS.includes(Number(code)),
   );
+  const { isClicked } = useClickFromDashboard();
+
   const navigate = useNavigate();
   const dept = is_plant(userInfo?.dept_code) ? "plant" : "";
   const { setStatusFilter } = useStatusFilter();
@@ -45,7 +51,11 @@ const ApproveModalFn = ({ selectedvalue: data, setSelectedValue }) => {
         resetshowtoast();
         resetShowModal();
         resetComments();
-        navigate("/dashboardfn", { replace: true });
+        if (isClicked) {
+          navigate("/pendingdashboard", { replace: true });
+        } else {
+          navigate("/dashboardfn", { replace: true });
+        }
         setStatusFilter("Pending");
       }, 1500);
       try {
