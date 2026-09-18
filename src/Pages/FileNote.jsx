@@ -65,6 +65,7 @@ const FileNote = () => {
   const [selectedfnvalue, setSelectedFnValue] = useState("");
   const [selectedvalue, setSelectedValue] = useState("");
   const [dataupdated, setDataUpdated] = useState(false);
+  const [wefUpdateMessage, setWefUpdateMessage] = useState("");
   const { setIsRecalled, resetIsRecalled, isRecalled } = useRecallStatement();
   const { isAlerted, setIsAlerted, resetIsAlerted } = useRecallAlert();
   const [iocintimated, setIocintimated] = useState(false);
@@ -113,10 +114,16 @@ const FileNote = () => {
   const formattedSelectedDate = selectedDate
     ? selectedDate.split("-").reverse().join("-")
     : "";
-
   const { mutate: newfilenote } = useMutation({
     mutationFn: createfilenote,
     onSuccess: (data) => {
+      const contentWefUpdated = data?.contentWefUpdated === true;
+      if (contentWefUpdated) {
+        setWefUpdateMessage(
+          data.message ||
+            "The date has been updated as per the selected W.E.F date.",
+        );
+      }
       navigate(`/filenote/${data.id}`, {
         replace: true,
         state: null,
@@ -432,6 +439,7 @@ const FileNote = () => {
 
   const createNewFileNote = () => {
     setNewfn();
+    setSelectedDate("");
     setSelectedFnValue("");
     setSelectedValue("");
     setName("");
@@ -834,7 +842,7 @@ const FileNote = () => {
         !dataupdated &&
         !isEdit &&
         !selectedvalue.demob_intimated && (
-          <div className="fixed top-5 left-1/2 z-60  transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+          <div className="fixed top-5 left-1/2 z-[80] transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
             ✅ You have successfully created the File Note/IOC!
           </div>
         )}
@@ -874,6 +882,31 @@ const FileNote = () => {
             ✅ You have marked the ioc intimation successully!
           </div>
         )}
+      {wefUpdateMessage && (
+        <div
+          className="fixed inset-0 z-70 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="wef-update-title"
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
+            <h2
+              id="wef-update-title"
+              className="mb-3 text-xl font-semibold text-gray-800"
+            >
+              De-mobilization Date updated
+            </h2>
+            <p className="mb-6 text-gray-600">{wefUpdateMessage}</p>
+            <button
+              type="button"
+              onClick={() => setWefUpdateMessage("")}
+              className="rounded-lg cursor-pointer bg-blue-600 px-6 py-2 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

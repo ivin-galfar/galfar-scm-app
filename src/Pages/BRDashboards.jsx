@@ -48,6 +48,7 @@ import {
 } from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
+import { useClickFromDashboard } from "../store/helperStore";
 
 const BRDashboards = () => {
   const location = useLocation();
@@ -64,6 +65,7 @@ const BRDashboards = () => {
   });
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
+  const { resetIsClicked } = useClickFromDashboard();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { resetNewStatement } = useNewStatement();
   const { pagination, setPageIndex, setPageSize } = usePagination();
@@ -183,6 +185,7 @@ const BRDashboards = () => {
         console.error("Fetch receipts error:", message);
       }
     };
+    resetIsClicked();
     if (canFetch) {
       fetchStatments();
     }

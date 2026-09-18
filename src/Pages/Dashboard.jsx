@@ -20,9 +20,6 @@ import Alerts from "../Components/Alerts";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import axios from "axios";
 import { IoPrint } from "react-icons/io5";
-import { jsPDF } from "jspdf";
-import { autoTable } from "jspdf-autotable";
-import galfarlogo from "../assets/Images/logo-new.png";
 import { IoWarningOutline } from "react-icons/io5";
 import { useToggleAsset } from "../store/assetStore";
 import {
@@ -41,17 +38,15 @@ import {
   is_gm,
   is_hire,
 } from "../Helpers/dept_helper";
-import {
-  fetchReceipt,
-  fetchReceiptCount,
-  fetchStatement,
-  loginUser,
-} from "../APIs/api";
+import { fetchReceiptCount } from "../APIs/api";
 import { formatDateDDMMYYYY } from "../Helpers/helperfunctions";
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
-import { useLoading, useQuickAccess } from "../store/helperStore";
-import { useSelectedDept } from "../store/userStore";
+import {
+  useClickFromDashboard,
+  useLoading,
+  useQuickAccess,
+} from "../store/helperStore";
 import { handleHirePrint } from "../Helpers/print_helper";
 const Dashboard = () => {
   const {
@@ -60,13 +55,10 @@ const Dashboard = () => {
     setReceipts,
     setMrno,
     setAllReceipts,
-    allreceipts,
     statusFilter,
     setStatusFilter,
     multiStatusFilter,
     setMultiStatusFilter,
-    sharedTableData,
-    setApproverDetails,
   } = useContext(AppContext);
   const { toggleasset, resetasset } = useToggleAsset();
   const [approversFetched, setApproversFetched] = useState(false);
@@ -75,6 +67,7 @@ const Dashboard = () => {
   const userInfo = useUserInfo();
   const { dashboardType, setDashboardType, resetDashboardType } =
     useDashboardType();
+  const { resetIsClicked } = useClickFromDashboard();
   const { pagination, setPageIndex, setPageSize } = usePagination();
   const [searchcsno, setSearchCSNo] = useState(null);
   const [searchcsname, setSearchCSName] = useState(null);
@@ -218,6 +211,7 @@ const Dashboard = () => {
         setReqMrno(reqMrValues);
         setReceipts(categorizedReceipts);
         setMrno(mrValues);
+        resetIsClicked();
         resetIsLoading();
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
