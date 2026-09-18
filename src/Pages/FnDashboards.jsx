@@ -35,6 +35,7 @@ import {
 import { BiBadgeCheck } from "react-icons/bi";
 import {
   useCategories,
+  useClickFromDashboard,
   useDeleteStore,
   usenewfn,
   useProjectCodes,
@@ -91,6 +92,7 @@ const FnDashboards = () => {
   const isplant = is_plant(userInfo?.dept_code);
   const demob_intimators =
     userInfo?.role?.includes("inith") || userInfo?.role.includes("hod");
+  const { resetIsClicked } = useClickFromDashboard();
   const { data: fndata, isLoading } = useQuery({
     queryKey: [
       "fnid",
@@ -175,6 +177,7 @@ const FnDashboards = () => {
       }
     };
     fetchStatments();
+    resetIsClicked();
   }, [
     statusfilter,
     searchcsno,

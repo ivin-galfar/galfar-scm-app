@@ -9,7 +9,6 @@ import { useState } from "react";
 import { IoWarningSharp } from "react-icons/io5";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
 import { TiMediaFastForwardOutline } from "react-icons/ti";
-import { CgSandClock } from "react-icons/cg";
 
 const Buttontext = ({ issentforapproval, nextstatus, data }) => {
   const userInfo = useUserInfo();

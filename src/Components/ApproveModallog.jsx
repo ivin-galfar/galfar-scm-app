@@ -12,6 +12,7 @@ import { is_logistics } from "../Helpers/dept_helper";
 import { useNavigate } from "react-router-dom";
 import { LuRotateCcwSquare } from "react-icons/lu";
 import { generatePDFLG } from "../Helpers/helperfunctions";
+import { useClickFromDashboard } from "../store/helperStore";
 
 const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const { setErrorMessage, errormessage, clearErrorMessage } =
@@ -23,6 +24,7 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
   const dept = is_logistics(userInfo?.dept_code) ? "logistics" : "";
   const navigate = useNavigate();
   const { setStatusFilter } = useStatusFilter();
+  const { isClicked } = useClickFromDashboard();
 
   const submitApproval = async (cs_id, status) => {
     let definedprojects = [
@@ -99,7 +101,11 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
       setTimeout(() => {
         setShowmodal(false);
         resetshowtoast();
-        navigate("/dashboardlg", { replace: true });
+        if (isClicked) {
+          navigate("/pendingdashboard", { replace: true });
+        } else {
+          navigate("/dashboardlg", { replace: true });
+        }
         setStatusFilter("Pending");
       }, 1500);
       setComments("");

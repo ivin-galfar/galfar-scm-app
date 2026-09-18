@@ -58,6 +58,7 @@ import {
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
 import { GrAttachment } from "react-icons/gr";
+import { useClickFromDashboard } from "../store/helperStore";
 const LogisticsDashboard = () => {
   const userInfo = useUserInfo();
   const { setStatusFilter, statusfilter, resetStatusFilter } =
@@ -89,6 +90,7 @@ const LogisticsDashboard = () => {
     value: null,
   });
   const isgm = is_gm(userInfo?.role);
+  const { resetIsClicked } = useClickFromDashboard();
 
   const { data: allstatements, isLoading } = useQuery({
     queryKey: [
@@ -222,6 +224,7 @@ const LogisticsDashboard = () => {
           userInfo.pr_code,
         );
         setReceiptsCount(totalcount.receipts_count);
+        resetIsClicked();
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
         console.error("Fetch receipts error:", message);
