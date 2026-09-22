@@ -195,6 +195,7 @@ const FileNote = () => {
       }, 1500);
     },
   });
+  console.log("outside", INHOUSE_PROJECTS);
 
   const generateTemplate = async (category, type) => {
     console.log(INHOUSE_PROJECTS);
