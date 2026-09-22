@@ -5,8 +5,8 @@ export const REACT_SERVER_URL =
 export const SPECIAL_PROJECTS = import.meta.env.VITE_SPECIAL_PROJECTS?.split(
   ",",
 ).map(Number);
-export const CAMP_TEMP_PROJECTS =
-  import.meta.env.VITE_CAMP_TEMP_PROJECTS?.split(",").map(Number) ?? [];
+export const INHOUSE_PROJECTS =
+  import.meta.env.VITE_INHOUSE_PROJECTS?.split(",").map(Number) ?? [];
 export const FLEET_LOCATIONS =
   import.meta.env.VITE_FLEET_LOCATIONS?.split(",")
     .map((location) => location.trim())
