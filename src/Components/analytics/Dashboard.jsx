@@ -162,7 +162,7 @@ const Dashboard = () => {
           </div>
           <div className="min-w-0 xl:col-span-3">
             <DashboardPlaceholder
-              title="Coming Soon"
+              title="Coming Soon.."
               description="Additional insights and metrics will be available in upcoming releases."
             />
           </div>
