@@ -198,9 +198,6 @@ const FileNote = () => {
   console.log("outside", INHOUSE_PROJECTS);
 
   const generateTemplate = async (category, type) => {
-    console.log(INHOUSE_PROJECTS);
-    console.log(!INHOUSE_PROJECTS.includes(Number(selectedproject)));
-
     if (!doc_no || doc_no.last_no == null) return "";
     const dept = isPlant ? "P&E" : "Logistics";
     const typedefined = type === "file_note" ? "FN" : "IOC";
