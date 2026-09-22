@@ -792,16 +792,17 @@ export const fileNoteTemplate = (
             {
               type: "tableCell",
               content: [
-                {
-                  type: "paragraph",
-                  content: [
-                    { type: "text", text: `Cc : ` },
-                    {
-                      type: "text",
-                      text: ccvalue,
-                    },
-                  ],
-                },
+                ...(ccvalue
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          { type: "text", text: "Cc : " },
+                          { type: "text", text: ccvalue },
+                        ],
+                      },
+                    ]
+                  : []),
               ],
             },
             {

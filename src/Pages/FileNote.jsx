@@ -55,6 +55,7 @@ import TypeFilter from "../Components/TypeFilter";
 import { IoSave, IoWarning } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { FaUndoAlt } from "react-icons/fa";
+import { CAMP_TEMP_PROJECTS } from "../../config/ENV";
 
 const FileNote = () => {
   const editorinfo = useEditorInfo();
@@ -212,7 +213,9 @@ const FileNote = () => {
     const formattedDate = format(date, "do MMMM yyyy");
     const cleanCategory = category?.trim();
     const ccvalue =
-      selectedproject != "" && selectedproject != 1501
+      selectedproject != "" &&
+      selectedproject != 1501 &&
+      !CAMP_TEMP_PROJECTS.includes(Number(selectedproject))
         ? await getCCValue(category, selectedproject, userInfo)
         : "";
     const cmname = selectedproject

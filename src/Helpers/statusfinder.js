@@ -1,4 +1,4 @@
-import { SPECIAL_PROJECTS } from "../../config/ENV";
+import { CAMP_TEMP_PROJECTS, SPECIAL_PROJECTS } from "../../config/ENV";
 
 export const expectedstatus = (currentrole, project) => {
   const roles = currentrole.map((r) => r.toLowerCase());
@@ -127,7 +127,11 @@ export const statusExpected = (
     (category == "Demob" || category == "FWA")
   ) {
     statustext = "pending for cm";
-  } else if (roles.includes("cm") && project_code != 1501) {
+  } else if (
+    roles.includes("cm") &&
+    project_code != 1501 &&
+    project_code != CAMP_TEMP_PROJECTS
+  ) {
     statustext = "pending for pm";
   } else if (
     roles.includes("cm") &&
