@@ -13,7 +13,7 @@ const InputSearch = ({
   };
   const label = labelMap[module] || "Name";
   return (
-    <div className="ml-auto flex mt-4 flex-col gap-2 sm:flex-row items-center justify-center">
+    <div className="ml-auto flex flex-wrap items-center justify-center gap-2">
       <div className="flex flex-wrap items-center justify-center gap-1 rounded-lg bg-gray-100 p-1">
         <button
           onClick={() => {

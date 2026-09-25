@@ -73,7 +73,7 @@ const DashboardButton = () => {
   });
 
   return (
-    <div className="flex gap-2 border-gray-300 pb-1">
+    <div className="flex h-8 items-center gap-1 rounded-lg bg-slate-100 p-1">
       {dashboards.map((dash) => {
         const colors = colorMap[dash.key];
         const isActive = dashboardType === dash.key;
@@ -88,11 +88,11 @@ const DashboardButton = () => {
               setPageIndex(0);
             }}
             className={`
-              px-4 py-2 text-sm font-bold transition-colors duration-200 border-b-2
+              inline-flex h-6 items-center whitespace-nowrap rounded-md px-2.5 text-xs font-semibold transition-colors duration-200
               ${
                 isActive
-                  ? `${colors.border} ${colors.text}`
-                  : `border-transparent text-gray-600 hover:text-gray-800 ${colors.hover}`
+                  ? `bg-white shadow-sm ${colors.text}`
+                  : `text-gray-600 hover:bg-white/70 hover:text-gray-800 ${colors.hover}`
               }
             `}
           >

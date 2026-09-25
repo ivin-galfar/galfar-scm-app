@@ -1137,3 +1137,150 @@ export const GetAnnouncementsData = async ({ userInfo }) => {
     throw error;
   }
 };
+
+export const GetFleetDocId = async (userInfo, project) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/flreq/fetchdocid/${project}`,
+      config,
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const GetFleetRequests = async (userInfo, project, module) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+
+    const projectPath = Array.isArray(project) ? project.join(",") : project;
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/flreq/fetchdocsdata${projectPath ? `/${projectPath}` : ""}`,
+      {
+        ...config,
+        params: {
+          module: module,
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const GetFleetRequestById = async (userInfo, id) => {
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userInfo?.token}`,
+    },
+  };
+
+  const response = await axios.get(`${REACT_SERVER_URL}/flreq/${id}`, config);
+
+  return response.data;
+};
+
+export const AddNewFleetRequests = async ({
+  project,
+  date,
+  location,
+  items,
+  userInfo,
+}) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+
+    const formatDate = (value) => {
+      if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+      const [year, month, day] = value.split("-");
+      return `${day}-${month}-${year}`;
+    };
+
+    const payload = {
+      project,
+      date: formatDate(date),
+      location,
+      status: "created",
+      items: items.map((item) => ({
+        equip_desc: item.equipmentDescription,
+        capacity: item.capacity,
+        cicpa: item.cicpa,
+        quantity: Number(item.quantity),
+        required_from: formatDate(item.requiredFrom),
+        rental_type: item.rentalType,
+        duration: item.duration,
+        purpose: item.purpose,
+        production_qty_envisaged: Number(item.productionQtyEnvisaged),
+        qty_similar_machines: Number(item.similarMachinesAvailable),
+        utilization: Number(item.utilization),
+        remarks: item.remarks,
+      })),
+    };
+
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/flreq`,
+      payload,
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const UpdateFleetRequestWorkflow = async ({
+  id,
+  status,
+  action,
+  comments,
+  project,
+  date,
+  location,
+  items,
+  userInfo,
+}) => {
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userInfo?.token}`,
+    },
+  };
+
+  const response = await axios.put(
+    `${REACT_SERVER_URL}/flreq/${id}`,
+    {
+      status,
+      action,
+      comments,
+      ...(project !== undefined && { project }),
+      ...(date !== undefined && { date }),
+      ...(location !== undefined && { location }),
+      ...(items !== undefined && { items }),
+    },
+    config,
+  );
+
+  return response.data;
+};

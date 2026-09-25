@@ -439,82 +439,84 @@ const Dashboard = () => {
 
   return (
     <div className="w-full px-5 flex-grow relative">
-      <div className="flex border-b  border-gray-300 mb-4">
-        {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
-          (tab) => {
-            const isActive =
-              (tab === "All" && statusFilter === "All") ||
-              (tab === "Approved" && statusFilter === "Approved") ||
-              (tab === "Rejected" && statusFilter === "Rejected") ||
-              (tab === "Under Review" && statusFilter === "review") ||
-              (tab === "Pending" && multiStatusFilter.length > 0);
+      <div className="mb-4 flex flex-wrap items-center gap-y-2 border-b border-gray-300">
+        <div className="flex min-w-max items-center">
+          {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+            (tab) => {
+              const isActive =
+                (tab === "All" && statusFilter === "All") ||
+                (tab === "Approved" && statusFilter === "Approved") ||
+                (tab === "Rejected" && statusFilter === "Rejected") ||
+                (tab === "Under Review" && statusFilter === "review") ||
+                (tab === "Pending" && multiStatusFilter.length > 0);
 
-            let activeColor = "border-blue-500 text-blue-600";
-            let inactiveColor =
-              "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+              let activeColor = "border-blue-500 text-blue-600";
+              let inactiveColor =
+                "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
 
-            if (tab === "Approved") {
-              activeColor = "border-green-500 text-green-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-green-500";
-            } else if (tab === "Rejected") {
-              activeColor = "border-red-500 text-red-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-red-500";
-            } else if (tab === "Pending") {
-              activeColor = "border-yellow-500 text-yellow-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-yellow-500";
-            } else if (tab === "Under Review") {
-              activeColor = "border-cyan-500 text-cyan-600";
-              inactiveColor =
-                "border-transparent text-gray-500 hover:text-cyan-500";
-            }
+              if (tab === "Approved") {
+                activeColor = "border-green-500 text-green-600";
+                inactiveColor =
+                  "border-transparent text-gray-500 hover:text-green-500";
+              } else if (tab === "Rejected") {
+                activeColor = "border-red-500 text-red-600";
+                inactiveColor =
+                  "border-transparent text-gray-500 hover:text-red-500";
+              } else if (tab === "Pending") {
+                activeColor = "border-yellow-500 text-yellow-600";
+                inactiveColor =
+                  "border-transparent text-gray-500 hover:text-yellow-500";
+              } else if (tab === "Under Review") {
+                activeColor = "border-cyan-500 text-cyan-600";
+                inactiveColor =
+                  "border-transparent text-gray-500 hover:text-cyan-500";
+              }
 
-            return (
-              <button
-                key={tab}
-                onClick={() => {
-                  switch (tab) {
-                    case "All":
-                      setStatusFilter("All");
-                      setMultiStatusFilter([]);
-                      setPageIndex(0);
-                      break;
-                    case "Approved":
-                      setStatusFilter("Approved");
-                      setMultiStatusFilter([]);
-                      setPageIndex(0);
-                      break;
-                    case "Rejected":
-                      setStatusFilter("Rejected");
-                      setMultiStatusFilter([]);
-                      setPageIndex(0);
-                      break;
-                    case "Pending":
-                      setStatusFilter("");
-                      setMultiStatusFilter(pendingStatuses);
-                      setPageIndex(0);
-                      break;
-                    case "Under Review":
-                      setStatusFilter("review");
-                      setMultiStatusFilter([]);
-                      setPageIndex(0);
-                      break;
-                  }
-                }}
-                className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                  isActive ? activeColor : inactiveColor
-                }`}
-              >
-                {tab}
-              </button>
-            );
-          },
-        )}
-        <div className="flex justify-between ml-auto">
+              return (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    switch (tab) {
+                      case "All":
+                        setStatusFilter("All");
+                        setMultiStatusFilter([]);
+                        setPageIndex(0);
+                        break;
+                      case "Approved":
+                        setStatusFilter("Approved");
+                        setMultiStatusFilter([]);
+                        setPageIndex(0);
+                        break;
+                      case "Rejected":
+                        setStatusFilter("Rejected");
+                        setMultiStatusFilter([]);
+                        setPageIndex(0);
+                        break;
+                      case "Pending":
+                        setStatusFilter("");
+                        setMultiStatusFilter(pendingStatuses);
+                        setPageIndex(0);
+                        break;
+                      case "Under Review":
+                        setStatusFilter("review");
+                        setMultiStatusFilter([]);
+                        setPageIndex(0);
+                        break;
+                    }
+                  }}
+                  className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
+                    isActive ? activeColor : inactiveColor
+                  }`}
+                >
+                  {tab}
+                </button>
+              );
+            },
+          )}
+        </div>
+        <div className="ml-auto flex items-center gap-2 pt-1">
           {(isLogistics || isasset || ishod) && isPlant && (
-            <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
+            <div className="flex items-center">
               <DashboardButton />
             </div>
           )}

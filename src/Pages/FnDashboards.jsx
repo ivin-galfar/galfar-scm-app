@@ -574,7 +574,7 @@ const FnDashboards = () => {
   }, [categoryFilter, typeFilter, selectedproject]);
   return (
     <div className="flex-grow ">
-      <div className="flex-grow w-full px-5">
+      <div className="flex-grow w-full px-5 pt-1">
         <div className="flex border-b justify-between items-center border-gray-300 mb-4">
           <div className="text-nowrap">
             {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
@@ -646,7 +646,7 @@ const FnDashboards = () => {
             )}
           </div>
           {(cmusers || pmusers || initusers || multiinit || multiprojects) && (
-            <div className="ml-auto flex">
+            <div className="ml-auto flex items-center">
               <TypeFilter
                 type={typeFilter}
                 category={categoryFilter}
@@ -665,10 +665,7 @@ const FnDashboards = () => {
               />
             </div>
           )}
-          <div className="flex ">
-            {
-              <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto"></div>
-            }
+          <div className="ml-2 flex items-center">
             <InputSearch
               handleSearch={handleSearch}
               search={search}
@@ -751,7 +748,7 @@ const FnDashboards = () => {
                         <div className="flex items-center justify-center gap-4">
                           <Link
                             className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
-                            onClick={() => setNewfn(false)}
+                            onClick={() => l(false)}
                             to={
                               userInfo?.role?.includes("initfn")
                                 ? `/filenote/${row.original?.id}`

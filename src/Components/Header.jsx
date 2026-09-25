@@ -21,6 +21,7 @@ import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
 import { getDeptConfig } from "../Helpers/Permissions";
 import { useQuickAccess } from "../store/helperStore";
+import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 
 const Header = () => {
   const userInfo = useUserInfo();
@@ -58,6 +59,7 @@ const Header = () => {
 
   const location = useLocation();
   const path = location.pathname;
+  const { canAccess: canAccessFleetRequests } = getFleetRequestAccess(userInfo);
   const { defaultDept } = getDeptConfig({
     isLogistics,
     isPlant,
@@ -141,7 +143,11 @@ const Header = () => {
                 >
                   Comparative Statements
                 </NavLink>
-
+                {canAccessFleetRequests && (
+                  <NavLink to="/equipfr" className={navLinkClasses}>
+                    Fleet MR
+                  </NavLink>
+                )}
                 <NavLink
                   to="/dashboardfn"
                   className={() => {

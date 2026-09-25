@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation, Navigate } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import Home from "./Components/Home";
 import Header from "./Components/Header";
@@ -16,11 +16,12 @@ import { Suspense, useEffect } from "react";
 import BrStatement from "./Pages/BrStatement";
 import BRDashboards from "./Pages/BRDashboards";
 import FileNote from "./Pages/FileNote";
-import { is_fnote } from "./Helpers/dept_helper";
 import FnDashboards from "./Pages/FnDashboards";
 import { APP_VERSION } from "../config/ENV";
 import ResetPwd from "./Pages/ResetPage";
 import PendingDashboard from "./Pages/PendingDashboard";
+import EquipmentMR from "./Pages/FleetRequest";
+import FleetRequestRoute from "./Components/FleetRequestRoute";
 
 const App = () => {
   const location = useLocation();
@@ -107,6 +108,14 @@ const App = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/resetpwd" element={<ResetPwd />} />
             <Route path="/brstatement" element={<BrStatement />} />
+            <Route
+              path="/equipfr"
+              element={<FleetRequestRoute><EquipmentMR /></FleetRequestRoute>}
+            />
+            <Route
+              path="/equipfr/:id"
+              element={<FleetRequestRoute><EquipmentMR /></FleetRequestRoute>}
+            />
 
             <>
               <Route

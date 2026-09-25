@@ -1,6 +1,5 @@
 import { usenewfn } from "../store/helperStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { BsAsterisk } from "react-icons/bs";
 import { fetchProjectDetails } from "../APIs/api";
 import { useLocation } from "react-router-dom";
 import { usePagination } from "../store/statementStore";
@@ -58,29 +57,33 @@ const TypeFilter = ({
   const fwausers = userInfo.role.includes("initdc");
   const viewusers = userInfo.role.includes("view");
   const hireusers = userInfo.role.includes("inith");
+  const selectClassName =
+    "h-8 w-full appearance-none rounded-md border border-slate-300 bg-white bg-no-repeat px-2.5 pr-8 text-sm text-slate-800 transition hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 sm:w-44 lg:w-40";
+  const selectStyle = {
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%2364758B' d='M6 8.5 1.5 4h9z'/%3E%3C/svg%3E")`,
+    backgroundPosition: "right 0.65rem center",
+  };
 
   return (
     <div>
       {
-        <div className="flex justify-center items-center  rounded-md mb-1">
-          <div className="px-4">
-            <label className="text-gray-500 font-medium text-small flex gap-2">
-              Type : <BsAsterisk size={6} color="red" className="mt-2" />{" "}
-            </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-xs font-semibold text-slate-500">
+            Filters
+          </span>
+          <div className="min-w-0 flex-1 sm:flex-none">
             <select
+              aria-label="Type (required)"
               disabled={isDocLoading}
               value={type}
               onChange={(e) => {
                 settype(e.target.value);
                 setCategory("");
               }}
-              className="w-48 md:w-56 lg:w-40 appearance-none rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 bg-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-shadow duration-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-no-repeat bg-right pr-10"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundPosition: "right 0.9rem center",
-              }}
+              className={selectClassName}
+              style={selectStyle}
             >
-              <option value="">📋 - Select Type -</option>
+              <option value="">Select type</option>
               {types?.map((type) => {
                 if (
                   type === "file_note" &&
@@ -97,22 +100,16 @@ const TypeFilter = ({
               })}
             </select>
           </div>
-          <div className="px-4">
-            <label className="text-gray-500 font-medium text-small flex gap-2">
-              Category:{" "}
-              <BsAsterisk size={6} color="red" className="mt-2" />{" "}
-            </label>
+          <div className="min-w-0 flex-1 sm:flex-none">
             <select
+              aria-label="Category (required)"
               disabled={isDocLoading || !type}
               value={category}
               onChange={(e) => handleDocumentcategorytype(e.target.value)}
-              className="w-48 md:w-56 lg:w-48 appearance-none rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 bg-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-shadow duration-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-no-repeat bg-right pr-10"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundPosition: "right 0.9rem center",
-              }}
+              className={selectClassName}
+              style={selectStyle}
             >
-              <option value="">📋 - Select Category - </option>
+              <option value="">Select category</option>
               {categories?.map((category) => (
                 <option key={category} value={category}>
                   {category !== "FWA" ? category : "HWA"}
@@ -123,22 +120,16 @@ const TypeFilter = ({
           {(demobusers || fwausers || isgm || hireusers || ishod) &&
             (category == "FWA" || category == "Demob") &&
             !multiinit && (
-              <div className="px-4">
-                <label className="text-gray-500 font-medium text-small flex gap-2">
-                  Project:{" "}
-                  <BsAsterisk size={6} color="red" className="mt-2" />{" "}
-                </label>
+              <div className="min-w-0 flex-1 sm:flex-none">
                 <select
+                  aria-label="Project (required)"
                   disabled={isDocLoading}
                   value={selectedproject}
                   onChange={(e) => setSelectedProject(e.target.value)}
-                  className="w-48 md:w-56 lg:w-45 appearance-none rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 bg-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-shadow duration-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-no-repeat bg-right pr-10"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%231F2937' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                    backgroundPosition: "right 0.9rem center",
-                  }}
+                  className={selectClassName}
+                  style={selectStyle}
                 >
-                  <option value="">📋 - Select - </option>
+                  <option value="">Select project</option>
                   {projectcodes?.map((project) => (
                     <option key={project}>{project}</option>
                   ))}
@@ -146,8 +137,11 @@ const TypeFilter = ({
               </div>
             )}
           {type != "" && location.pathname == "/dashboardfn" && (
-            <span
-              className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-900 cursor-pointer transition-colors mt-5"
+            <button
+              type="button"
+              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/10"
+              aria-label="Clear filters"
+              title="Clear filters"
               onClick={() => {
                 settype("");
                 setCategory("");
@@ -164,8 +158,8 @@ const TypeFilter = ({
                 setSearchCSName("");
               }}
             >
-              <FaRegTimesCircle color="red" size={15} />
-            </span>
+              <FaRegTimesCircle size={17} />
+            </button>
           )}
         </div>
       }

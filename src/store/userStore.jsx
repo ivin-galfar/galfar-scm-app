@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export const toggleNewUser = create((set) => ({
+export const useUserStore = create((set) => ({
   newuser: false,
   setNewuser: () => set((state) => ({ newuser: !state.newuser })),
 }));
