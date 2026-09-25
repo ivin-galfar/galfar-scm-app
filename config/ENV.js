@@ -5,6 +5,8 @@ export const REACT_SERVER_URL =
 export const SPECIAL_PROJECTS = import.meta.env.VITE_SPECIAL_PROJECTS?.split(
   ",",
 ).map(Number);
+export const INHOUSE_PROJECTS =
+  import.meta.env.VITE_INHOUSE_PROJECTS?.split(",").map(Number) ?? [];
 
 const parseEnvList = (value) =>
   value

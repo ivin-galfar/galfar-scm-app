@@ -55,6 +55,7 @@ import TypeFilter from "../Components/TypeFilter";
 import { IoSave, IoWarning } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { FaUndoAlt } from "react-icons/fa";
+import { INHOUSE_PROJECTS } from "../../config/ENV";
 
 const FileNote = () => {
   const editorinfo = useEditorInfo();
@@ -194,6 +195,7 @@ const FileNote = () => {
       }, 1500);
     },
   });
+  console.log("outside", INHOUSE_PROJECTS);
 
   const generateTemplate = async (category, type) => {
     if (!doc_no || doc_no.last_no == null) return "";
@@ -212,7 +214,9 @@ const FileNote = () => {
     const formattedDate = format(date, "do MMMM yyyy");
     const cleanCategory = category?.trim();
     const ccvalue =
-      selectedproject != "" && selectedproject != 1501
+      selectedproject != "" &&
+      selectedproject != 1501 &&
+      !INHOUSE_PROJECTS.includes(Number(selectedproject))
         ? await getCCValue(category, selectedproject, userInfo)
         : "";
     const cmname = selectedproject
