@@ -659,6 +659,8 @@ const FleetRequest = () => {
   };
 
   const columnHelper = createColumnHelper();
+  const compactColumnIds = new Set(["capacity", "cicpa", "duration"]);
+  const preservedWidthColumnIds = new Set(["fleetDescription", "remarks"]);
 
   const columns = [
     columnHelper.display({
@@ -973,13 +975,21 @@ const FleetRequest = () => {
                       <th
                         key={header.id}
                         className={`${
-                          header.column.id === "productionQtyEnvisaged" ||
-                          header.column.id === "similarMachinesAvailable"
-                            ? "w-32 max-w-32 whitespace-normal"
-                            : header.column.id === "actions"
-                              ? "w-14 text-center"
-                              : "whitespace-nowrap"
-                        } border-r border-slate-200 px-3 py-3.5 text-md font-bold upperse tracking-wide text-slate-700 last:border-r-0`}
+                          compactColumnIds.has(header.column.id)
+                            ? header.column.id === "cicpa"
+                              ? "w-16 whitespace-nowrap"
+                              : "w-20 whitespace-nowrap"
+                            : header.column.id === "productionQtyEnvisaged" ||
+                                header.column.id === "similarMachinesAvailable"
+                              ? "w-32 max-w-32 whitespace-normal"
+                              : header.column.id === "actions"
+                                ? "w-14 text-center"
+                                : "whitespace-nowrap"
+                        } border-r border-slate-200 py-3.5 text-md font-bold upperse tracking-wide text-slate-700 last:border-r-0 ${
+                          preservedWidthColumnIds.has(header.column.id)
+                            ? "px-3"
+                            : "px-2"
+                        }`}
                       >
                         {flexRender(
                           header.column.columnDef.header,
@@ -998,13 +1008,21 @@ const FleetRequest = () => {
                         <td
                           key={cell.id}
                           className={`${
-                            cell.column.id === "productionQtyEnvisaged" ||
-                            cell.column.id === "similarMachinesAvailable"
-                              ? "w-32 max-w-24 whitespace-normal break-words "
-                              : cell.column.id === "actions"
-                                ? "w-14 text-center"
-                                : "max-w-24 "
-                          } px-3 py-3 align-top text-slate-700`}
+                            compactColumnIds.has(cell.column.id)
+                              ? cell.column.id === "cicpa"
+                                ? "w-16 whitespace-nowrap"
+                                : "w-20 whitespace-nowrap"
+                              : cell.column.id === "productionQtyEnvisaged" ||
+                                  cell.column.id === "similarMachinesAvailable"
+                                ? "w-32 max-w-24 whitespace-normal"
+                                : cell.column.id === "actions"
+                                  ? "w-14 text-center"
+                                  : "max-w-24 "
+                          } py-3 align-top text-slate-700 ${
+                            preservedWidthColumnIds.has(cell.column.id)
+                              ? "px-3"
+                              : "px-2"
+                          }`}
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
