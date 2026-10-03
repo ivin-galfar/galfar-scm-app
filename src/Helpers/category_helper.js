@@ -22,7 +22,7 @@ export const TypeForUi = {
 
 export const TypeForFeedUi = {
   file_note: "File Note",
-  ioc: "Ioc",
+  ioc: "Inter Office Correspondence",
 };
 
 export const CategoryForUi = {

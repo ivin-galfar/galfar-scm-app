@@ -1,19 +1,25 @@
 import axios from "axios";
 import { REACT_SERVER_URL, SPECIAL_PROJECTS } from "../../config/ENV";
-import { categoryapprovers, prevRole, roles } from "./roles_helper";
+import { prevRole } from "./roles_helper";
+import { CategoryForUi, TypeForFeedUi, TypeValue } from "./category_helper";
+import { GetFleetRequestById, getcmpmNames } from "../APIs/api";
 import {
-  CategoryForUi,
-  TypeForFeedUi,
-  TypeForUi,
-  TypeValue,
-} from "./category_helper";
-import { getcmpmNames } from "../APIs/api";
-import {
+  generateFRPDF,
   handleBrPrint,
   handleFnPrint,
   handleHirePrint,
   handlePrint,
 } from "./print_helper";
+export {
+  extractText,
+  formatDateDDMMYYYY,
+  formatPrice,
+  getAlignment,
+  getApproverNames,
+  getDept,
+  getType,
+} from "./pdfHelpers";
+
 export const handleRemoveFile = (index, formData, setFormData) => {
   const updatedFilenames = [...formData.filename];
   const updatedFiles = [...formData.file];
@@ -130,11 +136,6 @@ export const getPmName = (projectcode) => {
   }
 };
 
-export const formatDateDDMMYYYY = (date) =>
-  new Date(date).toLocaleDateString("en-GB", {
-    timeZone: "Asia/Dubai",
-  });
-
 export const formatDateDMY = (date) =>
   new Date(date).toLocaleDateString("en-AE", {
     timeZone: "Asia/Dubai",
@@ -168,10 +169,6 @@ export const formatDateDDMMYYYYHHMMSS = (date) => {
       timeZone: "Asia/Dubai",
     })
     .toUpperCase();
-};
-
-export const formatPrice = (value) => {
-  return Math.round(value || 0).toLocaleString();
 };
 
 export const handleFileUpload = async (files, userInfo, setFormData) => {
@@ -234,18 +231,6 @@ export const handleAttachmentsUpload = async (files, userInfo) => {
   }
 };
 
-export const getApproverNames = (flow, dept) => {
-  const flowRoles = categoryapprovers[flow] || [];
-
-  return flowRoles.flatMap((role) => {
-    if (role == "INITIATOR") {
-      return roles.INITIATOR[dept];
-    }
-
-    return roles[role] ? [roles[role]] : [];
-  });
-};
-
 export const getSubmittedDate = (approverinfo = [], role, module) => {
   let lastsubmissiondate = "";
   const prevrole = prevRole(role, module);
@@ -285,10 +270,6 @@ export const formatwords = (buttontxt) => {
 
 export const getTypeCode = (type) => {
   return TypeValue[type] || "";
-};
-
-export const getType = (type) => {
-  return TypeForUi[type] || "";
 };
 
 export const getFeedType = (type) => {
@@ -380,30 +361,6 @@ export const getFromValue = (category) => {
   }
 };
 
-export const extractText = (content = []) => {
-  return content
-    .map((item) => {
-      if (item.type === "text") {
-        return item.text || "";
-      }
-
-      if (item.type === "hardBreak") {
-        return "\n";
-      }
-      if (item.content) {
-        return extractText(item.content);
-      }
-
-      return "";
-    })
-    .join(" ");
-};
-
-export const getAlignment = (cell) => {
-  const paragraph = cell.content?.find((c) => c.type === "paragraph");
-  return paragraph?.attrs?.textAlign || "left";
-};
-
 export const isBold = (cell) => {
   return cell.content?.some((item) => {
     if (item.type === "text") {
@@ -414,14 +371,6 @@ export const isBold = (cell) => {
     }
     return false;
   });
-};
-export const getDept = (code) => {
-  switch (code) {
-    case 1:
-      return "Plant & Equipment Department";
-    case 2:
-      return "Logistics Department";
-  }
 };
 
 export const formatName = (name) => {
@@ -541,6 +490,7 @@ export const generatePDFHire = async (responseData, userInfo) => {
         type: "application/pdf",
       },
     );
+
     const uploadedFiles = await handleAttachmentsUpload([pdfFile], userInfo);
     if (uploadedFiles && uploadedFiles.length > 0) {
       return uploadedFiles[0].fileUrl || uploadedFiles[0].url || null;
@@ -549,6 +499,92 @@ export const generatePDFHire = async (responseData, userInfo) => {
     console.error("PDF generation/upload failed:", error);
   }
 };
+
+export const handleFrPrint = async (
+  fleetRequest,
+  userInfo,
+  emailPdf = false,
+) => {
+  const requestId = fleetRequest?.id ?? null;
+  const hasCompleteData =
+    fleetRequest &&
+    typeof fleetRequest === "object" &&
+    Array.isArray(fleetRequest.items);
+  const completeRequest = hasCompleteData
+    ? fleetRequest
+    : await GetFleetRequestById(userInfo, requestId);
+  console.log("comp", completeRequest);
+
+  return generateFRPDF(completeRequest, userInfo, emailPdf);
+};
+
+export const generateFRApprovedPDF = async (fleetRequestId, userInfo) => {
+  if (!fleetRequestId) {
+    throw new Error(
+      "Fleet Request id is required to generate the approved PDF.",
+    );
+  }
+  console.log("entering into", fleetRequestId);
+
+  const approvedRequest = await GetFleetRequestById(userInfo, fleetRequestId);
+  if (
+    String(approvedRequest?.status ?? "")
+      .trim()
+      .toLowerCase() !== "approved"
+  ) {
+    throw new Error(
+      "The latest Fleet Request data is not in the approved state.",
+    );
+  }
+
+  let pdfResult;
+  try {
+    pdfResult = await handleFrPrint(approvedRequest, userInfo, true);
+  } catch (error) {
+    console.error("Fleet Request approved PDF generation failed", error);
+    throw error;
+  }
+
+  const pdfBlob = pdfResult?.pdfBlob;
+  if (!(pdfBlob instanceof Blob) || pdfBlob.size === 0) {
+    if (pdfResult?.blobUrl) URL.revokeObjectURL(pdfResult.blobUrl);
+    throw new Error(
+      "Fleet Request PDF generation did not return a valid Blob.",
+    );
+  }
+  console.log(pdfBlob);
+  console.log("approvedreq", approvedRequest);
+
+  const safeDocumentNumber = String(approvedRequest?.doc_id).replace(
+    /[^a-zA-Z0-9_-]+/g,
+    "_",
+  );
+  const pdfFile = new File(
+    [pdfBlob],
+    `Approved_Fleet_Request_${safeDocumentNumber}.pdf`,
+    { type: "application/pdf" },
+  );
+
+  try {
+    const uploadedFiles = await handleAttachmentsUpload([pdfFile], userInfo);
+    const uploadedUrl = uploadedFiles?.[0]?.fileUrl || uploadedFiles?.[0]?.url;
+    console.log(uploadedUrl);
+
+    if (typeof uploadedUrl !== "string" || !uploadedUrl.trim()) {
+      throw new Error(
+        "Fleet Request approved PDF upload did not return a Blob URL.",
+      );
+    }
+
+    return uploadedUrl;
+  } catch (error) {
+    console.error("Fleet Request approved PDF upload failed", error);
+    throw error;
+  } finally {
+    if (pdfResult?.blobUrl) URL.revokeObjectURL(pdfResult.blobUrl);
+  }
+};
+
 export const getGreeting = () => {
   const hour = new Date().getHours();
 
@@ -571,6 +607,8 @@ export const getPath = (label) => {
       return "filenote";
     case "Buy Vs Rent":
       return "brstatement";
+    case "Fleet Request":
+      return "fleetrequest";
     default:
       return "";
   }
@@ -584,4 +622,5 @@ export const initiatorRoles = [
   "initdc",
   "view",
   "initlg",
+  "initfr",
 ];

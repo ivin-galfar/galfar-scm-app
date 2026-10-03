@@ -2,7 +2,7 @@ const DRAFT_VERSION = 1;
 const DRAFT_PREFIX = "fleet-request-draft";
 
 const itemFields = [
-  "equipmentDescription",
+  "fleetDescription",
   "capacity",
   "cicpa",
   "quantity",
@@ -13,6 +13,9 @@ const itemFields = [
   "productionQtyEnvisaged",
   "similarMachinesAvailable",
   "remarks",
+  "utilization",
+  "adnocFitments",
+  "tpi",
 ];
 
 export const createEmptyFleetItem = () =>

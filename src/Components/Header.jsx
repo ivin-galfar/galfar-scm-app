@@ -1,6 +1,6 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import galfarlogo from "../assets/Images/logo-new.png";
+import galfarlogo from "../assets/Images/galfar-logo-clean.png";
 import SideNav from "./SideNav";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserDropdown from "./UserDropdown";
@@ -25,8 +25,7 @@ import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 
 const Header = () => {
   const userInfo = useUserInfo();
-  const { statusFilter, setStatusFilter, setMultiStatusFilter } =
-    useContext(AppContext);
+  const { setStatusFilter, setMultiStatusFilter } = useContext(AppContext);
   const { setStatusFilter: setStatusFilterzustand } = useStatusFilter();
   const { selectedDept, setSelectedDept } = useSelectedDept();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,7 +52,7 @@ const Header = () => {
   const navLinkClasses = ({ isActive }) => {
     return `text-gray-700 hover:text-blue-600 ${isActive ? "border-b-2 border-blue-500 text-blue-600" : ""}`;
   };
-  const { dashboardType, setDashboardType } = useDashboardType();
+  const { setDashboardType } = useDashboardType();
   const { setPageSize } = usePagination();
   const { resetIsClicked } = useQuickAccess();
 
@@ -98,22 +97,36 @@ const Header = () => {
     userInfo?.role?.includes("view");
   return (
     <div>
-      <header className="bg-white shadow-md">
-        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex  items-center h-16">
-            <div className="flex space-x-6">
-              <div className="flex justify-center items-center p-6">
-                <NavLink to="/">
+      <header className="app-header bg-white shadow-md">
+        <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center gap-4">
+            <div className="flex shrink-0 items-center gap-3">
+              <div className="flex items-center justify-center px-3 py-2">
+                <NavLink
+                  to="/"
+                  className="block overflow-hidden rounded-lg bg-white p-1 shadow-sm"
+                  aria-label="Galfar home"
+                >
                   <img
                     src={galfarlogo}
-                    alt="Galfar Logo"
-                    className="h-10 w-auto"
+                    alt="Galfar"
+                    className="h-10 w-10 object-contain"
                   />
                 </NavLink>
               </div>
+              <div className="hidden h-9 items-center border-l border-white/25 pl-4 md:flex">
+                <div className="flex flex-col justify-center leading-tight">
+                  <span className="block text-[15px] font-semibold uppercase tracking-[0.22em] text-white">
+                    Galfar
+                  </span>
+                  <span className="mt-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+                    Integrated Web Application
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="ml-auto mr-45">
-              <nav className="flex space-x-8 ">
+            <div className="ml-auto min-w-0">
+              <nav className="flex items-center gap-4 lg:gap-7">
                 <NavLink to="/" className={navLinkClasses}>
                   Home
                 </NavLink>
@@ -144,8 +157,21 @@ const Header = () => {
                   Comparative Statements
                 </NavLink>
                 {canAccessFleetRequests && (
-                  <NavLink to="/equipfr" className={navLinkClasses}>
-                    Fleet MR
+                  <NavLink
+                    to="/dashboardfr"
+                    className={() => {
+                      const isActive =
+                        location.pathname.startsWith("/dashboardfr") ||
+                        location.pathname.startsWith("/fleetrequest");
+
+                      return `text-gray-700 hover:text-blue-600 ${
+                        isActive
+                          ? "border-b-2 border-blue-500 text-blue-600"
+                          : ""
+                      }`;
+                    }}
+                  >
+                    Fleet Req.
                   </NavLink>
                 )}
                 <NavLink

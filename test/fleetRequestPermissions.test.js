@@ -6,6 +6,10 @@ import {
   FLEET_APPROVAL_ROLES,
   getFleetApprovalFlow,
 } from "../src/Helpers/fleetRequestWorkflow.js";
+import {
+  canRecallFleetRequest,
+  getFleetRequestAction,
+} from "../src/Helpers/approvalFlowHelper.js";
 
 const withPermission = (access_level, statement_role = "fl_req") => ({
   permission: { statement_role, allowed_role: "pm", access_level },
@@ -59,4 +63,45 @@ test("Fleet Request frontend uses CM-first workflows", () => {
   assert.deepEqual(getFleetApprovalFlow(7102, [7102]), [
     "INITIATOR", "CM", "PM", "PD", "HOD", "GM", "CEO",
   ]);
+});
+
+test("Fleet Request recall is available only to initiators while pending", () => {
+  const initiator = withPermission("edit");
+  const approver = withPermission("view");
+
+  assert.equal(
+    canRecallFleetRequest({
+      fleetRequest: { status: "pending for pm" },
+      user: initiator,
+    }),
+    true,
+  );
+  assert.equal(
+    canRecallFleetRequest({
+      fleetRequest: { status: "approved" },
+      user: initiator,
+    }),
+    false,
+  );
+  assert.equal(
+    canRecallFleetRequest({
+      fleetRequest: { status: "pending for pm" },
+      user: approver,
+    }),
+    false,
+  );
+});
+
+test("a recalled Fleet Request can be edited and resubmitted", () => {
+  const action = getFleetRequestAction({
+    fleetRequest: { project: 7097, status: "recalled" },
+    user: withPermission("edit"),
+  });
+
+  assert.deepEqual(action, {
+    action: "send-for-approval",
+    label: "Resubmit for Approval",
+    nextStatus: "pending for cm",
+    disabled: false,
+  });
 });

@@ -2,12 +2,8 @@
 import { LuArrowRight, LuClock3 } from "react-icons/lu";
 import {
   Badge,
-  Button,
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Separator,
 } from "./ui";
 import {
@@ -22,15 +18,17 @@ import { useClickFromDashboard } from "../../store/helperStore";
 import { FiFileText } from "react-icons/fi";
 import { MdPendingActions } from "react-icons/md";
 import ZeroPendings from "../../Components/ZeroPendings";
+import DashboardSectionHeader from "./DashboardSectionHeader";
 
-const PendingForYou = ({ items, pending_count = 0 }) => {
+const PendingForYou = ({ items }) => {
   const userInfo = useUserInfo();
   const { setIsClicked } = useClickFromDashboard();
   const isAdmin = userInfo?.is_admin;
   const roles = userInfo?.role || [];
   const isInitiator =
     initiatorRoles.some((role) => roles.includes(role)) ||
-    roles.every((role) => role === "initfn");
+    roles.every((role) => role === "initfn") ||
+    roles.every((role) => role === "initfr");
 
   const filteredItems = isAdmin
     ? items
@@ -56,39 +54,34 @@ const PendingForYou = ({ items, pending_count = 0 }) => {
       className={`relative flex h-full min-h-10 flex-col overflow-hidden shadow-sm border-amber-200/80 bg-amber-50/35 dark:border-amber-900/60 dark:bg-amber-950/15"`}
     >
       <span className="absolute inset-y-0 left-0 w-1 bg-amber-400" />
-      <CardHeader className="shrink-0 flex-row items-start justify-between gap-3 space-y-0 p-4 pb-3">
-        <div>
-          <span className="flex gap-3">
-            <CardTitle
-              className={`flex items-center gap-2 
-                  "text-amber-900 dark:text-amber-200"`}
-            >
-              <MdPendingActions size={19} className="text-amber-500" />
-              <span className="font-bold text-lg items-start flex"></span>
-              {isInitiator ? "Pending Statements" : "Awaiting your Action"}
-            </CardTitle>
-            {filteredItems.length > 0 && (
-              <Badge className="min-w-5 h-5 px-1.5 rounded-t-lg bg-red-500 text-white items-center text-xs font-semibold border-0">
-                {filteredItems.length}
-              </Badge>
-            )}
-          </span>
-          <CardDescription className="mt-1">
-            {isInitiator
-              ? "Statments which are still in progress"
-              : "Requests that require your attention"}
-          </CardDescription>
-        </div>
-        <Link
-          to="/pendingdashboard"
-          className="flex  shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 py-1 text-sm font-semibold text-gray-600 transition hover:bg-accent hover:text-accent-foreground"
-          onClick={setIsClicked}
-        >
-          View All
-          <LuArrowRight />
-        </Link>
-      </CardHeader>
-      <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pb-4">
+      <DashboardSectionHeader
+        title={isInitiator ? "Pending Statements" : "Awaiting Your Action"}
+        description={
+          isInitiator
+            ? "Statements which are still in progress"
+            : "Requests that require your attention"
+        }
+        icon={MdPendingActions}
+        tone="amber"
+        badge={
+          filteredItems.length > 0 ? (
+            <Badge className="h-5 min-w-5 rounded-full border-0 bg-amber-600 px-1.5 text-[11px] font-semibold text-white">
+              {filteredItems.length}
+            </Badge>
+          ) : null
+        }
+        action={
+          <Link
+            to="/pendingdashboard"
+            className="flex shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-accent hover:text-accent-foreground dark:text-slate-300"
+            onClick={setIsClicked}
+          >
+            View All
+            <LuArrowRight />
+          </Link>
+        }
+      />
+      <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-3">
         {filteredItems.length ? (
           <div className="max-h-60 min-h-0 space-y-2 overflow-y-auto pr-1">
             {filteredItems.map((item, index) => (

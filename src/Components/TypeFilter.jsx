@@ -6,6 +6,7 @@ import { usePagination } from "../store/statementStore";
 import { is_gm, is_hod } from "../Helpers/dept_helper";
 import { getFeedType } from "../Helpers/helperfunctions";
 import { FaRegTimesCircle } from "react-icons/fa";
+import { CategoryForUi } from "../Helpers/category_helper";
 
 const TypeFilter = ({
   isDocLoading,
@@ -57,8 +58,12 @@ const TypeFilter = ({
   const fwausers = userInfo.role.includes("initdc");
   const viewusers = userInfo.role.includes("view");
   const hireusers = userInfo.role.includes("inith");
-  const selectClassName =
-    "h-8 w-full appearance-none rounded-md border border-slate-300 bg-white bg-no-repeat px-2.5 pr-8 text-sm text-slate-800 transition hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 sm:w-44 lg:w-40";
+  const isFileNotePage = location.pathname.startsWith("/filenote");
+  const selectClassName = `${
+    isFileNotePage
+      ? "h-10 rounded-lg border-gray-300"
+      : "h-8 rounded-md border-slate-300"
+  } w-full appearance-none border bg-white bg-no-repeat px-2.5 pr-8 text-sm text-slate-800 transition hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 sm:w-44 lg:w-40`;
   const selectStyle = {
     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%2364758B' d='M6 8.5 1.5 4h9z'/%3E%3C/svg%3E")`,
     backgroundPosition: "right 0.65rem center",
@@ -112,7 +117,7 @@ const TypeFilter = ({
               <option value="">Select category</option>
               {categories?.map((category) => (
                 <option key={category} value={category}>
-                  {category !== "FWA" ? category : "HWA"}
+                  {category !== "FWA" ? CategoryForUi[category] : "HWA"}
                 </option>
               ))}
             </select>

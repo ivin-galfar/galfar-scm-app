@@ -394,162 +394,165 @@ const LogisticsTable = () => {
           </button>
         </div>
       )}
-      <div className="flex w-full gap-10">
-        {" "}
-        <table
-          className={`table border border-gray-300 ${
-            columns.length > 1 ? "w-3/4" : "w-1/3"
-          } overflow-x-auto max-w-full text-sm`}
-        >
-          <thead className="text-center bg-gray-100">
-            {columns.length > 2 && (
-              <tr className="text-center font-semibold border border-gray-300 rounded-lg bg-white shadow-sm">
-                <td className="px-4 py-2"></td>
+      <div
+        className={`grid w-full min-w-0 gap-6 ${
+          formData?.file?.length > 0
+            ? "xl:grid-cols-[minmax(0,3fr)_minmax(16rem,1fr)]"
+            : "grid-cols-1"
+        }`}
+      >
+        <div className="min-w-0 overflow-x-auto [scrollbar-width:thin]">
+          <table className="table w-full min-w-[36rem] border border-gray-300 text-sm">
+            <thead className="text-center bg-gray-100">
+              {columns.length > 2 && (
+                <tr className="text-center font-semibold border border-gray-300 rounded-lg bg-white shadow-sm">
+                  <td className="px-4 py-2"></td>
+                  {columns.slice(1).map((column, colIndex) => (
+                    <td
+                      key={colIndex}
+                      className="px-4 py-2 border-l text-center font-semibold bg-blue-50"
+                    >
+                      L{colIndex + 1}
+                    </td>
+                  ))}
+                </tr>
+              )}
+              <tr className="border-b">
+                {columns.map((column, index) => (
+                  <th key={index} className="p-2 relative justify-between ">
+                    {column}
+                    <span
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 ${(!newstatement || column == "Forwarder") && "invisible"}`}
+                      onClick={() => removeColumn(column, index)}
+                    >
+                      X
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {particularvalue.map((particular, index) => {
+                const rowIndex = `row_${index}`;
+                return (
+                  <tr key={index} className="border-b text-center">
+                    <td className="px-4 py-2">{particular}</td>
+                    {columns.slice(1).map((column, colIndex) => {
+                      const columnIndex = `vendor_${colIndex}`;
+                      return (
+                        <td key={colIndex} className="px-2 py-2 border-l">
+                          {userInfo.is_admin ? (
+                            <input
+                              type="text"
+                              disabled={
+                                (formData.sentforapproval &&
+                                  !isRecalled &&
+                                  !isReview) ||
+                                (isFreeze && !isReview)
+                              }
+                              value={
+                                tableData.find((r) => r?.r_id === rowIndex)
+                                  ?.forwarders?.[columnIndex] ?? ""
+                              }
+                              className={`w-1/2 px-2 py-1 text-center  font-semibold border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all placeholder:text-gray-400`}
+                              onChange={(e) =>
+                                handleChange(
+                                  rowIndex,
+                                  colIndex,
+                                  e.target.value,
+                                  particular,
+                                  column,
+                                )
+                              }
+                            />
+                          ) : (
+                            <>
+                              {" "}
+                              <div className="max-w-2xl px-2 py-1 text-center break-words whitespace-normal ">
+                                {(() => {
+                                  const value = tableData.find(
+                                    (r) => r?.r_id === rowIndex,
+                                  )?.forwarders?.[columnIndex];
+                                  if (!value) return value;
+
+                                  const match = String(value).match(
+                                    /^([A-Za-z]+)?\s*([\d,.]+)$/,
+                                  );
+
+                                  if (!match) return value;
+
+                                  const [, currency, amount] = match;
+                                  const formatted = Number(
+                                    amount.replace(/,/g, ""),
+                                  ).toLocaleString("en-US", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  });
+
+                                  return currency
+                                    ? `${currency} ${formatted}`
+                                    : formatted;
+                                })()}
+                              </div>
+                            </>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+
+              <tr className="text-center bg-gray-50 font-semibold">
+                <td
+                  className={`border px-4 py-2 font-semibold bg-green-50 text-green-800 text-center ${columns.length < 2 ? "invisible" : ""}`}
+                >
+                  Selected Vendor
+                </td>
+
                 {columns.slice(1).map((column, colIndex) => (
-                  <td
-                    key={colIndex}
-                    className="px-4 py-2 border-l text-center font-semibold bg-blue-50"
-                  >
-                    L{colIndex + 1}
+                  <td key={colIndex} className="px-4 py-2 border-l border-t">
+                    <label
+                      className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || (!formData.status?.includes("pending") && isEditing) || (userInfo.is_admin && !formData.status?.includes("pending")) ? "cursor-pointer" : "cursor-auto"} `}
+                    >
+                      <input
+                        type="radio"
+                        name="selectedVendor"
+                        value={column}
+                        checked={formData.selected_vendor_index === colIndex}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            selected_vendor_index: colIndex,
+                          })
+                        }
+                        disabled={
+                          formData.sentforapproval && isFreeze && !isReview
+                        }
+                        className="accent-green-600 w-4 h-4 sr-only"
+                      />
+
+                      <span
+                        className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border shadow-sm transition-colors duration-200 ${
+                          formData.selected_vendor_index === colIndex
+                            ? "bg-green-100 text-green-700 border-green-300"
+                            : "bg-gray-100 text-gray-600 border-gray-300"
+                        }`}
+                      >
+                        {formData.selected_vendor_index === colIndex
+                          ? "✅ Selected"
+                          : "⭕ Select"}
+                      </span>
+                    </label>
                   </td>
                 ))}
               </tr>
-            )}
-            <tr className="border-b">
-              {columns.map((column, index) => (
-                <th key={index} className="p-2 relative justify-between ">
-                  {column}
-                  <span
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 ${(!newstatement || column == "Forwarder") && "invisible"}`}
-                    onClick={() => removeColumn(column, index)}
-                  >
-                    X
-                  </span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {particularvalue.map((particular, index) => {
-              const rowIndex = `row_${index}`;
-              return (
-                <tr key={index} className="border-b text-center">
-                  <td className="px-4 py-2">{particular}</td>
-                  {columns.slice(1).map((column, colIndex) => {
-                    const columnIndex = `vendor_${colIndex}`;
-                    return (
-                      <td key={colIndex} className="px-2 py-2 border-l">
-                        {userInfo.is_admin ? (
-                          <input
-                            type="text"
-                            disabled={
-                              (formData.sentforapproval &&
-                                !isRecalled &&
-                                !isReview) ||
-                              (isFreeze && !isReview)
-                            }
-                            value={
-                              tableData.find((r) => r?.r_id === rowIndex)
-                                ?.forwarders?.[columnIndex] ?? ""
-                            }
-                            className={`w-1/2 px-2 py-1 text-center  font-semibold border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all placeholder:text-gray-400`}
-                            onChange={(e) =>
-                              handleChange(
-                                rowIndex,
-                                colIndex,
-                                e.target.value,
-                                particular,
-                                column,
-                              )
-                            }
-                          />
-                        ) : (
-                          <>
-                            {" "}
-                            <div className="max-w-2xl px-2 py-1 text-center break-words whitespace-normal ">
-                              {(() => {
-                                const value = tableData.find(
-                                  (r) => r?.r_id === rowIndex,
-                                )?.forwarders?.[columnIndex];
-                                if (!value) return value;
-
-                                const match = String(value).match(
-                                  /^([A-Za-z]+)?\s*([\d,.]+)$/,
-                                );
-
-                                if (!match) return value;
-
-                                const [, currency, amount] = match;
-                                const formatted = Number(
-                                  amount.replace(/,/g, ""),
-                                ).toLocaleString("en-US", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                });
-
-                                return currency
-                                  ? `${currency} ${formatted}`
-                                  : formatted;
-                              })()}
-                            </div>
-                          </>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-
-            <tr className="text-center bg-gray-50 font-semibold">
-              <td
-                className={`border px-4 py-2 font-semibold bg-green-50 text-green-800 text-center ${columns.length < 2 ? "invisible" : ""}`}
-              >
-                Selected Vendor
-              </td>
-
-              {columns.slice(1).map((column, colIndex) => (
-                <td key={colIndex} className="px-4 py-2 border-l border-t">
-                  <label
-                    className={`flex flex-col items-center gap-2 ${(!formData.sentforapproval && isEditing) || (!formData.status?.includes("pending") && isEditing) || (userInfo.is_admin && !formData.status?.includes("pending")) ? "cursor-pointer" : "cursor-auto"} `}
-                  >
-                    <input
-                      type="radio"
-                      name="selectedVendor"
-                      value={column}
-                      checked={formData.selected_vendor_index === colIndex}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          selected_vendor_index: colIndex,
-                        })
-                      }
-                      disabled={
-                        formData.sentforapproval && isFreeze && !isReview
-                      }
-                      className="accent-green-600 w-4 h-4 sr-only"
-                    />
-
-                    <span
-                      className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border shadow-sm transition-colors duration-200 ${
-                        formData.selected_vendor_index === colIndex
-                          ? "bg-green-100 text-green-700 border-green-300"
-                          : "bg-gray-100 text-gray-600 border-gray-300"
-                      }`}
-                    >
-                      {formData.selected_vendor_index === colIndex
-                        ? "✅ Selected"
-                        : "⭕ Select"}
-                    </span>
-                  </label>
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
         {formData?.file?.length > 0 && (
-          <div className="w-1/3 p-4 bg-gray-50 rounded-xl shadow-inner overflow-y-auto max-h-[40vh]">
+          <div className="min-w-0 max-h-[40vh] overflow-y-auto rounded-xl bg-gray-50 p-4 shadow-inner">
             <h2 className="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">
               Uploaded Files{" "}
               {formData?.filename?.length > 0
@@ -557,7 +560,7 @@ const LogisticsTable = () => {
                 : ""}
             </h2>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
               {formData?.file || formData?.filename?.length > 0 ? (
                 formData?.filename?.map((file, index) => {
                   const url = formData.file?.[index];

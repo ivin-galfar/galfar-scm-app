@@ -54,7 +54,7 @@ import {
 import TypeFilter from "../Components/TypeFilter";
 import { IoSave, IoWarning } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
-import { FaUndoAlt } from "react-icons/fa";
+import { LuUndo2 } from "react-icons/lu";
 import { INHOUSE_PROJECTS } from "../../config/ENV";
 
 const FileNote = () => {
@@ -549,9 +549,9 @@ const FileNote = () => {
           />
         )}
         {newfn && (
-          <div className="flex items-end gap-4 p-4">
-            <div>
-              <label className="mb-1 flex font-medium">
+          <div className="-translate-y-3 grid grid-cols-1 items-start gap-4 p-4 sm:grid-cols-[minmax(0,21rem)_11rem]">
+            <div className="flex min-w-0 flex-col">
+              <label className="mb-1 flex h-5 items-center font-medium">
                 Subject: <BsAsterisk size={6} color="red" />
               </label>
 
@@ -560,13 +560,13 @@ const FileNote = () => {
                 placeholder="Enter File Note/IOC subject name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-84 rounded-lg border border-gray-300 p-2"
+                className="h-10 w-full rounded-lg border border-gray-300 p-2"
               />
             </div>
 
             {category == "Demob" && (
-              <div>
-                <label className="mb-1 flex font-medium">
+              <div className="flex min-w-0 flex-col">
+                <label className="mb-1 flex h-5 items-center font-medium">
                   W.E.F: <BsAsterisk size={6} color="red" />
                 </label>
 
@@ -575,7 +575,7 @@ const FileNote = () => {
                   value={selectedDate}
                   min={minDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="rounded-lg border border-gray-300 p-2"
+                  className="h-10 w-full rounded-lg border border-gray-300 p-2"
                   onKeyDown={(e) => e.preventDefault()}
                   required
                 />
@@ -669,15 +669,14 @@ const FileNote = () => {
                 selectedvalue.status !== "edit" &&
                 selectedvalue.status !== "created" &&
                 selectedvalue.status !== "review" && (
-                  <span className="text-gray-500 cursor-pointer hover:text-gray-700">
-                    <FaUndoAlt
-                      size={20}
-                      color="#2563EB"
-                      onClick={() => {
-                        setIsAlerted();
-                      }}
-                    />{" "}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={setIsAlerted}
+                    className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-800 shadow-sm transition hover:border-amber-400 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+                  >
+                    <LuUndo2 size={17} aria-hidden="true" />
+                    Recall
+                  </button>
                 )}
             </div>
           </div>

@@ -1,8 +1,8 @@
-import { SPECIAL_PROJECTS } from "../../config/ENV";
-import { getFleetRequestAccess } from "./fleetRequestPermissions";
-import { getFleetApprovalFlow } from "./fleetRequestWorkflow";
+import { SPECIAL_PROJECTS } from "../../config/ENV.js";
+import { getFleetRequestAccess } from "./fleetRequestPermissions.js";
+import { getFleetApprovalFlow } from "./fleetRequestWorkflow.js";
 
-export { FLEET_APPROVAL_ROLES } from "./fleetRequestWorkflow";
+export { FLEET_APPROVAL_ROLES } from "./fleetRequestWorkflow.js";
 
 const normalizeRole = (role) =>
   String(role ?? "")
@@ -59,6 +59,15 @@ const getUserRoles = (user) => {
   return roles.filter(Boolean).map(normalizeRole);
 };
 
+export const canRecallFleetRequest = ({ fleetRequest, user }) => {
+  const access = getFleetRequestAccess(user);
+  const status = String(fleetRequest?.status ?? "")
+    .trim()
+    .toLowerCase();
+
+  return access.canEdit && status.startsWith("pending for ");
+};
+
 export const getFleetRequestAction = ({
   fleetRequest,
   user,
@@ -101,17 +110,24 @@ export const getFleetRequestAction = ({
     };
   }
 
-  if (status === "review" && access.canEdit) {
+  if (["review", "recalled"].includes(status) && access.canEdit) {
     const [nextRole] = getNextFleetApprovalRoles(fleetRequest, "INITIATOR");
-    return nextRole ? {
-      action: "send-for-approval",
-      label: "Resubmit for Approval",
-      nextStatus: `pending for ${nextRole.toLowerCase()}`,
-      disabled: false,
-    } : null;
+    return nextRole
+      ? {
+          action: "send-for-approval",
+          label: "Resubmit for Approval",
+          nextStatus: `pending for ${nextRole.toLowerCase()}`,
+          disabled: false,
+        }
+      : null;
   }
 
-  if (status === "rejected" || status === "review" || status === "reverted") {
+  if (
+    status === "rejected" ||
+    status === "review" ||
+    status === "recalled" ||
+    status === "reverted"
+  ) {
     return {
       action: null,
       label: status.charAt(0).toUpperCase() + status.slice(1),

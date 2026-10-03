@@ -4,7 +4,7 @@ import { LuTriangleAlert } from "react-icons/lu";
 import { createEmptyFleetItem } from "../Helpers/fleetRequestDraft";
 
 const requiredFields = {
-  equipmentDescription: "Equipment Description",
+  fleetDescription: "Fleet Description",
   capacity: "Capacity",
   cicpa: "CICPA",
   quantity: "Quantity",
@@ -13,7 +13,8 @@ const requiredFields = {
   duration: "Duration",
   purpose: "Purpose",
   similarMachinesAvailable: "Qty of Similar Machines Available at Site",
-  utilization: "utilization",
+  adnocFitments: "ADNOC Fitments",
+  tpi: "TPI",
   remarks: "Remarks",
 };
 
@@ -44,14 +45,16 @@ const validateItem = (item) => {
     errors.similarMachinesAvailable = "Value cannot be negative.";
   }
 
+  if (item.tpi && !["Normal", "CPIS"].includes(item.tpi)) {
+    errors.tpi = "Select Normal or CPIS.";
+  }
+
   return errors;
 };
 
-const hasAllRequiredFields = (item) =>
-  Boolean(item) &&
-  Object.keys(requiredFields).every(
-    (field) => String(item[field] ?? "").trim() !== "",
-  );
+const areAllItemsValid = (items) =>
+  items.length > 0 &&
+  items.every((item) => Object.keys(validateItem(item)).length === 0);
 
 const FleetItemsModal = ({
   isOpen,
@@ -66,6 +69,15 @@ const FleetItemsModal = ({
   const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
 
   if (!isOpen) return null;
+
+  const minimumDate = new Date();
+  minimumDate.setDate(minimumDate.getDate() + 7);
+
+  const minDate = [
+    minimumDate.getFullYear(),
+    String(minimumDate.getMonth() + 1).padStart(2, "0"),
+    String(minimumDate.getDate()).padStart(2, "0"),
+  ].join("-");
 
   const updateItem = (itemIndex, field, value) => {
     onItemsChange(
@@ -222,22 +234,22 @@ const FleetItemsModal = ({
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <label>
                       <span className="mb-1 block text-sm font-medium text-slate-700">
-                        Equipment Description{" "}
+                        Fleet Description{" "}
                         <span className="text-red-600">*</span>
                       </span>
                       <input
                         className={inputClass}
                         type="text"
-                        value={item.equipmentDescription}
+                        value={item.fleetDescription}
                         onChange={(event) =>
                           updateItem(
                             itemIndex,
-                            "equipmentDescription",
+                            "fleetDescription",
                             event.target.value,
                           )
                         }
                       />
-                      {renderError(itemIndex, "equipmentDescription")}
+                      {renderError(itemIndex, "fleetDescription")}
                     </label>
 
                     <label>
@@ -254,34 +266,6 @@ const FleetItemsModal = ({
                       />
                       {renderError(itemIndex, "capacity")}
                     </label>
-
-                    <label>
-                      <span className="mb-1 block text-sm font-medium text-slate-700">
-                        CICPA <span className="text-red-600">*</span>
-                      </span>
-                      <select
-                        className={inputClass}
-                        value={item.cicpa}
-                        onChange={(event) =>
-                          updateItem(itemIndex, "cicpa", event.target.value)
-                        }
-                      >
-                        <option value="">Select Yes/No</option>
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                      </select>
-
-                      {/* <input
-                        className={inputClass}
-                        type="text"
-                        value={item.cicpa}
-                        onChange={(event) =>
-                          updateItem(itemIndex, "cicpa", event.target.value)
-                        }
-                      />
-                      {renderError(itemIndex, "cicpa")} */}
-                    </label>
-
                     <label>
                       <span className="mb-1 block text-sm font-medium text-slate-700">
                         Quantity <span className="text-red-600">*</span>
@@ -298,26 +282,6 @@ const FleetItemsModal = ({
                       />
                       {renderError(itemIndex, "quantity")}
                     </label>
-
-                    <label>
-                      <span className="mb-1 block text-sm font-medium text-slate-700">
-                        Required From <span className="text-red-600">*</span>
-                      </span>
-                      <input
-                        className={inputClass}
-                        type="date"
-                        value={item.requiredFrom}
-                        onChange={(event) =>
-                          updateItem(
-                            itemIndex,
-                            "requiredFrom",
-                            event.target.value,
-                          )
-                        }
-                      />
-                      {renderError(itemIndex, "requiredFrom")}
-                    </label>
-
                     <label>
                       <span className="mb-1 block text-sm font-medium text-slate-700">
                         Type of Rental <span className="text-red-600">*</span>
@@ -338,6 +302,26 @@ const FleetItemsModal = ({
                         <option value="Monthly">Monthly</option>
                       </select>
                       {renderError(itemIndex, "rentalType")}
+                    </label>
+
+                    <label>
+                      <span className="mb-1 block text-sm font-medium text-slate-700">
+                        Required From <span className="text-red-600">*</span>
+                      </span>
+                      <input
+                        className={inputClass}
+                        type="date"
+                        value={item.requiredFrom}
+                        min={minDate}
+                        onChange={(event) =>
+                          updateItem(
+                            itemIndex,
+                            "requiredFrom",
+                            event.target.value,
+                          )
+                        }
+                      />
+                      {renderError(itemIndex, "requiredFrom")}
                     </label>
 
                     <label>
@@ -402,6 +386,22 @@ const FleetItemsModal = ({
                       />
                       {renderError(itemIndex, "productionQtyEnvisaged")}
                     </label>
+                    <label>
+                      <span className="mb-1 block text-sm font-medium text-slate-700">
+                        CICPA <span className="text-red-600">*</span>
+                      </span>
+                      <select
+                        className={inputClass}
+                        value={item.cicpa}
+                        onChange={(event) =>
+                          updateItem(itemIndex, "cicpa", event.target.value)
+                        }
+                      >
+                        <option value="">Select Yes/No</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </label>
 
                     <label>
                       <span className="mb-1 block text-sm font-medium text-slate-700">
@@ -426,7 +426,7 @@ const FleetItemsModal = ({
                     </label>
                     <label>
                       <span className="mb-1 block text-sm font-medium text-slate-700">
-                        Utilization <span className="text-red-600">*</span>
+                        Utilization (%)
                       </span>
                       <input
                         className={inputClass}
@@ -444,6 +444,63 @@ const FleetItemsModal = ({
                       />
                       {renderError(itemIndex, "utilization")}
                     </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="mb-1 block text-sm font-medium text-slate-700">
+                          ADNOC Fitments <span className="text-red-600">*</span>
+                        </span>
+                        <div
+                          className="grid h-9 grid-cols-2 overflow-hidden rounded border border-slate-300"
+                          role="group"
+                          aria-label="ADNOC Fitments required"
+                        >
+                          {["yes", "no"].map((value) => {
+                            const isSelected = item.adnocFitments === value;
+
+                            return (
+                              <button
+                                key={value}
+                                type="button"
+                                aria-pressed={isSelected}
+                                onClick={() =>
+                                  updateItem(itemIndex, "adnocFitments", value)
+                                }
+                                className={`text-sm font-medium transition first:border-r first:border-slate-300 cursor-pointer ${
+                                  isSelected
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-white text-slate-600 hover:bg-slate-50"
+                                }`}
+                              >
+                                {value === "yes" ? "Yes" : "No"}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {renderError(itemIndex, "adnocFitments")}
+                      </div>
+
+                      <label>
+                        <span className="mb-1 block text-sm font-medium text-slate-700">
+                          TPI <span className="text-red-600">*</span>
+                        </span>
+                        <select
+                          className={inputClass}
+                          value={
+                            ["Normal", "CPIS"].includes(item.tpi)
+                              ? item.tpi
+                              : ""
+                          }
+                          onChange={(event) =>
+                            updateItem(itemIndex, "tpi", event.target.value)
+                          }
+                        >
+                          <option value="">Select TPI</option>
+                          <option value="Normal">Normal</option>
+                          <option value="CPIS">CPIS</option>
+                        </select>
+                        {renderError(itemIndex, "tpi")}
+                      </label>
+                    </div>
 
                     <label className="md:col-span-2 lg:col-span-3">
                       <span className="mb-1 block text-sm font-medium text-slate-700">
@@ -464,16 +521,14 @@ const FleetItemsModal = ({
             })}
           </div>
 
-          {hasAllRequiredFields(items[0]) && (
-            <button
-              type="button"
-              onClick={addItem}
-              // disabled={items.length >= maxItems}
-              className="mt-5 rounded border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-white cursor-pointer"
-            >
-              Add Another Item
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={addItem}
+            disabled={!areAllItemsValid(items)}
+            className="mt-5 cursor-pointer rounded border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-white"
+          >
+            Add Another Item
+          </button>
         </div>
 
         <div className="flex flex-wrap justify-between gap-3 border-t border-slate-200 px-5 py-4">
@@ -541,14 +596,14 @@ const FleetItemsModal = ({
                 type="button"
                 onClick={() => setShowDiscardConfirmation(false)}
                 autoFocus
-                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 cursor-pointer"
               >
                 Keep editing
               </button>
               <button
                 type="button"
                 onClick={onDiscard}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cusor-pointer"
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer"
               >
                 {isEditing ? "Discard changes" : "Discard draft"}
               </button>

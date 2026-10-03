@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import {
   LuArrowLeftRight,
+  LuCarFront,
   LuChevronDown,
   LuFileText,
   LuPackage,
@@ -10,12 +11,13 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDashboardType } from "../../store/logisticsStore";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui";
+import { Card, CardContent } from "./ui";
 import { FaToolbox } from "react-icons/fa";
 import { useQuickAccess } from "../../store/helperStore";
 import { TbHomeMove } from "react-icons/tb";
 import useUserInfo from "../../CustomHooks/useUserInfo";
 import { initiatorRoles } from "../../Helpers/helperfunctions";
+import DashboardSectionHeader from "./DashboardSectionHeader";
 
 const actions = [
   {
@@ -53,6 +55,13 @@ const actions = [
     type: "bvrplant",
     tone: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300",
   },
+  {
+    label: "Fleet Request",
+    icon: LuCarFront,
+    path: "/dashboardfr",
+    type: "bvrplant",
+    tone: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
+  },
 ];
 const QuickAccess = ({ items = actions }) => {
   const { setDashboardType } = useDashboardType();
@@ -71,11 +80,15 @@ const QuickAccess = ({ items = actions }) => {
       ? "asset-menu"
       : hasRole("initlg")
         ? "logistics"
-        : ["initpr", "initdc", "initfn"].some(hasRole)
-          ? "filenote"
-          : null;
+        : hasRole("initfr")
+          ? "fleetrequest"
+          : ["initpr", "initdc", "initfn"].some(hasRole)
+            ? "filenote"
+            : null;
 
   const navigateToCreate = (path, intent) => {
+    console.log(path);
+
     setIsCreateMenuOpen(false);
     navigate(path, { state: { createNew: intent } });
   };
@@ -89,7 +102,7 @@ const QuickAccess = ({ items = actions }) => {
           <span
             type="button"
             onClick={() => setIsCreateMenuOpen((open) => !open)}
-            className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-blue-700 bg-white px-3 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-blue-700 bg-white px-3 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
             aria-expanded={isCreateMenuOpen}
             aria-haspopup="menu"
           >
@@ -135,6 +148,7 @@ const QuickAccess = ({ items = actions }) => {
     const destinations = {
       receipts: ["/receipts", "receipts"],
       logistics: ["/lstatements", "logistics"],
+      fleetrequest: ["/fleetrequest", "fleetrequest"],
       filenote: ["/filenote", "filenote"],
     };
     const [path, intent] = destinations[createAction];
@@ -152,21 +166,15 @@ const QuickAccess = ({ items = actions }) => {
   };
 
   return (
-    <Card className="h-full shadow-sm">
-      <CardHeader className="p-4 pb-3">
-        <div className="flex justify-between">
-          <CardTitle className="flex gap-2">
-            <TbHomeMove
-              size={19}
-              className="transition-transform duration-200 group-hover:scale-110"
-              color="green"
-            />
-            Quick Access{" "}
-          </CardTitle>
-          {isInitiator && renderCreateAction()}
-        </div>
-      </CardHeader>
-      <CardContent className="grid grid-cols-3 gap-2 p-3 pt-0">
+    <Card className="h-full  overflow-hidden shadow-sm">
+      <DashboardSectionHeader
+        title="Quick Access"
+        description="Open frequently used workspaces"
+        icon={TbHomeMove}
+        tone="emerald"
+        action={isInitiator ? renderCreateAction() : null}
+      />
+      <CardContent className="ml-2 grid translate-y-1 grid-cols-3 gap-2 justify-items-center  px-6 pb-2 pt-2">
         {items.map(({ label, icon: Icon, path, type, tone }) => (
           <Link
             key={label}

@@ -21,8 +21,36 @@
 .animate-slide-in {
   animation: slide-in 0.4s ease-out;
 }
-tbody tr:hover {
-  background-color: #f3f4f6;
+/* Dashboard pages use the Fleet MR dashboard as their shared visual baseline. */
+.dashboard-shell {
+  color: var(--color-slate-700, #334155);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.dashboard-shell .text-gray-800 {
+  color: var(--color-slate-800, #1e293b);
+}
+
+.dashboard-shell .text-gray-700 {
+  color: var(--color-slate-700, #334155);
+}
+
+.dashboard-shell .text-gray-500,
+.dashboard-shell .text-gray-400 {
+  color: var(--color-slate-500, #64748b);
+}
+
+.dashboard-shell .border-gray-300 {
+  border-color: var(--color-slate-200, #e2e8f0);
+}
+
+.dashboard-shell .bg-gray-50 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-slate-100, #f1f5f9) 95%,
+    transparent
+  );
 }
 @keyframes slide-down {
   0% {
@@ -123,40 +151,51 @@ tbody tr:hover {
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }
-
+/* galfar blue */
+/* #005285 or #005387 */
+/* #1B5583 */
+/* #1E367B */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --galfar-950: #0c2948;
+  --galfar-900: #1e367b;
+  --galfar-800: #1e367b;
+  --galfar-700: #1e367b;
+  --galfar-600: #1687b5;
+  --galfar-500: #32a4cc;
+  --galfar-100: #d9eff8;
+  --galfar-50: #eff9fc;
+  --background: oklch(0.975 0.012 225);
+  --foreground: oklch(0.25 0.035 255);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.25 0.035 255);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.25 0.035 255);
+  --primary: oklch(0.43 0.16 255);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.965 0.018 250);
+  --secondary-foreground: oklch(0.36 0.1 255);
+  --muted: oklch(0.965 0.012 250);
+  --muted-foreground: oklch(0.52 0.035 255);
+  --accent: oklch(0.94 0.035 250);
+  --accent-foreground: oklch(0.36 0.1 255);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: oklch(0.9 0.018 250);
+  --input: oklch(0.87 0.025 250);
+  --ring: oklch(0.55 0.15 255);
+  --chart-1: oklch(0.52 0.18 255);
+  --chart-2: oklch(0.64 0.13 225);
+  --chart-3: oklch(0.64 0.15 155);
+  --chart-4: oklch(0.72 0.15 75);
+  --chart-5: oklch(0.59 0.15 25);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar: oklch(0.25 0.09 255);
+  --sidebar-foreground: oklch(0.94 0.02 250);
+  --sidebar-primary: oklch(0.57 0.17 255);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.34 0.11 255);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 13%);
+  --sidebar-ring: oklch(0.7 0.12 250);
 }
 
 .dark {
@@ -199,10 +238,123 @@ tbody tr:hover {
   }
   body {
     @apply bg-background text-foreground;
+    min-width: 320px;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Galfar enterprise shell. These rules are intentionally presentation-only. */
+.app-shell {
+  background: #f1f6f8;
+  color: #26374d;
+}
+
+.app-header {
+  position: relative;
+  z-index: 40;
+  border-bottom: 1px solid rgb(148 163 184 / 22%);
+  background: linear-gradient(
+    105deg,
+    var(--galfar-900),
+    var(--galfar-800) 58%,
+    var(--galfar-700)
+  );
+  box-shadow: 0 8px 24px -18px rgb(12 41 72 / 65%);
+}
+
+.app-header nav > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 4rem;
+  border-color: #7dd3fc;
+  color: #e0f2fe;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.app-header nav > a:hover {
+  color: #fff;
+}
+
+.app-header img {
+  filter: drop-shadow(0 2px 5px rgb(0 0 0 / 18%));
+}
+
+.app-sidenav {
+  border-right: 1px solid rgb(255 255 255 / 12%);
+  background: var(--galfar-900) !important;
+  color: #e0f2fe;
+  box-shadow: 12px 0 32px -24px rgb(2 18 51 / 80%);
+}
+
+.app-sidenav > div:first-child {
+  border-color: rgb(255 255 255 / 12%) !important;
+}
+
+.app-sidenav > div:first-child button,
+.app-sidenav > div:first-child h2 {
+  color: #e0f2fe !important;
+}
+
+.app-sidenav nav a,
+.app-sidenav nav button {
+  border-radius: 0.5rem;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.app-sidenav nav a:hover,
+.app-sidenav nav button:hover {
+  background: rgb(50 164 204 / 24%) !important;
+  color: #fff !important;
+}
+
+.app-sidenav hr {
+  background: rgb(255 255 255 / 12%) !important;
+}
+
+.app-shell main:not([class*="bg-[#06285b]"]),
+.app-shell > div.flex-1 {
+  background-color: #f1f6f8;
+}
+
+.app-shell input:not([type="checkbox"]):not([type="radio"]),
+.app-shell select,
+.app-shell textarea {
+  border-color: #cbd5e1;
+}
+
+.app-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.app-shell select:focus,
+.app-shell textarea:focus {
+  border-color: var(--galfar-600);
+  box-shadow: 0 0 0 3px rgb(22 135 181 / 14%);
+  outline: none;
+}
+
+.app-shell table thead {
+  background-color: #e7f2f7;
+  color: #26374d;
+}
+
+.app-shell table tbody tr {
+  transition: background-color 140ms ease;
+}
+
+.app-shell table tbody tr:hover {
+  background-color: #eef8fb;
+}
+
+.dashboard-shell > section,
+.dashboard-shell article,
+.dashboard-shell [class*="bg-white"] {
+  border-color: #dbe4ef;
 }
 
 .recharts-legend-wrapper {
@@ -231,10 +383,153 @@ tbody tr:hover {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .empty-state,
-  .empty-state__icon {
-    animation: none;
+@keyframes milestone-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.995);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
+@keyframes milestone-accent {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 2px 0 10px rgb(16 185 129 / 28%);
+  }
+}
+
+@keyframes milestone-icon-settle {
+  0% {
+    transform: rotate(-8deg) scale(0.86);
+  }
+
+  65% {
+    transform: rotate(3deg) scale(1.05);
+  }
+
+  100% {
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes milestone-title-shimmer {
+  0%,
+  30% {
+    background-position: 100% 50%;
+  }
+
+  58%,
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.digital-milestone {
+  background-image: linear-gradient(
+    105deg,
+    rgb(255 255 255 / 98%),
+    rgb(239 249 252 / 72%) 55%,
+    rgb(236 253 245 / 60%)
+  );
+  box-shadow:
+    0 18px 40px -18px rgb(12 41 72 / 48%),
+    0 6px 14px -8px rgb(12 41 72 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 80%);
+  animation: milestone-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.digital-milestone__accent {
+  animation: milestone-accent 2.8s ease-in-out infinite;
+}
+
+.digital-milestone__icon {
+  animation: milestone-icon-settle 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.digital-milestone__glow {
+  animation: milestone-accent 4.8s ease-in-out infinite;
+}
+
+.digital-milestone__title,
+.digital-milestone__details,
+.digital-milestone__message {
+  animation: milestone-enter 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.digital-milestone__title {
+  color: var(--galfar-900);
+  background-image: linear-gradient(
+    105deg,
+    var(--galfar-900) 0%,
+    var(--galfar-900) 36%,
+    #059669 49%,
+    var(--galfar-900) 62%,
+    var(--galfar-900) 100%
+  );
+  background-position: 100% 50%;
+  background-size: 240% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation:
+    milestone-enter 450ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    milestone-title-shimmer 4.8s 650ms ease-in-out infinite;
+}
+
+.digital-milestone__details {
+  animation-delay: 70ms;
+}
+
+.digital-milestone__message {
+  animation-delay: 130ms;
+}
+
+.digital-milestone__benefit {
+  opacity: 0;
+  animation: milestone-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.digital-milestone__benefit:nth-child(1) {
+  animation-delay: 180ms;
+}
+
+.digital-milestone__benefit:nth-child(2) {
+  animation-delay: 250ms;
+}
+
+.digital-milestone__benefit:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-state,
+  .empty-state__icon,
+  .digital-milestone,
+  .digital-milestone__accent,
+  .digital-milestone__glow,
+  .digital-milestone__icon,
+  .digital-milestone__title,
+  .digital-milestone__details,
+  .digital-milestone__message,
+  .digital-milestone__benefit {
+    animation: none;
+  }
+
+  .digital-milestone__benefit {
+    opacity: 1;
+  }
+
+  .digital-milestone__title {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}

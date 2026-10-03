@@ -15,11 +15,11 @@ import { deletefn, fetchfilenoteids, fetchfilenoteidvalue } from "../APIs/api";
 import { Link, useLocation } from "react-router-dom";
 import useuserInfo from "../CustomHooks/useUserInfo";
 import { useStatusFilter } from "../store/logisticsStore";
-import { dept_finder, is_plant } from "../Helpers/dept_helper";
-import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
+import { is_plant } from "../Helpers/dept_helper";
 import { usePagination } from "../store/statementStore";
 import { useEffect, useState } from "react";
-import { IoPrint, IoWarningOutline } from "react-icons/io5";
+import { IoWarningOutline } from "react-icons/io5";
+import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import Alerts from "../Components/Alerts";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
@@ -47,8 +47,14 @@ import { getcategory, getTypes } from "../Helpers/category_helper";
 import { GrAttachment } from "react-icons/gr";
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
+import { fetchProjectDetails } from "../APIs/api";
+import { getProjectIocAccess } from "../Helpers/projectIocAccess";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
+  const location = useLocation();
+  const isProjectsIocEntry =
+    new URLSearchParams(location.search).get("view") === "projects-ioc";
+  const projectIocAccess = getProjectIocAccess(userInfo);
   const isAdmin = userInfo?.is_admin;
   const deleteStatement = useDeleteStore((state) => state.deleteStatement);
   const setDeleteStatement = useDeleteStore(
@@ -70,7 +76,7 @@ const FnDashboards = () => {
     value: null,
   });
   const queryClient = useQueryClient();
-  const { newfn, setNewfn } = usenewfn();
+  const { setNewfn } = usenewfn();
   const [categoryFilter, setCategoryFilter] = useState(() => {
     const saved = sessionStorage.getItem("filenoteFilters");
     return saved ? JSON.parse(saved).categoryFilter || "" : "";
@@ -79,8 +85,7 @@ const FnDashboards = () => {
     const saved = sessionStorage.getItem("filenoteFilters");
     return saved ? JSON.parse(saved).typeFilter || "" : "";
   });
-  const { setStatusFilter, statusfilter, resetStatusFilter } =
-    useStatusFilter();
+  const { setStatusFilter, statusfilter } = useStatusFilter();
   const { projectcodes, setProjectCodes } = useProjectCodes();
   // const [selectedproject, setSelectedProject] = useState([]);
   const { selectedproject, setSelectedProject } = useSelectedProject();
@@ -120,7 +125,7 @@ const FnDashboards = () => {
         projectFilter: selectedproject,
       }),
     enabled: !!userInfo,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const handleSearch = (e) => {
@@ -196,7 +201,7 @@ const FnDashboards = () => {
         clearErrorMessage();
         resetDeleteStatement();
       }, 1000);
-      queryClient.invalidateQueries(["fnid"]);
+      queryClient.invalidateQueries({ queryKey: ["fnid"] });
     } catch (error) {
       const message = error?.response?.data.message || error.message;
       setShowToast();
@@ -215,7 +220,9 @@ const FnDashboards = () => {
   const columns = [
     columnHelper.accessor("sl", {
       header: "Sl. No.",
-      meta: { className: "min-w-[36px] whitespace-pre-wrap break-words" },
+      meta: {
+        className: "w-14 min-w-14 max-w-14 whitespace-nowrap text-center !px-2",
+      },
       cell: ({ row }) => row.index + 1,
     }),
     columnHelper.accessor((row) => row?.doc_no, {
@@ -563,6 +570,45 @@ const FnDashboards = () => {
     userInfo.role.includes("initdc");
   const multiprojects = userInfo?.pr_code?.length > 1;
   useEffect(() => {
+    if (!isProjectsIocEntry || !projectIocAccess.canAccess) return;
+
+    const allowedCategories = projectIocAccess.allowedCategories;
+    const nextCategory =
+      allowedCategories?.includes("Demob") || !allowedCategories
+        ? "Demob"
+        : projectIocAccess.defaultCategory;
+
+    setTypeFilter("ioc");
+    setCategoryFilter(nextCategory);
+    setSelectedProject("");
+    setPageIndex(0);
+
+    const loadProjectCodes = async () => {
+      try {
+        const projects = await fetchProjectDetails(userInfo);
+        const availableProjects = projects.map((project) => project.project);
+        const assignedProjects = userInfo?.pr_code || [];
+        const canViewAllProjects = userInfo?.role?.some((role) =>
+          ["gm", "hod", "fm", "ceo"].includes(role.toLowerCase()),
+        );
+
+        setProjectCodes(
+          canViewAllProjects
+            ? availableProjects
+            : availableProjects.filter((project) =>
+                assignedProjects.includes(project),
+              ),
+        );
+      } catch (error) {
+        console.error("Unable to load IOC project filters", error);
+        setProjectCodes([]);
+      }
+    };
+
+    loadProjectCodes();
+  }, [isProjectsIocEntry]);
+
+  useEffect(() => {
     sessionStorage.setItem(
       "filenoteFilters",
       JSON.stringify({
@@ -573,114 +619,131 @@ const FnDashboards = () => {
     );
   }, [categoryFilter, typeFilter, selectedproject]);
   return (
-    <div className="flex-grow ">
-      <div className="flex-grow w-full px-5 pt-1">
-        <div className="flex border-b justify-between items-center border-gray-300 mb-4">
-          <div className="text-nowrap">
-            {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
-              (tab) => {
-                const isActive =
-                  (tab === "All" && statusfilter === "All") ||
-                  (tab === "Approved" && statusfilter === "Approved") ||
-                  (tab === "Rejected" && statusfilter === "Rejected") ||
-                  (tab === "Pending" && statusfilter === "Pending") ||
-                  (tab === "Under Review" && statusfilter === "review");
+    <main className="dashboard-shell relative flex h-0 min-h-0 w-full flex-grow flex-col overflow-hidden bg-slate-50 px-2 pb-0 pt-2 sm:px-3">
+      <div className="flex min-h-0 w-full flex-1 flex-col">
+        <div className="mb-3 flex shrink-0 flex-col gap-2 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2 lg:flex-row lg:items-center lg:justify-between">
+          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
+            <div className="flex min-w-max items-center gap-1 rounded-lg bg-slate-100/80 p-1">
+              {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+                (tab) => {
+                  const isActive =
+                    (tab === "All" && statusfilter === "All") ||
+                    (tab === "Approved" && statusfilter === "Approved") ||
+                    (tab === "Rejected" && statusfilter === "Rejected") ||
+                    (tab === "Pending" && statusfilter === "Pending") ||
+                    (tab === "Under Review" && statusfilter === "review");
 
-                let activeColor = "border-blue-500 text-blue-600";
-                let inactiveColor =
-                  "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+                  let activeColor =
+                    "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/45";
+                  let inactiveColor =
+                    "text-slate-500 hover:bg-white/70 hover:text-slate-800";
 
-                if (tab === "Approved") {
-                  activeColor = "border-green-500 text-green-600";
-                  inactiveColor =
-                    "border-transparent text-gray-500 hover:text-green-500";
-                } else if (tab === "Rejected") {
-                  activeColor = "border-red-500 text-red-600";
-                  inactiveColor =
-                    "border-transparent text-gray-500 hover:text-red-500";
-                } else if (tab === "Pending") {
-                  activeColor = "border-yellow-500 text-yellow-600";
-                  inactiveColor =
-                    "border-transparent text-gray-500 hover:text-yellow-500";
-                } else if (tab === "Under Review") {
-                  activeColor = "border-cyan-500 text-cyan-600";
-                  inactiveColor =
-                    "border-transparent text-gray-500 hover:text-cyan-500";
-                }
+                  if (tab === "Approved") {
+                    activeColor =
+                      "bg-white text-emerald-700 shadow-sm ring-1 ring-slate-200/45";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-emerald-700";
+                  } else if (tab === "Rejected") {
+                    activeColor =
+                      "bg-white text-rose-700 shadow-sm ring-1 ring-slate-200/45";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-rose-700";
+                  } else if (tab === "Pending") {
+                    activeColor =
+                      "bg-white text-amber-700 shadow-sm ring-1 ring-slate-200/45";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-amber-700";
+                  } else if (tab === "Under Review") {
+                    activeColor =
+                      "bg-white text-cyan-700 shadow-sm ring-1 ring-slate-200/45";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-cyan-700";
+                  }
 
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => {
-                      switch (tab) {
-                        case "All":
-                          setStatusFilter("All");
-                          setPageIndex(0);
-                          break;
-                        case "Approved":
-                          setStatusFilter("Approved");
-                          setPageIndex(0);
-                          break;
-                        case "Rejected":
-                          setStatusFilter("Rejected");
-                          setPageIndex(0);
-                          break;
-                        case "Pending":
-                          setStatusFilter("Pending");
-                          setPageIndex(0);
-                          break;
-                        case "Under Review":
-                          setStatusFilter("review");
-                          setPageIndex(0);
-                          break;
-                      }
-                    }}
-                    className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                      isActive ? activeColor : inactiveColor
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                );
-              },
-            )}
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        switch (tab) {
+                          case "All":
+                            setStatusFilter("All");
+                            setPageIndex(0);
+                            break;
+                          case "Approved":
+                            setStatusFilter("Approved");
+                            setPageIndex(0);
+                            break;
+                          case "Rejected":
+                            setStatusFilter("Rejected");
+                            setPageIndex(0);
+                            break;
+                          case "Pending":
+                            setStatusFilter("Pending");
+                            setPageIndex(0);
+                            break;
+                          case "Under Review":
+                            setStatusFilter("review");
+                            setPageIndex(0);
+                            break;
+                        }
+                      }}
+                      className={`cursor-pointer rounded-md px-2.5 py-1.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-3 ${
+                        isActive ? activeColor : inactiveColor
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  );
+                },
+              )}
+            </div>
           </div>
-          {(cmusers || pmusers || initusers || multiinit || multiprojects) && (
-            <div className="ml-auto flex items-center">
-              <TypeFilter
-                type={typeFilter}
-                category={categoryFilter}
-                projectcodes={projectcodes}
-                settype={setTypeFilter}
-                setCategory={setCategoryFilter}
-                setProjectCodes={setProjectCodes}
-                types={types}
-                categories={categories}
-                selectedproject={selectedproject}
-                setSelectedProject={setSelectedProject}
+          <div className="flex w-full flex-col gap-2 xl:flex-row xl:items-center lg:w-auto">
+            {(isProjectsIocEntry ||
+              cmusers ||
+              pmusers ||
+              initusers ||
+              multiinit ||
+              multiprojects) && (
+              <div className="min-w-0">
+                <TypeFilter
+                  type={typeFilter}
+                  category={categoryFilter}
+                  projectcodes={projectcodes}
+                  settype={setTypeFilter}
+                  setCategory={setCategoryFilter}
+                  setProjectCodes={setProjectCodes}
+                  types={isProjectsIocEntry ? ["ioc"] : types}
+                  categories={
+                    isProjectsIocEntry && projectIocAccess.isProjectScoped
+                      ? categories.filter((category) =>
+                          projectIocAccess.allowedCategories.includes(category),
+                        )
+                      : categories
+                  }
+                  selectedproject={selectedproject}
+                  setSelectedProject={setSelectedProject}
+                  setSearch={setSearch}
+                  setSearchCSNo={setSearchCSNo}
+                  setSearchCSName={setSearchCSName}
+                  multiinit={multiinit}
+                />
+              </div>
+            )}
+            <div className="flex items-center">
+              <InputSearch
+                handleSearch={handleSearch}
+                search={search}
                 setSearch={setSearch}
                 setSearchCSNo={setSearchCSNo}
                 setSearchCSName={setSearchCSName}
-                multiinit={multiinit}
+                module="fn"
               />
             </div>
-          )}
-          <div className="ml-2 flex items-center">
-            <InputSearch
-              handleSearch={handleSearch}
-              search={search}
-              setSearch={setSearch}
-              setSearchCSNo={setSearchCSNo}
-              setSearchCSName={setSearchCSName}
-              module="fn"
-            />
           </div>
         </div>
         {
-          <div
-            className="relative overflow-x-hidden overflow-y-auto bg-white shadow rounded border border-gray-200"
-            style={{ height: `calc(93vh - 140px)` }}
-          >
+          <div className="relative min-h-0 flex-1 overflow-auto rounded border border-gray-200 bg-white shadow [scrollbar-width:thin]">
             <Loading isLoading={isLoading} />
             <table className="w-full min-w-0 divide-y divide-gray-200">
               <thead className="top-0 z-10 sticky  bg-gray-50">
@@ -689,24 +752,24 @@ const FnDashboards = () => {
                     {headerGroup.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="border-b border-gray-300 px-4  text-left text-sm font-semibold text-gray-700"
+                        className={`border-b border-gray-300 px-2 text-left text-sm font-semibold text-gray-700 ${header.column.columnDef.meta?.className || ""}`}
                       >
                         {header.isPlaceholder
                           ? null
                           : header.column.columnDef.header}
                       </th>
                     ))}
-                    <th className=" border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                    <th className="border-b border-gray-300 px-2 py-2 text-center text-sm font-semibold text-gray-700">
                       Action
                     </th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                    <th className="w-20 border-b border-gray-300 px-2 py-2 text-center text-sm font-semibold text-gray-700">
                       Created
                     </th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
+                    <th className="w-32 min-w-32 text-nowrap border-b border-gray-300 px-2 py-2 text-center text-sm font-semibold text-gray-700">
                       {userInfo?.is_admin ? "Last Activity" : "Submitted"}
                     </th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center"></th>
+                    <th className="w-10 border-b border-gray-300 px-1 py-2 text-center text-sm font-semibold text-gray-700"></th>
+                    <th className="w-10 border-b border-gray-300 px-1 py-2 text-center text-sm font-semibold text-gray-700"></th>
                   </tr>
                 ))}
               </thead>
@@ -724,9 +787,9 @@ const FnDashboards = () => {
                   table.getRowModel().rows.map((row) => (
                     <tr
                       key={row.id}
-                      className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100 ${
+                      className={`odd:bg-slate-50 even:bg-white transition-colors hover:bg-blue-50/70 ${
                         row.original.deleted != 0
-                          ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                          ? "!bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
                           : ""
                       }`}
                     >
@@ -744,50 +807,66 @@ const FnDashboards = () => {
                         ),
                       )}
 
-                      <td className="border-gray-300 border-b px-2 py-2 text-sm text-gray-700 text-center">
-                        <div className="flex items-center justify-center gap-4">
+                      <td className="whitespace-nowrap border-b border-gray-300 px-1 py-1 text-center text-sm text-gray-700">
+                        <div className="flex items-center justify-center gap-1.5">
                           <Link
-                            className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
-                            onClick={() => l(false)}
+                            className="inline-flex h-7 items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-1 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100"
+                            onClick={() => setNewfn(false)}
                             to={
                               userInfo?.role?.includes("initfn")
                                 ? `/filenote/${row.original?.id}`
                                 : "/login"
                             }
                           >
-                            View <FaArrowAltCircleRight />
+                            <LuEye size={14} /> View
                           </Link>
-                          <IoPrint
-                            className={
+                          <button
+                            type="button"
+                            disabled={
+                              !(
+                                userInfo?.is_admin ||
+                                userInfo.role?.includes("initpr") ||
+                                demob_intimators ||
+                                isgm ||
+                                row.original.category == "Demob"
+                              )
+                            }
+                            className={`inline-flex h-7 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md border px-2 text-xs font-semibold transition ${
                               userInfo?.is_admin ||
                               userInfo.role?.includes("initpr") ||
                               demob_intimators ||
                               isgm ||
                               row.original.category == "Demob"
-                                ? "text-black cursor-pointer"
-                                : "text-gray-400 pointer-events-none cursor-not-allowed"
-                            }
-                            size={25}
+                                ? "cursor-pointer border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                                : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                            }`}
                             onClick={async () => {
                               const data = await getstatement(row.original?.id);
                               handleFnPrint(data, userInfo);
                             }}
-                          />
-                          <FaTrash
-                            className={`mr-1 text-red-500  ${!userInfo?.is_admin ? "hidden" : row.original.status === "approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
-                            size={16}
-                            onClick={() => {
-                              if (row.original.status === "approved") return;
-                              setDeleteStatement(row.original.id);
-                            }}
-                          />
+                          >
+                            <LuFileDown size={14} /> PDF
+                          </button>
+                          {userInfo?.is_admin && (
+                            <button
+                              type="button"
+                              className={`inline-flex h-7 items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 ${row.original.status === "approved" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                              aria-label="Delete statement"
+                              onClick={() => {
+                                if (row.original.status === "approved") return;
+                                setDeleteStatement(row.original.id);
+                              }}
+                            >
+                              <LuTrash2 size={14} /> Delete
+                            </button>
+                          )}
                         </div>
                       </td>
 
-                      <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center w-20">
+                      <td className="w-20 border-b border-gray-300 px-2 py-2 text-center text-sm text-gray-700">
                         {formatDateDDMMYYYY(row.original.created_at)}
                       </td>
-                      <td className="border-gray-300 border-b px-4 py-2 text-[13px] text-gray-700 text-center w-32">
+                      <td className="w-32 min-w-32 border-b border-gray-300 px-2 py-2 text-center text-[13px] leading-tight text-gray-700">
                         {userInfo?.is_admin
                           ? getlastSubmittedDate(
                               row?.original?.approver_info,
@@ -799,7 +878,7 @@ const FnDashboards = () => {
                               "fn",
                             ) || ""}
                       </td>
-                      <td>
+                      <td className="w-10 px-1 text-center">
                         {row.original.file_name?.length > 0 && (
                           <span className="flex items-center gap-1 text-gray-400 text-xs">
                             <GrAttachment size={12} />
@@ -807,7 +886,7 @@ const FnDashboards = () => {
                           </span>
                         )}
                       </td>
-                      <td>
+                      <td className="w-10 px-1 text-center">
                         {" "}
                         {row.original.demob_intimated && demob_intimators && (
                           <BiBadgeCheck
@@ -826,21 +905,21 @@ const FnDashboards = () => {
                 )}
               </tbody>
             </table>
-            <div className={`flex justify-between`}>
-              <div className="ml-2 flex items-center text-sm text-gray-700 font-medium">
+            <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-slate-200 bg-slate-50 px-1 py-1 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center text-sm font-semibold text-slate-600">
                 Total Number of Records: {total}
               </div>
 
-              <div className="flex items-center gap-2 p-2 justify-end ">
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">Rows per page:</span>
+                  <span className="text-sm text-slate-600">Rows per page:</span>
                   <select
                     value={pagination.pageSize}
                     onChange={(e) => {
                       setPageSize(Number(e.target.value));
                       setPageIndex(0);
                     }}
-                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                    className="h-6 rounded-md border border-slate-300 bg-white px-1 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   >
                     {[5, 10, 20, 50].map((size) => (
                       <option key={size} value={size}>
@@ -849,11 +928,11 @@ const FnDashboards = () => {
                     ))}
                   </select>
                 </div>
-                <div className="flex items-center gap-2 ">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setPageIndex(0)}
                     disabled={pagination.pageIndex == 0}
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 cursor-pointer ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
                   >
                     «
                   </button>
@@ -861,12 +940,12 @@ const FnDashboards = () => {
                   <button
                     onClick={() => setPageIndex(pagination.pageIndex - 1)}
                     disabled={pagination.pageIndex == 0}
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
                   >
                     ‹ Prev
                   </button>
 
-                  <span className="text-sm px-2">
+                  <span className="px-1.5 text-sm text-slate-600">
                     Page{" "}
                     <strong>{total != 0 ? pagination.pageIndex + 1 : 0}</strong>{" "}
                     of <strong>{Math.ceil(total / pagination.pageSize)}</strong>
@@ -878,7 +957,7 @@ const FnDashboards = () => {
                       pagination.pageIndex + 1 >=
                       Math.ceil(total / pagination.pageSize)
                     }
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
                       pagination.pageIndex + 1 >=
                       Math.ceil(total / pagination.pageSize)
                         ? "cursor-auto"
@@ -896,7 +975,7 @@ const FnDashboards = () => {
                       pagination.pageIndex ==
                       Math.max(Math.ceil(total / pagination.pageSize) - 1, 0)
                     }
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
                       pagination.pageIndex ==
                       Math.max(Math.ceil(total / pagination.pageSize) - 1, 0)
                         ? "cursor-auto"
@@ -930,7 +1009,7 @@ const FnDashboards = () => {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

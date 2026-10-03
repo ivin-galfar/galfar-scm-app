@@ -27,12 +27,12 @@ import {
   is_logistics,
   is_plant,
 } from "../Helpers/dept_helper";
-import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
 import DashboardButton from "../Components/DashboardButton";
 import { useNewStatement, usetotalBRstatements } from "../store/brStore";
 import { usePagination } from "../store/statementStore";
 import { useEffect, useState } from "react";
-import { IoPrint, IoWarningOutline } from "react-icons/io5";
+import { IoWarningOutline } from "react-icons/io5";
+import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import Alerts from "../Components/Alerts";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { useErrorMessage } from "../store/errorStore";
@@ -103,7 +103,7 @@ const BRDashboards = () => {
         module: location.pathname,
       }),
     enabled: canFetch,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const handleSearch = (e) => {
@@ -139,7 +139,7 @@ const BRDashboards = () => {
         resetshowtoast();
         clearErrorMessage();
       }, 1000);
-      queryClient.invalidateQueries(["csid"]);
+      queryClient.invalidateQueries({ queryKey: ["csid"] });
       setDeleteStatement({ open: false });
     } catch (error) {
       const message = error?.response?.data.message || error.message;
@@ -354,80 +354,89 @@ const BRDashboards = () => {
   });
 
   return (
-    <div className="flex-grow ">
-      <div className="flex-grow w-full px-5">
-        <div className="flex border-b  border-gray-300 mb-4">
-          {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
-            (tab) => {
-              const isActive =
-                (tab === "All" && statusfilter === "All") ||
-                (tab === "Approved" && statusfilter === "Approved") ||
-                (tab === "Rejected" && statusfilter === "Rejected") ||
-                (tab === "Pending" && statusfilter === "Pending") ||
-                (tab === "Under Review" && statusfilter === "review");
+    <main className="dashboard-shell relative flex h-0 min-h-0 w-full flex-grow flex-col overflow-hidden bg-slate-50 px-2 pb-0 pt-2 sm:px-3">
+      <div className="flex min-h-0 w-full flex-1 flex-col">
+        <div className="mb-3 flex shrink-0 flex-col gap-2 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2 lg:flex-row lg:items-center lg:justify-between">
+          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
+            <div className="flex min-w-max items-center gap-1 rounded-lg bg-slate-100/80 p-1">
+              {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+                (tab) => {
+                  const isActive =
+                    (tab === "All" && statusfilter === "All") ||
+                    (tab === "Approved" && statusfilter === "Approved") ||
+                    (tab === "Rejected" && statusfilter === "Rejected") ||
+                    (tab === "Pending" && statusfilter === "Pending") ||
+                    (tab === "Under Review" && statusfilter === "review");
 
-              let activeColor = "border-blue-500 text-blue-600";
-              let inactiveColor =
-                "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+                  let activeColor =
+                    "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/35";
+                  let inactiveColor =
+                    "text-slate-500 hover:bg-white/70 hover:text-slate-800";
 
-              if (tab === "Approved") {
-                activeColor = "border-green-500 text-green-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-green-500";
-              } else if (tab === "Rejected") {
-                activeColor = "border-red-500 text-red-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-red-500";
-              } else if (tab === "Pending") {
-                activeColor = "border-yellow-500 text-yellow-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-yellow-500";
-              } else if (tab === "Under Review") {
-                activeColor = "border-cyan-500 text-cyan-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-cyan-500";
-              }
+                  if (tab === "Approved") {
+                    activeColor =
+                      "bg-emerald-600 text-white shadow-sm shadow-emerald-900/10 ring-1 ring-emerald-700/10";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-emerald-700";
+                  } else if (tab === "Rejected") {
+                    activeColor =
+                      "bg-rose-600 text-white shadow-sm shadow-rose-900/10 ring-1 ring-rose-700/10";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-rose-700";
+                  } else if (tab === "Pending") {
+                    activeColor =
+                      "bg-white text-amber-700 shadow-sm ring-1 ring-slate-200/35";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-amber-700";
+                  } else if (tab === "Under Review") {
+                    activeColor =
+                      "bg-white text-cyan-700 shadow-sm ring-1 ring-slate-200/35";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-cyan-700";
+                  }
 
-              return (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    switch (tab) {
-                      case "All":
-                        setStatusFilter("All");
-                        setPageIndex(0);
-                        break;
-                      case "Approved":
-                        setStatusFilter("Approved");
-                        setPageIndex(0);
-                        break;
-                      case "Rejected":
-                        setStatusFilter("Rejected");
-                        setPageIndex(0);
-                        break;
-                      case "Pending":
-                        setStatusFilter("Pending");
-                        setPageIndex(0);
-                        break;
-                      case "Under Review":
-                        setStatusFilter("review");
-                        setPageIndex(0);
-                        break;
-                    }
-                  }}
-                  className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                    isActive ? activeColor : inactiveColor
-                  }`}
-                >
-                  {tab}
-                </button>
-              );
-            },
-          )}
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        switch (tab) {
+                          case "All":
+                            setStatusFilter("All");
+                            setPageIndex(0);
+                            break;
+                          case "Approved":
+                            setStatusFilter("Approved");
+                            setPageIndex(0);
+                            break;
+                          case "Rejected":
+                            setStatusFilter("Rejected");
+                            setPageIndex(0);
+                            break;
+                          case "Pending":
+                            setStatusFilter("Pending");
+                            setPageIndex(0);
+                            break;
+                          case "Under Review":
+                            setStatusFilter("review");
+                            setPageIndex(0);
+                            break;
+                        }
+                      }}
+                      className={`cursor-pointer rounded-md px-2.5 py-1.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-3 ${
+                        isActive ? activeColor : inactiveColor
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  );
+                },
+              )}
+            </div>
+          </div>
 
-          <div className="flex justify-between ml-auto">
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
             {(isLogistics || isasset || ishod) && (isPlant || isBuyvsrent) && (
-              <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
+              <div className="flex items-center">
                 <DashboardButton />
               </div>
             )}
@@ -443,8 +452,7 @@ const BRDashboards = () => {
         </div>
         {
           <div
-            className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
-            style={{ height: `calc(93vh - 140px)` }}
+            className="min-h-0 flex-1 overflow-y-auto rounded border border-gray-200 bg-white shadow"
           >
             <Loading isLoading={isLoading} />
             <table className="min-w-full divide-y divide-gray-200">
@@ -487,9 +495,9 @@ const BRDashboards = () => {
                   table.getRowModel().rows.map((row) => (
                     <tr
                       key={row.id}
-                      className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100   ${
+                      className={`odd:bg-slate-50 even:bg-white transition-colors hover:bg-blue-50/70 ${
                         row.original.deleted !== 0
-                          ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                          ? "!bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
                           : ""
                       }`}
                     >
@@ -508,34 +516,45 @@ const BRDashboards = () => {
                       )}
 
                       <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                        <div className="flex items-center justify-center gap-4">
+                        <div className="flex items-center justify-center gap-1.5">
                           <Link
-                            className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
+                            className="inline-flex h-7 items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100"
                             to={`/brstatement/${row.original?.id}`}
                             onClick={resetNewStatement}
                           >
-                            View <FaArrowAltCircleRight />
+                            <LuEye size={14} /> View
                           </Link>
-                          <IoPrint
-                            className={
+                          <button
+                            type="button"
+                            disabled={
+                              !(
+                                userinfo?.is_admin ||
+                                userinfo.role?.includes("inita") ||
+                                isgm ||
+                                ishod
+                              )
+                            }
+                            className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs font-semibold transition ${
                               userinfo?.is_admin ||
                               userinfo.role?.includes("inita") ||
                               isgm ||
                               ishod
-                                ? "text-black cursor-pointer"
-                                : "text-gray-400 pointer-events-none cursor-not-allowed"
-                            }
-                            size={25}
+                                ? "cursor-pointer border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                                : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                            }`}
                             onClick={async () => {
                               const formData = await getstatement(
                                 row.original?.id,
                               );
                               handleBrPrint(formData);
                             }}
-                          />
-                          <FaTrash
-                            className={`mr-1 text-red-500  ${!userinfo?.is_admin ? "hidden" : row.original.status === "approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
-                            size={16}
+                          >
+                            <LuFileDown size={14} /> Print PDF
+                          </button>
+                          <button
+                            type="button"
+                            className={`inline-flex h-7 items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 ${!userinfo?.is_admin ? "hidden" : row.original.status === "approved" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                            aria-label="Delete statement"
                             onClick={() => {
                               if (row.original.status === "approved") return;
                               setDeleteStatement({
@@ -543,7 +562,9 @@ const BRDashboards = () => {
                                 open: true,
                               });
                             }}
-                          />
+                          >
+                            <LuTrash2 size={14} /> Delete
+                          </button>
                         </div>
                       </td>
 
@@ -567,21 +588,21 @@ const BRDashboards = () => {
                 )}
               </tbody>
             </table>
-            <div className={`flex justify-between`}>
-              <div className="ml-2 flex items-center text-sm text-gray-700 font-medium">
+            <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-slate-200 bg-slate-50 px-1 py-1 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center text-sm font-semibold text-slate-600">
                 Total Number of Records: {brcount}
               </div>
 
-              <div className="flex items-center gap-2 p-2 justify-end ">
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">Rows per page:</span>
+                  <span className="text-sm text-slate-600">Rows per page:</span>
                   <select
                     value={pagination.pageSize}
                     onChange={(e) => {
                       setPageSize(Number(e.target.value));
                       setPageIndex(0);
                     }}
-                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                    className="h-6 rounded-md border border-slate-300 bg-white px-1 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   >
                     {[5, 10, 20, 50].map((size) => (
                       <option key={size} value={size}>
@@ -590,11 +611,11 @@ const BRDashboards = () => {
                     ))}
                   </select>
                 </div>
-                <div className="flex items-center gap-2 ">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setPageIndex(0)}
                     disabled={pagination.pageIndex == 0}
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 cursor-pointer ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
                   >
                     «
                   </button>
@@ -602,12 +623,12 @@ const BRDashboards = () => {
                   <button
                     onClick={() => setPageIndex(pagination.pageIndex - 1)}
                     disabled={pagination.pageIndex == 0}
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
                   >
                     ‹ Prev
                   </button>
 
-                  <span className="text-sm px-2">
+                  <span className="px-1.5 text-sm text-slate-600">
                     Page{" "}
                     <strong>
                       {brcount != 0 ? pagination.pageIndex + 1 : 0}
@@ -622,7 +643,7 @@ const BRDashboards = () => {
                       pagination.pageIndex + 1 >=
                       Math.ceil(brcount / pagination.pageSize)
                     }
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
                       pagination.pageIndex + 1 >=
                       Math.ceil(brcount / pagination.pageSize)
                         ? "cursor-auto"
@@ -640,7 +661,7 @@ const BRDashboards = () => {
                       pagination.pageIndex ==
                       Math.max(Math.ceil(brcount / pagination.pageSize) - 1, 0)
                     }
-                    className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                    className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
                       pagination.pageIndex ==
                       Math.max(Math.ceil(brcount / pagination.pageSize) - 1, 0)
                         ? "cursor-auto"
@@ -676,7 +697,7 @@ const BRDashboards = () => {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

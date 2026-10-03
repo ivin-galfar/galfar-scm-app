@@ -15,12 +15,11 @@ import { AppContext } from "../Components/Context";
 import fetchStatments from "../APIs/StatementsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link, useLocation, Navigate } from "react-router-dom";
-import { FaArrowAltCircleRight, FaTrash } from "react-icons/fa";
 import Alerts from "../Components/Alerts";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import axios from "axios";
-import { IoPrint } from "react-icons/io5";
 import { IoWarningOutline } from "react-icons/io5";
+import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import { useToggleAsset } from "../store/assetStore";
 import {
   useDeleteStatement,
@@ -279,6 +278,7 @@ const Dashboard = () => {
   const columns = [
     columnHelper.accessor("sl", {
       header: "Sl. No.",
+      meta: { className: "w-20 max-w-xs " },
       cell: ({ row }) => row.index + 1,
     }),
     columnHelper.accessor(
@@ -291,7 +291,7 @@ const Dashboard = () => {
       },
       {
         id: "mrno",
-        header: "Doc. No.",
+        header: "Document No.",
         cell: (info) => info.getValue() || "-",
       },
     ),
@@ -350,11 +350,11 @@ const Dashboard = () => {
                       : "bg-gray-300";
         const displayStatus = isDeleted ? "Deleted" : status;
         return (
-          <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-gray-700 flex gap-2 items-center">
+          <div className="flex min-w-40 flex-col gap-1.5">
+            <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
               {displayStatus === "review" ? (
                 <>
-                  <IoWarningOutline className="text-yellow-500" size={18} />
+                  <IoWarningOutline className="text-amber-500" size={18} />
                   <span>To be Reviewed</span>
                 </>
               ) : displayStatus === "Rejected" &&
@@ -366,9 +366,9 @@ const Dashboard = () => {
               )}
             </span>
 
-            <div className="relative max-w-2/3 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+            <div className="relative h-1.5 w-full max-w-36 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200/80">
               <div
-                className={`h-2 ${progressColor} rounded-full transition-all duration-500`}
+                className={`h-full ${progressColor} rounded-full transition-[width] duration-500 ease-out motion-reduce:transition-none`}
                 style={{
                   width: `${progress}%`,
                 }}
@@ -438,131 +438,139 @@ const Dashboard = () => {
   });
 
   return (
-    <div className="w-full px-5 flex-grow relative">
-      <div className="mb-4 flex flex-wrap items-center gap-y-2 border-b border-gray-300">
-        <div className="flex min-w-max items-center">
-          {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
-            (tab) => {
-              const isActive =
-                (tab === "All" && statusFilter === "All") ||
-                (tab === "Approved" && statusFilter === "Approved") ||
-                (tab === "Rejected" && statusFilter === "Rejected") ||
-                (tab === "Under Review" && statusFilter === "review") ||
-                (tab === "Pending" && multiStatusFilter.length > 0);
+    <main className="dashboard-shell relative flex h-0 min-h-0 w-full flex-grow flex-col overflow-hidden bg-slate-50 px-2 pb-0 pt-2 sm:px-3">
+      <section className="mb-3 shrink-0 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
+            <div className="flex min-w-max items-center gap-1 rounded-lg bg-slate-100/80 p-1">
+              {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+                (tab) => {
+                  const isActive =
+                    (tab === "All" && statusFilter === "All") ||
+                    (tab === "Approved" && statusFilter === "Approved") ||
+                    (tab === "Rejected" && statusFilter === "Rejected") ||
+                    (tab === "Under Review" && statusFilter === "review") ||
+                    (tab === "Pending" && multiStatusFilter.length > 0);
 
-              let activeColor = "border-blue-500 text-blue-600";
-              let inactiveColor =
-                "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+                  let activeColor =
+                    "bg-blue-50 text-blue-700 shadow-sm shadow-blue-100/40 ring-1 ring-inset ring-blue-200/50";
+                  let inactiveColor =
+                    "text-slate-500 hover:bg-white/70 hover:text-slate-800";
 
-              if (tab === "Approved") {
-                activeColor = "border-green-500 text-green-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-green-500";
-              } else if (tab === "Rejected") {
-                activeColor = "border-red-500 text-red-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-red-500";
-              } else if (tab === "Pending") {
-                activeColor = "border-yellow-500 text-yellow-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-yellow-500";
-              } else if (tab === "Under Review") {
-                activeColor = "border-cyan-500 text-cyan-600";
-                inactiveColor =
-                  "border-transparent text-gray-500 hover:text-cyan-500";
-              }
+                  if (tab === "Approved") {
+                    activeColor =
+                      "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/40 ring-1 ring-inset ring-emerald-200/50";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-emerald-700";
+                  } else if (tab === "Rejected") {
+                    activeColor =
+                      "bg-rose-50 text-rose-700 shadow-sm shadow-rose-100/40 ring-1 ring-inset ring-rose-200/50";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-rose-700";
+                  } else if (tab === "Pending") {
+                    activeColor =
+                      "bg-amber-50 text-amber-700 shadow-sm shadow-amber-100/40 ring-1 ring-inset ring-amber-200/50";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-amber-700";
+                  } else if (tab === "Under Review") {
+                    activeColor =
+                      "bg-cyan-50 text-cyan-700 shadow-sm shadow-cyan-100/40 ring-1 ring-inset ring-cyan-200/50";
+                    inactiveColor =
+                      "text-slate-500 hover:bg-white/70 hover:text-cyan-700";
+                  }
 
-              return (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    switch (tab) {
-                      case "All":
-                        setStatusFilter("All");
-                        setMultiStatusFilter([]);
-                        setPageIndex(0);
-                        break;
-                      case "Approved":
-                        setStatusFilter("Approved");
-                        setMultiStatusFilter([]);
-                        setPageIndex(0);
-                        break;
-                      case "Rejected":
-                        setStatusFilter("Rejected");
-                        setMultiStatusFilter([]);
-                        setPageIndex(0);
-                        break;
-                      case "Pending":
-                        setStatusFilter("");
-                        setMultiStatusFilter(pendingStatuses);
-                        setPageIndex(0);
-                        break;
-                      case "Under Review":
-                        setStatusFilter("review");
-                        setMultiStatusFilter([]);
-                        setPageIndex(0);
-                        break;
-                    }
-                  }}
-                  className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                    isActive ? activeColor : inactiveColor
-                  }`}
-                >
-                  {tab}
-                </button>
-              );
-            },
-          )}
-        </div>
-        <div className="ml-auto flex items-center gap-2 pt-1">
-          {(isLogistics || isasset || ishod) && isPlant && (
-            <div className="flex items-center">
-              <DashboardButton />
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        switch (tab) {
+                          case "All":
+                            setStatusFilter("All");
+                            setMultiStatusFilter([]);
+                            setPageIndex(0);
+                            break;
+                          case "Approved":
+                            setStatusFilter("Approved");
+                            setMultiStatusFilter([]);
+                            setPageIndex(0);
+                            break;
+                          case "Rejected":
+                            setStatusFilter("Rejected");
+                            setMultiStatusFilter([]);
+                            setPageIndex(0);
+                            break;
+                          case "Pending":
+                            setStatusFilter("");
+                            setMultiStatusFilter(pendingStatuses);
+                            setPageIndex(0);
+                            break;
+                          case "Under Review":
+                            setStatusFilter("review");
+                            setMultiStatusFilter([]);
+                            setPageIndex(0);
+                            break;
+                        }
+                      }}
+                      className={`cursor-pointer rounded-md px-2.5 py-1.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-3 ${
+                        isActive ? activeColor : inactiveColor
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  );
+                },
+              )}
             </div>
-          )}
-          <InputSearch
-            handleSearch={handleSearch}
-            search={search}
-            setSearch={setSearch}
-            setSearchCSNo={setSearchCSNo}
-            setSearchCSName={setSearchCSName}
-          />
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
+            {(isLogistics || isasset || ishod) && isPlant && (
+              <div className="flex items-center">
+                <DashboardButton />
+              </div>
+            )}
+            <InputSearch
+              handleSearch={handleSearch}
+              search={search}
+              setSearch={setSearch}
+              setSearchCSNo={setSearchCSNo}
+              setSearchCSName={setSearchCSName}
+            />
+          </div>
         </div>
-      </div>
+      </section>
       <div
-        className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
-        style={{ height: `calc(93vh - 140px)` }}
+        className="relative min-h-0 flex-1 overflow-auto rounded-t-xl border border-b-0 border-slate-200 bg-white shadow-[0_8px_24px_-20px_rgb(15_23_42/0.24)]"
       >
         <Loading isLoading={isLoading} />
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="top-0 z-10 sticky  bg-gray-50">
+        <table className="min-w-[900px] w-full border-separate border-spacing-0">
+          <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="border-b border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700"
+                    className="border-b border-slate-200 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.06em] text-slate-600"
                   >
                     {header.isPlaceholder
                       ? null
                       : header.column.columnDef.header}
                   </th>
                 ))}
-                <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                <th className="border-b border-slate-200 px-3 py-2 text-center text-xs font-bold uppercase tracking-[0.06em] text-slate-600">
                   Action
                 </th>
-                <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                <th className="border-b border-slate-200 px-3 py-2 text-center text-xs font-bold uppercase tracking-[0.06em] text-slate-600">
                   Created
                 </th>
               </tr>
             ))}
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white">
             {table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + 1}
-                  className="text-center py-4 text-gray-500"
+                  className="py-12 text-center text-sm font-medium text-slate-500"
                 >
                   No Statements found
                 </td>
@@ -571,10 +579,10 @@ const Dashboard = () => {
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100 transition duration-200
+                  className={`group odd:bg-gray-50 even:bg-white transition-colors duration-200 hover:bg-blue-50/70 motion-reduce:transition-none
                 ${
                   row.original.formData.deleted !== 0
-                    ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                    ? "!bg-rose-50/70 text-rose-400 opacity-60 grayscale"
                     : ""
                 }`}
                 >
@@ -582,7 +590,7 @@ const Dashboard = () => {
                     (cell) => (
                       <td
                         key={cell.id}
-                        className={`border-b  border-gray-300 px-4 py-2 text-sm text-gray-700 ${cell.column.columnDef.meta?.className}`}
+                        className={`border-b border-slate-100 px-3 py-2 text-sm leading-5 text-slate-700 ${cell.column.columnDef.meta?.className}`}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -591,10 +599,10 @@ const Dashboard = () => {
                       </td>
                     ),
                   )}
-                  <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                    <div className="flex items-center justify-center gap-4">
+                  <td className="border-b border-slate-100 px-3 py-2 text-center text-sm text-slate-700">
+                    <div className="flex items-center justify-center gap-1.5">
                       <Link
-                        className={`px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 `}
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100"
                         to={`/receipts/${row.original?.formData?.id}`}
                         onClick={() => {
                           row.original.formData.type == "hiring"
@@ -602,134 +610,151 @@ const Dashboard = () => {
                             : toggleasset();
                         }}
                       >
-                        View <FaArrowAltCircleRight />
+                        <LuEye size={14} /> View
                       </Link>
-                      <IoPrint
-                        className={` ${
+                      <button
+                        type="button"
+                        disabled={!userInfo?.is_admin && !isgm && !ishod}
+                        className={`inline-flex h-7 min-w-[5.25rem] items-center justify-center gap-1 whitespace-nowrap rounded-md border px-2.5 text-xs font-semibold transition ${
                           !userInfo?.is_admin && !isgm && !ishod
-                            ? "text-gray-400 pointer-events-none cursor-not-allowed"
-                            : "text-black cursor-pointer"
+                            ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                            : "cursor-pointer border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
                         }`}
-                        size={25}
                         onClick={() => {
                           handleHirePrint(row.original, userInfo);
                         }}
-                      />
-                      <FaTrash
-                        className={`mr-1 text-red-500  ${!userInfo?.is_admin ? "hidden" : row.original.formData.status === "Approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
-                        size={16}
+                      >
+                        <LuFileDown size={14} /> Print PDF
+                      </button>
+                      <button
+                        type="button"
+                        className={`inline-flex h-7 items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 ${!userInfo?.is_admin ? "hidden" : row.original.formData.status === "Approved" ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
+                        aria-label="Delete statement"
                         onClick={() => {
                           if (row.original.formData.status === "Approved")
                             return;
                           setdeleteMr(row.original.formData.id);
                           setTriggerdelete(true);
                         }}
-                      />
+                      >
+                        <LuTrash2 size={14} /> Delete
+                      </button>
                     </div>
                   </td>
-                  <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
+                  <td className="whitespace-nowrap border-b border-slate-100 px-3 py-2 text-center text-sm text-slate-600">
                     {formatDateDDMMYYYY(row.original.formData.created_at)}
                   </td>
                 </tr>
               ))
             )}
           </tbody>
+          <tfoot className="sticky bottom-0 z-10 bg-slate-50 h-6">
+            <tr>
+              <td
+                colSpan={columns.length + 2}
+                className="border-t border-slate-200 px-1 py-1"
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center text-sm font-semibold text-slate-600">
+                    Total Number of Records: {receiptscount}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-slate-600">
+                        Rows per page:
+                      </span>
+                      <select
+                        value={pagination.pageSize}
+                        onChange={(e) => {
+                          setPageSize(Number(e.target.value));
+                          setPageIndex(0);
+                        }}
+                        className="h-6 rounded-md border border-slate-300 bg-white px-1 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      >
+                        {[5, 10, 20, 50].map((size) => (
+                          <option key={size} value={size}>
+                            {size}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setPageIndex(0)}
+                        disabled={pagination.pageIndex == 0}
+                        className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
+                      >
+                        «
+                      </button>
+
+                      <button
+                        onClick={() => setPageIndex(pagination.pageIndex - 1)}
+                        disabled={pagination.pageIndex == 0}
+                        className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
+                      >
+                        ‹ Prev
+                      </button>
+
+                      <span className="px-1.5 text-sm text-slate-600">
+                        Page{" "}
+                        <strong>
+                          {receiptscount != 0 ? pagination.pageIndex + 1 : 0}
+                        </strong>{" "}
+                        of{" "}
+                        <strong>
+                          {Math.ceil(receiptscount / pagination.pageSize)}
+                        </strong>
+                      </span>
+
+                      <button
+                        onClick={() => setPageIndex(pagination.pageIndex + 1)}
+                        disabled={
+                          pagination.pageIndex + 1 >=
+                          Math.ceil(receiptscount / pagination.pageSize)
+                        }
+                        className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
+                          pagination.pageIndex + 1 >=
+                          Math.ceil(receiptscount / pagination.pageSize)
+                            ? "cursor-auto"
+                            : "cursor-pointer"
+                        }`}
+                      >
+                        Next ›
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          setPageIndex(
+                            Math.ceil(receiptscount / pagination.pageSize) - 1,
+                          )
+                        }
+                        disabled={
+                          pagination.pageIndex ==
+                          Math.max(
+                            Math.ceil(receiptscount / pagination.pageSize) - 1,
+                            0,
+                          )
+                        }
+                        className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
+                          pagination.pageIndex ==
+                          Math.max(
+                            Math.ceil(receiptscount / pagination.pageSize) - 1,
+                            0,
+                          )
+                            ? "cursor-auto"
+                            : "cursor-pointer"
+                        }`}
+                      >
+                        »
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
         </table>
-        <div className={`flex justify-between`}>
-          <div className="ml-2 flex items-center text-sm text-gray-700 font-medium">
-            Total Number of Records: {receiptscount}
-          </div>
-
-          <div className="flex items-center gap-2 p-2 justify-end ">
-            <div className="flex items-center gap-2">
-              <span className="text-sm">Rows per page:</span>
-              <select
-                value={pagination.pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPageIndex(0);
-                }}
-                className="border border-gray-300 rounded px-2 py-1 text-sm"
-              >
-                {[5, 10, 20, 50].map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center gap-2 ">
-              <button
-                onClick={() => setPageIndex(0)}
-                disabled={pagination.pageIndex == 0}
-                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 cursor-pointer ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
-              >
-                «
-              </button>
-
-              <button
-                onClick={() => setPageIndex(pagination.pageIndex - 1)}
-                disabled={pagination.pageIndex == 0}
-                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
-              >
-                ‹ Prev
-              </button>
-
-              <span className="text-sm px-2">
-                Page{" "}
-                <strong>
-                  {receiptscount != 0 ? pagination.pageIndex + 1 : 0}
-                </strong>{" "}
-                of{" "}
-                <strong>
-                  {Math.ceil(receiptscount / pagination.pageSize)}
-                </strong>
-              </span>
-
-              <button
-                onClick={() => setPageIndex(pagination.pageIndex + 1)}
-                disabled={
-                  pagination.pageIndex + 1 >=
-                  Math.ceil(receiptscount / pagination.pageSize)
-                }
-                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
-                  pagination.pageIndex + 1 >=
-                  Math.ceil(receiptscount / pagination.pageSize)
-                    ? "cursor-auto"
-                    : "cursor-pointer"
-                }`}
-              >
-                Next ›
-              </button>
-
-              <button
-                onClick={() =>
-                  setPageIndex(
-                    Math.ceil(receiptscount / pagination.pageSize) - 1,
-                  )
-                }
-                disabled={
-                  pagination.pageIndex ==
-                  Math.max(
-                    Math.ceil(receiptscount / pagination.pageSize) - 1,
-                    0,
-                  )
-                }
-                className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
-                  pagination.pageIndex ==
-                  Math.max(
-                    Math.ceil(receiptscount / pagination.pageSize) - 1,
-                    0,
-                  )
-                    ? "cursor-auto"
-                    : "cursor-pointer"
-                }`}
-              >
-                »
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
       {triggerdelete && (
         <Alerts
@@ -739,11 +764,11 @@ const Dashboard = () => {
         />
       )}
       {showToast && !errormessage && deleted && (
-        <div className="z-[9999] fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="animate-slide-in fixed left-1/2 top-5 z-[9999] -translate-x-1/2 rounded-lg border border-emerald-500 bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-xl transition-all duration-300 motion-reduce:animate-none motion-reduce:transition-none">
           ✅ Statement successfully Deleted!!
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

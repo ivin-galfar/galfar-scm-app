@@ -7,12 +7,14 @@ import {
 import { tableFeatures } from "@tanstack/table-core";
 import { FLEET_LOCATIONS } from "../../config/ENV";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { usenewfn } from "../store/helperStore";
+import { useClickFromDashboard, usenewfn } from "../store/helperStore";
+import { useStatusFilter } from "../store/logisticsStore";
 import {
   AddNewFleetRequests,
   GetFleetDocId,
   GetFleetRequestById,
   GetFleetRequests,
+  FREmailAlert,
   UpdateFleetRequestWorkflow,
 } from "../APIs/api";
 import { RiAddBoxFill } from "react-icons/ri";
@@ -21,7 +23,7 @@ import FleetItemsModal from "../Components/FleetItemsModal";
 import ButtonTxtFR from "../Components/ButtonTxtFR";
 import ApprovalModalFR from "../Components/ApprovalModalFR";
 import FleetRequestConfirmationModal from "../Components/FleetRequestConfirmationModal";
-import { LuCircleCheck, LuPencil, LuTrash2 } from "react-icons/lu";
+import { LuCircleCheck, LuPencil, LuTrash2, LuUndo2 } from "react-icons/lu";
 import { MdOutlineError } from "react-icons/md";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
@@ -32,9 +34,14 @@ import {
   removeFleetDraft,
   writeFleetDraft,
 } from "../Helpers/fleetRequestDraft";
-import { formatDateDDMMYYYY, formatDateDMY } from "../Helpers/helperfunctions";
+import {
+  formatDateDDMMYYYY,
+  formatDateDMY,
+  generateFRApprovedPDF,
+} from "../Helpers/helperfunctions";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 import { normalizeDateForInput } from "../Helpers/fleetRequestDocument";
+import { canRecallFleetRequest } from "../Helpers/approvalFlowHelper";
 
 const getToday = () => {
   const today = new Date();
@@ -42,10 +49,33 @@ const getToday = () => {
   return today.toISOString().split("T")[0];
 };
 
+const getFleetRequestSuccessMessage = (action) => {
+  switch (action) {
+    case "create":
+      return "Fleet request created successfully!";
+    case "update":
+      return "Fleet request updated successfully!";
+    case "send-for-approval":
+      return "Sent for approval to CM successfully!";
+    case "approve":
+      return "Fleet Request has been Approved successfully!";
+    case "reject":
+      return "Fleet Request has been Rejected successfully!";
+    case "review":
+      return "Fleet Request has been Sent back for review successfully!";
+    case "recall":
+      return "Fleet Request recalled successfully!";
+    default:
+      return "Fleet request action completed successfully!";
+  }
+};
+
 const FleetRequest = () => {
   const userInfo = useUserInfo();
   const fleetAccess = getFleetRequestAccess(userInfo);
   const { newfn, setNewfn } = usenewfn();
+  const { isClicked } = useClickFromDashboard();
+  const { setStatusFilter } = useStatusFilter();
 
   const projects = Array.isArray(userInfo?.pr_code)
     ? userInfo.pr_code
@@ -66,7 +96,6 @@ const FleetRequest = () => {
     useState(routeFleetRequestId);
   const preserveStatusForRouteIdRef = useRef("");
   const draftWriteTimerRef = useRef(null);
-  const [fleetIdRequest, setFleetIdRequest] = useState(0);
   const [fleetItems, setFleetItems] = useState([]);
   const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
   const [editingItemIndex, setEditingItemIndex] = useState(null);
@@ -89,7 +118,15 @@ const FleetRequest = () => {
     fleetAccess.canEdit &&
       (newfn ||
         normalizedStatus === "created" ||
-        normalizedStatus === "review"),
+        normalizedStatus === "review" ||
+        normalizedStatus === "recalled"),
+  );
+  const canRecall = Boolean(
+    selectedFleetRequestId &&
+      canRecallFleetRequest({
+        fleetRequest: { status: fleetRequestStatus },
+        user: userInfo,
+      }),
   );
   const draftUserId = userInfo?.email ?? userInfo?.id;
   const hasModalItemValues = modalItems.some((item) =>
@@ -98,12 +135,15 @@ const FleetRequest = () => {
 
   useEffect(() => {
     if (!userInfo?.token) return;
+    let ignore = false;
+
     const fetchFleetIds = async () => {
       try {
         if (newfn) {
-          if (fleetIdRequest === 0 || !String(project).trim()) return;
+          if (!String(project).trim()) return;
 
           const response = await GetFleetDocId(userInfo, project);
+          if (ignore) return;
 
           const docId = response?.formatted_doc_id;
 
@@ -117,8 +157,7 @@ const FleetRequest = () => {
             setFleetId(parts.join("/"));
           } else {
             if (response.last_id == 0) {
-              const currentYear = new Date().getFullYear();
-              setFleetId(`FR/${currentYear}/${project}/0001`);
+              setFleetId(`FR/${project}/0001`);
             } else {
               setFleetId("");
             }
@@ -129,19 +168,28 @@ const FleetRequest = () => {
         const response = await GetFleetRequests(
           userInfo,
           projects,
-          path.pathname.startsWith("/equipfr") ? "equipfr" : path.pathname,
+          path.pathname.startsWith("/fleetrequest")
+            ? "fleetrequest"
+            : path.pathname,
         );
+        if (ignore) return;
 
-        setFleetIds(response);
+        setFleetIds(response.data);
       } catch (error) {
+        if (ignore) return;
         setFleetId("");
         setFleetIds([]);
+        setErrorMessage(error);
         console.error("Unable to fetch Fleet Request IDs", error);
       }
     };
 
     fetchFleetIds();
-  }, [fleetIdRequest, newfn, path.pathname, project, userInfo]);
+
+    return () => {
+      ignore = true;
+    };
+  }, [newfn, path.pathname, project, userInfo]);
 
   useEffect(() => {
     setSelectedFleetRequestId(routeFleetRequestId);
@@ -204,15 +252,14 @@ const FleetRequest = () => {
 
         const fleetRequest = response ?? {};
         const responseItems = response.items ?? [];
-
         const normalizedDocument = {
           project: String(fleetRequest.project ?? ""),
           docId: fleetRequest.doc_id ?? "",
           status: fleetRequest.status ?? "",
           location: fleetRequest.location ?? "",
-          date: normalizeDateForInput(fleetRequest.created_date),
+          date: normalizeDateForInput(fleetRequest.created_at),
           items: responseItems.map((item) => ({
-            equipmentDescription: item.equipment_description ?? "",
+            fleetDescription: item.fleet_description ?? "",
             capacity: item.capacity ?? "",
             cicpa: item.cicpa ?? "",
             quantity: item.quantity ?? "",
@@ -228,7 +275,9 @@ const FleetRequest = () => {
               "",
             similarMachinesAvailable: item.qty_similar_machines_available ?? "",
             remarks: item.remarks ?? "",
-            utilization: item.utilization,
+            utilization: item.utilization ?? 0,
+            adnocFitments: item.adnocFitments ?? item.adnoc_fitments ?? "",
+            tpi: item.tpi ?? "",
           })),
         };
 
@@ -268,7 +317,7 @@ const FleetRequest = () => {
     setDraftStorageKey(storageKey);
     setProject(projectCode);
     setLocation(draft?.location ?? "");
-    setDate(draft?.date || getToday());
+    setDate(getToday());
     setFleetId(draft?.fleetId ?? "");
     setFleetItems(draft?.fleetItems ?? []);
     setEditingItemIndex(draft?.editingItemIndex ?? null);
@@ -292,6 +341,7 @@ const FleetRequest = () => {
   }, [draftStorageKey, draftUserId, newfn, project]);
 
   const handleNewFleetRequest = () => {
+    //for view statements
     if (newfn) {
       writeFleetDraft(draftStorageKey, {
         project,
@@ -315,19 +365,17 @@ const FleetRequest = () => {
       setEditingItemIndex(null);
       setDraftStorageKey(null);
       setSelectedFleetRequestId("");
-      navigate("/equipfr");
+      navigate("/fleetrequest");
       return;
     }
 
+    //for new statements
     const projectCode = projects[0]?.toString() ?? "";
     setFleetRequestStatus("");
     setSelectedFleetRequestId("");
-    navigate("/equipfr");
-    const draft = loadProjectDraft(projectCode);
+    navigate("/fleetrequest");
+    loadProjectDraft(projectCode);
     setNewfn(true);
-    if (!draft?.fleetId) {
-      setFleetIdRequest((request) => request + 1);
-    }
   };
 
   const handleProjectChange = (projectCode) => {
@@ -353,10 +401,7 @@ const FleetRequest = () => {
       return;
     }
 
-    const draft = loadProjectDraft(projectCode);
-    if (!draft?.fleetId) {
-      setFleetIdRequest((request) => request + 1);
-    }
+    loadProjectDraft(projectCode);
   };
 
   const handleSaveItems = (items) => {
@@ -480,6 +525,7 @@ const FleetRequest = () => {
               date,
               location,
               items: fleetItems,
+              comments,
               userInfo,
             })
           : await UpdateFleetRequestWorkflow({
@@ -497,13 +543,17 @@ const FleetRequest = () => {
               }),
               userInfo,
             });
-      const savedRequest =
-        response?.fleetRequest ??
-        response?.request ??
-        response?.data ??
-        response;
+
+      const savedRequest = response;
       const savedStatus = savedRequest?.status ?? buttonAction.nextStatus;
       const savedId = String(savedRequest?.id ?? selectedFleetRequestId ?? "");
+
+      const shouldSendWorkflowEmail = [
+        "send-for-approval",
+        "approve",
+        "reject",
+        "review",
+      ].includes(buttonAction.action);
 
       if (buttonAction.action === "create") {
         clearTimeout(draftWriteTimerRef.current);
@@ -517,22 +567,64 @@ const FleetRequest = () => {
         if (savedRequest?.doc_id) setFleetId(savedRequest.doc_id);
         if (savedId) {
           preserveStatusForRouteIdRef.current = savedId;
-          navigate(`/equipfr/${savedId}`, { replace: true });
+          navigate(`/fleetrequest/${savedId}`, { replace: true });
         }
       }
 
       setFleetRequestStatus(savedStatus);
-      if (buttonAction.action === "update") setHasPendingUpdates(false);
+      if (["update", "recall"].includes(buttonAction.action)) {
+        setHasPendingUpdates(false);
+      }
       setConfirmationAction(null);
       setIsApprovalModalOpen(false);
-      setSuccessMessage(
-        buttonAction.action === "create"
-          ? "Fleet request created successfully!"
-          : `${buttonAction.label} completed successfully!`,
-      );
+      setSuccessMessage(getFleetRequestSuccessMessage(buttonAction.action));
       setSaveSucceeded(true);
       setShowToast();
+      setIsSaving(false);
+
+      if (buttonAction.action === "approve") {
+        setStatusFilter("Pending");
+        setTimeout(() => {
+          navigate(isClicked ? "/pendingdashboard" : "/dashboardfr", {
+            replace: true,
+          });
+        }, 1500);
+      }
+
+      if (shouldSendWorkflowEmail) {
+        let exportedStatementAttachment;
+        if (savedStatus.trim().toLowerCase() === "approved") {
+          try {
+            exportedStatementAttachment = await generateFRApprovedPDF(
+              savedId,
+              userInfo,
+            );
+          } catch (pdfError) {
+            console.error(
+              "Fleet Request approved PDF attachment preparation failed",
+              pdfError,
+            );
+          }
+        }
+
+        try {
+          await FREmailAlert(savedId, userInfo, "plant", {
+            ...savedRequest,
+            id: Number(savedId),
+            doc_id: savedRequest?.doc_id ?? fleetId,
+            created_date: savedRequest?.created_at ?? date,
+            location: savedRequest?.location ?? location,
+            status: savedStatus,
+            ...(exportedStatementAttachment && {
+              exportedStatementAttachment,
+            }),
+          });
+        } catch (emailError) {
+          console.error("Fleet Request workflow email failed", emailError);
+        }
+      }
     } catch (error) {
+      setIsSaving(false);
       const responseMessage = error?.response?.data?.error;
       const message =
         responseMessage ||
@@ -544,7 +636,6 @@ const FleetRequest = () => {
       setErrorMessage(message);
       setShowToast();
     } finally {
-      setIsSaving(false);
       setTimeout(() => {
         resetshowtoast();
         clearErrorMessage();
@@ -575,11 +666,18 @@ const FleetRequest = () => {
       header: "#",
       cell: ({ row }) => row.index + 1,
     }),
-    columnHelper.accessor("equipmentDescription", {
-      header: "Equipment Description",
+    columnHelper.accessor("fleetDescription", {
+      header: "Fleet Description",
     }),
     columnHelper.accessor("capacity", { header: "Capacity" }),
-    columnHelper.accessor("cicpa", { header: "CICPA" }),
+    columnHelper.accessor("cicpa", {
+      header: () => (
+        <span className="leading-tight">
+          CICPA <br />
+          (Yes/No)
+        </span>
+      ),
+    }),
     columnHelper.accessor("quantity", { header: "Quantity" }),
     columnHelper.accessor("requiredFrom", {
       header: () => (
@@ -604,7 +702,7 @@ const FleetRequest = () => {
     }),
     columnHelper.accessor("similarMachinesAvailable", {
       header: () => (
-        <span className="leading-tight">
+        <span className="leading-tight w-64! ">
           Qty - Similar Machines
           <br />
           at Site
@@ -612,6 +710,15 @@ const FleetRequest = () => {
       ),
     }),
     columnHelper.accessor("utilization", { header: "Utilization" }),
+    columnHelper.accessor("adnocFitments", {
+      header: () => (
+        <span className="leading-tight">
+          Adnoc <br />
+          Fitments
+        </span>
+      ),
+    }),
+    columnHelper.accessor("tpi", { header: "TPI" }),
     columnHelper.accessor("remarks", { header: "Remarks" }),
     ...(canEdit
       ? [
@@ -685,7 +792,7 @@ const FleetRequest = () => {
                   const id = event.target.value;
                   setFleetRequestStatus("");
                   setSelectedFleetRequestId(id);
-                  navigate(id ? `/equipfr/${id}` : "/equipfr");
+                  navigate(id ? `/fleetrequest/${id}` : "/fleetrequest");
                 }}
                 className="h-9 w-52 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 aria-label="Select Fleet Request"
@@ -712,7 +819,25 @@ const FleetRequest = () => {
             </h2>
           </div>
 
-          <div aria-hidden="true" />
+          <div className="flex justify-end sm:justify-self-end">
+            {canRecall && (
+              <button
+                type="button"
+                onClick={() =>
+                  setConfirmationAction({
+                    action: "recall",
+                    label: "Recall",
+                    nextStatus: "recalled",
+                  })
+                }
+                disabled={isSaving}
+                className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-800 shadow-sm transition hover:border-amber-400 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <LuUndo2 size={17} aria-hidden="true" />
+                Recall
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-x-3 gap-y-6 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(9rem,0.7fr)_minmax(9rem,0.7fr)] sm:items-end sm:gap-5">
@@ -806,20 +931,9 @@ const FleetRequest = () => {
               <input
                 type="date"
                 value={date}
-                onChange={(event) => {
-                  setDate(event.target.value);
-                  setValidationErrors((current) => ({
-                    ...current,
-                    date: "",
-                  }));
-                  if (selectedFleetRequestId) setHasPendingUpdates(true);
-                }}
-                className={`h-9 w-full rounded border bg-white px-2.5 text-slate-800 outline-none transition focus:ring-2 ${
-                  validationErrors.date
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-100"
-                    : "border-slate-300 focus:border-blue-500 focus:ring-blue-100"
-                }`}
-                aria-invalid={Boolean(validationErrors.date)}
+                disabled
+                className="h-9 w-full cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-2.5 text-slate-700 disabled:opacity-100"
+                aria-label="Fleet request date"
               />
             ) : (
               <output className={readOnlyValueClass}>
@@ -843,7 +957,7 @@ const FleetRequest = () => {
           >
             {fleetItems.length > 0 && <LuPencil size={16} />}
             {fleetItems.length > 0
-              ? "Edit Equipment Items"
+              ? "Add / Edit Equipment Items"
               : hasModalItemValues
                 ? "Continue Equipment Draft"
                 : "Add Equipment"}
@@ -957,19 +1071,33 @@ const FleetRequest = () => {
               ? "Create Fleet Request?"
               : confirmationAction.action === "update"
                 ? "Update Fleet Request?"
-                : "Send Fleet Request for approval?"
+                : confirmationAction.action === "recall"
+                  ? "Recall Fleet Request?"
+                  : "Send Fleet Request for approval?"
           }
           message={
             confirmationAction.action === "create"
-              ? "Confirm that the Fleet Request details and equipment items are correct before creating it."
+              ? "Confirm  Fleet Request details and equipment items are correct before creating it."
               : confirmationAction.action === "update"
                 ? "Save the updated Fleet Request details and equipment items?"
-                : "This request will be sent to the next approver in the workflow."
+                : confirmationAction.action === "recall"
+                  ? "This request will be withdrawn from the current approval step and returned to editable mode. You can update it and send it for approval again."
+                  : "This request will be sent to the next approver in the workflow."
           }
           confirmLabel={confirmationAction.label}
           isLoading={isSaving}
+          variant={
+            confirmationAction.action === "recall" ? "warning" : "primary"
+          }
+          allowComments={
+            confirmationAction.action === "create" ||
+            (confirmationAction.action === "send-for-approval" &&
+              normalizedStatus === "review")
+          }
           onCancel={() => setConfirmationAction(null)}
-          onConfirm={() => submitFleetRequestAction(confirmationAction)}
+          onConfirm={(comments) =>
+            submitFleetRequestAction(confirmationAction, comments)
+          }
         />
       )}
       {isApprovalModalOpen && (

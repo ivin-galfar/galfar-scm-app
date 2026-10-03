@@ -933,8 +933,8 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
         role: userInfo.is_admin
           ? (userInfo.role?.[1] ?? userInfo.role?.[0])
           : userInfo.role?.[0],
-        dept_id: data.department_id,
-        doc_no: data.doc_no,
+        dept_id: data.department_id ?? data.dept_id,
+        doc_no: data.doc_no ?? data.doc_id,
         name: data.name,
         status: data.status,
         created_at: data.created_at,
@@ -1157,7 +1157,14 @@ export const GetFleetDocId = async (userInfo, project) => {
   }
 };
 
-export const GetFleetRequests = async (userInfo, project, module) => {
+export const GetFleetRequests = async (
+  userInfo,
+  project,
+  module,
+  page,
+  limit,
+  statusfilter,
+) => {
   try {
     const config = {
       headers: {
@@ -1166,18 +1173,67 @@ export const GetFleetRequests = async (userInfo, project, module) => {
       },
     };
 
-    const projectPath = Array.isArray(project) ? project.join(",") : project;
+    const roles = (
+      Array.isArray(userInfo?.role) ? userInfo.role : [userInfo?.role]
+    )
+      .filter(Boolean)
+      .map((role) => String(role).trim().toLowerCase());
+    const assignedProjects = (
+      Array.isArray(userInfo?.pr_code) ? userInfo.pr_code : [userInfo?.pr_code]
+    )
+      .filter(
+        (projectCode) => projectCode !== undefined && projectCode !== null,
+      )
+      .map((projectCode) => String(projectCode).trim())
+      .filter(Boolean);
+    const canViewAllProjects = roles.some((role) =>
+      ["hod", "gm", "ceo"].includes(role),
+    );
+    const requestedProjects = (Array.isArray(project) ? project : [project])
+      .filter(
+        (projectCode) => projectCode !== undefined && projectCode !== null,
+      )
+      .map((projectCode) => String(projectCode).trim())
+      .filter(Boolean);
+    const permittedProjects = canViewAllProjects
+      ? requestedProjects
+      : requestedProjects.length
+        ? requestedProjects.filter((projectCode) =>
+            assignedProjects.includes(projectCode),
+          )
+        : assignedProjects;
+    if (!canViewAllProjects && permittedProjects.length === 0) return [];
+    const projects = permittedProjects.join(",");
     const response = await axios.get(
-      `${REACT_SERVER_URL}/flreq/fetchdocsdata${projectPath ? `/${projectPath}` : ""}`,
+      `${REACT_SERVER_URL}/flreq/fetchdocsdata`,
       {
         ...config,
         params: {
           module: module,
+          page,
+          limit,
+          roles: roles.join(","),
+          access_scope: canViewAllProjects ? "all" : "assigned",
+          project_codes: canViewAllProjects
+            ? undefined
+            : assignedProjects.join(","),
+          statusfilter,
+          ...(projects && { projects }),
         },
       },
     );
 
-    return response.data;
+    if (canViewAllProjects || !Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    // Defense in depth: never expose records outside the signed-in user's
+    // assigned projects, even if the server returns an unexpectedly broad set.
+    return response.data.filter((request) =>
+      assignedProjects.includes(
+        String(request?.project ?? request?.project_code ?? "").trim(),
+      ),
+    );
   } catch (error) {
     throw error;
   }
@@ -1201,6 +1257,7 @@ export const AddNewFleetRequests = async ({
   date,
   location,
   items,
+  comments,
   userInfo,
 }) => {
   try {
@@ -1223,8 +1280,9 @@ export const AddNewFleetRequests = async ({
       date: formatDate(date),
       location,
       status: "created",
+      comments,
       items: items.map((item) => ({
-        equip_desc: item.equipmentDescription,
+        fleet_description: item.fleetDescription,
         capacity: item.capacity,
         cicpa: item.cicpa,
         quantity: Number(item.quantity),
@@ -1235,6 +1293,8 @@ export const AddNewFleetRequests = async ({
         production_qty_envisaged: Number(item.productionQtyEnvisaged),
         qty_similar_machines: Number(item.similarMachinesAvailable),
         utilization: Number(item.utilization),
+        adnoc_fitments: item.adnocFitments,
+        tpi: item.tpi,
         remarks: item.remarks,
       })),
     };
@@ -1260,27 +1320,67 @@ export const UpdateFleetRequestWorkflow = async ({
   location,
   items,
   userInfo,
+  deleted,
 }) => {
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${userInfo?.token}`,
-    },
-  };
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
 
-  const response = await axios.put(
-    `${REACT_SERVER_URL}/flreq/${id}`,
-    {
-      status,
-      action,
-      comments,
-      ...(project !== undefined && { project }),
-      ...(date !== undefined && { date }),
-      ...(location !== undefined && { location }),
-      ...(items !== undefined && { items }),
-    },
-    config,
-  );
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/flreq/${id}`,
+      {
+        status,
+        action,
+        comments,
+        ...(project !== undefined && { project }),
+        ...(date !== undefined && { date }),
+        ...(location !== undefined && { location }),
+        ...(items !== undefined && { items }),
+        ...(deleted !== undefined && { deleted }),
+      },
+      config,
+    );
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const FREmailAlert = async (id, userInfo, dept, data) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/${id}?dept=${dept}&type=fr`,
+      {
+        id: data.id,
+        role: userInfo.is_admin
+          ? userInfo.role?.includes("initfr")
+            ? "initfr"
+            : (userInfo.role?.[1] ?? userInfo.role?.[0])
+          : userInfo.role?.[0],
+        doc_id: data.doc_id,
+        created_date: data.created_date,
+        location: data.location,
+        project: data.project,
+        status: data.status,
+        ...(data.exportedStatementAttachment && {
+          exportedStatementAttachment: data.exportedStatementAttachment,
+        }),
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };

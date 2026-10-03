@@ -1,33 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import { FaRegUser, FaChevronDown } from "react-icons/fa";
+import { FaUserTie } from "react-icons/fa";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { Link, useNavigate } from "react-router-dom";
-import Alerts from "./Alerts";
+import { Link } from "react-router-dom";
 import { FiExternalLink } from "react-icons/fi";
 import { updatedocread } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
+import LogoutButton from "./LogoutButton";
 
 const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showFavourites, setShowFavourites] = useState(false);
+  const [, setShowFavourites] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
-  const [showConfirm, setShowConfirm] = useState(false);
   const userInfo = useUserInfo();
 
   const userEmail = userInfo?.email;
-  const isAdmin = userInfo?.is_admin;
-
   const toggleDropdown = () => setIsOpen((prev) => !prev);
-
-  const handleLogout = () => {
-    setShowConfirm(true);
-  };
-  const handleConfirmLogout = () => {
-    localStorage.removeItem("userInfo");
-    setShowConfirm(false);
-    navigate("/login");
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -55,25 +42,30 @@ const UserDropdown = () => {
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative flex h-16 items-center" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gradient-to-tr from-blue-200 to-blue-100 text-blue-700  transition border border-blue-300 cursor-pointer"
+        className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/12 text-white shadow-sm transition hover:border-white/50 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
       >
-        <FaRegUser size={15} />
+        <FaUserTie size={17} aria-hidden="true" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-72 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 animate-fade-in overflow-hidden">
-          <div className="px-5 py-4 bg-gray-50 border-b border-gray-200 rounded-t-xl">
-            <p className="text-xs text-gray-500">Signed in as</p>
-            <p className="text-sm font-semibold text-gray-800 truncate">
+        <div
+          className="absolute right-0 top-full z-[100] mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-sky-100 bg-white shadow-[0_18px_45px_-18px_rgba(12,54,85,0.45)] animate-fade-in"
+          role="menu"
+        >
+          <div className="border-b border-sky-100 bg-sky-50/80 px-5 py-4">
+            <p className="text-xs font-medium text-slate-500">Signed in as</p>
+            <p className="truncate text-sm font-semibold text-slate-800">
               {userEmail}
             </p>
           </div>
           <span>
             <button
-              className="w-full flex text-left px-5 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 transition cursor-pointer"
+              className="flex w-full cursor-pointer px-5 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-sky-800"
               onClick={handleUpdateDocRead}
             >
               <Link
@@ -86,22 +78,11 @@ const UserDropdown = () => {
               </Link>
             </button>
           </span>
-          <div className="border-t border-gray-100" />
-          <button
-            onClick={handleLogout}
-            className="w-full text-left px-5 py-3 text-sm text-red-600 hover:bg-red-50 transition cursor-pointer"
-          >
+          <div className="border-t border-slate-100" />
+          <LogoutButton className="w-full cursor-pointer px-5 py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50">
             Logout
-          </button>
+          </LogoutButton>
         </div>
-      )}
-
-      {showConfirm && (
-        <Alerts
-          message="Are you sure you want to log out?"
-          onCancel={() => setShowConfirm(false)}
-          onConfirm={handleConfirmLogout}
-        />
       )}
     </div>
   );

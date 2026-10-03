@@ -1,21 +1,16 @@
-import { HandBag01FreeIcons } from "@hugeicons/core-free-icons";
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
-import { FaHandsHolding } from "react-icons/fa6";
 import { LuMoonStar, LuCloudSun } from "react-icons/lu";
-import {
-  PiHandArrowDownFill,
-  PiHandWavingBold,
-  PiHandWavingFill,
-  PiSunDimBold,
-} from "react-icons/pi";
+import { PiSunDimBold } from "react-icons/pi";
+import { getDashboardTimePeriod } from "../../Helpers/dashboardMilestone";
 
 const Greetings = ({ userName }) => {
   const [isAnimated, setIsAnimated] = useState(false);
   const [shouldShow, setShouldShow] = useState(false);
 
   const getGreetingData = () => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
+    const period = getDashboardTimePeriod();
+    if (period === "morning") {
       return {
         greeting: "Good Morning",
         icon: LuCloudSun,
@@ -24,7 +19,7 @@ const Greetings = ({ userName }) => {
       };
     }
 
-    if (hour >= 12 && hour < 17) {
+    if (period === "afternoon") {
       return {
         greeting: "Good Afternoon",
         icon: PiSunDimBold,

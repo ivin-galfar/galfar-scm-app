@@ -22,6 +22,7 @@ import ResetPwd from "./Pages/ResetPage";
 import PendingDashboard from "./Pages/PendingDashboard";
 import EquipmentMR from "./Pages/FleetRequest";
 import FleetRequestRoute from "./Components/FleetRequestRoute";
+import FRDashboards from "./Pages/FRDashboards";
 
 const App = () => {
   const location = useLocation();
@@ -39,7 +40,7 @@ const App = () => {
   }, []);
   return (
     <div
-      className={`${location.pathname !== "/login" && !isresetPage && "pl-12"} flex min-h-screen flex-col`}
+      className={`app-shell ${location.pathname !== "/login" && !isresetPage && "pl-12"} flex min-h-screen flex-col`}
     >
       {!userInfo && !isresetPage && (
         <FloatingNotification
@@ -109,12 +110,28 @@ const App = () => {
             <Route path="/resetpwd" element={<ResetPwd />} />
             <Route path="/brstatement" element={<BrStatement />} />
             <Route
-              path="/equipfr"
-              element={<FleetRequestRoute><EquipmentMR /></FleetRequestRoute>}
+              path="/fleetrequest"
+              element={
+                <FleetRequestRoute>
+                  <EquipmentMR />
+                </FleetRequestRoute>
+              }
             />
             <Route
-              path="/equipfr/:id"
-              element={<FleetRequestRoute><EquipmentMR /></FleetRequestRoute>}
+              path="/fleetrequest/:id"
+              element={
+                <FleetRequestRoute>
+                  <EquipmentMR />
+                </FleetRequestRoute>
+              }
+            />
+            <Route
+              path="/dashboardfr/"
+              element={
+                <FleetRequestRoute>
+                  <FRDashboards />
+                </FleetRequestRoute>
+              }
             />
 
             <>

@@ -1,48 +1,42 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import useUserInfo from "../CustomHooks/useUserInfo";
-import { FaLock, FaHome } from "react-icons/fa";
-import { IoDocumentText } from "react-icons/io5";
-import { HiDocumentText } from "react-icons/hi2";
-import { FaSignOutAlt } from "react-icons/fa";
-import { MdSpaceDashboard } from "react-icons/md";
-import { AppContext } from "./Context";
-import { FiMenu } from "react-icons/fi";
-import { AiFillCaretUp } from "react-icons/ai";
-import { AiFillCaretDown } from "react-icons/ai";
-import { FaSignInAlt } from "react-icons/fa";
-import { FaTruck } from "react-icons/fa";
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
-  is_buyrent,
-  is_fm,
-  is_logistics,
-  is_plant,
-} from "../Helpers/dept_helper";
-import { GiCrane } from "react-icons/gi";
-import { useDashboardType } from "../store/logisticsStore";
-import { IoHelpCircleSharp } from "react-icons/io5";
-import { GiClamp } from "react-icons/gi";
-import { PiFireTruckLight } from "react-icons/pi";
-import { updatedocread } from "../APIs/api";
+  FaBalanceScale,
+  FaChartBar,
+  FaClipboardList,
+  FaHome,
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaTruck,
+  FaUserTie,
+  FaProjectDiagram,
+} from "react-icons/fa";
+import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
+import { HiDocumentText } from "react-icons/hi2";
+import { IoDocumentText, IoHelpCircleSharp } from "react-icons/io5";
+import { MdSpaceDashboard } from "react-icons/md";
 import { useMutation } from "@tanstack/react-query";
+import useUserInfo from "../CustomHooks/useUserInfo";
+import { is_plant } from "../Helpers/dept_helper";
+import { useDashboardType } from "../store/logisticsStore";
+import { updatedocread } from "../APIs/api";
+import galfarlogo from "../assets/Images/galfar-logo-clean.png";
+import LogoutButton from "./LogoutButton";
+import { PiBulldozer } from "react-icons/pi";
 
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
-  const { setStatusFilter, setMultiStatusFilter } = useContext(AppContext);
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const [submenu1Open, setSubmenu1Open] = useState(false);
+  const [projectsSubmenuOpen, setProjectsSubmenuOpen] = useState(false);
   const { setDashboardType } = useDashboardType();
-  const navigate = useNavigate();
-  const handleLogout = () => {
-    localStorage.removeItem("userInfo");
-    navigate("/login");
-  };
+  const { pathname, search } = useLocation();
+
   const userInfo = useUserInfo();
-  const isLogistics = is_logistics(userInfo?.dept_code);
   const isPlant = is_plant(userInfo?.dept_code);
-  const isplanthire = userInfo?.role?.includes("inith");
-  const initfn = userInfo?.role?.includes("initfn");
-  const isfm = is_fm(userInfo?.role);
-  const isBuyvsrent = is_buyrent(userInfo?.dept_code);
+  const isProjectIocRoute =
+    pathname === "/dashboardfn" &&
+    new URLSearchParams(search).get("view") === "projects-ioc";
 
   useEffect(() => {
     if (isPlant) {
@@ -55,7 +49,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
       setIsMenuOpen(true);
     }
   }, [userInfo, setIsMenuOpen, isPlant]);
-  const dashboardType = isPlant ? "plant" : "bvrplant";
   const { mutate: updateDocReadMutation } = useMutation({
     mutationFn: updatedocread,
     onSuccess: (data) => {
@@ -69,244 +62,410 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const handleUpdateDocRead = () => {
     updateDocReadMutation(userInfo);
   };
+
+  const isFnRoute =
+    (pathname === "/dashboardfn" && !isProjectIocRoute) ||
+    pathname.startsWith("/filenote");
+  const isPlantRoute =
+    pathname === "/dashboard" ||
+    pathname === "/dashboardbr" ||
+    pathname.startsWith("/particulars/1") ||
+    pathname.startsWith("/receipts") ||
+    pathname.startsWith("/brstatement") ||
+    isFnRoute;
+  const isProjectsRoute =
+    pathname.startsWith("/fleetrequest") ||
+    pathname.startsWith("/dashboardfr") ||
+    isProjectIocRoute;
+  const isLogisticsRoute =
+    pathname === "/dashboardlg" ||
+    pathname.startsWith("/particulars/2") ||
+    pathname.startsWith("/lstatements");
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (isPlantRoute) {
+      setSubmenuOpen(true);
+    } else if (isProjectsRoute) {
+      setProjectsSubmenuOpen(true);
+    } else if (isLogisticsRoute) {
+      setSubmenu1Open(true);
+    }
+  }, [isOpen, isLogisticsRoute, isPlantRoute, isProjectsRoute]);
+
+  const toggleSection = (section) => {
+    if (!isOpen) {
+      setIsMenuOpen(true);
+      if (section === "plant") setSubmenuOpen(true);
+      if (section === "projects") setProjectsSubmenuOpen(true);
+      if (section === "logistics") setSubmenu1Open(true);
+      return;
+    }
+
+    if (section === "plant") setSubmenuOpen((current) => !current);
+    if (section === "projects") {
+      setProjectsSubmenuOpen((current) => !current);
+    }
+    if (section === "logistics") setSubmenu1Open((current) => !current);
+  };
+
+  const itemClass = (isActive = false) =>
+    `group relative flex h-10 min-h-10 w-full shrink-0 cursor-pointer items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 ${
+      isOpen ? "px-3" : "justify-center px-0"
+    } ${
+      isActive
+        ? "bg-sky-400/18 text-white before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-sky-300"
+        : "text-slate-200/90 hover:bg-white/8 hover:text-white"
+    }`;
+
+  const iconClass = (isActive = false) =>
+    `h-5 w-5 shrink-0 transition-colors duration-200 ${
+      isActive ? "text-sky-200" : "text-slate-300 group-hover:text-white"
+    }`;
+
+  const userLabel = userInfo?.email?.split("@")[0] || "Signed-in user";
+  const firstRole = userInfo?.role?.[0];
+  const primaryRole = firstRole?.toLowerCase().startsWith("init")
+    ? "Initiator"
+    : firstRole;
+
   return (
-    <div
+    <aside
       ref={ref}
-      onMouseLeave={() => userInfo && setIsMenuOpen(false)}
-      className={`fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow transition-all duration-300 
-    ${isOpen ? "w-68" : "w-15"}`}
+      className={`app-sidenav fixed left-0 top-0 z-50 flex h-dvh flex-col overflow-hidden shadow transition-[width] duration-300 ease-out ${
+        isOpen ? "w-68" : "w-15"
+      }`}
+      aria-label="Primary navigation"
     >
-      <div className="flex justify-between items-center p-5 border-b border-gray-200 dark:border-gray-700">
-        <button
-          className="flex items-center gap-2 text-gray-700 cursor-pointer"
-          onClick={() => setIsMenuOpen(true)}
-        >
-          <FiMenu className="h-6 w-6" />
-          {isOpen && (
-            <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
-              Menu
-            </h2>
-          )}
-        </button>
+      <div
+        className={`flex h-16 shrink-0 items-center border-b border-white/10 ${
+          isOpen ? "justify-between px-4" : "justify-center px-2"
+        }`}
+      >
+        {isOpen ? (
+          <Link
+            to="/"
+            className="flex min-w-0 cursor-pointer items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70"
+            aria-label="Galfar home"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
+              <img
+                src={galfarlogo}
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </span>
+            <span className="min-w-0 leading-tight">
+              <span className="block text-xs font-bold tracking-[0.12em] text-white">
+                GALFAR
+              </span>
+              <span className="mt-2 flex whitespace-nowrap text-[10px] font-bold tracking-[0.12em] text-white">
+                Integrated Web Application
+              </span>
+            </span>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-slate-100 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+            onClick={() => setIsMenuOpen(true)}
+            title="Open menu"
+            aria-label="Open navigation menu"
+          >
+            <FiMenu className="h-5 w-5 shrink-0" />
+          </button>
+        )}
 
         {isOpen && (
           <button
+            type="button"
             onClick={() => setIsMenuOpen(false)}
-            className="text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white cursor-pointer"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-300 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+            aria-label="Collapse navigation menu"
           >
-            ✕
+            <FiX className="h-5 w-5" />
           </button>
         )}
       </div>
 
-      <nav className={`p-4  ${!isOpen ? "space-y-7" : "space-y-4"}`}>
+      <nav
+        className={`min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden py-3 [scrollbar-color:rgba(186,230,253,0.25)_transparent] [scrollbar-width:thin] ${
+          isOpen ? "px-3" : "px-2.5"
+        }`}
+      >
+        {isOpen && (
+          <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-200/55">
+            Workspace
+          </p>
+        )}
         <Link
           to="/"
-          className={`flex items-center gap-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700
-      h-10 px-2
-      ${!isOpen ? "justify-center w-10" : "justify-start w-full"}
-    `}
+          className={itemClass(pathname === "/")}
+          title={!isOpen ? "Home" : undefined}
+          aria-current={pathname === "/" ? "page" : undefined}
         >
-          <FaHome className="text-lg" />
-          {isOpen && <span className="whitespace-nowrap">Home</span>}
+          <FaHome className={iconClass(pathname === "/")} />
+          {isOpen && <span className="truncate">Home</span>}
         </Link>
+
+        {isOpen && (
+          <p className="mb-2 mt-5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-200/55">
+            Operations
+          </p>
+        )}
+
         <button
-          onClick={() => setSubmenuOpen(!submenuOpen)}
-          className="flex min-h-10 p-2  items-center gap-2  rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
+          type="button"
+          onClick={() => toggleSection("plant")}
+          className={itemClass(isPlantRoute)}
+          title={!isOpen ? "Plant & Equipment" : undefined}
+          aria-expanded={submenuOpen}
+          aria-controls="plant-navigation"
         >
-          <GiCrane className="text-xl" />
+          <PiBulldozer className={iconClass(isPlantRoute)} />
           {isOpen && (
-            <span className="flex flex-1 items-center gap-2">
-              <span className=" break-words">Plant - CS </span>
-              <span className="ml-auto flex gap-2 text-gray-500 dark:text-gray-300 cursor-pointer">
-                {submenuOpen ? <AiFillCaretUp /> : <AiFillCaretDown />}
-                {!isPlant && !isBuyvsrent && !initfn && <FaLock />}{" "}
+            <>
+              <span className="min-w-0 flex-1 truncate text-left">
+                Plant & Equipment
               </span>
-            </span>
+              <FiChevronDown
+                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+                  submenuOpen ? "rotate-180" : ""
+                }`}
+              />
+            </>
           )}
         </button>
-        {isOpen && submenuOpen && (
-          <div className="ml-6 mt-2 space-y-2">
-            {/* <Link
-              to="/dashboard"
-              className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700  ${
-                !isPlant
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-              onClick={() => {
-                setStatusFilter("All");
-                setMultiStatusFilter([]);
-                setDashboardType("plant");
-              }}
-            >
-              <MdSpaceDashboard />
-              {isOpen && <span>Dashboard</span>}
-            </Link> */}
 
+        {isOpen && submenuOpen && (
+          <div
+            id="plant-navigation"
+            className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
+          >
+            <Link
+              to="/dashboard"
+              className={itemClass(pathname === "/dashboard")}
+              onClick={() => setDashboardType("plant")}
+            >
+              <FaChartBar className={iconClass(pathname === "/dashboard")} />
+              <span className="truncate">Hiring / Asset </span>
+            </Link>
+            <Link
+              to="/dashboardbr"
+              className={itemClass(pathname === "/dashboardbr")}
+              onClick={() => setDashboardType("bvrplant")}
+            >
+              <FaBalanceScale
+                className={iconClass(pathname === "/dashboardbr")}
+              />
+              <span className="truncate">Buy vs Rent </span>
+            </Link>
+            <Link
+              to="/dashboardfn"
+              className={itemClass(isFnRoute)}
+              aria-current={isFnRoute ? "page" : undefined}
+            >
+              <IoDocumentText className={iconClass(isFnRoute)} />
+              <span className="min-w-0 flex-1 truncate">FN / IOC</span>
+            </Link>
             <Link
               to="/particulars/1"
-              className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !userInfo?.is_admin || !isPlant
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
+              className={itemClass(pathname.startsWith("/particulars/1"))}
             >
-              <HiDocumentText />
-              {isOpen && <>Templates {!userInfo?.is_admin ? <FaLock /> : ""}</>}
-            </Link>
-            <Link
-              to={isPlant ? "/dashboard" : "/dashboardbr"}
-              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !isPlant && !isBuyvsrent
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-              onClick={() => setDashboardType(dashboardType)}
-            >
-              <GiClamp />
-              {isOpen && <span>Dashboard</span>}
-            </Link>
-            {!isfm && (
-              <Link
-                to="/receipts"
-                className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                  !isPlant
-                    ? "pointer-events-none opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-              >
-                <PiFireTruckLight />
-                {isOpen && <span> Hiring / Asset</span>}
-              </Link>
-            )}
-            <Link
-              to="/brstatement"
-              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                isplanthire || !isBuyvsrent
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-            >
-              <GiClamp />
-              {isOpen && <span>Buy vs Rent </span>}
-            </Link>
-            <Link
-              to="/filenote"
-              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !initfn
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-            >
-              <GiClamp />
-              {isOpen && <span>Fn / IOC </span>}
+              <HiDocumentText
+                className={iconClass(pathname.startsWith("/particulars/1"))}
+              />
+              <span className="min-w-0 flex-1 truncate">Templates</span>
             </Link>
           </div>
         )}
-        <hr className="border-0 h-px bg-gray-200 my-1 mx-2" />
-        <button
-          onClick={() => setSubmenu1Open(!submenu1Open)}
-          className="flex min-h-10 p-2  items-center gap-2  rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
-        >
-          <FaTruck />
 
+        <button
+          type="button"
+          onClick={() => toggleSection("projects")}
+          className={`${itemClass(isProjectsRoute)} mt-1`}
+          title={!isOpen ? "Projects" : undefined}
+          aria-expanded={projectsSubmenuOpen}
+          aria-controls="projects-navigation"
+        >
+          <FaProjectDiagram className={iconClass(isProjectsRoute)} />
           {isOpen && (
-            <span className="flex flex-1 items-center gap-2 w-1xs">
-              <span className=" break-words">Logistics - CS</span>
-              <span className="ml-auto flex gap-2 text-gray-500 dark:text-gray-300 cursor-pointer">
-                {submenu1Open ? <AiFillCaretUp /> : <AiFillCaretDown />}
-                {!isLogistics ? <FaLock /> : ""}
+            <>
+              <span className="min-w-0 flex-1 truncate text-left">
+                Projects
               </span>
-            </span>
+              <FiChevronDown
+                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+                  projectsSubmenuOpen ? "rotate-180" : ""
+                }`}
+              />
+            </>
           )}
         </button>
+
+        {isOpen && projectsSubmenuOpen && (
+          <div
+            id="projects-navigation"
+            className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
+          >
+            <Link
+              to="/dashboardfr"
+              className={itemClass(
+                pathname.startsWith("/dashboardfr") ||
+                  pathname.startsWith("/fleetrequest"),
+              )}
+            >
+              <FaClipboardList
+                className={iconClass(
+                  pathname.startsWith("/dashboardfr") ||
+                    pathname.startsWith("/fleetrequest"),
+                )}
+              />
+              <span className="min-w-0 flex-1 truncate">Fleet Request</span>
+            </Link>
+            <Link
+              to="/dashboardfn?view=projects-ioc"
+              className={itemClass(isProjectIocRoute)}
+            >
+              <IoDocumentText className={iconClass(isProjectIocRoute)} />
+              <span className="min-w-0 flex-1 truncate">IOC</span>
+            </Link>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => toggleSection("logistics")}
+          className={`${itemClass(isLogisticsRoute)} mt-1`}
+          title={!isOpen ? "Logistics" : undefined}
+          aria-expanded={submenu1Open}
+          aria-controls="logistics-navigation"
+        >
+          <FaTruck className={iconClass(isLogisticsRoute)} />
+          {isOpen && (
+            <>
+              <span className="min-w-0 flex-1 truncate text-left">
+                Logistics
+              </span>
+              <FiChevronDown
+                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+                  submenu1Open ? "rotate-180" : ""
+                }`}
+              />
+            </>
+          )}
+        </button>
+
         {isOpen && submenu1Open && (
-          <div className="ml-6 mt-2 space-y-2">
+          <div
+            id="logistics-navigation"
+            className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
+          >
             <Link
               to="/dashboardlg"
-              className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !isLogistics
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
+              className={itemClass(pathname === "/dashboardlg")}
               onClick={() => {
                 setDashboardType("logistics");
               }}
             >
-              <MdSpaceDashboard />
-              {isOpen && <span>Dashboard</span>}
+              <MdSpaceDashboard
+                className={iconClass(pathname === "/dashboardlg")}
+              />
+              <span className="truncate">Dashboard</span>
             </Link>
-
             <Link
               to="/particulars/2"
-              className={`flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !userInfo?.is_admin
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }${
-                !isLogistics
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
+              className={itemClass(pathname.startsWith("/particulars/2"))}
             >
-              <HiDocumentText />
-              {isOpen && <>Templates {!userInfo?.is_admin ? <FaLock /> : ""}</>}
+              <HiDocumentText
+                className={iconClass(pathname.startsWith("/particulars/2"))}
+              />
+              <span className="min-w-0 flex-1 truncate">Templates</span>
             </Link>
-
             <Link
               to="/lstatements"
-              className={`flex gap-2 p-2 items-center rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                !isLogistics
-                  ? "pointer-events-none opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
+              className={itemClass(pathname.startsWith("/lstatements"))}
             >
-              <IoDocumentText />
-              {isOpen && <span>Comparative Statements</span>}
+              <IoDocumentText
+                className={iconClass(pathname.startsWith("/lstatements"))}
+              />
+              <span className="truncate">Comparative Statements</span>
             </Link>
           </div>
         )}
-        <hr className="border-0 h-px bg-gray-200 my-1 mx-2" />
-        <div className="relative">
-          <button onClick={handleUpdateDocRead}>
-            <Link
-              to="https://app.notion.com/p/Changelogs-2a792f8cf633815fabb5e328963521fa"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-            >
-              <IoHelpCircleSharp className="text-lg" />
 
-              {isOpen && (
-                <span className="whitespace-nowrap">What's New ⭐</span>
-              )}
-              <span
-                className={`${
-                  !isOpen
-                    ? "absolute -top-3 -right-2"
-                    : "relative top-0 right-0"
-                } rounded-full bg-red-700 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-white shadow-sm transition-all duration-300`}
-              >
-                NEW
-              </span>
-            </Link>
-          </button>
-        </div>
+        {isOpen && (
+          <p className="mb-2 mt-5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-200/55">
+            Support
+          </p>
+        )}
+        {!isOpen && <div className="my-3 h-px bg-white/10" />}
 
-        <button
-          className="flex gap-2 p-2 rounded text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
-          onClick={handleLogout}
+        <Link
+          to="https://app.notion.com/p/Changelogs-2a792f8cf633815fabb5e328963521fa"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={itemClass(false)}
+          onClick={handleUpdateDocRead}
+          title={!isOpen ? "What's New" : undefined}
         >
-          {userInfo ? (
-            <FaSignOutAlt />
-          ) : (
-            <FaSignInAlt className="text-green-400 text-2xl glow-pop-green" />
+          <IoHelpCircleSharp className={iconClass(false)} />
+          {isOpen && (
+            <span className="min-w-0 flex-1 truncate">What&apos;s New</span>
           )}
-          {isOpen && (userInfo ? "Sign out" : "Sign In")}
-        </button>
+          {isOpen ? (
+            <span className="ml-auto rounded-md border border-sky-200/20 bg-white/8 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] !text-sky-100">
+              New
+            </span>
+          ) : (
+            <span
+              className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-sky-300 ring-2 ring-[#09528e]"
+              aria-label="New updates available"
+            />
+          )}
+        </Link>
       </nav>
-    </div>
+
+      <div className="shrink-0 border-t border-white/10 p-2.5">
+        {userInfo && isOpen && (
+          <div className="mb-2 flex min-w-0 items-center gap-3 rounded-lg bg-black/10 px-3 py-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-sky-100 ring-1 ring-white/10">
+              <FaUserTie className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold capitalize text-white">
+                {userLabel}
+              </p>
+              {primaryRole && (
+                <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-wide text-slate-300">
+                  {primaryRole}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {userInfo ? (
+          <LogoutButton
+            className={itemClass(false)}
+            title={!isOpen ? "Sign out" : undefined}
+          >
+            <FaSignOutAlt className={iconClass(false)} />
+            {isOpen && <span className="truncate">Sign out</span>}
+          </LogoutButton>
+        ) : (
+          <Link
+            to="/login"
+            className={itemClass(false)}
+            title={!isOpen ? "Sign in" : undefined}
+          >
+            <FaSignInAlt className="h-5 w-5 shrink-0 text-emerald-300" />
+            {isOpen && <span className="truncate">Sign in</span>}
+          </Link>
+        )}
+      </div>
+    </aside>
   );
 };
 
