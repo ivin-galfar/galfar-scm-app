@@ -2,10 +2,11 @@ import { LuBellRing } from "react-icons/lu";
 import { GrSystem } from "react-icons/gr";
 import { FaRocket } from "react-icons/fa";
 import { GrUpdate } from "react-icons/gr";
-import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "./ui";
+import { Card, CardContent, Skeleton } from "./ui";
 import { GetAnnouncementsData } from "../../APIs/api";
 import { useQuery } from "@tanstack/react-query";
 import { formatDateDMY } from "../../Helpers/helperfunctions";
+import DashboardSectionHeader from "./DashboardSectionHeader";
 
 const Annoucements = (userInfo) => {
   const { data, isLoading } = useQuery({
@@ -30,18 +31,15 @@ const Annoucements = (userInfo) => {
   };
 
   return (
-    <Card className="flex max-h-85  h-full flex-col shadow-sm">
-      <CardHeader className="shrink-0 flex-row items-start justify-between gap-3 space-y-0 p-2 pb-2">
-        <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-md">
-            <LuBellRing size={19} color="red" fill="red" />
-          </span>
-          <CardTitle>Announcements</CardTitle>
-        </div>
-      </CardHeader>
-      <div className="w-full border-t border-border" />
+    <Card className="flex max-h-85 h-full flex-col overflow-hidden shadow-sm">
+      <DashboardSectionHeader
+        title="Announcements"
+        description="Latest updates and notices"
+        icon={LuBellRing}
+        tone="violet"
+      />
 
-      <CardContent className="flex h-fit min-h-10 flex-1 flex-col space-y-0 overflow-y-auto p-0">
+      <CardContent className="flex h-fit min-h-10 flex-1 flex-col space-y-0 overflow-y-auto p-1!">
         {isLoading
           ? Array.from({ length: 4 }).map((_, index) => (
               <div

@@ -1,40 +1,36 @@
 /* eslint-disable react/prop-types */
-import { LuArrowRight, LuFileText } from "react-icons/lu";
+import { LuFileText } from "react-icons/lu";
 import { AiFillAlert } from "react-icons/ai";
 
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-  Separator,
-} from "./ui";
+import { Badge, Card, CardContent, Separator } from "./ui";
 import ZeroPendings from "../../Components/ZeroPendings";
+import DashboardSectionHeader from "./DashboardSectionHeader";
 
 const NearingReminder = ({ items, escalated_times }) => {
+  const escalatedCount = Number(escalated_times) || 0;
+
   return (
-    <Card className="flex h-full min-h-0 flex-col shadow-sm">
-      <div className="shrink-0 flex-row items-start justify-between gap-3 space-y-0 p-4 pb-3">
-        <div className="w-full">
-          <span className="justify-between flex">
-            <div className="flex gap-2">
-              <AiFillAlert color="red" size={19} />
-              <CardTitle>Nearing Reminder / Overdue</CardTitle>
-            </div>
-            {/* <CardTitle> //PHASE II
-            Escalations Triggered for you : {escalated_times}{" "}
-          </CardTitle> */}
-          </span>
-          <CardDescription className="mt-1">
-            Statements approaching reminder
-          </CardDescription>
-        </div>
-        {/* <Button variant="outline" className="shrink-0">
-        View all <LuArrowRight />
-      </Button> */}
-      </div>
-      <CardContent className="min-h-0  flex-1 overflow-hidden px-4 pb-4">
+    <Card className="flex h-full min-h-0 flex-col overflow-hidden shadow-sm">
+      <DashboardSectionHeader
+        title="Nearing Reminder / Overdue"
+        description="Statements approaching their reminder threshold"
+        icon={AiFillAlert}
+        tone="rose"
+        action={
+          <div
+            className="flex items-center gap-2 rounded-lg border border-rose-200/80 bg-rose-50 px-2.5 py-1.5 text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/35 dark:text-rose-300"
+            aria-label={`${escalatedCount} reminders escalated for you`}
+          >
+            <span className="text-[11px] font-semibold leading-tight">
+              Reminders esclated to you{" "}
+            </span>
+            <Badge className="h-5 min-w-5 justify-center rounded-full border-0 bg-rose-600 px-1.5 text-[11px] font-bold text-white dark:bg-rose-500">
+              {escalatedCount}
+            </Badge>
+          </div>
+        }
+      />
+      <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-3">
         {items.length ? (
           <div className="max-h-52 min-h-0 space-y-2 overflow-y-auto pr-1">
             {items.map((item, index) => (

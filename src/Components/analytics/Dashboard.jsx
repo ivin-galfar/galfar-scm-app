@@ -14,6 +14,7 @@ import WorkflowSummary from "./WorkflowSummary";
 import { initiatorRoles } from "../../Helpers/helperfunctions";
 import Annoucements from "./Announcements";
 import Greetings from "./Greetings";
+import DigitalMilestone from "./DigitalMilestone";
 
 const emptyAnalytics = {
   summary: { approved: 0, pending: 0, inProgress: 0, rejected: 0, all: 0 },
@@ -126,6 +127,12 @@ const Dashboard = () => {
           </div>
         </div>
         {isError && <DashboardError onRetry={refetch} />}
+        {!isLoading && !isError && (
+          <DigitalMilestone
+            totalStatements={analyticsData.summary.all}
+            userInfo={userInfo}
+          />
+        )}
         <StatusSummary statuses={statuses} loading={isLoading} />
         <section
           className="grid grid-cols-2  gap-3 lg:grid-cols-1 xl:grid-cols-12 "

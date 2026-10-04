@@ -11,7 +11,7 @@ const Card = forwardRef(({ className = "", ...props }, ref) => (
 Card.displayName = "Card";
 
 const CardHeader = ({ className = "", ...props }) => (
-  <div className={`flex flex-col space-y-1.5 p-5 ${className}`} {...props} />
+  <div className={`flex flex-col space-y-1.5 p-2 ${className}`} {...props} />
 );
 const CardContent = ({ className = "", ...props }) => (
   <div className={`p-5 pt-0 ${className}`} {...props} />

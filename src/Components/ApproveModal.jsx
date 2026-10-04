@@ -1,10 +1,16 @@
+/* eslint-disable react/prop-types */
 import { useContext, useState } from "react";
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 import { AppContext } from "./Context";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useNavigate } from "react-router-dom";
-import { LuRotateCcwSquare } from "react-icons/lu";
+import {
+  LuCheck,
+  LuClipboardCheck,
+  LuRotateCcwSquare,
+  LuX,
+} from "react-icons/lu";
 import {
   useClearStatementTable,
   useSortVendors,
@@ -187,71 +193,106 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
   };
 
   return (
-    <div>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 ">
-        <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative">
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-[2px]">
+      <div
+        className="w-full max-w-xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="statement-approval-title"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-3">
+          <div className="flex min-w-0 items-start gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+              <LuClipboardCheck size={22} aria-hidden="true" />
+            </span>
+            <div>
+              <h2
+                id="statement-approval-title"
+                className="text-lg font-semibold text-slate-900"
+              >
+                Statement Approval
+              </h2>
+              <p className="mt-1 text-sm leading-5 text-slate-500">
+                Choose an action to move this statement through the approval
+                workflow.
+              </p>
+            </div>
+          </div>
           <button
-            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl cursor-pointer"
+            type="button"
+            className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
             onClick={() => setShowmodal(false)}
+            aria-label="Close approval modal"
           >
-            &times;
+            <LuX size={20} aria-hidden="true" />
           </button>
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            Approve/Reject
-          </h2>
-          <div className="flex w-full">
+        </div>
+        <div className="px-6 py-3">
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-800">
+              Comments
+            </span>
             <textarea
-              rows={3}
-              placeholder="Enter your comments here..."
-              className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+              rows={4}
+              placeholder="Add a clear note for the initiator or next approver..."
+              className="mt-2 w-full resize-none rounded-lg border border-slate-300 p-2 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               onChange={(e) => setComments(e.target.value)}
             />
-          </div>
-          <div className="mt-6 flex justify-end space-x-2">
+          </label>
+        </div>
+        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={() => setShowmodal(false)}
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <button
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               onClick={() => submitApproval(cs_id, "approved")}
             >
-              Approve
+              <LuCheck aria-hidden="true" /> Approve
             </button>
             <button
-              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition cursor-pointer"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
               onClick={() => submitApproval(cs_id, "rejected")}
             >
-              Reject
+              <LuX aria-hidden="true" /> Reject
             </button>
             <button
-              className="px-4 py-2 flex items-center gap-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition cursor-pointer"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
               onClick={() => submitApproval(cs_id, "review")}
             >
               <LuRotateCcwSquare /> Send For Review
             </button>
           </div>
-          {showToast &&
-            (sharedTableData.formData.status == "Approved" ||
-              sharedTableData.formData.status == "Pending for CEO" ||
-              sharedTableData.formData.status == "Pending for GM") &&
-            !errormessage && (
-              <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-                ✅ You have Approved this Statement!
-              </div>
-            )}{" "}
-          {showToast &&
-            sharedTableData.formData.status == "Rejected" &&
-            !errormessage && (
-              <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-                <div className="flex gap-2 justify-center items-center">
-                  <RxCross1 /> You have Rejected this Statement!
-                </div>
-              </div>
-            )}
-          {showToast && lastAction == "review" && !errormessage && (
+        </div>
+        {showToast &&
+          (sharedTableData.formData.status == "Approved" ||
+            sharedTableData.formData.status == "Pending for CEO" ||
+            sharedTableData.formData.status == "Pending for GM") &&
+          !errormessage && (
             <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-              You have successfully sent back the statement to Initiator for
-              Review!!
+              ✅ You have Approved this Statement!
+            </div>
+          )}{" "}
+        {showToast &&
+          sharedTableData.formData.status == "Rejected" &&
+          !errormessage && (
+            <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+              <div className="flex gap-2 justify-center items-center">
+                <RxCross1 /> You have Rejected this Statement!
+              </div>
             </div>
           )}
-        </div>
+        {showToast && lastAction == "review" && !errormessage && (
+          <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+            You have successfully sent back the statement to Initiator for
+            Review!!
+          </div>
+        )}
       </div>
     </div>
   );

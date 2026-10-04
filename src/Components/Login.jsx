@@ -1,11 +1,10 @@
 import { useState } from "react";
-import galfarlogo from "../assets/Images/logo-new.png";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser, registerUser } from "../APIs/api";
 import { SiTicktick } from "react-icons/si";
 import { MdErrorOutline } from "react-icons/md";
-import { toggleNewUser } from "../store/userStore";
+import { useUserStore } from "../store/userStore";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +13,8 @@ const Login = () => {
   const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
 
-  const { newuser, setNewuser } = toggleNewUser();
+  const newuser = useUserStore((state) => state.newuser);
+
   const { mutate: loginMutation, isPending: isLoading } = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
@@ -55,44 +55,61 @@ const Login = () => {
   };
 
   return (
-    <div>
+    <div className="w-full">
       {showToast && !errormessage && !newuser && (
-        <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-          <SiTicktick /> Successfully logged in!
+        <div
+          className="animate-slide-down fixed left-1/2 top-5 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-medium text-white shadow-xl shadow-emerald-900/15"
+          role="status"
+        >
+          <SiTicktick className="shrink-0" /> Successfully logged in!
         </div>
       )}
       {!errormessage && showToast && newuser && (
-        <div className="flex justify-center  items-center gap-2 fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
-          <SiTicktick /> Successfully created your account!
+        <div
+          className="animate-slide-down fixed left-1/2 top-5 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-medium text-white shadow-xl shadow-emerald-900/15"
+          role="status"
+        >
+          <SiTicktick className="shrink-0" /> Successfully created your account!
         </div>
       )}
       {errormessage && (
-        <div className="fixed top-5 left-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-3 transition-all duration-300 animate-slide-in">
-          <MdErrorOutline />
+        <div
+          className="animate-slide-down fixed left-1/2 top-5 z-50 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-lg bg-red-600 px-5 py-3 text-sm font-medium text-white shadow-xl shadow-red-900/15"
+          role="alert"
+        >
+          <MdErrorOutline className="shrink-0 text-lg" />
           {errormessage}
         </div>
       )}
-      <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 h-auto">
-        <div className="mb-10">
-          <img
-            src={galfarlogo}
-            alt="Galfar Logo"
-            className="h-20 w-auto object-fill"
-          />
+      <div className="w-full min-w-0">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700/65">
+              Streamlined Management Approvals
+            </p>
+          </div>
         </div>
 
-        <div className="w-[400px] max-w-2xl bg-white p-10 rounded-2xl shadow-lg transition-all duration-300 ease-in-out">
+        <div>
           <h2
-            className={`font-semibold text-gray-900 mb-8 text-left ${
-              newuser ? "text-2xl" : "text-3xl"
+            className={`text-left text-[2rem] font-semibold leading-tight tracking-[-0.025em] text-[#07153f] ${
+              newuser ? "text-3xl" : "text-4xl"
             }`}
           >
-            {newuser ? "Create Account" : "Sign in"}
+            {newuser ? "Create your account" : "Welcome back"}
           </h2>
+          <p className="mt-2 max-w-sm text-sm leading-5 text-slate-600">
+            {newuser
+              ? "Enter your details to get started."
+              : "Sign in with your credentials to continue."}
+          </p>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-semibold text-[#0b1b4b]"
+              >
                 Email address
               </label>
               <input
@@ -101,80 +118,75 @@ const Login = () => {
                 type="email"
                 autoComplete="email"
                 required
-                placeholder="Email address*"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="name@galfaremirates.com"
+                className="block h-11 w-full rounded-lg border border-blue-200 bg-white/75 px-4 text-sm text-slate-950 shadow-sm transition placeholder:text-slate-500 hover:border-blue-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+              <div className="mb-2 flex items-center justify-between gap-4">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-[#0b1b4b]"
+                >
+                  Password
+                </label>
+                <NavLink
+                  to={`/resetpwd?email=${email}`}
+                  type="button"
+                  className="shrink-0 text-xs font-semibold text-blue-700 transition hover:text-blue-900 hover:underline hover:underline-offset-4 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 sm:text-sm"
+                >
+                  Forgot password?
+                </NavLink>
+              </div>
               <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete={newuser ? "new-password" : "current-password"}
                 required
-                placeholder="Password*"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Enter your password"
+                className="block h-11 w-full rounded-lg border border-blue-200 bg-white/75 px-4 text-sm text-slate-950 shadow-sm transition placeholder:text-slate-500 hover:border-blue-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
-            <div className="flex flex-col items-start text-sm gap-2 mb-4">
-              <NavLink
-                to={`/resetpwd?email=${email}`}
-                type="button"
-                className="text-gray-700 hover:text-indigo-600 underline-offset-2 hover:underline cursor-pointer"
-              >
-                Forgot your password?
-              </NavLink>
-
-              <div className="text-gray-700">
-                {newuser
-                  ? "Already have an account?"
-                  : "Contact Admin for new accounts!"}
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent
-                         rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700
-                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
-              >
-                {" "}
-                {(isLoading || isRegLoading) && (
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    ></path>
-                  </svg>
-                )}
-                {newuser ? "Sign Up" : "Sign In"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="flex h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm shadow-blue-950/20 transition hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/25 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {(isLoading || isRegLoading) && (
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+              )}
+              {newuser ? "Sign Up" : "Sign In"}
+            </button>
           </form>
+
+          <div className="mt-6 border-t border-slate-300/80 pt-4 text-center text-xs leading-5 text-slate-600">
+            {newuser
+              ? "Already have an account? Sign in with your existing credentials."
+              : "Need an account? Contact administrator for access."}
+          </div>
         </div>
       </div>
     </div>

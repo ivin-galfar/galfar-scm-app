@@ -1,11 +1,6 @@
 import { useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
-import {
-  FaFileDownload,
-  FaFileUpload,
-  FaPlus,
-  FaUndoAlt,
-} from "react-icons/fa";
+import { FaFileUpload, FaPlus, FaUndoAlt } from "react-icons/fa";
 import {
   useAllParticulars,
   usecolumns,
@@ -37,6 +32,7 @@ import { IoMdSave } from "react-icons/io";
 import { GrRevert } from "react-icons/gr";
 import { IoSave } from "react-icons/io5";
 import Alerts from "./Alerts";
+import { LuUndo2 } from "react-icons/lu";
 
 const StatementHeader = () => {
   const { formData, setFormData, setTableData, resetData, tableData } =
@@ -390,6 +386,12 @@ const StatementHeader = () => {
     }
   }, [location.state]);
 
+  const showEditAction =
+    formData.created_at != "" && formData.status === "created" && !isRecalled;
+  const showRecallAction =
+    formData.created_at != "" &&
+    !["approved", "review", "rejected", "created"].includes(formData.status);
+
   return (
     <div>
       <form className="flex max-w-full h-1/4 p-5">
@@ -713,8 +715,9 @@ const StatementHeader = () => {
             </form.Field>
           </div>
         </div>
-        <div className="flex w-1/3 items-center h-56 pl-10 justify-between">
-          <div>
+        <div className="flex h-56 min-w-0 w-1/3 flex-col pl-4">
+          <div aria-hidden="true" className="h-12 shrink-0" />
+          <div className="min-w-0">
             <form.Field
               name="date"
               validators={{
@@ -809,19 +812,23 @@ const StatementHeader = () => {
               )}
             </form.Field>
           </div>
-          <div className="flex  gap-2 pl-10">
-            {userInfo?.is_admin ? (
-              <div className="block gap-2">
+          <div className="mt-2 flex min-w-0 gap-2 ">
+            {userInfo?.is_admin && (
+              <div className="flex min-w-0 w-full items-center gap-2 justify-between">
                 <label
                   htmlFor="receiptfile"
-                  className={`flex gap-2 text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg ${formData?.created_at && isFreeze && !isReview ? "cursor-auto" : "cursor-pointer"}  hover:bg-blue-200 transition-all`}
+                  className={`relative inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-blue-300 bg-blue-50 px-4 text-sm font-semibold text-blue-700 shadow-sm transition focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-2 ${
+                    formData?.created_at && isFreeze && !isReview
+                      ? "cursor-not-allowed opacity-60"
+                      : "cursor-pointer hover:border-blue-400 hover:bg-blue-100"
+                  }`}
                 >
+                  <FaFileUpload size={15} />
                   Upload File
-                  <FaFileUpload size={20} />
                   {Array.isArray(formData?.file) &&
                     formData?.file?.filter((f) => f.trim() !== "").length >
                       0 && (
-                      <span className="relative -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-bounce z-10">
+                      <span className="absolute -right-2 -top-2 z-10 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow">
                         {formData?.file.length}
                       </span>
                     )}
@@ -835,20 +842,31 @@ const StatementHeader = () => {
                   onChange={handleFileUpload}
                   disabled={isFreeze && !isReview}
                 />
-                <div className="pt-5 flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  {showEditAction ? (
+                    <button
+                      type="button"
+                      className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-blue-300 bg-blue-50 px-4 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-100"
+                      onClick={() => {
+                        resetFreeze();
+                        setIsEditing();
+                      }}
+                    >
+                      <MdModeEdit />
+                      Edit Statement
+                    </button>
+                  ) : showRecallAction ? (
+                    <button
+                      type="button"
+                      className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-800 shadow-sm transition hover:border-amber-400 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+                      onClick={setIsAlerted}
+                    >
+                      <LuUndo2 size={15} title="Recall" />
+                      Recall
+                    </button>
+                  ) : null}
                   <button
-                    type="button"
-                    className={`p-2 px-4 py-2 rounded-lg flex items-center gap-2 bg-blue-50 cursor-pointer hover:bg-blue-100 active:bg-blue-200 ${formData.created_at == "" || formData.status != "created" || isRecalled ? "invisible" : ""} `}
-                    onClick={() => {
-                      resetFreeze();
-                      setIsEditing();
-                    }}
-                  >
-                    <MdModeEdit />
-                    Edit Statement
-                  </button>
-                  <button
-                    className={`text-xl text-gray-600 ${isEditing || isReview ? "cursor-pointer hover:text-gray-800 " : ""} ${(formData.created_at == "" || formData.status != "created") && !isRecalled && !isReview ? "invisible" : ""}`}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-700 shadow-sm transition hover:border-green-300 hover:bg-green-100 ${isEditing || isReview ? "cursor-pointer" : ""} ${(formData.created_at == "" || formData.status != "created") && !isRecalled && !isReview ? "invisible" : ""}`}
                     onClick={() => {
                       handleSave();
                       resetIsEditing();
@@ -858,57 +876,8 @@ const StatementHeader = () => {
                   >
                     <IoSave size={20} color="green" title="save" />
                   </button>
-                  <button
-                    type="button"
-                    className={`${!isEditing ? "cursor-pointer hover:text-gray-800 " : ""} ${formData.created_at != "" && formData.status != "approved" && formData.status != "review" && formData.status != "rejected" && formData.status != "created" ? "visible" : "invisible"}`}
-                    onClick={setIsAlerted}
-                  >
-                    <FaUndoAlt size={15} title="Recall" />
-                  </button>
                 </div>
               </div>
-            ) : (
-              <>
-                {Array.isArray(formData?.file) &&
-                  formData.file?.filter((f) => f.trim() !== "").length > 0 &&
-                  (formData?.file?.length <= 1 ? (
-                    <div className="relative flex items-center gap-2">
-                      {formData.file.map((fileurl, index) => (
-                        <a
-                          key={index}
-                          href={fileurl}
-                          target="_blank"
-                          download
-                          className="flex items-center gap-2 text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-200 transition-all"
-                        >
-                          View Attachment {index + 1}
-                          <FaFileDownload size={20} className="relative" />
-                        </a>
-                      ))}
-                      <span className="absolute -top-6 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-bounce z-10">
-                        {formData?.file.length}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="relative flex flex-wrap gap-1 max-w-full">
-                      {formData.file?.map((fileurl, index) => (
-                        <a
-                          key={index}
-                          href={fileurl}
-                          target="_blank"
-                          download
-                          className="flex items-center gap-10 text-xs bg-blue-100 text-blue-700 px-2 py-1 max-w-[48%] rounded-md cursor-pointer hover:bg-blue-200 transition-all flex-shrink min-w-0 truncate"
-                        >
-                          <span>Download Attachment {index + 1}</span>
-                          <FaFileDownload size={16} className="relative" />
-                        </a>
-                      ))}
-                      <span className="absolute -top-5 right-0 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-bounce z-10">
-                        {formData.file?.length}
-                      </span>
-                    </div>
-                  ))}
-              </>
             )}
           </div>
           <div />

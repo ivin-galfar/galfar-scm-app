@@ -3,17 +3,10 @@ import {
   flexRender,
   useTable,
 } from "@tanstack/react-table";
-import {
-  createExpandedRowModel,
-  createPaginatedRowModel,
-  rowExpandingFeature,
-  rowPaginationFeature,
-  tableFeatures,
-} from "@tanstack/table-core";
 import { usePagination } from "../store/statementStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link } from "react-router-dom";
-import { FaArrowCircleRight } from "react-icons/fa";
+import { LuEye } from "react-icons/lu";
 import {
   formatDateDMY,
   getPath,
@@ -25,6 +18,7 @@ import { GetAnalyticsData } from "../APIs/api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { MdRestartAlt } from "react-icons/md";
+import { getInitiatorCapabilities } from "../Helpers/initiatorCapabilities";
 
 const PendingDashboard = () => {
   const { pagination, setPageIndex, setPageSize } = usePagination();
@@ -33,7 +27,8 @@ const PendingDashboard = () => {
   const userInfo = useUserInfo();
   const isAdmin = userInfo?.is_admin;
   const roles = userInfo?.role || [];
-  const { data, isLoading } = useQuery({
+  const initiatorCapabilities = getInitiatorCapabilities(roles);
+  const { data } = useQuery({
     queryKey: ["analytics-approvals", userInfo?.token],
     queryFn: () => GetAnalyticsData(userInfo),
     enabled: !!userInfo,
@@ -55,11 +50,17 @@ const PendingDashboard = () => {
         if (roles.includes("initlg")) {
           return item.type === "logistics";
         }
-        if (roles.includes("initpr") || roles.includes("initdc")) {
-          return item.type === "ioc";
+        const initiatorTypes = [];
+        if (initiatorCapabilities.demob || initiatorCapabilities.hwa) {
+          initiatorTypes.push("ioc");
+        } else if (initiatorCapabilities.generalFNIOC) {
+          initiatorTypes.push("filenote", "ioc");
         }
-        if (roles.every((v) => v.includes("initfn"))) {
-          return item.type === "filenote" || item.type === "ioc";
+        if (initiatorCapabilities.fleetRequest) {
+          initiatorTypes.push("fleet request");
+        }
+        if (initiatorTypes.length) {
+          return initiatorTypes.includes(item.type);
         }
 
         return false;
@@ -78,7 +79,7 @@ const PendingDashboard = () => {
     columnHelper.accessor((row) => row?.doc_no, {
       id: "doc_id",
       meta: { className: "w-50  whitespace-pre-wrap break-words" },
-      header: "Doc. No.",
+      header: "Document No.",
       cell: (info) => {
         const value = info.row.original;
         let formatted_doc = "";
@@ -94,8 +95,9 @@ const PendingDashboard = () => {
         } else if (value.label == "File Note" || value.label == "IOC") {
           formatted_doc = value.id;
           category = value.category;
+        } else if (value.label == "Fleet Request") {
+          formatted_doc = value.doc_no;
         }
-
         return `${category ? category + "/" : ""}${formatted_doc} `;
       },
     }),
@@ -137,8 +139,8 @@ const PendingDashboard = () => {
   const unique_labels = [...new Set(filteredItems?.map((t) => t.label))];
 
   return (
-    <main className="min-w-0 min-h-0 flex-1 overflow-x-hidden bg-gradient-to-br from-muted/50 via-background to-muted/20 px-3 py-4 sm:px-5 lg:h-full lg:px-6 lg:py-3">
-      <section className=" rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <main className="dashboard-shell min-h-0 min-w-0 flex-1 overflow-x-hidden bg-slate-50 px-2 py-2 sm:px-4">
+      <section className="mx-auto flex h-full max-w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
         <header className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-slate-900">
@@ -198,7 +200,7 @@ const PendingDashboard = () => {
 
         <div className="flex-grow ">
           <div className="flex-grow w-full">
-            <div className="flex border-b justify-between items-center border-gray-300 mb-4">
+            <div className="flex items-center justify-between border-b border-gray-300">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="top-0 z-10 sticky  bg-gray-50">
                   {table.getHeaderGroups().map((headerGroup) => (
@@ -238,10 +240,10 @@ const PendingDashboard = () => {
                     table.getRowModel().rows.map((row) => (
                       <tr
                         key={row.id}
-                        className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100 ${
+                        className={`odd:bg-slate-50 even:bg-white transition-colors hover:bg-blue-50/70 ${
                           row.original?.deleted
                             ? row.original?.deleted != 0
-                              ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                              ? "!bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
                               : ""
                             : ""
                         }`}
@@ -260,14 +262,14 @@ const PendingDashboard = () => {
                           ),
                         )}
                         <td className="border-gray-300 border-b px-2 py-2 text-sm text-gray-700 text-center">
-                          <div className="flex items-center justify-center gap-4">
+                          <div className="flex items-center justify-center gap-1.5">
                             <Link
-                              className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
+                              className="inline-flex h-7 items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100"
                               // onClick={() => setNewfn(false)}
                               to={`/${getPath(row.original.label)}/${row.original.id}`}
                               onClick={setIsClicked}
                             >
-                              View <FaArrowCircleRight />
+                              <LuEye size={14} /> View
                             </Link>
                           </div>
                         </td>
@@ -283,19 +285,19 @@ const PendingDashboard = () => {
           </div>
         </div>
 
-        <div className={`flex justify-between p-2`}>
-          <div className="ml-2 flex items-center text-sm text-gray-700 font-medium">
+        <div className="flex flex-col gap-2 border-t border-slate-200 bg-slate-50 px-1 py-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center text-sm font-semibold text-slate-600">
             Total Number of Records: {selectedFilteredItems?.length}
           </div>
 
-          <div className="flex items-center gap-2 ">
+          <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
             <select
               value={pagination.pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setPageIndex(0);
               }}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
+              className="rounded-md border border-slate-300 bg-white px-1 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             >
               {[5, 10, 20, 50].map((size) => (
                 <option key={size} value={size}>
@@ -306,7 +308,7 @@ const PendingDashboard = () => {
             <button
               onClick={() => setPageIndex(0)}
               disabled={pagination.pageIndex == 0}
-              className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 cursor-pointer ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
+              className={`rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
             >
               «
             </button>
@@ -314,12 +316,12 @@ const PendingDashboard = () => {
             <button
               onClick={() => setPageIndex(pagination.pageIndex - 1)}
               disabled={pagination.pageIndex == 0}
-              className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
+              className={`rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
             >
               ‹ Prev
             </button>
 
-            <span className="text-sm px-2">
+            <span className="px-1.5 text-sm text-slate-600">
               Page <strong>{total != 0 ? pagination.pageIndex + 1 : 0}</strong>{" "}
               of <strong>{Math.ceil(total / pagination.pageSize)}</strong>
             </span>
@@ -330,7 +332,7 @@ const PendingDashboard = () => {
                 pagination.pageIndex + 1 >=
                 Math.ceil(total / pagination.pageSize)
               }
-              className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+              className={`rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 ${
                 pagination.pageIndex + 1 >=
                 Math.ceil(total / pagination.pageSize)
                   ? "cursor-auto"
@@ -348,7 +350,7 @@ const PendingDashboard = () => {
                 pagination.pageIndex ==
                 Math.max(Math.ceil(total / pagination.pageSize) - 1, 0)
               }
-              className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+              className={`rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 ${
                 pagination.pageIndex ==
                 Math.max(Math.ceil(total / pagination.pageSize) - 1, 0)
                   ? "cursor-auto"

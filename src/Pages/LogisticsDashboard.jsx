@@ -28,8 +28,11 @@ import {
   useSelectedProject,
   useStatusFilter,
 } from "../store/logisticsStore";
-import { IoPrint, IoWarningOutline } from "react-icons/io5";
+import { IoWarningOutline } from "react-icons/io5";
+import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import DashboardButton from "../Components/DashboardButton";
+import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
+import DashboardStatusNav from "../Components/DashboardStatusNav";
 import {
   is_buyrent,
   is_gm,
@@ -38,7 +41,6 @@ import {
 } from "../Helpers/dept_helper";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaArrowCircleRight, FaTrash } from "react-icons/fa";
 import Alerts from "../Components/Alerts";
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
@@ -111,7 +113,7 @@ const LogisticsDashboard = () => {
         searchcsname,
       ),
     enabled: !!userInfo,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const handleSearch = (e) => {
@@ -163,7 +165,7 @@ const LogisticsDashboard = () => {
         resetshowtoast();
         clearErrorMessage();
       }, 1000);
-      queryClient.invalidateQueries(["csid"]);
+      queryClient.invalidateQueries({ queryKey: ["csid"] });
       setDeleteStatement({ open: false });
     } catch (error) {
       const message = error?.response?.data.message || error.message;
@@ -252,11 +254,14 @@ const LogisticsDashboard = () => {
   const columns = [
     columnHelper.accessor("sl", {
       header: "Sl. No.",
+      meta: {
+        className: "w-12 whitespace-nowrap text-center !px-1",
+      },
       cell: ({ row }) => row.index + 1,
     }),
     columnHelper.accessor((row) => row?.id, {
       id: "csno",
-      header: "Doc. No.",
+      header: "Document No.",
       cell: (info) => info.getValue() || "-",
     }),
     columnHelper.accessor((row) => row?.shipment_no, {
@@ -420,89 +425,61 @@ const LogisticsDashboard = () => {
   });
 
   return (
-    <div className="flex-grow w-full px-5">
-      <div className="flex border-b  border-gray-300 mb-4">
-        {[
-          "All",
-          "Approved",
-          "Rejected",
-          "Pending",
-          "Under Review",
-          "Approval History",
-        ].map((tab) => {
-          const isActive =
-            (tab === "All" && statusfilter === "All") ||
-            (tab === "Approved" && statusfilter === "Approved") ||
-            (tab === "Rejected" && statusfilter === "Rejected") ||
-            (tab === "Pending" && statusfilter === "Pending") ||
-            (tab === "Under Review" && statusfilter === "Review") ||
-            (tab === "Approval History" && statusfilter === "Approval History");
+    <main className="dashboard-shell relative flex h-0 min-h-0 w-full flex-grow flex-col overflow-hidden bg-slate-50 px-2 pb-0 pt-2 sm:px-3">
+      <div className="mb-3 flex shrink-0 flex-col gap-2 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2 lg:flex-row lg:items-center lg:justify-between">
+        <DashboardStatusNav>
+          {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+            (tab) => {
+              const isActive =
+                (tab === "All" && statusfilter === "All") ||
+                (tab === "Approved" && statusfilter === "Approved") ||
+                (tab === "Rejected" && statusfilter === "Rejected") ||
+                (tab === "Pending" && statusfilter === "Pending") ||
+                (tab === "Under Review" && statusfilter === "Review");
 
-          let activeColor = "border-blue-500 text-blue-600";
-          let inactiveColor =
-            "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+              return (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    switch (tab) {
+                      case "All":
+                        setStatusFilter("All");
+                        setPageIndex(0);
+                        break;
+                      case "Approved":
+                        setStatusFilter("Approved");
+                        setPageIndex(0);
+                        break;
+                      case "Rejected":
+                        setStatusFilter("Rejected");
+                        setPageIndex(0);
+                        break;
+                      case "Pending":
+                        setStatusFilter("Pending");
+                        setPageIndex(0);
+                        break;
+                      case "Under Review":
+                        setStatusFilter("Review");
+                        setPageIndex(0);
+                        break;
+                      case "Approval History":
+                        setStatusFilter("Approval History");
+                        setPageIndex(0);
+                        break;
+                    }
+                  }}
+                  className={getDashboardStatusTabClass(tab, isActive)}
+                >
+                  {tab}
+                </button>
+              );
+            },
+          )}
+        </DashboardStatusNav>
 
-          if (tab === "Approved") {
-            activeColor = "border-green-500 text-green-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-green-500";
-          } else if (tab === "Rejected") {
-            activeColor = "border-red-500 text-red-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-red-500";
-          } else if (tab === "Pending") {
-            activeColor = "border-yellow-500 text-yellow-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-yellow-500";
-          } else if (tab === "Approval History") {
-            activeColor = "border-cyan-500 text-cyan-600";
-            inactiveColor =
-              "border-transparent text-gray-500 hover:text-cyan-500";
-          }
-
-          return (
-            <button
-              key={tab}
-              onClick={() => {
-                switch (tab) {
-                  case "All":
-                    setStatusFilter("All");
-                    setPageIndex(0);
-                    break;
-                  case "Approved":
-                    setStatusFilter("Approved");
-                    setPageIndex(0);
-                    break;
-                  case "Rejected":
-                    setStatusFilter("Rejected");
-                    setPageIndex(0);
-                    break;
-                  case "Pending":
-                    setStatusFilter("Pending");
-                    setPageIndex(0);
-                    break;
-                  case "Under Review":
-                    setStatusFilter("Review");
-                    setPageIndex(0);
-                    break;
-                  case "Approval History":
-                    setStatusFilter("Approval History");
-                    setPageIndex(0);
-                    break;
-                }
-              }}
-              className={`px-4 py-2 -mb-px border-b-2 font-medium cursor-pointer transition-colors ${
-                isActive ? activeColor : inactiveColor
-              }`}
-            >
-              {tab}
-            </button>
-          );
-        })}
-
-        <div className="flex justify-between ml-auto">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
           {isLogistics && (isPlant || isBuyvsrent) && (
-            <div className="flex px-4 py-2 -mb-px items-center justify-center ml-auto">
+            <div className="flex items-center">
               <DashboardButton />
             </div>
           )}
@@ -518,10 +495,7 @@ const LogisticsDashboard = () => {
         </div>
       </div>
       {statusfilter !== "Approval History" && (
-        <div
-          className="overflow-y-auto  bg-white shadow rounded border border-gray-200"
-          style={{ height: `calc(93vh - 140px)` }}
-        >
+        <div className="min-h-0 flex-1 overflow-auto rounded border border-gray-200 bg-white shadow [scrollbar-width:thin]">
           <Loading isLoading={isLoading} />
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="top-0 z-10 sticky  bg-gray-50">
@@ -530,14 +504,14 @@ const LogisticsDashboard = () => {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="border-b border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700"
+                      className="whitespace-nowrap border-b border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-700"
                     >
                       {header.isPlaceholder
                         ? null
                         : header.column.columnDef.header}
                     </th>
                   ))}
-                  <th className=" border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center">
+                  <th className="whitespace-nowrap border-b border-gray-300 px-2 py-2 text-center text-sm font-semibold text-gray-700">
                     Action
                   </th>
                   <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
@@ -548,7 +522,7 @@ const LogisticsDashboard = () => {
                   </th>
                   <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap">
                     {" "}
-                    Approvals History
+                    Timelines
                   </th>
                   <th className="border-b border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 text-center text-nowrap"></th>
                 </tr>
@@ -568,9 +542,9 @@ const LogisticsDashboard = () => {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className={`even:bg-white odd:bg-gray-50 hover:bg-blue-100   ${
+                    className={`odd:bg-slate-50 even:bg-white transition-colors hover:bg-blue-50/70 ${
                       row.original.deleted !== 0
-                        ? "bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
+                        ? "!bg-red-50 text-red-400 border-l-4 border-red-400/60 opacity-60 grayscale"
                         : ""
                     }`}
                   >
@@ -588,23 +562,30 @@ const LogisticsDashboard = () => {
                       ),
                     )}
 
-                    <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                      <div className="flex items-center justify-center gap-4">
+                    <td className="whitespace-nowrap border-b border-gray-300 px-2 py-2 text-center text-sm text-gray-700">
+                      <div className="flex items-center justify-center gap-1">
                         <Link
-                          className="px-2 py-1 bg-blue-500 text-white rounded inline-flex justify-center items-center gap-2 hover:bg-blue-600 cursor-pointer"
+                          className="inline-flex h-7 items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-1.5 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100"
                           to={`/lstatements/${row.original?.id}`}
                         >
-                          View <FaArrowCircleRight />
+                          <LuEye size={14} /> View
                         </Link>
-                        <IoPrint
-                          className={
+                        <button
+                          type="button"
+                          disabled={
+                            !(
+                              userInfo?.is_admin ||
+                              userInfo.role?.includes("incharge") ||
+                              isgm
+                            )
+                          }
+                          className={`inline-flex h-7 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md border px-1.5 text-xs font-semibold transition ${
                             userInfo?.is_admin ||
                             userInfo.role?.includes("incharge") ||
                             isgm
-                              ? "text-black cursor-pointer"
-                              : "text-gray-400 pointer-events-none cursor-not-allowed"
-                          }
-                          size={25}
+                              ? "cursor-pointer border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                              : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                          }`}
                           onClick={async () => {
                             const { formData, tableData } = await getstatement(
                               row.original?.id,
@@ -612,10 +593,14 @@ const LogisticsDashboard = () => {
 
                             handlePrint(formData, tableData, userInfo);
                           }}
-                        />
-                        <FaTrash
-                          className={`mr-1 text-red-500  ${!userInfo?.is_admin ? "hidden" : row.original.status === "Approved" ? "cursor-not-allowed  opacity-50 scale-95" : "cursor-pointer"} `}
-                          size={16}
+                        >
+                          <LuFileDown size={14} /> PDF
+                        </button>
+                        <button
+                          type="button"
+                          className={`inline-flex h-7 w-7 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-700 transition hover:border-red-300 hover:bg-red-100 ${!userInfo?.is_admin ? "hidden" : row.original.status === "Approved" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                          aria-label="Delete statement"
+                          title="Delete statement"
                           onClick={() => {
                             if (row.original.status === "Approved") return;
                             // setdeleteMr(row.original.formData.id);
@@ -624,7 +609,9 @@ const LogisticsDashboard = () => {
                               open: true,
                             });
                           }}
-                        />
+                        >
+                          <LuTrash2 size={14} />
+                        </button>
                       </div>
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
@@ -666,21 +653,21 @@ const LogisticsDashboard = () => {
               )}
             </tbody>
           </table>
-          <div className={`flex justify-between`}>
-            <div className="ml-2 flex items-center text-sm text-gray-700 font-medium">
+          <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-slate-200 bg-slate-50 px-1 py-1 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center text-sm font-semibold text-slate-600">
               Total Number of Records: {receiptscount}
             </div>
 
-            <div className="flex items-center gap-2 p-2 justify-end ">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               <div className="flex items-center gap-2">
-                <span className="text-sm">Rows per page:</span>
+                <span className="text-sm text-slate-600">Rows per page:</span>
                 <select
                   value={pagination.pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value));
                     setPageIndex(0);
                   }}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="h-6 rounded-md border border-slate-300 bg-white px-1 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   {[5, 10, 20, 50].map((size) => (
                     <option key={size} value={size}>
@@ -689,11 +676,11 @@ const LogisticsDashboard = () => {
                   ))}
                 </select>
               </div>
-              <div className="flex items-center gap-2 ">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setPageIndex(0)}
                   disabled={pagination.pageIndex == 0}
-                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 cursor-pointer ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
+                  className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex == 0 ? "cursor-auto" : "cursor-pointer"}`}
                 >
                   «
                 </button>
@@ -701,12 +688,12 @@ const LogisticsDashboard = () => {
                 <button
                   onClick={() => setPageIndex(pagination.pageIndex - 1)}
                   disabled={pagination.pageIndex == 0}
-                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
+                  className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${pagination.pageIndex != 0 ? "cursor-pointer" : ""}`}
                 >
                   ‹ Prev
                 </button>
 
-                <span className="text-sm px-2">
+                <span className="px-1.5 text-sm text-slate-600">
                   Page{" "}
                   <strong>
                     {receiptscount != 0 ? pagination.pageIndex + 1 : 0}
@@ -723,7 +710,7 @@ const LogisticsDashboard = () => {
                     pagination.pageIndex + 1 >=
                     Math.ceil(receiptscount / pagination.pageSize)
                   }
-                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                  className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
                     pagination.pageIndex + 1 >=
                     Math.ceil(receiptscount / pagination.pageSize)
                       ? "cursor-auto"
@@ -746,7 +733,7 @@ const LogisticsDashboard = () => {
                       0,
                     )
                   }
-                  className={`border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-40 ${
+                  className={`h-6 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 motion-reduce:transition-none ${
                     pagination.pageIndex ==
                     Math.max(
                       Math.ceil(receiptscount / pagination.pageSize) - 1,
@@ -790,7 +777,7 @@ const LogisticsDashboard = () => {
           <SiTicktick /> {errormessage}
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

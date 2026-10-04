@@ -1,4 +1,4 @@
-import { SPECIAL_PROJECTS } from "../../config/ENV";
+import { SPECIAL_PROJECTS } from "../../config/ENV.js";
 
 export const roles = {
   INITIATOR: {

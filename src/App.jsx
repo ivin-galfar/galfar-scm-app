@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation, Navigate } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import Home from "./Components/Home";
 import Header from "./Components/Header";
@@ -16,17 +16,25 @@ import { Suspense, useEffect } from "react";
 import BrStatement from "./Pages/BrStatement";
 import BRDashboards from "./Pages/BRDashboards";
 import FileNote from "./Pages/FileNote";
-import { is_fnote } from "./Helpers/dept_helper";
 import FnDashboards from "./Pages/FnDashboards";
 import { APP_VERSION } from "../config/ENV";
 import ResetPwd from "./Pages/ResetPage";
 import PendingDashboard from "./Pages/PendingDashboard";
+import EquipmentMR from "./Pages/FleetRequest";
+import FleetRequestRoute from "./Components/FleetRequestRoute";
+import FRDashboards from "./Pages/FRDashboards";
+import AdminRoute from "./Components/AdminRoute";
+import NavigationPermissionRoute from "./Components/NavigationPermissionRoute";
 
 const App = () => {
   const location = useLocation();
   const userInfo = useUserInfo();
   const isLoginPage = location.pathname === "/login";
   const isresetPage = location.pathname === "/resetpwd";
+  const fnDashboardPermission =
+    new URLSearchParams(location.search).get("view") === "projects-ioc"
+      ? "canAccessProjects"
+      : "canAccessFNIOC";
   useEffect(() => {
     const storedAppVersion = localStorage.getItem("app_version");
 
@@ -38,7 +46,7 @@ const App = () => {
   }, []);
   return (
     <div
-      className={`${location.pathname !== "/login" && !isresetPage && "pl-12"} flex min-h-screen flex-col`}
+      className={`app-shell ${location.pathname !== "/login" && !isresetPage && "pl-12"} flex min-h-screen flex-col`}
     >
       {!userInfo && !isresetPage && (
         <FloatingNotification
@@ -61,18 +69,20 @@ const App = () => {
             <Route
               path="/particulars/:dept_id"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <Particulars />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
 
             <Route
               path="/receipts"
               element={
-                <ProtectedRoute>
+                <NavigationPermissionRoute
+                  permission={["canAccessPlant", "canAccessHiringAsset"]}
+                >
                   <Receipts />
-                </ProtectedRoute>
+                </NavigationPermissionRoute>
               }
             />
             <Route
@@ -94,39 +104,114 @@ const App = () => {
             <Route
               path="/receipts/:mrnumber"
               element={
-                <ProtectedRoute>
+                <NavigationPermissionRoute
+                  permission={["canAccessPlant", "canAccessHiringAsset"]}
+                >
                   <Receipts />
-                </ProtectedRoute>
+                </NavigationPermissionRoute>
               }
             />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route
+              path="/dashboard"
+              element={
+                <NavigationPermissionRoute
+                  permission={["canAccessPlant", "canAccessHiringAsset"]}
+                >
+                  <Dashboard />
+                </NavigationPermissionRoute>
+              }
+            />
             <Route path="/dashboardlg" element={<LogisticsDashboard />} />
-            <Route path="/dashboardbr" element={<BRDashboards />} />
-            <Route path="/dashboardfn" element={<FnDashboards />} />
+            <Route
+              path="/dashboardbr"
+              element={
+                <NavigationPermissionRoute
+                  permission={["canAccessPlant", "canAccessBuyVsRent"]}
+                >
+                  <BRDashboards />
+                </NavigationPermissionRoute>
+              }
+            />
+            <Route
+              path="/dashboardfn"
+              element={
+                <NavigationPermissionRoute permission={fnDashboardPermission}>
+                  <FnDashboards />
+                </NavigationPermissionRoute>
+              }
+            />
             <Route path="/pendingdashboard" element={<PendingDashboard />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/resetpwd" element={<ResetPwd />} />
-            <Route path="/brstatement" element={<BrStatement />} />
+            <Route
+              path="/brstatement"
+              element={
+                <NavigationPermissionRoute
+                  permission={["canAccessPlant", "canAccessBuyVsRent"]}
+                >
+                  <BrStatement />
+                </NavigationPermissionRoute>
+              }
+            />
+            <Route
+              path="/fleetrequest"
+              element={
+                <NavigationPermissionRoute permission="canAccessProjects">
+                  <FleetRequestRoute>
+                    <EquipmentMR />
+                  </FleetRequestRoute>
+                </NavigationPermissionRoute>
+              }
+            />
+            <Route
+              path="/fleetrequest/:id"
+              element={
+                <NavigationPermissionRoute permission="canAccessProjects">
+                  <FleetRequestRoute>
+                    <EquipmentMR />
+                  </FleetRequestRoute>
+                </NavigationPermissionRoute>
+              }
+            />
+            <Route
+              path="/dashboardfr/"
+              element={
+                <NavigationPermissionRoute permission="canAccessProjects">
+                  <FleetRequestRoute>
+                    <FRDashboards />
+                  </FleetRequestRoute>
+                </NavigationPermissionRoute>
+              }
+            />
 
             <>
               <Route
                 path="/filenote"
                 element={
-                  <ProtectedRoute>
+                  <NavigationPermissionRoute permission="canAccessFNIOC">
                     <FileNote />
-                  </ProtectedRoute>
+                  </NavigationPermissionRoute>
                 }
               />
               <Route
                 path="/filenote/:fn_no"
                 element={
-                  <ProtectedRoute>
+                  <NavigationPermissionRoute permission="canAccessFNIOC">
                     <FileNote />
-                  </ProtectedRoute>
+                  </NavigationPermissionRoute>
                 }
               />
             </>
-            <Route path="/brstatement/:cs_no" element={<BrStatement />} />
+            <Route
+              path="/brstatement/:cs_no"
+              element={
+                <NavigationPermissionRoute
+                  permission={["canAccessPlant", "canAccessBuyVsRent"]}
+                >
+                  <BrStatement />
+                </NavigationPermissionRoute>
+              }
+            />
           </Routes>
         </Suspense>
       </div>

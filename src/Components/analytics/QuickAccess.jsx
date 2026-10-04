@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import {
   LuArrowLeftRight,
+  LuCarFront,
   LuChevronDown,
   LuFileText,
   LuPackage,
@@ -10,12 +11,14 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDashboardType } from "../../store/logisticsStore";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui";
+import { Card, CardContent } from "./ui";
 import { FaToolbox } from "react-icons/fa";
 import { useQuickAccess } from "../../store/helperStore";
 import { TbHomeMove } from "react-icons/tb";
 import useUserInfo from "../../CustomHooks/useUserInfo";
 import { initiatorRoles } from "../../Helpers/helperfunctions";
+import DashboardSectionHeader from "./DashboardSectionHeader";
+import { getInitiatorCreationOptions } from "../../Helpers/initiatorCapabilities";
 
 const actions = [
   {
@@ -53,6 +56,13 @@ const actions = [
     type: "bvrplant",
     tone: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300",
   },
+  {
+    label: "Fleet Request",
+    icon: LuCarFront,
+    path: "/dashboardfr",
+    type: "bvrplant",
+    tone: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
+  },
 ];
 const QuickAccess = ({ items = actions }) => {
   const { setDashboardType } = useDashboardType();
@@ -62,70 +72,75 @@ const QuickAccess = ({ items = actions }) => {
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const userRoles = userInfo?.role || [];
   const hasRole = (role) => userRoles.includes(role);
+  const initiatorCreationOptions = getInitiatorCreationOptions(userRoles);
   const isInitiator =
     initiatorRoles.some((r) => userRoles.includes(r)) ||
-    userRoles.every((r) => r == "initfn");
+    userRoles.every((role) => role === "initfn");
   const createAction = hasRole("inith")
     ? "receipts"
     : hasRole("inita")
       ? "asset-menu"
       : hasRole("initlg")
         ? "logistics"
-        : ["initpr", "initdc", "initfn"].some(hasRole)
-          ? "filenote"
+        : initiatorCreationOptions.length
+          ? "initiator-options"
           : null;
 
-  const navigateToCreate = (path, intent) => {
+  const navigateToCreate = (path, intent, defaults = {}) => {
     setIsCreateMenuOpen(false);
-    navigate(path, { state: { createNew: intent } });
+    navigate(path, { state: { createNew: intent, ...defaults } });
   };
 
   const renderCreateAction = () => {
     if (!createAction) return null;
 
-    if (createAction === "asset-menu") {
+    if (
+      createAction === "asset-menu" ||
+      (createAction === "initiator-options" &&
+        initiatorCreationOptions.length > 1)
+    ) {
+      const menuOptions =
+        createAction === "asset-menu"
+          ? [
+              { key: "asset", label: "Asset", path: "/receipts", intent: "receipts" },
+              { key: "bvr", label: "Buy vs Rent", path: "/brstatement", intent: "bvr" },
+              { key: "filenote", label: "File Note / IOC", path: "/filenote", intent: "filenote" },
+            ]
+          : initiatorCreationOptions;
       return (
         <div className="relative">
-          <span
+          <button
             type="button"
             onClick={() => setIsCreateMenuOpen((open) => !open)}
-            className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-blue-700 bg-white px-3 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-blue-700 bg-white px-3 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
             aria-expanded={isCreateMenuOpen}
             aria-haspopup="menu"
           >
             <LuPlus size={18} />
             Create New
             <LuChevronDown size={18} />
-          </span>
+          </button>
           {isCreateMenuOpen && (
             <div
               className="absolute right-0 z-20 mt-2 w-36 rounded-lg border border-border bg-background p-1 shadow-lg"
               role="menu"
             >
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm cursor-pointer hover:bg-muted"
-                onClick={() => navigateToCreate("/receipts", "receipts")}
-                role="menuitem"
-              >
-                Asset
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-muted cursor-pointer"
-                onClick={() => navigateToCreate("/brstatement", "bvr")}
-                role="menuitem"
-              >
-                Buy vs Rent
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-muted cursor-pointer"
-                onClick={() => navigateToCreate("/filenote", "filenote")}
-                role="menuitem"
-              >
-                File Note / IOC
-              </button>
+              {menuOptions.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className="w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+                  onClick={() =>
+                    navigateToCreate(option.path, option.intent, {
+                      type: option.type,
+                      category: option.category,
+                    })
+                  }
+                  role="menuitem"
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -135,38 +150,44 @@ const QuickAccess = ({ items = actions }) => {
     const destinations = {
       receipts: ["/receipts", "receipts"],
       logistics: ["/lstatements", "logistics"],
+      fleetrequest: ["/fleetrequest", "fleetrequest"],
       filenote: ["/filenote", "filenote"],
     };
-    const [path, intent] = destinations[createAction];
+    const directOption =
+      createAction === "initiator-options"
+        ? initiatorCreationOptions[0]
+        : null;
+    const [path, intent] = directOption
+      ? [directOption.path, directOption.intent]
+      : destinations[createAction];
 
     return (
-      <span
+      <button
         type="button"
-        onClick={() => navigateToCreate(path, intent)}
+        onClick={() =>
+          navigateToCreate(path, intent, {
+            type: directOption?.type,
+            category: directOption?.category,
+          })
+        }
         className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-blue-700 bg-white px-3 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
       >
         <LuPlus size={18} />
         Create New
-      </span>
+      </button>
     );
   };
 
   return (
-    <Card className="h-full shadow-sm">
-      <CardHeader className="p-4 pb-3">
-        <div className="flex justify-between">
-          <CardTitle className="flex gap-2">
-            <TbHomeMove
-              size={19}
-              className="transition-transform duration-200 group-hover:scale-110"
-              color="green"
-            />
-            Quick Access{" "}
-          </CardTitle>
-          {isInitiator && renderCreateAction()}
-        </div>
-      </CardHeader>
-      <CardContent className="grid grid-cols-3 gap-2 p-3 pt-0">
+    <Card className="h-full  overflow-hidden shadow-sm">
+      <DashboardSectionHeader
+        title="Quick Access"
+        description="Open frequently used workspaces"
+        icon={TbHomeMove}
+        tone="emerald"
+        action={isInitiator ? renderCreateAction() : null}
+      />
+      <CardContent className="ml-2 grid translate-y-1 grid-cols-3 gap-2 justify-items-center  px-6 pb-2 pt-2">
         {items.map(({ label, icon: Icon, path, type, tone }) => (
           <Link
             key={label}

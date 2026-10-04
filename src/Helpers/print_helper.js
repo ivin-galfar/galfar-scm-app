@@ -9,11 +9,359 @@ import {
   getApproverNames,
   getDept,
   getType,
-  isBold,
-} from "./helperfunctions";
+} from "./pdfHelpers";
 import { categoryapprovers, nextRole, roles } from "./roles_helper";
 import { fetchReceipt, getcmpmNames } from "../APIs/api";
 import { SPECIAL_PROJECTS } from "../../config/ENV";
+import { getFleetApprovalFlow } from "./fleetRequestWorkflow";
+
+const pdfText = (value, fallback = "--") => {
+  const text = String(value ?? "").trim();
+  return text || fallback;
+};
+
+const getLatestFleetApproval = (approvals, role) =>
+  [...approvals].reverse().find(
+    (approval) =>
+      String(approval?.role ?? "")
+        .trim()
+        .toUpperCase() === role,
+  );
+
+const isCompletedFleetApproval = (approval, role, flow) => {
+  if (!approval) return false;
+  const status = String(approval.status ?? "")
+    .trim()
+    .toLowerCase();
+  if (["rejected", "review", "recalled", "reverted"].includes(status))
+    return false;
+  const nextRole = flow[flow.indexOf(role) + 1];
+  return nextRole
+    ? status === `pending for ${nextRole.toLowerCase()}`
+    : status === "approved";
+};
+
+const getPendingFleetApprovalRole = (approvals, flow, requestStatus) => {
+  const normalizedRequestStatus = String(requestStatus ?? "")
+    .trim()
+    .toLowerCase();
+  const pendingMatch = normalizedRequestStatus.match(/^pending for\s+(.+)$/);
+  const statusRole = pendingMatch?.[1]?.trim().toUpperCase();
+  if (statusRole && flow.includes(statusRole)) return statusRole;
+
+  if (
+    ["approved", "rejected", "review", "recalled", "reverted"].includes(
+      normalizedRequestStatus,
+    )
+  ) {
+    return null;
+  }
+
+  const lastApproval = approvals.at(-1);
+  const lastStatus = String(lastApproval?.status ?? "")
+    .trim()
+    .toLowerCase();
+  if (["rejected", "review", "recalled", "reverted"].includes(lastStatus)) {
+    return null;
+  }
+
+  const lastRole = String(lastApproval?.role ?? "")
+    .trim()
+    .toUpperCase();
+  const nextRole = flow[flow.indexOf(lastRole) + 1];
+  return nextRole ?? null;
+};
+
+const getFleetApprovalDisplayStatus = (approval, role, flow, pendingRole) => {
+  if (isCompletedFleetApproval(approval, role, flow)) {
+    return "Approved";
+  }
+  const approvalStatus = String(approval?.status ?? "")
+    .trim()
+    .toLowerCase();
+  if (approvalStatus === "rejected") return "Rejected";
+  return role === pendingRole ? "(Pending)" : "--";
+};
+
+export const generateFRPDF = async (
+  fleetRequest,
+  userInfo,
+  emailPdf = false,
+) => {
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 10;
+  const footerHeight = 10;
+  const approvalHeight = 26;
+  const items = Array.isArray(fleetRequest?.items) ? fleetRequest.items : [];
+  const approvals = Array.isArray(fleetRequest?.approver_info)
+    ? fleetRequest.approver_info
+    : [];
+  const workflow = getFleetApprovalFlow(
+    fleetRequest?.project,
+    SPECIAL_PROJECTS,
+  ).filter((role) => role !== "INITIATOR");
+  const projectApproverRoles = workflow.filter((role) =>
+    ["CM", "PM", "PD"].includes(role),
+  );
+  const projectApproverNames = Object.fromEntries(
+    await Promise.all(
+      projectApproverRoles.map(async (role) => {
+        const result = await getcmpmNames(
+          role.toLowerCase(),
+          fleetRequest?.project,
+          userInfo,
+        );
+        const name = Array.isArray(result) ? result[0] : result;
+        return [role.toLowerCase(), String(name ?? "").trim()];
+      }),
+    ),
+  );
+  const approverNames = {
+    ...projectApproverNames,
+    hod: roles.HOD,
+    gm: roles.GM,
+    ceo: roles.CEO,
+  };
+  const approvalFlow = ["INITIATOR", ...workflow];
+  const pendingRole = getPendingFleetApprovalRole(
+    approvals,
+    approvalFlow,
+    fleetRequest?.status,
+  );
+
+  const drawPageHeader = () => {
+    const logoWidth = 60;
+    const logoHeight = 10;
+    doc.addImage(
+      galfarlogo,
+      "PNG",
+      (pageWidth - logoWidth) / 2,
+      3,
+      logoWidth,
+      logoHeight,
+    );
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text("FLEET REQUEST", pageWidth / 2, 20, { align: "center" });
+  };
+
+  const drawPageFooter = (pageNumber) => {
+    doc.setDrawColor(190);
+    doc.line(margin, pageHeight - 8, pageWidth - margin, pageHeight - 8);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(0, 0, 0);
+    doc.text(
+      "This document is electronically generated; signatures are not required for completed digital approvals.",
+      margin,
+      pageHeight - 4,
+    );
+    doc.text(`Page ${pageNumber}`, pageWidth - margin, pageHeight - 4, {
+      align: "right",
+    });
+  };
+
+  drawPageHeader();
+  const detailsTableWidth = 210;
+  const detailsTableMargin = pageWidth - detailsTableWidth;
+  autoTable(doc, {
+    startY: 26,
+    margin: {
+      left: detailsTableMargin,
+      right: detailsTableMargin,
+      bottom: footerHeight + approvalHeight + 2,
+    },
+    tableWidth: detailsTableWidth,
+    theme: "grid",
+    styles: {
+      font: "helvetica",
+      fontSize: 8.5,
+      textColor: [0, 0, 0],
+      cellPadding: { top: 1.25, right: 1.5, bottom: 1.25, left: 1.5 },
+      minCellHeight: 8,
+      overflow: "linebreak",
+      valign: "middle",
+      lineColor: [203, 213, 225],
+      lineWidth: 0.1,
+    },
+    columnStyles: {
+      0: { fontStyle: "bold", fillColor: [226, 232, 240], cellWidth: 28 },
+      1: { cellWidth: 40 },
+      2: { fontStyle: "bold", fillColor: [226, 232, 240], cellWidth: 28 },
+      3: { cellWidth: 40 },
+    },
+    body: [
+      [
+        "Document No.",
+        pdfText(fleetRequest?.doc_id),
+        "Project",
+        pdfText(fleetRequest?.project),
+      ],
+      [
+        "Location",
+        pdfText(fleetRequest?.location),
+        "Request Date",
+        formatDateDDMMYYYY(fleetRequest?.created_at) || "--",
+      ],
+    ],
+  });
+
+  let startY = (doc.lastAutoTable?.finalY ?? 26) + 7;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Fleet Request Items", margin, startY);
+  autoTable(doc, {
+    startY: startY + 3,
+    margin: {
+      left: margin,
+      right: margin,
+      top: 26,
+      bottom: footerHeight + approvalHeight + 2,
+    },
+    tableWidth: pageWidth - margin * 2,
+    theme: "grid",
+    showHead: "everyPage",
+    head: [
+      [
+        "#",
+        "Equipment\nDescription",
+        "Capacity",
+        "CICPA",
+        "Qty",
+        "Required\nFrom",
+        "Rental\nType",
+        "Duration",
+        "Purpose",
+        "Production Qty\nEnvisaged",
+        "Similar Machines\nat Site",
+        "Utilization",
+        "ADNOC\nFitments",
+        "TPI",
+        "Remarks",
+      ],
+    ],
+    body: items.map((item, index) => [
+      item.item_no ?? index + 1,
+      pdfText(item.fleet_description),
+      pdfText(item.capacity),
+      pdfText(item.cicpa),
+      pdfText(item.quantity),
+      formatDateDDMMYYYY(item.required_from) || "--",
+      pdfText(item.rental_type ?? item.rentalType),
+      pdfText(item.duration),
+      pdfText(item.purpose),
+      pdfText(item.production_qty_envisaged),
+      pdfText(item.qty_similar_machines_available),
+      pdfText(item.utilization),
+      pdfText(item.adnoc_fitments ?? item.adnocFitments),
+      pdfText(item.tpi),
+      pdfText(item.remarks),
+    ]),
+    styles: {
+      fontSize: 9,
+      cellPadding: { top: 2.5, right: 1.5, bottom: 2.5, left: 1.5 },
+      minCellHeight: 11,
+      overflow: "linebreak",
+      valign: "middle",
+      textColor: [0, 0, 0],
+      lineColor: [203, 213, 225],
+      lineWidth: 0.1,
+    },
+    headStyles: {
+      fillColor: [226, 232, 240],
+      textColor: [0, 0, 0],
+      fontStyle: "bold",
+      fontSize: 8.5,
+      minCellHeight: 14,
+      overflow: "linebreak",
+      halign: "center",
+      valign: "middle",
+    },
+    columnStyles: {
+      0: { cellWidth: 5, halign: "center" },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 17 },
+      3: { cellWidth: 14 },
+      4: { cellWidth: 9, halign: "center" },
+      5: { cellWidth: 19 },
+      6: { cellWidth: 16 },
+      7: { cellWidth: 17 },
+      8: { cellWidth: 30 },
+      9: { cellWidth: 19, halign: "center" },
+      10: { cellWidth: 19, halign: "center" },
+      11: { cellWidth: 18, halign: "center" },
+      12: { cellWidth: 16, halign: "center" },
+      13: { cellWidth: 14, halign: "center" },
+      14: { cellWidth: 35 },
+    },
+    didDrawPage: () => {
+      drawPageHeader();
+    },
+  });
+
+  const availableWidth = pageWidth - margin * 2;
+  const blockWidth = availableWidth / workflow.length;
+  const approvalTop = pageHeight - footerHeight - approvalHeight + 2;
+
+  workflow.forEach((role, index) => {
+    const normalizedRole = role.toLowerCase();
+    const approval = getLatestFleetApproval(approvals, role);
+    const approvalStatus = getFleetApprovalDisplayStatus(
+      approval,
+      role,
+      approvalFlow,
+      pendingRole,
+    );
+    const displayName = pdfText(approverNames[normalizedRole]);
+    const centerX = margin + blockWidth * (index + 0.5);
+    const wrappedName = doc.splitTextToSize(
+      displayName,
+      Math.max(blockWidth - 4, 10),
+    );
+
+    let color = [128, 128, 128];
+    if (approvalStatus.toLowerCase() === "approved") color = [0, 128, 0];
+    else if (approvalStatus.toLowerCase() === "rejected") color = [200, 0, 0];
+    else if (approvalStatus.toLowerCase() === "(pending)")
+      color = [255, 165, 0];
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...color);
+    doc.text(approvalStatus, centerX, approvalTop + 4, { align: "center" });
+
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    doc.line(centerX - 9, approvalTop + 5.5, centerX + 9, approvalTop + 5.5);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
+    doc.text(wrappedName, centerX, approvalTop + 10, { align: "center" });
+    doc.text(
+      `(${role})`,
+      centerX,
+      approvalTop + 10 + wrappedName.length * 3.5,
+      { align: "center" },
+    );
+  });
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let page = 1; page <= pageCount; page += 1) {
+    doc.setPage(page);
+    drawPageFooter(page);
+  }
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  if (emailPdf) {
+    return { pdfBlob, blobUrl };
+  }
+  window.open(blobUrl);
+};
 
 export const handlePrint = async (
   formData,

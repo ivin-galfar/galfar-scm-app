@@ -933,8 +933,8 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
         role: userInfo.is_admin
           ? (userInfo.role?.[1] ?? userInfo.role?.[0])
           : userInfo.role?.[0],
-        dept_id: data.department_id,
-        doc_no: data.doc_no,
+        dept_id: data.department_id ?? data.dept_id,
+        doc_no: data.doc_no ?? data.doc_id,
         name: data.name,
         status: data.status,
         created_at: data.created_at,
@@ -1134,6 +1134,253 @@ export const GetAnnouncementsData = async ({ userInfo }) => {
   } catch (error) {
     console.log(error);
 
+    throw error;
+  }
+};
+
+export const GetFleetDocId = async (userInfo, project) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/flreq/fetchdocid/${project}`,
+      config,
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const GetFleetRequests = async (
+  userInfo,
+  project,
+  module,
+  page,
+  limit,
+  statusfilter,
+) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+
+    const roles = (
+      Array.isArray(userInfo?.role) ? userInfo.role : [userInfo?.role]
+    )
+      .filter(Boolean)
+      .map((role) => String(role).trim().toLowerCase());
+    const assignedProjects = (
+      Array.isArray(userInfo?.pr_code) ? userInfo.pr_code : [userInfo?.pr_code]
+    )
+      .filter(
+        (projectCode) => projectCode !== undefined && projectCode !== null,
+      )
+      .map((projectCode) => String(projectCode).trim())
+      .filter(Boolean);
+    const canViewAllProjects = roles.some((role) =>
+      ["hod", "gm", "ceo"].includes(role),
+    );
+    const requestedProjects = (Array.isArray(project) ? project : [project])
+      .filter(
+        (projectCode) => projectCode !== undefined && projectCode !== null,
+      )
+      .map((projectCode) => String(projectCode).trim())
+      .filter(Boolean);
+    const permittedProjects = canViewAllProjects
+      ? requestedProjects
+      : requestedProjects.length
+        ? requestedProjects.filter((projectCode) =>
+            assignedProjects.includes(projectCode),
+          )
+        : assignedProjects;
+    if (!canViewAllProjects && permittedProjects.length === 0) return [];
+    const projects = permittedProjects.join(",");
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/flreq/fetchdocsdata`,
+      {
+        ...config,
+        params: {
+          module: module,
+          page,
+          limit,
+          roles: roles.join(","),
+          access_scope: canViewAllProjects ? "all" : "assigned",
+          project_codes: canViewAllProjects
+            ? undefined
+            : assignedProjects.join(","),
+          statusfilter,
+          ...(projects && { projects }),
+        },
+      },
+    );
+
+    if (canViewAllProjects || !Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    // Defense in depth: never expose records outside the signed-in user's
+    // assigned projects, even if the server returns an unexpectedly broad set.
+    return response.data.filter((request) =>
+      assignedProjects.includes(
+        String(request?.project ?? request?.project_code ?? "").trim(),
+      ),
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const GetFleetRequestById = async (userInfo, id) => {
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userInfo?.token}`,
+    },
+  };
+
+  const response = await axios.get(`${REACT_SERVER_URL}/flreq/${id}`, config);
+
+  return response.data;
+};
+
+export const AddNewFleetRequests = async ({
+  project,
+  date,
+  location,
+  items,
+  comments,
+  userInfo,
+}) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+
+    const formatDate = (value) => {
+      if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+      const [year, month, day] = value.split("-");
+      return `${day}-${month}-${year}`;
+    };
+
+    const payload = {
+      project,
+      date: formatDate(date),
+      location,
+      status: "created",
+      comments,
+      items: items.map((item) => ({
+        fleet_description: item.fleetDescription,
+        capacity: item.capacity,
+        cicpa: item.cicpa,
+        quantity: Number(item.quantity),
+        required_from: formatDate(item.requiredFrom),
+        rental_type: item.rentalType,
+        duration: item.duration,
+        purpose: item.purpose,
+        production_qty_envisaged: Number(item.productionQtyEnvisaged),
+        qty_similar_machines: Number(item.similarMachinesAvailable),
+        utilization: Number(item.utilization),
+        adnoc_fitments: item.adnocFitments,
+        tpi: item.tpi,
+        remarks: item.remarks,
+      })),
+    };
+
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/flreq`,
+      payload,
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const UpdateFleetRequestWorkflow = async ({
+  id,
+  status,
+  action,
+  comments,
+  project,
+  date,
+  location,
+  items,
+  userInfo,
+  deleted,
+}) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo?.token}`,
+      },
+    };
+
+    const response = await axios.put(
+      `${REACT_SERVER_URL}/flreq/${id}`,
+      {
+        status,
+        action,
+        comments,
+        ...(project !== undefined && { project }),
+        ...(date !== undefined && { date }),
+        ...(location !== undefined && { location }),
+        ...(items !== undefined && { items }),
+        ...(deleted !== undefined && { deleted }),
+      },
+      config,
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const FREmailAlert = async (id, userInfo, dept, data) => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const response = await axios.post(
+      `${REACT_SERVER_URL}/emailnotify/${id}?dept=${dept}&type=fr`,
+      {
+        id: data.id,
+        role: userInfo.is_admin
+          ? userInfo.role?.includes("initfr")
+            ? "initfr"
+            : (userInfo.role?.[1] ?? userInfo.role?.[0])
+          : userInfo.role?.[0],
+        doc_id: data.doc_id,
+        created_date: data.created_date,
+        location: data.location,
+        project: data.project,
+        status: data.status,
+        ...(data.exportedStatementAttachment && {
+          exportedStatementAttachment: data.exportedStatementAttachment,
+        }),
+      },
+      config,
+    );
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };

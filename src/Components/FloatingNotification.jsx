@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 
 const FloatingNotification = ({ message, duration = 5000 }) => {
@@ -14,7 +15,11 @@ const FloatingNotification = ({ message, duration = 5000 }) => {
   if (!visible) return null;
 
   return (
-    <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-2xl z-50 animate-slide-down opacity-95">
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed left-1/2 top-6 z-50 -translate-x-1/2 transform animate-slide-down rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-3 font-semibold text-white opacity-95 shadow-2xl"
+    >
       {message}
     </div>
   );
