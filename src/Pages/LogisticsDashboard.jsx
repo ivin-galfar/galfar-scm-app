@@ -32,6 +32,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import DashboardButton from "../Components/DashboardButton";
 import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
+import DashboardStatusNav from "../Components/DashboardStatusNav";
 import {
   is_buyrent,
   is_gm,
@@ -426,24 +427,15 @@ const LogisticsDashboard = () => {
   return (
     <main className="dashboard-shell relative flex h-0 min-h-0 w-full flex-grow flex-col overflow-hidden bg-slate-50 px-2 pb-0 pt-2 sm:px-3">
       <div className="mb-3 flex shrink-0 flex-col gap-2 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2 lg:flex-row lg:items-center lg:justify-between">
-        <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
-          <div className="flex min-w-max items-center gap-1 rounded-lg bg-slate-100/80 p-1">
-            {[
-              "All",
-              "Approved",
-              "Rejected",
-              "Pending",
-              "Under Review",
-              // "Approval History",
-            ].map((tab) => {
+        <DashboardStatusNav>
+          {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+            (tab) => {
               const isActive =
                 (tab === "All" && statusfilter === "All") ||
                 (tab === "Approved" && statusfilter === "Approved") ||
                 (tab === "Rejected" && statusfilter === "Rejected") ||
                 (tab === "Pending" && statusfilter === "Pending") ||
-                (tab === "Under Review" && statusfilter === "Review") ||
-                (tab === "Approval History" &&
-                  statusfilter === "Approval History");
+                (tab === "Under Review" && statusfilter === "Review");
 
               return (
                 <button
@@ -481,9 +473,9 @@ const LogisticsDashboard = () => {
                   {tab}
                 </button>
               );
-            })}
-          </div>
-        </div>
+            },
+          )}
+        </DashboardStatusNav>
 
         <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
           {isLogistics && (isPlant || isBuyvsrent) && (

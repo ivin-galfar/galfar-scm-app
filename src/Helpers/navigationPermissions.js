@@ -2,7 +2,7 @@ const COMMON_MODULE_ROLES = ["pm", "hod", "cm", "fm", "gm", "ceo"];
 const HIRING_ASSET_RESTRICTED_ROLES = ["pm", "cm", "pd", "fm"];
 const BUY_VS_RENT_RESTRICTED_ROLES = ["pm", "cm", "pd"];
 const PLANT_RESTRICTED_ROLES = ["initpr", "initdc"];
-const PROJECTS_RESTRICTED_ROLES = ["incharge"];
+const PROJECTS_RESTRICTED_ROLES = ["incharge", "fm"];
 
 const normalizeValues = (value) =>
   (Array.isArray(value) ? value : [value])
@@ -15,6 +15,7 @@ export const getModuleNavigationAccess = (userInfo) => {
       canAccessPlant: true,
       canAccessLogistics: true,
       canAccessProjects: true,
+      canViewProjectsNavigation: true,
       canAccessHiringAsset: true,
       canAccessBuyVsRent: true,
       canAccessTemplates: false,
@@ -33,6 +34,7 @@ export const getModuleNavigationAccess = (userInfo) => {
     canAccessProjects: !roles.some((role) =>
       PROJECTS_RESTRICTED_ROLES.includes(role),
     ),
+    canViewProjectsNavigation: true,
     canAccessHiringAsset: !roles.some((role) =>
       HIRING_ASSET_RESTRICTED_ROLES.includes(role),
     ),

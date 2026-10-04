@@ -17,7 +17,7 @@ import useuserInfo from "../CustomHooks/useUserInfo";
 import { useStatusFilter } from "../store/logisticsStore";
 import { is_plant } from "../Helpers/dept_helper";
 import { usePagination } from "../store/statementStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoWarningOutline } from "react-icons/io5";
 import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import Alerts from "../Components/Alerts";
@@ -27,6 +27,7 @@ import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleFnPrint } from "../Helpers/print_helper";
 import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
+import DashboardStatusNav from "../Components/DashboardStatusNav";
 import {
   formatDateDDMMYYYY,
   getlastSubmittedDate,
@@ -49,13 +50,17 @@ import { GrAttachment } from "react-icons/gr";
 import InputSearch from "../Components/InputSearch";
 import Loading from "../Components/Loading";
 import { fetchProjectDetails } from "../APIs/api";
-import { getProjectIocAccess } from "../Helpers/projectIocAccess";
+import {
+  getProjectIocAccess,
+  getProjectIocCategoryOptions,
+} from "../Helpers/projectIocAccess";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
   const location = useLocation();
   const isProjectsIocEntry =
     new URLSearchParams(location.search).get("view") === "projects-ioc";
   const projectIocAccess = getProjectIocAccess(userInfo);
+  const previousProjectsIocEntry = useRef(isProjectsIocEntry);
   const isAdmin = userInfo?.is_admin;
   const deleteStatement = useDeleteStore((state) => state.deleteStatement);
   const setDeleteStatement = useDeleteStore(
@@ -570,6 +575,28 @@ const FnDashboards = () => {
     userInfo?.role?.includes("initpr") &&
     userInfo.role.includes("initdc");
   const multiprojects = userInfo?.pr_code?.length > 1;
+  const projectDefaultCategory =
+    projectIocAccess.allowedCategories?.includes("Demob") ||
+    !projectIocAccess.allowedCategories
+      ? "Demob"
+      : projectIocAccess.defaultCategory;
+  const hasActiveFilters = Boolean(
+    statusfilter !== "All" ||
+      searchcsno ||
+      searchcsname ||
+      selectedproject ||
+      (!isProjectsIocEntry && (typeFilter || categoryFilter)),
+  );
+  const handleClearFilters = () => {
+    setStatusFilter("All");
+    setTypeFilter(isProjectsIocEntry ? "ioc" : "");
+    setCategoryFilter(isProjectsIocEntry ? projectDefaultCategory : "");
+    setSelectedProject("");
+    setSearchCSNo("");
+    setSearchCSName("");
+    setSearch({ isText: true, isNumber: false, value: "" });
+    setPageIndex(0);
+  };
   useEffect(() => {
     if (!isProjectsIocEntry || !projectIocAccess.canAccess) return;
 
@@ -610,6 +637,21 @@ const FnDashboards = () => {
   }, [isProjectsIocEntry]);
 
   useEffect(() => {
+    const leftProjectsIoc =
+      previousProjectsIocEntry.current && !isProjectsIocEntry;
+
+    if (leftProjectsIoc) {
+      setTypeFilter("");
+      setCategoryFilter("");
+      setSelectedProject("");
+      setProjectCodes([]);
+      setPageIndex(0);
+    }
+
+    previousProjectsIocEntry.current = isProjectsIocEntry;
+  }, [isProjectsIocEntry]);
+
+  useEffect(() => {
     sessionStorage.setItem(
       "filenoteFilters",
       JSON.stringify({
@@ -623,53 +665,51 @@ const FnDashboards = () => {
     <main className="dashboard-shell relative flex h-0 min-h-0 w-full flex-grow flex-col overflow-hidden bg-slate-50 px-2 pb-0 pt-2 sm:px-3">
       <div className="flex min-h-0 w-full flex-1 flex-col">
         <div className="mb-3 flex shrink-0 flex-col gap-2 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2 lg:flex-row lg:items-center lg:justify-between">
-          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
-            <div className="flex min-w-max items-center gap-1 rounded-lg bg-slate-100/80 p-1">
-              {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
-                (tab) => {
-                  const isActive =
-                    (tab === "All" && statusfilter === "All") ||
-                    (tab === "Approved" && statusfilter === "Approved") ||
-                    (tab === "Rejected" && statusfilter === "Rejected") ||
-                    (tab === "Pending" && statusfilter === "Pending") ||
-                    (tab === "Under Review" && statusfilter === "review");
+          <DashboardStatusNav>
+            {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+              (tab) => {
+                const isActive =
+                  (tab === "All" && statusfilter === "All") ||
+                  (tab === "Approved" && statusfilter === "Approved") ||
+                  (tab === "Rejected" && statusfilter === "Rejected") ||
+                  (tab === "Pending" && statusfilter === "Pending") ||
+                  (tab === "Under Review" && statusfilter === "review");
 
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => {
-                        switch (tab) {
-                          case "All":
-                            setStatusFilter("All");
-                            setPageIndex(0);
-                            break;
-                          case "Approved":
-                            setStatusFilter("Approved");
-                            setPageIndex(0);
-                            break;
-                          case "Rejected":
-                            setStatusFilter("Rejected");
-                            setPageIndex(0);
-                            break;
-                          case "Pending":
-                            setStatusFilter("Pending");
-                            setPageIndex(0);
-                            break;
-                          case "Under Review":
-                            setStatusFilter("review");
-                            setPageIndex(0);
-                            break;
-                        }
-                      }}
-                      className={getDashboardStatusTabClass(tab, isActive)}
-                    >
-                      {tab}
-                    </button>
-                  );
-                },
-              )}
-            </div>
-          </div>
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      switch (tab) {
+                        case "All":
+                          setStatusFilter("All");
+                          setPageIndex(0);
+                          break;
+                        case "Approved":
+                          setStatusFilter("Approved");
+                          setPageIndex(0);
+                          break;
+                        case "Rejected":
+                          setStatusFilter("Rejected");
+                          setPageIndex(0);
+                          break;
+                        case "Pending":
+                          setStatusFilter("Pending");
+                          setPageIndex(0);
+                          break;
+                        case "Under Review":
+                          setStatusFilter("review");
+                          setPageIndex(0);
+                          break;
+                      }
+                    }}
+                    className={getDashboardStatusTabClass(tab, isActive)}
+                  >
+                    {tab}
+                  </button>
+                );
+              },
+            )}
+          </DashboardStatusNav>
           <div className="flex w-full flex-col gap-2 xl:flex-row xl:items-center lg:w-auto">
             {(isProjectsIocEntry ||
               cmusers ||
@@ -677,7 +717,7 @@ const FnDashboards = () => {
               initusers ||
               multiinit ||
               multiprojects) && (
-              <div className="min-w-0">
+              <div className="w-full min-w-0 xl:w-auto xl:min-w-max">
                 <TypeFilter
                   type={typeFilter}
                   category={categoryFilter}
@@ -687,9 +727,10 @@ const FnDashboards = () => {
                   setProjectCodes={setProjectCodes}
                   types={isProjectsIocEntry ? ["ioc"] : types}
                   categories={
-                    isProjectsIocEntry && projectIocAccess.isProjectScoped
-                      ? categories.filter((category) =>
-                          projectIocAccess.allowedCategories.includes(category),
+                    isProjectsIocEntry
+                      ? getProjectIocCategoryOptions(
+                          categories,
+                          projectIocAccess.allowedCategories,
                         )
                       : categories
                   }
@@ -699,6 +740,8 @@ const FnDashboards = () => {
                   setSearchCSNo={setSearchCSNo}
                   setSearchCSName={setSearchCSName}
                   multiinit={multiinit}
+                  onClearFilters={handleClearFilters}
+                  showClearFilters={hasActiveFilters}
                 />
               </div>
             )}

@@ -22,6 +22,7 @@ import { usePagination } from "../store/statementStore";
 import { getDeptConfig } from "../Helpers/Permissions";
 import { useQuickAccess } from "../store/helperStore";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
+import { getModuleNavigationAccess } from "../Helpers/navigationPermissions";
 
 const Header = () => {
   const userInfo = useUserInfo();
@@ -59,6 +60,7 @@ const Header = () => {
   const location = useLocation();
   const path = location.pathname;
   const { canAccess: canAccessFleetRequests } = getFleetRequestAccess(userInfo);
+  const navigationAccess = getModuleNavigationAccess(userInfo);
   const { defaultDept } = getDeptConfig({
     isLogistics,
     isPlant,
@@ -82,6 +84,26 @@ const Header = () => {
           : effectiveDept === "bvrplant"
             ? "/dashboardbr"
             : "/dashboard";
+  const canAccessComparativeStatements =
+    effectiveDept === "logistics"
+      ? navigationAccess.canAccessLogistics
+      : effectiveDept === "fn"
+        ? navigationAccess.canAccessPlant
+        : effectiveDept === "bvrplant"
+          ? navigationAccess.canAccessPlant &&
+            navigationAccess.canAccessBuyVsRent
+          : navigationAccess.canAccessPlant &&
+            navigationAccess.canAccessHiringAsset;
+  const canAccessFleetRequestHeader =
+    navigationAccess.canAccessProjects && canAccessFleetRequests;
+  const disabledHeaderLinkProps = (disabled) =>
+    disabled
+      ? {
+          "aria-disabled": true,
+          title: "Unavailable for your current role",
+          onClick: (event) => event.preventDefault(),
+        }
+      : {};
 
   useEffect(() => {
     if (!userInfo) return;
@@ -143,9 +165,21 @@ const Header = () => {
 
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
-                    }${isDisabled ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`;
+                    }${isDisabled || !canAccessComparativeStatements ? " cursor-not-allowed opacity-50 hover:text-gray-700" : ""}`;
                   }}
-                  onClick={() => {
+                  aria-disabled={
+                    isDisabled || !canAccessComparativeStatements
+                  }
+                  title={
+                    isDisabled || !canAccessComparativeStatements
+                      ? "Unavailable for your current role"
+                      : undefined
+                  }
+                  onClick={(event) => {
+                    if (isDisabled || !canAccessComparativeStatements) {
+                      event.preventDefault();
+                      return;
+                    }
                     resetIsClicked();
                     setStatusFilter("All");
                     setStatusFilterzustand("All");
@@ -156,24 +190,27 @@ const Header = () => {
                 >
                   Comparative Statements
                 </NavLink>
-                {canAccessFleetRequests && (
-                  <NavLink
-                    to="/dashboardfr"
-                    className={() => {
-                      const isActive =
-                        location.pathname.startsWith("/dashboardfr") ||
-                        location.pathname.startsWith("/fleetrequest");
+                <NavLink
+                  to="/dashboardfr"
+                  className={() => {
+                    const isActive =
+                      location.pathname.startsWith("/dashboardfr") ||
+                      location.pathname.startsWith("/fleetrequest");
 
-                      return `text-gray-700 hover:text-blue-600 ${
-                        isActive
-                          ? "border-b-2 border-blue-500 text-blue-600"
-                          : ""
-                      }`;
-                    }}
-                  >
-                    Fleet Req.
-                  </NavLink>
-                )}
+                    return `text-gray-700 hover:text-blue-600 ${
+                      isActive
+                        ? "border-b-2 border-blue-500 text-blue-600"
+                        : ""
+                    }${
+                      !canAccessFleetRequestHeader
+                        ? " cursor-not-allowed opacity-50 hover:text-gray-700"
+                        : ""
+                    }`;
+                  }}
+                  {...disabledHeaderLinkProps(!canAccessFleetRequestHeader)}
+                >
+                  Fleet Req.
+                </NavLink>
                 <NavLink
                   to="/dashboardfn"
                   className={() => {
@@ -183,8 +220,15 @@ const Header = () => {
 
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
+                    }${
+                      !navigationAccess.canAccessPlant
+                        ? " cursor-not-allowed opacity-50 hover:text-gray-700"
+                        : ""
                     }`;
                   }}
+                  {...disabledHeaderLinkProps(
+                    !navigationAccess.canAccessPlant,
+                  )}
                 >
                   FN/IOC
                 </NavLink>

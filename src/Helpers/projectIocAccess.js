@@ -1,5 +1,6 @@
 const PROJECT_IOC_ROLES = ["initpr", "initdc", "cm", "pm", "pd", "view"];
 const BROAD_FN_IOC_ROLES = ["gm", "ceo", "fm", "hod", "inith", "inita"];
+const PROJECT_IOC_CATEGORIES = ["Demob", "FWA"];
 
 const normalizeRoles = (roles = []) =>
   (Array.isArray(roles) ? roles : [roles])
@@ -38,4 +39,12 @@ export const getProjectIocAccess = (userInfo) => {
     allowedCategories,
     defaultCategory: allowedCategories?.includes("Demob") ? "Demob" : "FWA",
   };
+};
+
+export const getProjectIocCategoryOptions = (
+  categories = [],
+  allowedCategories = null,
+) => {
+  const permittedCategories = allowedCategories ?? PROJECT_IOC_CATEGORIES;
+  return categories.filter((category) => permittedCategories.includes(category));
 };

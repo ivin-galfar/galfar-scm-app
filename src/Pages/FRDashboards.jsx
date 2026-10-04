@@ -31,6 +31,7 @@ import { useStatusFilter } from "../store/logisticsStore";
 import { useToast } from "../store/toastStore";
 import { useClickFromDashboard } from "../store/helperStore";
 import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
+import DashboardStatusNav from "../Components/DashboardStatusNav";
 
 const normalizeList = (value) =>
   (Array.isArray(value) ? value : [value])
@@ -418,7 +419,7 @@ const FRDashboards = () => {
         <header className="border-b border-slate-200 px-3 py-3 sm:px-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex min-w-max items-center gap-1 rounded-lg bg-slate-100/80 p-1">
+              <DashboardStatusNav>
                 {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
                   (tab) => {
                     const isActive =
@@ -462,7 +463,7 @@ const FRDashboards = () => {
                     );
                   },
                 )}
-              </div>
+              </DashboardStatusNav>
             </div>
           </div>
         </header>

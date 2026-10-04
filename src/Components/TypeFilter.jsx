@@ -1,4 +1,4 @@
-import { usenewfn } from "../store/helperStore";
+/* eslint-disable react/prop-types */
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { fetchProjectDetails } from "../APIs/api";
 import { useLocation } from "react-router-dom";
@@ -24,6 +24,8 @@ const TypeFilter = ({
   setSearchCSName,
   types,
   multiinit,
+  onClearFilters,
+  showClearFilters,
 }) => {
   const userInfo = useUserInfo();
   const { setPageIndex } = usePagination();
@@ -63,20 +65,28 @@ const TypeFilter = ({
     isFileNotePage
       ? "h-10 rounded-lg border-gray-300"
       : "h-8 rounded-md border-slate-300"
-  } w-full appearance-none border bg-white bg-no-repeat px-2.5 pr-8 text-sm text-slate-800 transition hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 sm:w-44 lg:w-40`;
+  } w-full appearance-none border bg-white bg-no-repeat px-2.5 pr-8 text-sm text-slate-800 transition hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 ${
+    isFileNotePage ? "sm:w-44 lg:w-40" : "lg:w-40"
+  }`;
   const selectStyle = {
     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%2364758B' d='M6 8.5 1.5 4h9z'/%3E%3C/svg%3E")`,
     backgroundPosition: "right 0.65rem center",
   };
 
   return (
-    <div>
+    <div className={isFileNotePage ? "" : "w-full"}>
       {
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-xs font-semibold text-slate-500">
+        <div
+          className={
+            isFileNotePage
+              ? "flex flex-wrap items-center gap-2"
+              : "grid w-full grid-cols-1 items-center gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-nowrap"
+          }
+        >
+          <span className="mr-1 text-xs font-semibold text-slate-500 sm:col-span-2 lg:col-span-1">
             Filters
           </span>
-          <div className="min-w-0 flex-1 sm:flex-none">
+          <div className="min-w-0 w-full lg:w-auto lg:flex-none">
             <select
               aria-label="Type (required)"
               disabled={isDocLoading}
@@ -105,7 +115,7 @@ const TypeFilter = ({
               })}
             </select>
           </div>
-          <div className="min-w-0 flex-1 sm:flex-none">
+          <div className="min-w-0 w-full lg:w-auto lg:flex-none">
             <select
               aria-label="Category (required)"
               disabled={isDocLoading || !type}
@@ -125,7 +135,7 @@ const TypeFilter = ({
           {(demobusers || fwausers || isgm || hireusers || ishod) &&
             (category == "FWA" || category == "Demob") &&
             !multiinit && (
-              <div className="min-w-0 flex-1 sm:flex-none">
+              <div className="min-w-0 w-full lg:w-auto lg:flex-none">
                 <select
                   aria-label="Project (required)"
                   disabled={isDocLoading}
@@ -141,13 +151,18 @@ const TypeFilter = ({
                 </select>
               </div>
             )}
-          {type != "" && location.pathname == "/dashboardfn" && (
+          {(showClearFilters ?? type != "") &&
+            location.pathname == "/dashboardfn" && (
             <button
               type="button"
               className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/10"
               aria-label="Clear filters"
               title="Clear filters"
               onClick={() => {
+                if (onClearFilters) {
+                  onClearFilters();
+                  return;
+                }
                 settype("");
                 setCategory("");
                 sessionStorage.removeItem("filenoteFilters");
@@ -165,7 +180,7 @@ const TypeFilter = ({
             >
               <FaRegTimesCircle size={17} />
             </button>
-          )}
+            )}
         </div>
       }
     </div>

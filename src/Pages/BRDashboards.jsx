@@ -29,6 +29,7 @@ import {
 } from "../Helpers/dept_helper";
 import DashboardButton from "../Components/DashboardButton";
 import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
+import DashboardStatusNav from "../Components/DashboardStatusNav";
 import { useNewStatement, usetotalBRstatements } from "../store/brStore";
 import { usePagination } from "../store/statementStore";
 import { useEffect, useState } from "react";
@@ -358,8 +359,7 @@ const BRDashboards = () => {
     <main className="dashboard-shell relative flex h-0 min-h-0 w-full flex-grow flex-col overflow-hidden bg-slate-50 px-2 pb-0 pt-2 sm:px-3">
       <div className="flex min-h-0 w-full flex-1 flex-col">
         <div className="mb-3 flex shrink-0 flex-col gap-2 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2 lg:flex-row lg:items-center lg:justify-between">
-          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
-            <div className="flex min-w-max items-center gap-1 rounded-lg bg-slate-100/80 p-1">
+          <DashboardStatusNav>
               {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
                 (tab) => {
                   const isActive =
@@ -403,8 +403,7 @@ const BRDashboards = () => {
                   );
                 },
               )}
-            </div>
-          </div>
+          </DashboardStatusNav>
 
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
             {(isLogistics || isasset || ishod) && (isPlant || isBuyvsrent) && (

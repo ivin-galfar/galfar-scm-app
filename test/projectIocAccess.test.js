@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getProjectIocAccess } from "../src/Helpers/projectIocAccess.js";
+import {
+  getProjectIocAccess,
+  getProjectIocCategoryOptions,
+} from "../src/Helpers/projectIocAccess.js";
 
 test("project approvers are limited to Demob and HWA", () => {
   const access = getProjectIocAccess({ role: ["cm", "initfn"] });
@@ -27,4 +30,16 @@ test("broader FN/IOC roles remain unrestricted", () => {
   assert.equal(access.canAccess, true);
   assert.equal(access.isProjectScoped, false);
   assert.equal(access.allowedCategories, null);
+});
+
+test("Project IOC dropdown excludes general FN/IOC categories", () => {
+  const categories = ["Insurance", "Demob", "PR", "FC", "DPR", "FWA"];
+
+  assert.deepEqual(getProjectIocCategoryOptions(categories), ["Demob", "FWA"]);
+  assert.deepEqual(getProjectIocCategoryOptions(categories, ["Demob"]), [
+    "Demob",
+  ]);
+  assert.deepEqual(getProjectIocCategoryOptions(categories, ["FWA"]), [
+    "FWA",
+  ]);
 });

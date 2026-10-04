@@ -15,7 +15,6 @@ import {
 import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
 import { HiDocumentText } from "react-icons/hi2";
 import { IoDocumentText, IoHelpCircleSharp } from "react-icons/io5";
-import { MdSpaceDashboard } from "react-icons/md";
 import { useMutation } from "@tanstack/react-query";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { is_plant } from "../Helpers/dept_helper";
@@ -40,6 +39,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
     canAccessPlant,
     canAccessLogistics,
     canAccessProjects,
+    canViewProjectsNavigation,
     canAccessHiringAsset,
     canAccessBuyVsRent,
     canAccessTemplates,
@@ -139,7 +139,9 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
     isDisabled
       ? {
           "aria-disabled": true,
-          tabIndex: -1,
+          "aria-describedby": "disabled-navigation-description",
+          tabIndex: 0,
+          title: "Unavailable for your current role",
           onClick: (event) => event.preventDefault(),
         }
       : {};
@@ -219,6 +221,9 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
           isOpen ? "px-3" : "px-2.5"
         }`}
       >
+        <span id="disabled-navigation-description" className="sr-only">
+          This navigation item is unavailable for your current role.
+        </span>
         {isOpen && (
           <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-200/55">
             Workspace
@@ -294,9 +299,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             >
               <FaChartBar className={iconClass(pathname === "/dashboard")} />
               <span className="min-w-0 flex-1 truncate">Hiring / Asset</span>
-              {!canOpenHiringAsset && (
-                <FaLock className="h-3 w-3 shrink-0" aria-label="Locked" />
-              )}
             </Link>
             <Link
               to="/dashboardbr"
@@ -315,9 +317,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 className={iconClass(pathname === "/dashboardbr")}
               />
               <span className="min-w-0 flex-1 truncate">Buy vs Rent</span>
-              {!canOpenBuyVsRent && (
-                <FaLock className="h-3 w-3 shrink-0" aria-label="Locked" />
-              )}
             </Link>
             <Link
               to="/dashboardfn"
@@ -343,53 +342,55 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 className={iconClass(pathname.startsWith("/particulars/1"))}
               />
               <span className="min-w-0 flex-1 truncate">Templates</span>
-              {!canOpenPlantTemplates && (
-                <FaLock className="h-3 w-3 shrink-0" aria-label="Locked" />
-              )}
             </Link>
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => toggleSection("projects")}
-          className={`${itemClass(
-            isProjectsRoute && canAccessProjects,
-            !canAccessProjects,
-          )} mt-1`}
-          title={
-            !isOpen
-              ? `Projects${canAccessProjects ? "" : " (Locked)"}`
-              : undefined
-          }
-          aria-expanded={projectsSubmenuOpen}
-          aria-controls="projects-navigation"
-        >
-          <FaProjectDiagram className={iconClass(isProjectsRoute)} />
-          {!isOpen && !canAccessProjects && (
-            <FaLock
-              className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5"
-              aria-label="Locked"
-            />
-          )}
-          {isOpen && (
-            <>
-              <span className="min-w-0 flex-1 truncate text-left">
-                Projects
-              </span>
-              {!canAccessProjects && (
-                <FaLock className="h-3.5 w-3.5 shrink-0" aria-label="Locked" />
-              )}
-              <FiChevronDown
-                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
-                  projectsSubmenuOpen ? "rotate-180" : ""
-                }`}
+        {canViewProjectsNavigation && (
+          <button
+            type="button"
+            onClick={() => toggleSection("projects")}
+            className={`${itemClass(
+              isProjectsRoute && canAccessProjects,
+              !canAccessProjects,
+            )} mt-1`}
+            title={
+              !isOpen
+                ? `Projects${canAccessProjects ? "" : " (Locked)"}`
+                : undefined
+            }
+            aria-expanded={projectsSubmenuOpen}
+            aria-controls="projects-navigation"
+          >
+            <FaProjectDiagram className={iconClass(isProjectsRoute)} />
+            {!isOpen && !canAccessProjects && (
+              <FaLock
+                className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5"
+                aria-label="Locked"
               />
-            </>
-          )}
-        </button>
+            )}
+            {isOpen && (
+              <>
+                <span className="min-w-0 flex-1 truncate text-left">
+                  Projects
+                </span>
+                {!canAccessProjects && (
+                  <FaLock
+                    className="h-3.5 w-3.5 shrink-0"
+                    aria-label="Locked"
+                  />
+                )}
+                <FiChevronDown
+                  className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+                    projectsSubmenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </>
+            )}
+          </button>
+        )}
 
-        {isOpen && projectsSubmenuOpen && (
+        {canViewProjectsNavigation && isOpen && projectsSubmenuOpen && (
           <div
             id="projects-navigation"
             className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
@@ -411,9 +412,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 )}
               />
               <span className="min-w-0 flex-1 truncate">Fleet Request</span>
-              {!canAccessProjects && (
-                <FaLock className="h-3 w-3 shrink-0" aria-label="Locked" />
-              )}
             </Link>
             <Link
               to="/dashboardfn?view=projects-ioc"
@@ -425,9 +423,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             >
               <IoDocumentText className={iconClass(isProjectIocRoute)} />
               <span className="min-w-0 flex-1 truncate">IOC</span>
-              {!canAccessProjects && (
-                <FaLock className="h-3 w-3 shrink-0" aria-label="Locked" />
-              )}
             </Link>
           </div>
         )}
@@ -489,9 +484,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 className={iconClass(pathname.startsWith("/particulars/2"))}
               />
               <span className="min-w-0 flex-1 truncate">Templates</span>
-              {!canOpenLogisticsTemplates && (
-                <FaLock className="h-3 w-3 shrink-0" aria-label="Locked" />
-              )}
             </Link>
             <Link
               to="/dashboardlg"

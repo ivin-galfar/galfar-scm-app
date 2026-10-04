@@ -10,6 +10,7 @@ test("plant-only users cannot open Logistics navigation", () => {
       canAccessPlant: true,
       canAccessLogistics: false,
       canAccessProjects: true,
+      canViewProjectsNavigation: true,
       canAccessHiringAsset: true,
       canAccessBuyVsRent: true,
       canAccessTemplates: false,
@@ -25,6 +26,7 @@ test("logistics initiators and in-charge users cannot open Plant navigation", ()
         canAccessPlant: false,
         canAccessLogistics: true,
         canAccessProjects: role !== "incharge",
+        canViewProjectsNavigation: true,
         canAccessHiringAsset: true,
         canAccessBuyVsRent: true,
         canAccessTemplates: false,
@@ -55,6 +57,7 @@ test("users assigned to both departments can open both modules", () => {
       canAccessPlant: true,
       canAccessLogistics: true,
       canAccessProjects: true,
+      canViewProjectsNavigation: true,
       canAccessHiringAsset: true,
       canAccessBuyVsRent: true,
       canAccessTemplates: false,
@@ -113,6 +116,16 @@ test("in-charge users cannot open Projects", () => {
       .canAccessProjects,
     false,
   );
+});
+
+test("FM users see Projects locked and cannot open it", () => {
+  const access = getModuleNavigationAccess({
+    dept_code: [1, 2],
+    role: ["fm"],
+  });
+
+  assert.equal(access.canAccessProjects, false);
+  assert.equal(access.canViewProjectsNavigation, true);
 });
 
 test("project and document-control initiators cannot open Plant", () => {
