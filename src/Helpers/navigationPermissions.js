@@ -1,3 +1,5 @@
+import { getInitiatorCapabilities } from "./initiatorCapabilities.js";
+
 const COMMON_MODULE_ROLES = ["pm", "hod", "cm", "fm", "gm", "ceo"];
 const HIRING_ASSET_RESTRICTED_ROLES = ["pm", "cm", "pd", "fm"];
 const BUY_VS_RENT_RESTRICTED_ROLES = ["pm", "cm", "pd"];
@@ -16,6 +18,7 @@ export const getModuleNavigationAccess = (userInfo) => {
       canAccessLogistics: true,
       canAccessProjects: true,
       canViewProjectsNavigation: true,
+      canAccessFNIOC: true,
       canAccessHiringAsset: true,
       canAccessBuyVsRent: true,
       canAccessTemplates: false,
@@ -25,6 +28,7 @@ export const getModuleNavigationAccess = (userInfo) => {
   const roles = normalizeValues(userInfo.role);
   const departmentCodes = normalizeValues(userInfo.dept_code);
   const isCommonUser = roles.some((role) => COMMON_MODULE_ROLES.includes(role));
+  const initiatorCapabilities = getInitiatorCapabilities(roles);
 
   return {
     canAccessPlant:
@@ -35,6 +39,10 @@ export const getModuleNavigationAccess = (userInfo) => {
       PROJECTS_RESTRICTED_ROLES.includes(role),
     ),
     canViewProjectsNavigation: true,
+    canAccessFNIOC:
+      initiatorCapabilities.canAccessFNIOC ||
+      isCommonUser ||
+      departmentCodes.includes("1"),
     canAccessHiringAsset: !roles.some((role) =>
       HIRING_ASSET_RESTRICTED_ROLES.includes(role),
     ),

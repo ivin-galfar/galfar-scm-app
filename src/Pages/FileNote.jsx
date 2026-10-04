@@ -441,21 +441,24 @@ const FileNote = () => {
     }
   };
 
-  const createNewFileNote = () => {
+  const createNewFileNote = (defaults = {}) => {
     setNewfn();
     setSelectedDate("");
     setSelectedFnValue("");
     setSelectedValue("");
     setName("");
     navigate("/filenote", { replace: true });
-    setCategory("");
+    setCategory(defaults.category || "");
     setAttachments("");
-    settype("");
+    settype(defaults.type || "");
   };
 
   useEffect(() => {
     if (location.state?.createNew === "filenote") {
-      createNewFileNote();
+      createNewFileNote({
+        type: location.state.type,
+        category: location.state.category,
+      });
       setNewfn(true);
     }
   }, [location.state]);

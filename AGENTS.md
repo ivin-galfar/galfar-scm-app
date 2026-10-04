@@ -227,6 +227,7 @@ Keep the report proportional to the change. A small edit may need a compact para
 ## Permissions and Routes
 
 - Always enforce access in the backend; frontend permissions are for navigation and user experience only.
+- Frontend initiator capabilities are resolved by `src/Helpers/initiatorCapabilities.js`: `initfn` is the general FN/IOC fallback, `initpr` enables Demobilization, `initdc` enables HWA, and `initfr` enables Fleet Request. Specialized FN/IOC roles take precedence over `initfn` for creation choices, and multiple specialized capabilities produce the Home dashboard Create New menu.
 - Fleet Request access is derived through `src/Helpers/fleetRequestPermissions.js` using the `fl_req` statement role.
 - Fleet Request workflow actions are derived through `src/Helpers/approvalFlowHelper.js`.
 - Route protection is implemented through components such as `ProtectedRoute` and `FleetRequestRoute`.

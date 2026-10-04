@@ -18,6 +18,7 @@ import { TbHomeMove } from "react-icons/tb";
 import useUserInfo from "../../CustomHooks/useUserInfo";
 import { initiatorRoles } from "../../Helpers/helperfunctions";
 import DashboardSectionHeader from "./DashboardSectionHeader";
+import { getInitiatorCreationOptions } from "../../Helpers/initiatorCapabilities";
 
 const actions = [
   {
@@ -71,35 +72,44 @@ const QuickAccess = ({ items = actions }) => {
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const userRoles = userInfo?.role || [];
   const hasRole = (role) => userRoles.includes(role);
+  const initiatorCreationOptions = getInitiatorCreationOptions(userRoles);
   const isInitiator =
     initiatorRoles.some((r) => userRoles.includes(r)) ||
-    userRoles.every((r) => r == "initfn");
+    userRoles.every((role) => role === "initfn");
   const createAction = hasRole("inith")
     ? "receipts"
     : hasRole("inita")
       ? "asset-menu"
       : hasRole("initlg")
         ? "logistics"
-        : hasRole("initfr")
-          ? "fleetrequest"
-          : ["initpr", "initdc", "initfn"].some(hasRole)
-            ? "filenote"
-            : null;
+        : initiatorCreationOptions.length
+          ? "initiator-options"
+          : null;
 
-  const navigateToCreate = (path, intent) => {
-    console.log(path);
-
+  const navigateToCreate = (path, intent, defaults = {}) => {
     setIsCreateMenuOpen(false);
-    navigate(path, { state: { createNew: intent } });
+    navigate(path, { state: { createNew: intent, ...defaults } });
   };
 
   const renderCreateAction = () => {
     if (!createAction) return null;
 
-    if (createAction === "asset-menu") {
+    if (
+      createAction === "asset-menu" ||
+      (createAction === "initiator-options" &&
+        initiatorCreationOptions.length > 1)
+    ) {
+      const menuOptions =
+        createAction === "asset-menu"
+          ? [
+              { key: "asset", label: "Asset", path: "/receipts", intent: "receipts" },
+              { key: "bvr", label: "Buy vs Rent", path: "/brstatement", intent: "bvr" },
+              { key: "filenote", label: "File Note / IOC", path: "/filenote", intent: "filenote" },
+            ]
+          : initiatorCreationOptions;
       return (
         <div className="relative">
-          <span
+          <button
             type="button"
             onClick={() => setIsCreateMenuOpen((open) => !open)}
             className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-blue-700 bg-white px-3 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
@@ -109,36 +119,28 @@ const QuickAccess = ({ items = actions }) => {
             <LuPlus size={18} />
             Create New
             <LuChevronDown size={18} />
-          </span>
+          </button>
           {isCreateMenuOpen && (
             <div
               className="absolute right-0 z-20 mt-2 w-36 rounded-lg border border-border bg-background p-1 shadow-lg"
               role="menu"
             >
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm cursor-pointer hover:bg-muted"
-                onClick={() => navigateToCreate("/receipts", "receipts")}
-                role="menuitem"
-              >
-                Asset
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-muted cursor-pointer"
-                onClick={() => navigateToCreate("/brstatement", "bvr")}
-                role="menuitem"
-              >
-                Buy vs Rent
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-muted cursor-pointer"
-                onClick={() => navigateToCreate("/filenote", "filenote")}
-                role="menuitem"
-              >
-                File Note / IOC
-              </button>
+              {menuOptions.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className="w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+                  onClick={() =>
+                    navigateToCreate(option.path, option.intent, {
+                      type: option.type,
+                      category: option.category,
+                    })
+                  }
+                  role="menuitem"
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -151,17 +153,28 @@ const QuickAccess = ({ items = actions }) => {
       fleetrequest: ["/fleetrequest", "fleetrequest"],
       filenote: ["/filenote", "filenote"],
     };
-    const [path, intent] = destinations[createAction];
+    const directOption =
+      createAction === "initiator-options"
+        ? initiatorCreationOptions[0]
+        : null;
+    const [path, intent] = directOption
+      ? [directOption.path, directOption.intent]
+      : destinations[createAction];
 
     return (
-      <span
+      <button
         type="button"
-        onClick={() => navigateToCreate(path, intent)}
+        onClick={() =>
+          navigateToCreate(path, intent, {
+            type: directOption?.type,
+            category: directOption?.category,
+          })
+        }
         className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-blue-700 bg-white px-3 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
       >
         <LuPlus size={18} />
         Create New
-      </span>
+      </button>
     );
   };
 

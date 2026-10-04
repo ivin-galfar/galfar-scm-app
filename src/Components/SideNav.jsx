@@ -24,6 +24,8 @@ import galfarlogo from "../assets/Images/galfar-logo-clean.png";
 import LogoutButton from "./LogoutButton";
 import { PiBulldozer } from "react-icons/pi";
 import { getModuleNavigationAccess } from "../Helpers/navigationPermissions";
+import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
+import { getProjectIocAccess } from "../Helpers/projectIocAccess";
 import { FaShip } from "react-icons/fa6";
 
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
@@ -48,6 +50,10 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const canOpenBuyVsRent = canAccessPlant && canAccessBuyVsRent;
   const canOpenPlantTemplates = canAccessPlant && canAccessTemplates;
   const canOpenLogisticsTemplates = canAccessLogistics && canAccessTemplates;
+  const canOpenFleetRequest =
+    canAccessProjects && getFleetRequestAccess(userInfo).canAccess;
+  const canOpenProjectIoc =
+    canAccessProjects && getProjectIocAccess(userInfo).canAccess;
   const isProjectIocRoute =
     pathname === "/dashboardfn" &&
     new URLSearchParams(search).get("view") === "projects-ioc";
@@ -400,10 +406,10 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               className={itemClass(
                 (pathname.startsWith("/dashboardfr") ||
                   pathname.startsWith("/fleetrequest")) &&
-                  canAccessProjects,
-                !canAccessProjects,
+                  canOpenFleetRequest,
+                !canOpenFleetRequest,
               )}
-              {...disabledLinkProps(!canAccessProjects)}
+              {...disabledLinkProps(!canOpenFleetRequest)}
             >
               <FaClipboardList
                 className={iconClass(
@@ -416,10 +422,10 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             <Link
               to="/dashboardfn?view=projects-ioc"
               className={itemClass(
-                isProjectIocRoute && canAccessProjects,
-                !canAccessProjects,
+                isProjectIocRoute && canOpenProjectIoc,
+                !canOpenProjectIoc,
               )}
-              {...disabledLinkProps(!canAccessProjects)}
+              {...disabledLinkProps(!canOpenProjectIoc)}
             >
               <IoDocumentText className={iconClass(isProjectIocRoute)} />
               <span className="min-w-0 flex-1 truncate">IOC</span>

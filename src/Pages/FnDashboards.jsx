@@ -54,12 +54,14 @@ import {
   getProjectIocAccess,
   getProjectIocCategoryOptions,
 } from "../Helpers/projectIocAccess";
+import { getInitiatorCapabilities } from "../Helpers/initiatorCapabilities";
 const FnDashboards = () => {
   const userInfo = useuserInfo();
   const location = useLocation();
   const isProjectsIocEntry =
     new URLSearchParams(location.search).get("view") === "projects-ioc";
   const projectIocAccess = getProjectIocAccess(userInfo);
+  const initiatorCapabilities = getInitiatorCapabilities(userInfo?.role);
   const previousProjectsIocEntry = useRef(isProjectsIocEntry);
   const isAdmin = userInfo?.is_admin;
   const deleteStatement = useDeleteStore((state) => state.deleteStatement);
@@ -544,6 +546,8 @@ const FnDashboards = () => {
         cat = getcategory(typeFilter).filter(
           (c) => c.includes("FWA") || c.includes("Demob"),
         );
+      } else if (userInfo.role.includes("initdc")) {
+        cat = getcategory(typeFilter).filter((c) => c.includes("FWA"));
       } else if (userInfo.role.includes("inith")) {
         cat = getcategory(typeFilter).filter((c) => !c.includes("FWA"));
       } else if (userInfo.role.includes("initfn") && isAdmin) {
@@ -715,6 +719,8 @@ const FnDashboards = () => {
               cmusers ||
               pmusers ||
               initusers ||
+              initiatorCapabilities.demob ||
+              initiatorCapabilities.hwa ||
               multiinit ||
               multiprojects) && (
               <div className="w-full min-w-0 xl:w-auto xl:min-w-max">
@@ -828,7 +834,7 @@ const FnDashboards = () => {
                             className="inline-flex h-7 items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-1 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100"
                             onClick={() => setNewfn(false)}
                             to={
-                              userInfo?.role?.includes("initfn")
+                              initiatorCapabilities.canAccessFNIOC
                                 ? `/filenote/${row.original?.id}`
                                 : "/login"
                             }

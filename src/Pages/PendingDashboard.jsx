@@ -3,13 +3,6 @@ import {
   flexRender,
   useTable,
 } from "@tanstack/react-table";
-import {
-  createExpandedRowModel,
-  createPaginatedRowModel,
-  rowExpandingFeature,
-  rowPaginationFeature,
-  tableFeatures,
-} from "@tanstack/table-core";
 import { usePagination } from "../store/statementStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link } from "react-router-dom";
@@ -25,6 +18,7 @@ import { GetAnalyticsData } from "../APIs/api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { MdRestartAlt } from "react-icons/md";
+import { getInitiatorCapabilities } from "../Helpers/initiatorCapabilities";
 
 const PendingDashboard = () => {
   const { pagination, setPageIndex, setPageSize } = usePagination();
@@ -33,7 +27,8 @@ const PendingDashboard = () => {
   const userInfo = useUserInfo();
   const isAdmin = userInfo?.is_admin;
   const roles = userInfo?.role || [];
-  const { data, isLoading } = useQuery({
+  const initiatorCapabilities = getInitiatorCapabilities(roles);
+  const { data } = useQuery({
     queryKey: ["analytics-approvals", userInfo?.token],
     queryFn: () => GetAnalyticsData(userInfo),
     enabled: !!userInfo,
@@ -55,14 +50,17 @@ const PendingDashboard = () => {
         if (roles.includes("initlg")) {
           return item.type === "logistics";
         }
-        if (roles.includes("initpr") || roles.includes("initdc")) {
-          return item.type === "ioc";
+        const initiatorTypes = [];
+        if (initiatorCapabilities.demob || initiatorCapabilities.hwa) {
+          initiatorTypes.push("ioc");
+        } else if (initiatorCapabilities.generalFNIOC) {
+          initiatorTypes.push("filenote", "ioc");
         }
-        if (roles.every((v) => v.includes("initfn"))) {
-          return item.type === "filenote" || item.type === "ioc";
+        if (initiatorCapabilities.fleetRequest) {
+          initiatorTypes.push("fleet request");
         }
-        if (roles.includes("initfr")) {
-          return item.type === "fleet request";
+        if (initiatorTypes.length) {
+          return initiatorTypes.includes(item.type);
         }
 
         return false;

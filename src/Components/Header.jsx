@@ -23,6 +23,8 @@ import { getDeptConfig } from "../Helpers/Permissions";
 import { useQuickAccess } from "../store/helperStore";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 import { getModuleNavigationAccess } from "../Helpers/navigationPermissions";
+import { getInitiatorCapabilities } from "../Helpers/initiatorCapabilities";
+import { getProjectIocAccess } from "../Helpers/projectIocAccess";
 
 const Header = () => {
   const userInfo = useUserInfo();
@@ -61,6 +63,13 @@ const Header = () => {
   const path = location.pathname;
   const { canAccess: canAccessFleetRequests } = getFleetRequestAccess(userInfo);
   const navigationAccess = getModuleNavigationAccess(userInfo);
+  const initiatorCapabilities = getInitiatorCapabilities(userInfo?.role);
+  const projectIocAccess = getProjectIocAccess(userInfo);
+  const fnIocLink =
+    (initiatorCapabilities.demob || initiatorCapabilities.hwa) &&
+    projectIocAccess.isProjectScoped
+      ? "/dashboardfn?view=projects-ioc"
+      : "/dashboardfn";
   const { defaultDept } = getDeptConfig({
     isLogistics,
     isPlant,
@@ -212,7 +221,7 @@ const Header = () => {
                   Fleet Req.
                 </NavLink>
                 <NavLink
-                  to="/dashboardfn"
+                  to={fnIocLink}
                   className={() => {
                     const isActive =
                       location.pathname.startsWith("/dashboardfn") ||
@@ -221,13 +230,13 @@ const Header = () => {
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
                     }${
-                      !navigationAccess.canAccessPlant
+                      !navigationAccess.canAccessFNIOC
                         ? " cursor-not-allowed opacity-50 hover:text-gray-700"
                         : ""
                     }`;
                   }}
                   {...disabledHeaderLinkProps(
-                    !navigationAccess.canAccessPlant,
+                    !navigationAccess.canAccessFNIOC,
                   )}
                 >
                   FN/IOC

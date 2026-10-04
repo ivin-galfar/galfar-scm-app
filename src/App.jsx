@@ -34,7 +34,7 @@ const App = () => {
   const fnDashboardPermission =
     new URLSearchParams(location.search).get("view") === "projects-ioc"
       ? "canAccessProjects"
-      : "canAccessPlant";
+      : "canAccessFNIOC";
   useEffect(() => {
     const storedAppVersion = localStorage.getItem("app_version");
 
@@ -188,7 +188,7 @@ const App = () => {
               <Route
                 path="/filenote"
                 element={
-                  <NavigationPermissionRoute permission="canAccessPlant">
+                  <NavigationPermissionRoute permission="canAccessFNIOC">
                     <FileNote />
                   </NavigationPermissionRoute>
                 }
@@ -196,7 +196,7 @@ const App = () => {
               <Route
                 path="/filenote/:fn_no"
                 element={
-                  <NavigationPermissionRoute permission="canAccessPlant">
+                  <NavigationPermissionRoute permission="canAccessFNIOC">
                     <FileNote />
                   </NavigationPermissionRoute>
                 }
