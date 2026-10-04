@@ -30,6 +30,7 @@ import { useErrorMessage } from "../store/errorStore";
 import { useStatusFilter } from "../store/logisticsStore";
 import { useToast } from "../store/toastStore";
 import { useClickFromDashboard } from "../store/helperStore";
+import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
 
 const normalizeList = (value) =>
   (Array.isArray(value) ? value : [value])
@@ -427,33 +428,6 @@ const FRDashboards = () => {
                       (tab === "Pending" && statusfilter === "Pending") ||
                       (tab === "Under Review" && statusfilter === "review");
 
-                    let activeColor =
-                      "bg-blue-600 text-white shadow-sm shadow-blue-900/10";
-                    let inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-slate-800";
-
-                    if (tab === "Approved") {
-                      activeColor =
-                        "bg-emerald-600 text-white shadow-sm shadow-emerald-900/10";
-                      inactiveColor =
-                        "text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800";
-                    } else if (tab === "Rejected") {
-                      activeColor =
-                        "bg-rose-600 text-white shadow-sm shadow-rose-900/10";
-                      inactiveColor =
-                        "text-rose-700 hover:bg-rose-50 hover:text-rose-800";
-                    } else if (tab === "Pending") {
-                      activeColor =
-                        "bg-amber-600 text-white shadow-sm shadow-amber-900/10";
-                      inactiveColor =
-                        "text-slate-500 hover:bg-white/70 hover:text-amber-700";
-                    } else if (tab === "Under Review") {
-                      activeColor =
-                        "bg-cyan-600 text-white shadow-sm shadow-cyan-900/10";
-                      inactiveColor =
-                        "text-slate-500 hover:bg-white/70 hover:text-cyan-700";
-                    }
-
                     return (
                       <button
                         key={tab}
@@ -481,9 +455,7 @@ const FRDashboards = () => {
                               break;
                           }
                         }}
-                        className={`cursor-pointer rounded-md px-2.5 py-1.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-3 ${
-                          isActive ? activeColor : inactiveColor
-                        }`}
+                        className={getDashboardStatusTabClass(tab, isActive)}
                       >
                         {tab}
                       </button>

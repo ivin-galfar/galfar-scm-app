@@ -28,6 +28,7 @@ import {
 } from "../store/statementStore";
 import { useDashboardType } from "../store/logisticsStore";
 import DashboardButton from "../Components/DashboardButton";
+import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
 import {
   is_asset,
   is_logistics,
@@ -452,33 +453,6 @@ const Dashboard = () => {
                     (tab === "Under Review" && statusFilter === "review") ||
                     (tab === "Pending" && multiStatusFilter.length > 0);
 
-                  let activeColor =
-                    "bg-blue-50 text-blue-700 shadow-sm shadow-blue-100/40 ring-1 ring-inset ring-blue-200/50";
-                  let inactiveColor =
-                    "text-slate-500 hover:bg-white/70 hover:text-slate-800";
-
-                  if (tab === "Approved") {
-                    activeColor =
-                      "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/40 ring-1 ring-inset ring-emerald-200/50";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-emerald-700";
-                  } else if (tab === "Rejected") {
-                    activeColor =
-                      "bg-rose-50 text-rose-700 shadow-sm shadow-rose-100/40 ring-1 ring-inset ring-rose-200/50";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-rose-700";
-                  } else if (tab === "Pending") {
-                    activeColor =
-                      "bg-amber-50 text-amber-700 shadow-sm shadow-amber-100/40 ring-1 ring-inset ring-amber-200/50";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-amber-700";
-                  } else if (tab === "Under Review") {
-                    activeColor =
-                      "bg-cyan-50 text-cyan-700 shadow-sm shadow-cyan-100/40 ring-1 ring-inset ring-cyan-200/50";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-cyan-700";
-                  }
-
                   return (
                     <button
                       key={tab}
@@ -511,9 +485,7 @@ const Dashboard = () => {
                             break;
                         }
                       }}
-                      className={`cursor-pointer rounded-md px-2.5 py-1.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-3 ${
-                        isActive ? activeColor : inactiveColor
-                      }`}
+                      className={getDashboardStatusTabClass(tab, isActive)}
                     >
                       {tab}
                     </button>

@@ -28,6 +28,7 @@ import {
   is_plant,
 } from "../Helpers/dept_helper";
 import DashboardButton from "../Components/DashboardButton";
+import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
 import { useNewStatement, usetotalBRstatements } from "../store/brStore";
 import { usePagination } from "../store/statementStore";
 import { useEffect, useState } from "react";
@@ -368,33 +369,6 @@ const BRDashboards = () => {
                     (tab === "Pending" && statusfilter === "Pending") ||
                     (tab === "Under Review" && statusfilter === "review");
 
-                  let activeColor =
-                    "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/35";
-                  let inactiveColor =
-                    "text-slate-500 hover:bg-white/70 hover:text-slate-800";
-
-                  if (tab === "Approved") {
-                    activeColor =
-                      "bg-emerald-600 text-white shadow-sm shadow-emerald-900/10 ring-1 ring-emerald-700/10";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-emerald-700";
-                  } else if (tab === "Rejected") {
-                    activeColor =
-                      "bg-rose-600 text-white shadow-sm shadow-rose-900/10 ring-1 ring-rose-700/10";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-rose-700";
-                  } else if (tab === "Pending") {
-                    activeColor =
-                      "bg-white text-amber-700 shadow-sm ring-1 ring-slate-200/35";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-amber-700";
-                  } else if (tab === "Under Review") {
-                    activeColor =
-                      "bg-white text-cyan-700 shadow-sm ring-1 ring-slate-200/35";
-                    inactiveColor =
-                      "text-slate-500 hover:bg-white/70 hover:text-cyan-700";
-                  }
-
                   return (
                     <button
                       key={tab}
@@ -422,9 +396,7 @@ const BRDashboards = () => {
                             break;
                         }
                       }}
-                      className={`cursor-pointer rounded-md px-2.5 py-1.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-3 ${
-                        isActive ? activeColor : inactiveColor
-                      }`}
+                      className={getDashboardStatusTabClass(tab, isActive)}
                     >
                       {tab}
                     </button>
