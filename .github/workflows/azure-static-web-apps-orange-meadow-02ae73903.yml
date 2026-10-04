@@ -21,6 +21,7 @@ jobs:
       VITE_APP_VERSION: ${{ secrets.VITE_APP_VERSION }}
       VITE_INHOUSE_PROJECTS: ${{ secrets.VITE_INHOUSE_PROJECTS }}
       VITE_FLEET_LOCATIONS: ${{ secrets.VITE_FLEET_LOCATIONS }}
+      VITE_PAPERLESS_MILESTONE_THRESHOLD: ${{ secrets.VITE_PAPERLESS_MILESTONE_THRESHOLD }}
     steps:
       - uses: actions/checkout@v3
         with:
