@@ -689,8 +689,8 @@ const FleetRequest = () => {
       ),
       cell: (info) => formatDateDMY(info.getValue()) || "—",
     }),
-    columnHelper.accessor("rentalType", { header: "Rental Type" }),
     columnHelper.accessor("duration", { header: "Duration" }),
+    columnHelper.accessor("rentalType", { header: "Rental Type" }),
     columnHelper.accessor("purpose", { header: "Purpose" }),
     columnHelper.accessor("productionQtyEnvisaged", {
       header: () => (
