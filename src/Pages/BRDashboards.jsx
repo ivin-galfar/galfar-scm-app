@@ -360,49 +360,49 @@ const BRDashboards = () => {
       <div className="flex min-h-0 w-full flex-1 flex-col">
         <div className="mb-3 flex shrink-0 flex-col gap-2 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2 lg:flex-row lg:items-center lg:justify-between">
           <DashboardStatusNav>
-              {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
-                (tab) => {
-                  const isActive =
-                    (tab === "All" && statusfilter === "All") ||
-                    (tab === "Approved" && statusfilter === "Approved") ||
-                    (tab === "Rejected" && statusfilter === "Rejected") ||
-                    (tab === "Pending" && statusfilter === "Pending") ||
-                    (tab === "Under Review" && statusfilter === "review");
+            {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+              (tab) => {
+                const isActive =
+                  (tab === "All" && statusfilter === "All") ||
+                  (tab === "Approved" && statusfilter === "Approved") ||
+                  (tab === "Rejected" && statusfilter === "Rejected") ||
+                  (tab === "Pending" && statusfilter === "Pending") ||
+                  (tab === "Under Review" && statusfilter === "review");
 
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => {
-                        switch (tab) {
-                          case "All":
-                            setStatusFilter("All");
-                            setPageIndex(0);
-                            break;
-                          case "Approved":
-                            setStatusFilter("Approved");
-                            setPageIndex(0);
-                            break;
-                          case "Rejected":
-                            setStatusFilter("Rejected");
-                            setPageIndex(0);
-                            break;
-                          case "Pending":
-                            setStatusFilter("Pending");
-                            setPageIndex(0);
-                            break;
-                          case "Under Review":
-                            setStatusFilter("review");
-                            setPageIndex(0);
-                            break;
-                        }
-                      }}
-                      className={getDashboardStatusTabClass(tab, isActive)}
-                    >
-                      {tab}
-                    </button>
-                  );
-                },
-              )}
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      switch (tab) {
+                        case "All":
+                          setStatusFilter("All");
+                          setPageIndex(0);
+                          break;
+                        case "Approved":
+                          setStatusFilter("Approved");
+                          setPageIndex(0);
+                          break;
+                        case "Rejected":
+                          setStatusFilter("Rejected");
+                          setPageIndex(0);
+                          break;
+                        case "Pending":
+                          setStatusFilter("Pending");
+                          setPageIndex(0);
+                          break;
+                        case "Under Review":
+                          setStatusFilter("review");
+                          setPageIndex(0);
+                          break;
+                      }
+                    }}
+                    className={getDashboardStatusTabClass(tab, isActive)}
+                  >
+                    {tab}
+                  </button>
+                );
+              },
+            )}
           </DashboardStatusNav>
 
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
@@ -422,9 +422,7 @@ const BRDashboards = () => {
           </div>
         </div>
         {
-          <div
-            className="min-h-0 flex-1 overflow-y-auto rounded border border-gray-200 bg-white shadow"
-          >
+          <div className="min-h-0 flex-1 overflow-y-auto rounded border border-gray-200 bg-white shadow">
             <Loading isLoading={isLoading} />
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="top-0 z-10 sticky  bg-gray-50">
@@ -520,7 +518,7 @@ const BRDashboards = () => {
                               handleBrPrint(formData);
                             }}
                           >
-                            <LuFileDown size={14} /> Print PDF
+                            <LuFileDown size={14} /> PDF
                           </button>
                           <button
                             type="button"

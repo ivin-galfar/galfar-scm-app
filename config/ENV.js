@@ -9,14 +9,6 @@ export const SPECIAL_PROJECTS =
 export const INHOUSE_PROJECTS =
   environment.VITE_INHOUSE_PROJECTS?.split(",").map(Number) ?? [];
 
-const parseEnvList = (value) =>
-  value
-    ?.split(",")
-    .map((item) => item.trim())
-    .filter(Boolean) ?? [];
-
-export const FLEET_LOCATIONS = parseEnvList(environment.VITE_FLEET_LOCATIONS);
-
 export const APP_VERSION = environment.VITE_APP_VERSION;
 export const PAPERLESS_MILESTONE_THRESHOLD =
   environment.VITE_PAPERLESS_MILESTONE_THRESHOLD;

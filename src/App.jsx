@@ -3,7 +3,6 @@ import LoginPage from "./Pages/LoginPage";
 import Home from "./Components/Home";
 import Header from "./Components/Header";
 import Receipts from "./Components/Receipts";
-import ProtectedRoute from "./Components/ProtectedRoute";
 import useUserInfo from "./CustomHooks/useUserInfo";
 import Particulars from "./Pages/Particulars";
 import FloatingNotification from "./Components/FloatingNotification";
@@ -34,7 +33,7 @@ const App = () => {
   const fnDashboardPermission =
     new URLSearchParams(location.search).get("view") === "projects-ioc"
       ? "canAccessProjects"
-      : "canAccessFNIOC";
+      : ["canAccessPlant", "canAccessFNIOC"];
   useEffect(() => {
     const storedAppVersion = localStorage.getItem("app_version");
 
@@ -88,17 +87,17 @@ const App = () => {
             <Route
               path="/lstatements"
               element={
-                <ProtectedRoute>
+                <NavigationPermissionRoute permission="canAccessLogistics">
                   <LogisticsStatement />
-                </ProtectedRoute>
+                </NavigationPermissionRoute>
               }
             />
             <Route
               path="/lstatements/:cs_no"
               element={
-                <ProtectedRoute>
+                <NavigationPermissionRoute permission="canAccessLogistics">
                   <LogisticsStatement />
-                </ProtectedRoute>
+                </NavigationPermissionRoute>
               }
             />
             <Route
@@ -121,7 +120,14 @@ const App = () => {
                 </NavigationPermissionRoute>
               }
             />
-            <Route path="/dashboardlg" element={<LogisticsDashboard />} />
+            <Route
+              path="/dashboardlg"
+              element={
+                <NavigationPermissionRoute permission="canAccessLogistics">
+                  <LogisticsDashboard />
+                </NavigationPermissionRoute>
+              }
+            />
             <Route
               path="/dashboardbr"
               element={

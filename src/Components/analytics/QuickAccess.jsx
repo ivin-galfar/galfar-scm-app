@@ -19,6 +19,12 @@ import useUserInfo from "../../CustomHooks/useUserInfo";
 import { initiatorRoles } from "../../Helpers/helperfunctions";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { getInitiatorCreationOptions } from "../../Helpers/initiatorCapabilities";
+import {
+  getFnIocDashboardPath,
+  getProjectIocAccess,
+} from "../../Helpers/projectIocAccess";
+import { getModuleNavigationAccess } from "../../Helpers/navigationPermissions";
+import { getFleetRequestAccess } from "../../Helpers/fleetRequestPermissions";
 
 const actions = [
   {
@@ -73,6 +79,15 @@ const QuickAccess = ({ items = actions }) => {
   const userRoles = userInfo?.role || [];
   const hasRole = (role) => userRoles.includes(role);
   const initiatorCreationOptions = getInitiatorCreationOptions(userRoles);
+  const fnIocDashboardPath = getFnIocDashboardPath(userInfo);
+  const navigationAccess = getModuleNavigationAccess(userInfo);
+  const projectIocAccess = getProjectIocAccess(userInfo);
+  const canAccessFnIoc = projectIocAccess.isProjectScoped
+    ? navigationAccess.canAccessProjects && projectIocAccess.canAccess
+    : navigationAccess.canAccessPlant && navigationAccess.canAccessFNIOC;
+  const canAccessFleetRequest =
+    navigationAccess.canAccessProjects &&
+    getFleetRequestAccess(userInfo).canAccess;
   const isInitiator =
     initiatorRoles.some((r) => userRoles.includes(r)) ||
     userRoles.every((role) => role === "initfn");
@@ -91,6 +106,36 @@ const QuickAccess = ({ items = actions }) => {
     navigate(path, { state: { createNew: intent, ...defaults } });
   };
 
+  const canAccessAction = ({ path, type }) => {
+    if (!userInfo) return true;
+    if (type === "hiring" || type === "asset") {
+      return (
+        navigationAccess.canAccessPlant && navigationAccess.canAccessHiringAsset
+      );
+    }
+    if (type === "logistics") return navigationAccess.canAccessLogistics;
+    if (type === "fn") return canAccessFnIoc;
+    if (path === "/dashboardbr") {
+      return (
+        navigationAccess.canAccessPlant && navigationAccess.canAccessBuyVsRent
+      );
+    }
+    if (path === "/dashboardfr") return canAccessFleetRequest;
+    return true;
+  };
+
+  const orderedItems = items
+    .map((item, index) => ({
+      ...item,
+      canAccess: canAccessAction(item),
+      originalIndex: index,
+    }))
+    .sort(
+      (first, second) =>
+        Number(second.canAccess) - Number(first.canAccess) ||
+        first.originalIndex - second.originalIndex,
+    );
+
   const renderCreateAction = () => {
     if (!createAction) return null;
 
@@ -102,9 +147,24 @@ const QuickAccess = ({ items = actions }) => {
       const menuOptions =
         createAction === "asset-menu"
           ? [
-              { key: "asset", label: "Asset", path: "/receipts", intent: "receipts" },
-              { key: "bvr", label: "Buy vs Rent", path: "/brstatement", intent: "bvr" },
-              { key: "filenote", label: "File Note / IOC", path: "/filenote", intent: "filenote" },
+              {
+                key: "asset",
+                label: "Asset",
+                path: "/receipts",
+                intent: "receipts",
+              },
+              {
+                key: "bvr",
+                label: "Buy vs Rent",
+                path: "/brstatement",
+                intent: "bvr",
+              },
+              {
+                key: "filenote",
+                label: "File Note / IOC",
+                path: "/filenote",
+                intent: "filenote",
+              },
             ]
           : initiatorCreationOptions;
       return (
@@ -154,9 +214,7 @@ const QuickAccess = ({ items = actions }) => {
       filenote: ["/filenote", "filenote"],
     };
     const directOption =
-      createAction === "initiator-options"
-        ? initiatorCreationOptions[0]
-        : null;
+      createAction === "initiator-options" ? initiatorCreationOptions[0] : null;
     const [path, intent] = directOption
       ? [directOption.path, directOption.intent]
       : destinations[createAction];
@@ -188,23 +246,45 @@ const QuickAccess = ({ items = actions }) => {
         action={isInitiator ? renderCreateAction() : null}
       />
       <CardContent className="ml-2 grid translate-y-1 grid-cols-3 gap-2 justify-items-center  px-6 pb-2 pt-2">
-        {items.map(({ label, icon: Icon, path, type, tone }) => (
-          <Link
-            key={label}
-            to={path}
-            onClick={() => {
-              setDashboardType(type);
-              setIsClicked();
-            }}
-            className={`group flex aspect-square w-30 flex-col items-center justify-center gap-2 rounded-lg border border-border/60 p-2 text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${tone}`}
-          >
-            <span className="flex size-11 items-center justify-center rounded-xl bg-background/60 shadow-sm transition-transform duration-200 group-hover:scale-105">
-              <Icon size={22} />
-            </span>
+        {orderedItems.map(
+          ({ label, icon: Icon, path, type, tone, canAccess }) => {
+            return (
+              <Link
+                key={label}
+                to={type === "fn" ? fnIocDashboardPath : path}
+                aria-disabled={!canAccess}
+                title={
+                  canAccess ? undefined : "Unavailable for your current role"
+                }
+                onClick={(event) => {
+                  if (!canAccess) {
+                    event.preventDefault();
+                    return;
+                  }
+                  setDashboardType(type);
+                  setIsClicked();
+                }}
+                className={`group flex aspect-square w-30 flex-col items-center justify-center gap-2 rounded-lg border p-2 text-center shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  canAccess
+                    ? `border-border/60 hover:-translate-y-0.5 hover:border-border hover:shadow-md ${tone}`
+                    : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 opacity-60"
+                }`}
+              >
+                <span
+                  className={`flex size-11 items-center justify-center rounded-xl bg-background/60 shadow-sm transition-transform duration-200 ${
+                    canAccess ? "group-hover:scale-105" : ""
+                  }`}
+                >
+                  <Icon size={22} />
+                </span>
 
-            <span className="truncate text-[11px] font-semibold">{label}</span>
-          </Link>
-        ))}
+                <span className="truncate text-[11px] font-semibold">
+                  {label}
+                </span>
+              </Link>
+            );
+          },
+        )}
       </CardContent>
     </Card>
   );

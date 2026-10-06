@@ -67,8 +67,13 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
     };
 
     if (updatedstatus.toLowerCase() === "approved") {
-      const pdfUrl = await generatePDFLG(updatedFormData, tableData, userInfo);
+      const { fileUrl: pdfUrl, fileName: pdfName } = await generatePDFLG(
+        updatedFormData,
+        tableData,
+        userInfo,
+      );
       updatedFormData.approvedPdfUrl = pdfUrl;
+      updatedFormData.approvedpdfName = pdfName;
     }
 
     let comments_role = role_finder(userInfo.role);

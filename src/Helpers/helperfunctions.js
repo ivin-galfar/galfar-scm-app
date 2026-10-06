@@ -424,7 +424,7 @@ export const generatePDFLG = async (formData, tableData, userInfo) => {
 
     const pdfFile = new File(
       [pdfBlob],
-      `Approved_Statement_${formData.shipment_no}.pdf`,
+      `Comparison - ${formData.shipment_no}.pdf`,
       {
         type: "application/pdf",
       },
@@ -432,7 +432,10 @@ export const generatePDFLG = async (formData, tableData, userInfo) => {
 
     const uploadedFiles = await handleAttachmentsUpload([pdfFile], userInfo);
     if (uploadedFiles && uploadedFiles.length > 0) {
-      return uploadedFiles[0].fileUrl || uploadedFiles[0].url || null;
+      return {
+        fileUrl: uploadedFiles[0].fileUrl || null,
+        fileName: uploadedFiles[0].fileName,
+      };
     }
   } catch (error) {
     console.error("PDF generation/upload failed:", error);

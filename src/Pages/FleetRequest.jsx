@@ -5,7 +5,6 @@ import {
   useTable,
 } from "@tanstack/react-table";
 import { tableFeatures } from "@tanstack/table-core";
-import { FLEET_LOCATIONS } from "../../config/ENV";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useClickFromDashboard, usenewfn } from "../store/helperStore";
 import { useStatusFilter } from "../store/logisticsStore";
@@ -83,9 +82,7 @@ const FleetRequest = () => {
       ? [userInfo.pr_code]
       : [];
   const [project, setProject] = useState(() => projects[0]?.toString() ?? "");
-  const [location, setLocation] = useState(
-    () => userInfo?.location?.toString() ?? "",
-  );
+  const [location, setLocation] = useState("");
   const [date, setDate] = useState(getToday);
   const [fleetId, setFleetId] = useState("");
   const [fleetIds, setFleetIds] = useState([]);
@@ -893,7 +890,8 @@ const FleetRequest = () => {
           <label className={fieldClass}>
             <span className="font-medium">Location :</span>
             {canEdit ? (
-              <select
+              <input
+                type="text"
                 value={location}
                 onChange={(event) => {
                   setLocation(event.target.value);
@@ -909,19 +907,21 @@ const FleetRequest = () => {
                     : "border-slate-300 focus:border-blue-500 focus:ring-blue-100"
                 }`}
                 aria-invalid={Boolean(validationErrors.location)}
-              >
-                <option value="">Select Location</option>
-                {FLEET_LOCATIONS.map((locationOption) => (
-                  <option key={locationOption} value={locationOption}>
-                    {locationOption}
-                  </option>
-                ))}
-              </select>
+                aria-describedby={
+                  validationErrors.location
+                    ? "fleet-request-location-error"
+                    : undefined
+                }
+                placeholder="Enter location"
+              />
             ) : (
               <output className={readOnlyValueClass}>{location || "—"}</output>
             )}
             {canEdit && validationErrors.location && (
-              <span className="absolute left-0 top-full  text-xs font-medium text-red-600">
+              <span
+                id="fleet-request-location-error"
+                className="absolute left-0 top-full text-xs font-medium text-red-600"
+              >
                 {validationErrors.location}
               </span>
             )}

@@ -201,6 +201,7 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
     comments,
     created_at,
     approvedPdfUrl,
+    approvedpdfName,
     file,
     filename,
   } = formData;
@@ -231,6 +232,7 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
         comments,
         created_at,
         approvedPdfUrl,
+        approvedpdfName,
         file,
         filename,
       },
