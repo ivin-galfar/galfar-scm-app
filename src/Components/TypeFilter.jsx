@@ -134,6 +134,7 @@ const TypeFilter = ({
           </div>
           {(demobusers || fwausers || isgm || hireusers || ishod) &&
             (category == "FWA" || category == "Demob") &&
+            (isFileNotePage || projectcodes?.length > 1) &&
             !multiinit && (
               <div className="min-w-0 w-full lg:w-auto lg:flex-none">
                 <select

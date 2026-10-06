@@ -12,6 +12,11 @@ export const getProjectIocAccess = (userInfo) => {
   const hasProjectRole = PROJECT_IOC_ROLES.some((role) => roles.includes(role));
   const hasBroadRole = BROAD_FN_IOC_ROLES.some((role) => roles.includes(role));
   const isProjectScoped = hasProjectRole && !hasBroadRole;
+  const canAccess =
+    hasProjectRole ||
+    hasBroadRole ||
+    roles.includes("initfn") ||
+    Boolean(userInfo?.is_admin);
 
   let allowedCategories = null;
   if (isProjectScoped) {
@@ -29,22 +34,38 @@ export const getProjectIocAccess = (userInfo) => {
     }
   }
 
+  const canAccessDemob = canAccess;
+  const canAccessHwa = roles.some((role) =>
+    ["initdc", "cm", "pm", "pd", "gm", "ceo"].includes(role),
+  );
+
   return {
-    canAccess:
-      hasProjectRole ||
-      hasBroadRole ||
-      roles.includes("initfn") ||
-      Boolean(userInfo?.is_admin),
+    canAccess,
+    canAccessDemob: allowedCategories
+      ? allowedCategories.includes("Demob")
+      : canAccessDemob,
+    canAccessHwa,
+    navigationCategories: [
+      ...(canAccessDemob ? ["Demob"] : []),
+      ...(canAccessHwa ? ["FWA"] : []),
+    ],
     isProjectScoped,
     allowedCategories,
     defaultCategory: allowedCategories?.includes("Demob") ? "Demob" : "FWA",
   };
 };
 
+export const getFnIocDashboardPath = (userInfo) =>
+  getProjectIocAccess(userInfo).isProjectScoped
+    ? "/dashboardfn?view=projects-ioc"
+    : "/dashboardfn";
+
 export const getProjectIocCategoryOptions = (
   categories = [],
   allowedCategories = null,
 ) => {
   const permittedCategories = allowedCategories ?? PROJECT_IOC_CATEGORIES;
-  return categories.filter((category) => permittedCategories.includes(category));
+  return categories.filter((category) =>
+    permittedCategories.includes(category),
+  );
 };

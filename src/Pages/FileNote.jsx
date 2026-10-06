@@ -3,6 +3,7 @@ import { SimpleEditor } from "../@/components/tiptap-templates/simple/simple-edi
 import { useMutation } from "@tanstack/react-query";
 import {
   createfilenote,
+  fetchProjectDetails,
   fetchlastid,
   FnEmailAlert,
   updatefilenotevalues,
@@ -195,7 +196,6 @@ const FileNote = () => {
       }, 1500);
     },
   });
-  console.log("outside", INHOUSE_PROJECTS);
 
   const generateTemplate = async (category, type) => {
     if (!doc_no || doc_no.last_no == null) return "";
@@ -441,16 +441,46 @@ const FileNote = () => {
     }
   };
 
+  const loadCreateProjectCodes = async (createCategory) => {
+    if (!["Demob", "FWA"].includes(createCategory)) {
+      setProjectCodes([]);
+      return;
+    }
+
+    try {
+      const projects = await fetchProjectDetails(userInfo);
+      const availableProjects = projects.map((project) => project.project);
+      const assignedProjects = userInfo?.pr_code || [];
+
+      setProjectCodes(
+        availableProjects.filter((project) =>
+          assignedProjects.includes(project),
+        ),
+      );
+    } catch (error) {
+      console.error("Unable to load IOC projects", error);
+      setProjectCodes([]);
+      setErrorMessage("Unable to load projects.");
+      setShowToast();
+      setTimeout(() => {
+        resetshowtoast();
+        clearErrorMessage();
+      }, 3000);
+    }
+  };
+
   const createNewFileNote = (defaults = {}) => {
     setNewfn();
     setSelectedDate("");
     setSelectedFnValue("");
     setSelectedValue("");
     setName("");
+    resetSelectedproject();
     navigate("/filenote", { replace: true });
     setCategory(defaults.category || "");
     setAttachments("");
     settype(defaults.type || "");
+    void loadCreateProjectCodes(defaults.category);
   };
 
   useEffect(() => {

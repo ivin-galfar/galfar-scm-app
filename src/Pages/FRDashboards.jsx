@@ -362,10 +362,10 @@ const FRDashboards = () => {
               onClick={() => handleprint(request)}
               disabled={printingId === request.id}
               className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
-              aria-label="Print PDF"
+              aria-label="PDF"
             >
               <LuFileDown size={14} />
-              {printingId === request.id ? "Preparing..." : "Print PDF"}
+              {printingId === request.id ? "Preparing..." : "PDF"}
             </button>
             {fleetAccess.canEdit && (
               <button

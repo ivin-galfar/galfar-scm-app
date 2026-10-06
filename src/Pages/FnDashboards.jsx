@@ -60,6 +60,9 @@ const FnDashboards = () => {
   const location = useLocation();
   const isProjectsIocEntry =
     new URLSearchParams(location.search).get("view") === "projects-ioc";
+  const requestedProjectIocCategory = new URLSearchParams(location.search).get(
+    "category",
+  );
   const projectIocAccess = getProjectIocAccess(userInfo);
   const initiatorCapabilities = getInitiatorCapabilities(userInfo?.role);
   const previousProjectsIocEntry = useRef(isProjectsIocEntry);
@@ -580,10 +583,11 @@ const FnDashboards = () => {
     userInfo.role.includes("initdc");
   const multiprojects = userInfo?.pr_code?.length > 1;
   const projectDefaultCategory =
-    projectIocAccess.allowedCategories?.includes("Demob") ||
-    !projectIocAccess.allowedCategories
-      ? "Demob"
-      : projectIocAccess.defaultCategory;
+    ["Demob", "FWA"].includes(requestedProjectIocCategory) &&
+    projectIocAccess.navigationCategories.includes(requestedProjectIocCategory)
+      ? requestedProjectIocCategory
+      : projectIocAccess.navigationCategories[0] ||
+        projectIocAccess.defaultCategory;
   const hasActiveFilters = Boolean(
     statusfilter !== "All" ||
       searchcsno ||
@@ -604,14 +608,8 @@ const FnDashboards = () => {
   useEffect(() => {
     if (!isProjectsIocEntry || !projectIocAccess.canAccess) return;
 
-    const allowedCategories = projectIocAccess.allowedCategories;
-    const nextCategory =
-      allowedCategories?.includes("Demob") || !allowedCategories
-        ? "Demob"
-        : projectIocAccess.defaultCategory;
-
     setTypeFilter("ioc");
-    setCategoryFilter(nextCategory);
+    setCategoryFilter(projectDefaultCategory);
     setSelectedProject("");
     setPageIndex(0);
 
@@ -638,7 +636,7 @@ const FnDashboards = () => {
     };
 
     loadProjectCodes();
-  }, [isProjectsIocEntry]);
+  }, [isProjectsIocEntry, projectDefaultCategory]);
 
   useEffect(() => {
     const leftProjectsIoc =
@@ -736,7 +734,7 @@ const FnDashboards = () => {
                     isProjectsIocEntry
                       ? getProjectIocCategoryOptions(
                           categories,
-                          projectIocAccess.allowedCategories,
+                          projectIocAccess.navigationCategories,
                         )
                       : categories
                   }

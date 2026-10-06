@@ -444,54 +444,54 @@ const Dashboard = () => {
       <section className="mb-3 shrink-0 rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-2">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <DashboardStatusNav>
-              {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
-                (tab) => {
-                  const isActive =
-                    (tab === "All" && statusFilter === "All") ||
-                    (tab === "Approved" && statusFilter === "Approved") ||
-                    (tab === "Rejected" && statusFilter === "Rejected") ||
-                    (tab === "Under Review" && statusFilter === "review") ||
-                    (tab === "Pending" && multiStatusFilter.length > 0);
+            {["All", "Approved", "Rejected", "Pending", "Under Review"].map(
+              (tab) => {
+                const isActive =
+                  (tab === "All" && statusFilter === "All") ||
+                  (tab === "Approved" && statusFilter === "Approved") ||
+                  (tab === "Rejected" && statusFilter === "Rejected") ||
+                  (tab === "Under Review" && statusFilter === "review") ||
+                  (tab === "Pending" && multiStatusFilter.length > 0);
 
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => {
-                        switch (tab) {
-                          case "All":
-                            setStatusFilter("All");
-                            setMultiStatusFilter([]);
-                            setPageIndex(0);
-                            break;
-                          case "Approved":
-                            setStatusFilter("Approved");
-                            setMultiStatusFilter([]);
-                            setPageIndex(0);
-                            break;
-                          case "Rejected":
-                            setStatusFilter("Rejected");
-                            setMultiStatusFilter([]);
-                            setPageIndex(0);
-                            break;
-                          case "Pending":
-                            setStatusFilter("");
-                            setMultiStatusFilter(pendingStatuses);
-                            setPageIndex(0);
-                            break;
-                          case "Under Review":
-                            setStatusFilter("review");
-                            setMultiStatusFilter([]);
-                            setPageIndex(0);
-                            break;
-                        }
-                      }}
-                      className={getDashboardStatusTabClass(tab, isActive)}
-                    >
-                      {tab}
-                    </button>
-                  );
-                },
-              )}
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      switch (tab) {
+                        case "All":
+                          setStatusFilter("All");
+                          setMultiStatusFilter([]);
+                          setPageIndex(0);
+                          break;
+                        case "Approved":
+                          setStatusFilter("Approved");
+                          setMultiStatusFilter([]);
+                          setPageIndex(0);
+                          break;
+                        case "Rejected":
+                          setStatusFilter("Rejected");
+                          setMultiStatusFilter([]);
+                          setPageIndex(0);
+                          break;
+                        case "Pending":
+                          setStatusFilter("");
+                          setMultiStatusFilter(pendingStatuses);
+                          setPageIndex(0);
+                          break;
+                        case "Under Review":
+                          setStatusFilter("review");
+                          setMultiStatusFilter([]);
+                          setPageIndex(0);
+                          break;
+                      }
+                    }}
+                    className={getDashboardStatusTabClass(tab, isActive)}
+                  >
+                    {tab}
+                  </button>
+                );
+              },
+            )}
           </DashboardStatusNav>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
             {(isLogistics || isasset || ishod) && isPlant && (
@@ -509,9 +509,7 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
-      <div
-        className="relative min-h-0 flex-1 overflow-auto rounded-t-xl border border-b-0 border-slate-200 bg-white shadow-[0_8px_24px_-20px_rgb(15_23_42/0.24)]"
-      >
+      <div className="relative min-h-0 flex-1 overflow-auto rounded-t-xl border border-b-0 border-slate-200 bg-white shadow-[0_8px_24px_-20px_rgb(15_23_42/0.24)]">
         <Loading isLoading={isLoading} />
         <table className="min-w-[900px] w-full border-separate border-spacing-0">
           <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm">
@@ -586,7 +584,7 @@ const Dashboard = () => {
                       <button
                         type="button"
                         disabled={!userInfo?.is_admin && !isgm && !ishod}
-                        className={`inline-flex h-7 min-w-[5.25rem] items-center justify-center gap-1 whitespace-nowrap rounded-md border px-2.5 text-xs font-semibold transition ${
+                        className={`inline-flex h-7 min-w-[2.25rem] items-center justify-center gap-1 whitespace-nowrap rounded-md border px-2.5 text-xs font-semibold transition ${
                           !userInfo?.is_admin && !isgm && !ishod
                             ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
                             : "cursor-pointer border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
@@ -595,7 +593,7 @@ const Dashboard = () => {
                           handleHirePrint(row.original, userInfo);
                         }}
                       >
-                        <LuFileDown size={14} /> Print PDF
+                        <LuFileDown size={14} /> PDF
                       </button>
                       <button
                         type="button"

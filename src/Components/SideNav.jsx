@@ -42,21 +42,28 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
     canAccessLogistics,
     canAccessProjects,
     canViewProjectsNavigation,
+    canAccessFNIOC,
     canAccessHiringAsset,
     canAccessBuyVsRent,
     canAccessTemplates,
   } = getModuleNavigationAccess(userInfo);
   const canOpenHiringAsset = canAccessPlant && canAccessHiringAsset;
   const canOpenBuyVsRent = canAccessPlant && canAccessBuyVsRent;
-  const canOpenPlantTemplates = canAccessPlant && canAccessTemplates;
+  const canOpenGeneralFnIoc = canAccessPlant && canAccessFNIOC;
+  const canOpenPlantTemplates =
+    canAccessPlant && canAccessHiringAsset && canAccessTemplates;
   const canOpenLogisticsTemplates = canAccessLogistics && canAccessTemplates;
   const canOpenFleetRequest =
     canAccessProjects && getFleetRequestAccess(userInfo).canAccess;
-  const canOpenProjectIoc =
-    canAccessProjects && getProjectIocAccess(userInfo).canAccess;
+  const projectIocAccess = getProjectIocAccess(userInfo);
+  const canOpenDemobIoc = canAccessProjects && projectIocAccess.canAccessDemob;
+  const canOpenHwaIoc = canAccessProjects && projectIocAccess.canAccessHwa;
+  const projectIocCategory = new URLSearchParams(search).get("category");
   const isProjectIocRoute =
     pathname === "/dashboardfn" &&
     new URLSearchParams(search).get("view") === "projects-ioc";
+  const isDemobIocRoute = isProjectIocRoute && projectIocCategory !== "FWA";
+  const isHwaIocRoute = isProjectIocRoute && projectIocCategory === "FWA";
 
   useEffect(() => {
     if (isPlant) {
@@ -162,6 +169,12 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const primaryRole = firstRole?.toLowerCase().startsWith("init")
     ? "Initiator"
     : firstRole;
+  const navigationRoles = Array.isArray(userInfo?.role)
+    ? userInfo.role
+    : [userInfo?.role].filter(Boolean);
+  const logisticsFirst = navigationRoles.some((role) =>
+    ["incharge", "initlg"].includes(String(role).toLowerCase()),
+  );
 
   return (
     <aside
@@ -190,10 +203,10 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               />
             </span>
             <span className="min-w-0 leading-tight">
-              <span className="block text-xs font-bold tracking-[0.12em] text-white">
+              <span className="block text-[10px] font-semibod uppercase tracking-normal text-white">
                 GALFAR
               </span>
-              <span className="mt-2 flex whitespace-nowrap text-[10px] font-bold tracking-[0.12em] text-white">
+              <span className="mt-1 block whitespace-nowrap text-[10px] font-sembold uppercase tracking-normal text-white">
                 Integrated Web Application
               </span>
             </span>
@@ -251,125 +264,24 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={() => toggleSection("plant")}
-          className={itemClass(isPlantRoute && canAccessPlant, !canAccessPlant)}
-          title={
-            !isOpen
-              ? `Plant & Equipment${canAccessPlant ? "" : " (Locked)"}`
-              : undefined
-          }
-          aria-expanded={submenuOpen}
-          aria-controls="plant-navigation"
-        >
-          <PiBulldozer className={iconClass(isPlantRoute)} />
-          {!isOpen && !canAccessPlant && (
-            <FaLock
-              className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5"
-              aria-label="Locked"
-            />
-          )}
-          {isOpen && (
-            <>
-              <span className="min-w-0 flex-1 truncate text-left">
-                Plant & Equipment
-              </span>
-              {!canAccessPlant && (
-                <FaLock className="h-3.5 w-3.5 shrink-0" aria-label="Locked" />
-              )}
-              <FiChevronDown
-                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
-                  submenuOpen ? "rotate-180" : ""
-                }`}
-              />
-            </>
-          )}
-        </button>
-
-        {isOpen && submenuOpen && (
-          <div
-            id="plant-navigation"
-            className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
-          >
-            <Link
-              to="/dashboard"
-              className={itemClass(
-                pathname === "/dashboard" && canOpenHiringAsset,
-                !canOpenHiringAsset,
-              )}
-              onClick={
-                canOpenHiringAsset ? () => setDashboardType("plant") : undefined
-              }
-              {...disabledLinkProps(!canOpenHiringAsset)}
-            >
-              <FaChartBar className={iconClass(pathname === "/dashboard")} />
-              <span className="min-w-0 flex-1 truncate">Hiring / Asset</span>
-            </Link>
-            <Link
-              to="/dashboardbr"
-              className={itemClass(
-                pathname === "/dashboardbr" && canOpenBuyVsRent,
-                !canOpenBuyVsRent,
-              )}
-              onClick={
-                canOpenBuyVsRent
-                  ? () => setDashboardType("bvrplant")
-                  : undefined
-              }
-              {...disabledLinkProps(!canOpenBuyVsRent)}
-            >
-              <FaBalanceScale
-                className={iconClass(pathname === "/dashboardbr")}
-              />
-              <span className="min-w-0 flex-1 truncate">Buy vs Rent</span>
-            </Link>
-            <Link
-              to="/dashboardfn"
-              className={itemClass(
-                isFnRoute && canAccessPlant,
-                !canAccessPlant,
-              )}
-              {...disabledLinkProps(!canAccessPlant)}
-              aria-current={isFnRoute && canAccessPlant ? "page" : undefined}
-            >
-              <IoDocumentText className={iconClass(isFnRoute)} />
-              <span className="min-w-0 flex-1 truncate">FN / IOC</span>
-            </Link>
-            <Link
-              to="/particulars/1"
-              className={itemClass(
-                pathname.startsWith("/particulars/1") && canOpenPlantTemplates,
-                !canOpenPlantTemplates,
-              )}
-              {...disabledLinkProps(!canOpenPlantTemplates)}
-            >
-              <HiDocumentText
-                className={iconClass(pathname.startsWith("/particulars/1"))}
-              />
-              <span className="min-w-0 flex-1 truncate">Templates</span>
-            </Link>
-          </div>
-        )}
-
-        {canViewProjectsNavigation && (
+        <div className="flex flex-col gap-1.5">
           <button
             type="button"
-            onClick={() => toggleSection("projects")}
-            className={`${itemClass(
-              isProjectsRoute && canAccessProjects,
-              !canAccessProjects,
-            )} mt-1`}
+            onClick={() => toggleSection("plant")}
+            className={itemClass(
+              isPlantRoute && canAccessPlant,
+              !canAccessPlant,
+            )}
             title={
               !isOpen
-                ? `Projects${canAccessProjects ? "" : " (Locked)"}`
+                ? `Plant & Equipment${canAccessPlant ? "" : " (Locked)"}`
                 : undefined
             }
-            aria-expanded={projectsSubmenuOpen}
-            aria-controls="projects-navigation"
+            aria-expanded={submenuOpen}
+            aria-controls="plant-navigation"
           >
-            <FaProjectDiagram className={iconClass(isProjectsRoute)} />
-            {!isOpen && !canAccessProjects && (
+            <PiBulldozer className={iconClass(isPlantRoute)} />
+            {!isOpen && !canAccessPlant && (
               <FaLock
                 className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5"
                 aria-label="Locked"
@@ -378,9 +290,9 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
             {isOpen && (
               <>
                 <span className="min-w-0 flex-1 truncate text-left">
-                  Projects
+                  Plant & Equipment
                 </span>
-                {!canAccessProjects && (
+                {!canAccessPlant && (
                   <FaLock
                     className="h-3.5 w-3.5 shrink-0"
                     aria-label="Locked"
@@ -388,124 +300,254 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 )}
                 <FiChevronDown
                   className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
-                    projectsSubmenuOpen ? "rotate-180" : ""
+                    submenuOpen ? "rotate-180" : ""
                   }`}
                 />
               </>
             )}
           </button>
-        )}
 
-        {canViewProjectsNavigation && isOpen && projectsSubmenuOpen && (
-          <div
-            id="projects-navigation"
-            className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
-          >
-            <Link
-              to="/dashboardfr"
-              className={itemClass(
-                (pathname.startsWith("/dashboardfr") ||
-                  pathname.startsWith("/fleetrequest")) &&
-                  canOpenFleetRequest,
-                !canOpenFleetRequest,
-              )}
-              {...disabledLinkProps(!canOpenFleetRequest)}
+          {isOpen && submenuOpen && (
+            <div
+              id="plant-navigation"
+              className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
             >
-              <FaClipboardList
-                className={iconClass(
-                  pathname.startsWith("/dashboardfr") ||
-                    pathname.startsWith("/fleetrequest"),
+              <Link
+                to="/dashboard"
+                className={itemClass(
+                  pathname === "/dashboard" && canOpenHiringAsset,
+                  !canOpenHiringAsset,
                 )}
-              />
-              <span className="min-w-0 flex-1 truncate">Fleet Request</span>
-            </Link>
-            <Link
-              to="/dashboardfn?view=projects-ioc"
-              className={itemClass(
-                isProjectIocRoute && canOpenProjectIoc,
-                !canOpenProjectIoc,
-              )}
-              {...disabledLinkProps(!canOpenProjectIoc)}
+                onClick={
+                  canOpenHiringAsset
+                    ? () => setDashboardType("plant")
+                    : undefined
+                }
+                {...disabledLinkProps(!canOpenHiringAsset)}
+              >
+                <FaChartBar className={iconClass(pathname === "/dashboard")} />
+                <span className="min-w-0 flex-1 truncate">Hiring / Asset</span>
+              </Link>
+              <Link
+                to="/dashboardbr"
+                className={itemClass(
+                  pathname === "/dashboardbr" && canOpenBuyVsRent,
+                  !canOpenBuyVsRent,
+                )}
+                onClick={
+                  canOpenBuyVsRent
+                    ? () => setDashboardType("bvrplant")
+                    : undefined
+                }
+                {...disabledLinkProps(!canOpenBuyVsRent)}
+              >
+                <FaBalanceScale
+                  className={iconClass(pathname === "/dashboardbr")}
+                />
+                <span className="min-w-0 flex-1 truncate">Buy vs Rent</span>
+              </Link>
+              <Link
+                to="/dashboardfn"
+                className={itemClass(
+                  isFnRoute && canOpenGeneralFnIoc,
+                  !canOpenGeneralFnIoc,
+                )}
+                {...disabledLinkProps(!canOpenGeneralFnIoc)}
+                aria-current={
+                  isFnRoute && canOpenGeneralFnIoc ? "page" : undefined
+                }
+              >
+                <IoDocumentText className={iconClass(isFnRoute)} />
+                <span className="min-w-0 flex-1 truncate">FN / IOC</span>
+              </Link>
+              <Link
+                to="/particulars/1"
+                className={itemClass(
+                  pathname.startsWith("/particulars/1") &&
+                    canOpenPlantTemplates,
+                  !canOpenPlantTemplates,
+                )}
+                {...disabledLinkProps(!canOpenPlantTemplates)}
+              >
+                <HiDocumentText
+                  className={iconClass(pathname.startsWith("/particulars/1"))}
+                />
+                <span className="min-w-0 flex-1 truncate">Templates</span>
+              </Link>
+            </div>
+          )}
+
+          {canViewProjectsNavigation && (
+            <button
+              type="button"
+              onClick={() => toggleSection("projects")}
+              className={`${itemClass(
+                isProjectsRoute && canAccessProjects,
+                !canAccessProjects,
+              )} mt-1`}
+              title={
+                !isOpen
+                  ? `Projects${canAccessProjects ? "" : " (Locked)"}`
+                  : undefined
+              }
+              aria-expanded={projectsSubmenuOpen}
+              aria-controls="projects-navigation"
             >
-              <IoDocumentText className={iconClass(isProjectIocRoute)} />
-              <span className="min-w-0 flex-1 truncate">IOC</span>
-            </Link>
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={() => toggleSection("logistics")}
-          className={`${itemClass(
-            isLogisticsRoute && canAccessLogistics,
-            !canAccessLogistics,
-          )} mt-1`}
-          title={
-            !isOpen
-              ? `Logistics${canAccessLogistics ? "" : " (Locked)"}`
-              : undefined
-          }
-          aria-expanded={submenu1Open}
-          aria-controls="logistics-navigation"
-        >
-          <FaShip className={iconClass(isLogisticsRoute)} />
-          {!isOpen && !canAccessLogistics && (
-            <FaLock
-              className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5"
-              aria-label="Locked"
-            />
-          )}
-          {isOpen && (
-            <>
-              <span className="min-w-0 flex-1 truncate text-left">
-                Logistics
-              </span>
-              {!canAccessLogistics && (
-                <FaLock className="h-3.5 w-3.5 shrink-0" aria-label="Locked" />
+              <FaProjectDiagram className={iconClass(isProjectsRoute)} />
+              {!isOpen && !canAccessProjects && (
+                <FaLock
+                  className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5"
+                  aria-label="Locked"
+                />
               )}
-              <FiChevronDown
-                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
-                  submenu1Open ? "rotate-180" : ""
-                }`}
-              />
-            </>
+              {isOpen && (
+                <>
+                  <span className="min-w-0 flex-1 truncate text-left">
+                    Projects
+                  </span>
+                  {!canAccessProjects && (
+                    <FaLock
+                      className="h-3.5 w-3.5 shrink-0"
+                      aria-label="Locked"
+                    />
+                  )}
+                  <FiChevronDown
+                    className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+                      projectsSubmenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </>
+              )}
+            </button>
           )}
-        </button>
 
-        {isOpen && submenu1Open && (
-          <div
-            id="logistics-navigation"
-            className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
+          {canViewProjectsNavigation && isOpen && projectsSubmenuOpen && (
+            <div
+              id="projects-navigation"
+              className="relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200"
+            >
+              <Link
+                to="/dashboardfr"
+                className={itemClass(
+                  (pathname.startsWith("/dashboardfr") ||
+                    pathname.startsWith("/fleetrequest")) &&
+                    canOpenFleetRequest,
+                  !canOpenFleetRequest,
+                )}
+                {...disabledLinkProps(!canOpenFleetRequest)}
+              >
+                <FaClipboardList
+                  className={iconClass(
+                    pathname.startsWith("/dashboardfr") ||
+                      pathname.startsWith("/fleetrequest"),
+                  )}
+                />
+                <span className="min-w-0 flex-1 truncate">Fleet Request</span>
+              </Link>
+              <Link
+                to="/dashboardfn?view=projects-ioc&category=Demob"
+                className={itemClass(
+                  isDemobIocRoute && canOpenDemobIoc,
+                  !canOpenDemobIoc,
+                )}
+                {...disabledLinkProps(!canOpenDemobIoc)}
+              >
+                <IoDocumentText className={iconClass(isDemobIocRoute)} />
+                <span className="min-w-0 flex-1 truncate">Demob IOC</span>
+              </Link>
+              <Link
+                to="/dashboardfn?view=projects-ioc&category=FWA"
+                className={itemClass(
+                  isHwaIocRoute && canOpenHwaIoc,
+                  !canOpenHwaIoc,
+                )}
+                {...disabledLinkProps(!canOpenHwaIoc)}
+              >
+                <IoDocumentText className={iconClass(isHwaIocRoute)} />
+                <span className="min-w-0 flex-1 truncate">HWA IOC</span>
+              </Link>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => toggleSection("logistics")}
+            className={`${itemClass(
+              isLogisticsRoute && canAccessLogistics,
+              !canAccessLogistics,
+            )} ${logisticsFirst ? "-order-1" : ""} mt-1`}
+            title={
+              !isOpen
+                ? `Logistics${canAccessLogistics ? "" : " (Locked)"}`
+                : undefined
+            }
+            aria-expanded={submenu1Open}
+            aria-controls="logistics-navigation"
           >
-            <Link
-              to="/particulars/2"
-              className={itemClass(
-                pathname.startsWith("/particulars/2") &&
-                  canOpenLogisticsTemplates,
-                !canOpenLogisticsTemplates,
-              )}
-              {...disabledLinkProps(!canOpenLogisticsTemplates)}
-            >
-              <HiDocumentText
-                className={iconClass(pathname.startsWith("/particulars/2"))}
+            <FaShip className={iconClass(isLogisticsRoute)} />
+            {!isOpen && !canAccessLogistics && (
+              <FaLock
+                className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5"
+                aria-label="Locked"
               />
-              <span className="min-w-0 flex-1 truncate">Templates</span>
-            </Link>
-            <Link
-              to="/dashboardlg"
-              className={itemClass(
-                pathname.startsWith("/lstatements") && canAccessLogistics,
-                !canAccessLogistics,
-              )}
-              {...disabledLinkProps(!canAccessLogistics)}
+            )}
+            {isOpen && (
+              <>
+                <span className="min-w-0 flex-1 truncate text-left">
+                  Logistics
+                </span>
+                {!canAccessLogistics && (
+                  <FaLock
+                    className="h-3.5 w-3.5 shrink-0"
+                    aria-label="Locked"
+                  />
+                )}
+                <FiChevronDown
+                  className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+                    submenu1Open ? "rotate-180" : ""
+                  }`}
+                />
+              </>
+            )}
+          </button>
+
+          {isOpen && submenu1Open && (
+            <div
+              id="logistics-navigation"
+              className={`relative ml-5 mt-1 shrink-0 space-y-1 border-l border-sky-200/15 pl-3 animate-in fade-in slide-in-from-top-1 duration-200 ${
+                logisticsFirst ? "-order-1" : ""
+              }`}
             >
-              <IoDocumentText
-                className={iconClass(pathname.startsWith("/lstatements"))}
-              />
-              <span className="truncate">Comparative Statements</span>
-            </Link>
-          </div>
-        )}
+              <Link
+                to="/particulars/2"
+                className={itemClass(
+                  pathname.startsWith("/particulars/2") &&
+                    canOpenLogisticsTemplates,
+                  !canOpenLogisticsTemplates,
+                )}
+                {...disabledLinkProps(!canOpenLogisticsTemplates)}
+              >
+                <HiDocumentText
+                  className={iconClass(pathname.startsWith("/particulars/2"))}
+                />
+                <span className="min-w-0 flex-1 truncate">Templates</span>
+              </Link>
+              <Link
+                to="/dashboardlg"
+                className={itemClass(
+                  pathname.startsWith("/lstatements") && canAccessLogistics,
+                  !canAccessLogistics,
+                )}
+                {...disabledLinkProps(!canAccessLogistics)}
+              >
+                <IoDocumentText
+                  className={iconClass(pathname.startsWith("/lstatements"))}
+                />
+                <span className="truncate">Comparative Statements</span>
+              </Link>
+            </div>
+          )}
+        </div>
 
         {isOpen && (
           <p className="mb-2 mt-5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-200/55">

@@ -23,8 +23,10 @@ import { getDeptConfig } from "../Helpers/Permissions";
 import { useQuickAccess } from "../store/helperStore";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 import { getModuleNavigationAccess } from "../Helpers/navigationPermissions";
-import { getInitiatorCapabilities } from "../Helpers/initiatorCapabilities";
-import { getProjectIocAccess } from "../Helpers/projectIocAccess";
+import {
+  getFnIocDashboardPath,
+  getProjectIocAccess,
+} from "../Helpers/projectIocAccess";
 
 const Header = () => {
   const userInfo = useUserInfo();
@@ -63,13 +65,11 @@ const Header = () => {
   const path = location.pathname;
   const { canAccess: canAccessFleetRequests } = getFleetRequestAccess(userInfo);
   const navigationAccess = getModuleNavigationAccess(userInfo);
-  const initiatorCapabilities = getInitiatorCapabilities(userInfo?.role);
   const projectIocAccess = getProjectIocAccess(userInfo);
-  const fnIocLink =
-    (initiatorCapabilities.demob || initiatorCapabilities.hwa) &&
-    projectIocAccess.isProjectScoped
-      ? "/dashboardfn?view=projects-ioc"
-      : "/dashboardfn";
+  const fnIocLink = getFnIocDashboardPath(userInfo);
+  const canAccessFnIocHeader = projectIocAccess.isProjectScoped
+    ? navigationAccess.canAccessProjects && projectIocAccess.canAccess
+    : navigationAccess.canAccessFNIOC;
   const { defaultDept } = getDeptConfig({
     isLogistics,
     isPlant,
@@ -147,10 +147,10 @@ const Header = () => {
               </div>
               <div className="hidden h-9 items-center border-l border-white/25 pl-4 md:flex">
                 <div className="flex flex-col justify-center leading-tight">
-                  <span className="block text-[15px] font-semibold uppercase tracking-[0.22em] text-white">
+                  <span className="block text-xs font-semibold uppercase tracking-normal text-white">
                     Galfar
                   </span>
-                  <span className="mt-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+                  <span className="mt-1 block text-xs font-semibold uppercase tracking-normal text-white">
                     Integrated Web Application
                   </span>
                 </div>
@@ -230,13 +230,13 @@ const Header = () => {
                     return `text-gray-700 hover:text-blue-600 ${
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
                     }${
-                      !navigationAccess.canAccessFNIOC
+                      !canAccessFnIocHeader
                         ? " cursor-not-allowed opacity-50 hover:text-gray-700"
                         : ""
                     }`;
                   }}
                   {...disabledHeaderLinkProps(
-                    !navigationAccess.canAccessFNIOC,
+                    !canAccessFnIocHeader,
                   )}
                 >
                   FN/IOC
