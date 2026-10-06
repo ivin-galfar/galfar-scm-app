@@ -328,6 +328,27 @@ const FleetRequest = () => {
 
     return draft;
   };
+
+  const startNewFleetRequest = ({ replace = false } = {}) => {
+    const projectCode = projects[0]?.toString() ?? "";
+    setFleetRequestStatus("");
+    setSelectedFleetRequestId("");
+    navigate("/fleetrequest", { replace, state: null });
+    loadProjectDraft(projectCode);
+    setNewfn(true);
+  };
+
+  useEffect(() => {
+    if (path.state?.createNew !== "fleetrequest") return;
+
+    if (newfn) {
+      navigate(path.pathname, { replace: true, state: null });
+      return;
+    }
+
+    startNewFleetRequest({ replace: true });
+  }, [path.state]);
+
   useEffect(() => {
     if (!newfn || draftStorageKey || !draftUserId) return;
 
@@ -367,12 +388,7 @@ const FleetRequest = () => {
     }
 
     //for new statements
-    const projectCode = projects[0]?.toString() ?? "";
-    setFleetRequestStatus("");
-    setSelectedFleetRequestId("");
-    navigate("/fleetrequest");
-    loadProjectDraft(projectCode);
-    setNewfn(true);
+    startNewFleetRequest();
   };
 
   const handleProjectChange = (projectCode) => {
