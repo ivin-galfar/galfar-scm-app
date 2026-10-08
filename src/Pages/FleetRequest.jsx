@@ -1042,19 +1042,22 @@ const FleetRequest = () => {
                         <td
                           key={cell.id}
                           className={`${
-                            compactColumnIds.has(cell.column.id)
-                              ? cell.column.id === "cicpa"
-                                ? "w-16 whitespace-nowrap"
-                                : "w-20 whitespace-nowrap"
-                              : cell.column.id === "remarks"
-                                ? "w-48 max-w-48"
-                                : cell.column.id === "productionQtyEnvisaged" ||
-                                    cell.column.id ===
-                                      "similarMachinesAvailable"
-                                  ? "w-32 max-w-24 whitespace-normal"
-                                  : cell.column.id === "actions"
-                                    ? "w-14 text-center"
-                                    : "max-w-24"
+                            cell.column.id === "cicpa"
+                              ? "w-16 whitespace-nowrap"
+                              : cell.column.id === "capacity"
+                                ? "w-24 max-w-24 whitespace-normal"
+                                : cell.column.id === "duration"
+                                  ? "w-20 whitespace-nowrap"
+                                  : cell.column.id === "remarks"
+                                    ? "w-48 max-w-48"
+                                    : cell.column.id ===
+                                          "productionQtyEnvisaged" ||
+                                        cell.column.id ===
+                                          "similarMachinesAvailable"
+                                      ? "w-32 max-w-24 whitespace-normal"
+                                      : cell.column.id === "actions"
+                                        ? "w-14 text-center"
+                                        : "max-w-24"
                           } py-3 align-middle text-slate-700 ${
                             preservedWidthColumnIds.has(cell.column.id)
                               ? "px-3"
