@@ -687,7 +687,10 @@ const FleetRequest = () => {
     }),
     columnHelper.accessor("capacity", { header: "Capacity" }),
     columnHelper.accessor("quantity", { header: "Quantity" }),
-    columnHelper.accessor("duration", { header: "Duration" }),
+    columnHelper.accessor("duration", {
+      header: "Duration",
+      cell: (info) => <div className="w-10">{info.getValue() || "—"}</div>,
+    }),
     columnHelper.accessor("rentalType", { header: "Rental Type" }),
     columnHelper.accessor("purpose", { header: "Purpose" }),
     columnHelper.accessor("requiredFrom", {
@@ -701,9 +704,9 @@ const FleetRequest = () => {
     columnHelper.accessor("productionQtyEnvisaged", {
       header: () => (
         <span className="leading-tight">
-          Production Qty
+          Production
           <br />
-          Envisaged
+          Qty Envisaged
         </span>
       ),
       cell: (info) => info.getValue() || "—",
@@ -734,8 +737,20 @@ const FleetRequest = () => {
         </span>
       ),
     }),
-    columnHelper.accessor("tpi", { header: "TPI" }),
-    columnHelper.accessor("remarks", { header: "Remarks" }),
+    columnHelper.accessor("tpi", {
+      header: "TPI",
+      cell: (info) => (
+        <div className="w-12 truncate">{info.getValue() || "—"}</div>
+      ),
+    }),
+    columnHelper.accessor("remarks", {
+      header: () => "Remarks",
+      cell: (info) => (
+        <div className="max-h-20  overflow-y-auto whitespace-normal break-words">
+          {info.getValue() || "—"}
+        </div>
+      ),
+    }),
     ...(canEdit
       ? [
           columnHelper.display({
@@ -986,8 +1001,8 @@ const FleetRequest = () => {
         )}
         {fleetItems.length > 0 && (
           <div className="overflow-x-auto rounded border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-              <thead className="border-b-2 border-slate-300 bg-slate-100">
+            <table className="min-w-full divide-y divide-slate-200  text-sm text-center">
+              <thead className="border-b-2 border-slate-300 bg-slate-100 ">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
@@ -1031,13 +1046,16 @@ const FleetRequest = () => {
                               ? cell.column.id === "cicpa"
                                 ? "w-16 whitespace-nowrap"
                                 : "w-20 whitespace-nowrap"
-                              : cell.column.id === "productionQtyEnvisaged" ||
-                                  cell.column.id === "similarMachinesAvailable"
-                                ? "w-32 max-w-24 whitespace-normal"
-                                : cell.column.id === "actions"
-                                  ? "w-14 text-center"
-                                  : "max-w-24 "
-                          } py-3 align-top text-slate-700 ${
+                              : cell.column.id === "remarks"
+                                ? "w-48 max-w-48"
+                                : cell.column.id === "productionQtyEnvisaged" ||
+                                    cell.column.id ===
+                                      "similarMachinesAvailable"
+                                  ? "w-32 max-w-24 whitespace-normal"
+                                  : cell.column.id === "actions"
+                                    ? "w-14 text-center"
+                                    : "max-w-24"
+                          } py-3 align-middle text-slate-700 ${
                             preservedWidthColumnIds.has(cell.column.id)
                               ? "px-3"
                               : "px-2"
