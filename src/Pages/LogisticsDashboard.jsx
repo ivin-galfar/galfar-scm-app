@@ -29,7 +29,7 @@ import {
   useStatusFilter,
 } from "../store/logisticsStore";
 import { IoWarningOutline } from "react-icons/io5";
-import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
+import { LuEye, LuFileDown, LuTrash2, LuWorkflow } from "react-icons/lu";
 import DashboardButton from "../Components/DashboardButton";
 import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
 import DashboardStatusNav from "../Components/DashboardStatusNav";
@@ -49,7 +49,6 @@ import { useToast } from "../store/toastStore";
 import { SiTicktick } from "react-icons/si";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { handlePrint } from "../Helpers/print_helper";
-import { FaHistory } from "react-icons/fa";
 import ApprovalHistory from "../Components/ApprovalHistory";
 import { usePagination, usetotalReceipts } from "../store/statementStore";
 import {
@@ -630,15 +629,18 @@ const LogisticsDashboard = () => {
                           ) || ""}
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">
-                      <div
-                        className="flex items-center justify-center cursor-pointer"
+                      <button
+                        type="button"
+                        className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md text-blue-700 transition hover:bg-blue-50 hover:text-blue-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        aria-label="View approval timeline"
+                        title="View approval timeline"
                         onClick={() => {
                           (handleApprovalHistory(row.original.id),
                             fetchPmName(row.original.project));
                         }}
                       >
-                        <FaHistory />
-                      </div>
+                        <LuWorkflow size={17} aria-hidden="true" />
+                      </button>
                     </td>
                     <td className="border-gray-300 border-b text-sm text-gray-700 text-center">
                       {row.original.filename?.length > 0 && (
@@ -750,7 +752,11 @@ const LogisticsDashboard = () => {
           </div>
         </div>
       )}
-      {statusfilter === "Approval History" && <ApprovalHistory />}
+      {statusfilter === "Approval History" && (
+        <div className="min-h-0 flex-1 overflow-auto [scrollbar-width:thin]">
+          <ApprovalHistory />
+        </div>
+      )}
 
       {deletestatement.open && (
         <Alerts

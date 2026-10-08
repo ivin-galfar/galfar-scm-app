@@ -36,6 +36,7 @@ import {
 import {
   formatDateDDMMYYYY,
   formatDateDMY,
+  formatwords,
   generateFRApprovedPDF,
 } from "../Helpers/helperfunctions";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
@@ -258,11 +259,9 @@ const FleetRequest = () => {
           items: responseItems.map((item) => ({
             fleetDescription: item.fleet_description ?? "",
             capacity: item.capacity ?? "",
-            cicpa: item.cicpa ?? "",
+            cicpa: formatwords(item?.cicpa) ?? "",
             quantity: item.quantity ?? "",
-            requiredFrom: normalizeDateForInput(
-              item.requiredFrom ?? item.required_from,
-            ),
+            requiredFrom: normalizeDateForInput(item.required_from),
             rentalType: item.rentalType ?? item.rental_type ?? "",
             duration: item.duration ?? "",
             purpose: item.purpose ?? "",
@@ -273,8 +272,10 @@ const FleetRequest = () => {
             similarMachinesAvailable: item.qty_similar_machines_available ?? "",
             remarks: item.remarks ?? "",
             utilization: item.utilization ?? 0,
-            adnocFitments: item.adnocFitments ?? item.adnoc_fitments ?? "",
-            tpi: item.tpi ?? "",
+            adnocFitments: item?.adnoc_fitments
+              ? formatwords(item?.adnoc_fitments)
+              : "",
+            tpi: item?.tpi ? item.tpi : "",
           })),
         };
 
@@ -685,15 +686,13 @@ const FleetRequest = () => {
       header: "Fleet Description",
     }),
     columnHelper.accessor("capacity", { header: "Capacity" }),
-    columnHelper.accessor("cicpa", {
-      header: () => (
-        <span className="leading-tight">
-          CICPA <br />
-          (Yes/No)
-        </span>
-      ),
-    }),
     columnHelper.accessor("quantity", { header: "Quantity" }),
+    columnHelper.accessor("duration", {
+      header: "Duration",
+      cell: (info) => <div className="w-10">{info.getValue() || "—"}</div>,
+    }),
+    columnHelper.accessor("rentalType", { header: "Rental Type" }),
+    columnHelper.accessor("purpose", { header: "Purpose" }),
     columnHelper.accessor("requiredFrom", {
       header: () => (
         <span className="leading-tight">
@@ -702,15 +701,12 @@ const FleetRequest = () => {
       ),
       cell: (info) => formatDateDMY(info.getValue()) || "—",
     }),
-    columnHelper.accessor("duration", { header: "Duration" }),
-    columnHelper.accessor("rentalType", { header: "Rental Type" }),
-    columnHelper.accessor("purpose", { header: "Purpose" }),
     columnHelper.accessor("productionQtyEnvisaged", {
       header: () => (
         <span className="leading-tight">
-          Production Qty
+          Production
           <br />
-          Envisaged
+          Qty Envisaged
         </span>
       ),
       cell: (info) => info.getValue() || "—",
@@ -725,6 +721,14 @@ const FleetRequest = () => {
       ),
     }),
     columnHelper.accessor("utilization", { header: "Utilization" }),
+    columnHelper.accessor("cicpa", {
+      header: () => (
+        <span className="leading-tight">
+          CICPA <br />
+          (Yes/No)
+        </span>
+      ),
+    }),
     columnHelper.accessor("adnocFitments", {
       header: () => (
         <span className="leading-tight">
@@ -733,8 +737,20 @@ const FleetRequest = () => {
         </span>
       ),
     }),
-    columnHelper.accessor("tpi", { header: "TPI" }),
-    columnHelper.accessor("remarks", { header: "Remarks" }),
+    columnHelper.accessor("tpi", {
+      header: "TPI",
+      cell: (info) => (
+        <div className="w-12 truncate">{info.getValue() || "—"}</div>
+      ),
+    }),
+    columnHelper.accessor("remarks", {
+      header: () => "Remarks",
+      cell: (info) => (
+        <div className="max-h-20  overflow-y-auto whitespace-normal break-words">
+          {info.getValue() || "—"}
+        </div>
+      ),
+    }),
     ...(canEdit
       ? [
           columnHelper.display({
@@ -779,7 +795,7 @@ const FleetRequest = () => {
   });
 
   const readOnlyValueClass =
-    "min-w-0 overflow-hidden whitespace-nowrap font-medium text-ellipsis text-slate-800";
+    "min-w-0 whitespace-normal font-medium text-slate-800";
   const fieldClass = `relative flex min-w-0 text-slate-600 ${
     canEdit ? "flex-col gap-1" : "items-center gap-2"
   }`;
@@ -904,7 +920,9 @@ const FleetRequest = () => {
             )}
           </div>
           <label className={fieldClass}>
-            <span className="font-medium">Location :</span>
+            <span className="font-medium shrink-0 whitespace-nowrap">
+              Location :
+            </span>
             {canEdit ? (
               <input
                 type="text"
@@ -983,8 +1001,8 @@ const FleetRequest = () => {
         )}
         {fleetItems.length > 0 && (
           <div className="overflow-x-auto rounded border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-              <thead className="border-b-2 border-slate-300 bg-slate-100">
+            <table className="min-w-full divide-y divide-slate-200  text-sm text-center">
+              <thead className="border-b-2 border-slate-300 bg-slate-100 ">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
@@ -1028,13 +1046,16 @@ const FleetRequest = () => {
                               ? cell.column.id === "cicpa"
                                 ? "w-16 whitespace-nowrap"
                                 : "w-20 whitespace-nowrap"
-                              : cell.column.id === "productionQtyEnvisaged" ||
-                                  cell.column.id === "similarMachinesAvailable"
-                                ? "w-32 max-w-24 whitespace-normal"
-                                : cell.column.id === "actions"
-                                  ? "w-14 text-center"
-                                  : "max-w-24 "
-                          } py-3 align-top text-slate-700 ${
+                              : cell.column.id === "remarks"
+                                ? "w-48 max-w-48"
+                                : cell.column.id === "productionQtyEnvisaged" ||
+                                    cell.column.id ===
+                                      "similarMachinesAvailable"
+                                  ? "w-32 max-w-24 whitespace-normal"
+                                  : cell.column.id === "actions"
+                                    ? "w-14 text-center"
+                                    : "max-w-24"
+                          } py-3 align-middle text-slate-700 ${
                             preservedWidthColumnIds.has(cell.column.id)
                               ? "px-3"
                               : "px-2"

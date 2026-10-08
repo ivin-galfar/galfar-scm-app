@@ -1270,16 +1270,9 @@ export const AddNewFleetRequests = async ({
       },
     };
 
-    const formatDate = (value) => {
-      if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-
-      const [year, month, day] = value.split("-");
-      return `${day}-${month}-${year}`;
-    };
-
     const payload = {
       project,
-      date: formatDate(date),
+      date,
       location,
       status: "created",
       comments,
@@ -1288,7 +1281,7 @@ export const AddNewFleetRequests = async ({
         capacity: item.capacity,
         cicpa: item.cicpa,
         quantity: Number(item.quantity),
-        required_from: formatDate(item.requiredFrom),
+        required_from: item.requiredFrom,
         rental_type: item.rentalType,
         duration: item.duration,
         purpose: item.purpose,

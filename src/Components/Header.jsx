@@ -147,10 +147,10 @@ const Header = () => {
               </div>
               <div className="hidden h-9 items-center border-l border-white/25 pl-4 md:flex">
                 <div className="flex flex-col justify-center leading-tight">
-                  <span className="block text-xs font-semibold uppercase tracking-normal text-white">
+                  <span className="block text-md font-semibold uppercase tracking-normal text-white">
                     Galfar
                   </span>
-                  <span className="mt-1 block text-xs font-semibold uppercase tracking-normal text-white">
+                  <span className="mt-1 block text-md font-semibold uppercase tracking-normal text-white">
                     Integrated Web Application
                   </span>
                 </div>
@@ -176,9 +176,7 @@ const Header = () => {
                       isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
                     }${isDisabled || !canAccessComparativeStatements ? " cursor-not-allowed opacity-50 hover:text-gray-700" : ""}`;
                   }}
-                  aria-disabled={
-                    isDisabled || !canAccessComparativeStatements
-                  }
+                  aria-disabled={isDisabled || !canAccessComparativeStatements}
                   title={
                     isDisabled || !canAccessComparativeStatements
                       ? "Unavailable for your current role"
@@ -207,9 +205,7 @@ const Header = () => {
                       location.pathname.startsWith("/fleetrequest");
 
                     return `text-gray-700 hover:text-blue-600 ${
-                      isActive
-                        ? "border-b-2 border-blue-500 text-blue-600"
-                        : ""
+                      isActive ? "border-b-2 border-blue-500 text-blue-600" : ""
                     }${
                       !canAccessFleetRequestHeader
                         ? " cursor-not-allowed opacity-50 hover:text-gray-700"
@@ -235,9 +231,7 @@ const Header = () => {
                         : ""
                     }`;
                   }}
-                  {...disabledHeaderLinkProps(
-                    !canAccessFnIocHeader,
-                  )}
+                  {...disabledHeaderLinkProps(!canAccessFnIocHeader)}
                 >
                   FN/IOC
                 </NavLink>

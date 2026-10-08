@@ -421,6 +421,17 @@
   }
 }
 
+@keyframes milestone-trees-sway {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+
+  50% {
+    transform: rotate(4deg);
+  }
+}
+
 @keyframes milestone-title-shimmer {
   0%,
   30% {
@@ -432,27 +443,26 @@
     background-position: 0% 50%;
   }
 }
-
 .digital-milestone {
-  background-image: linear-gradient(
-    105deg,
-    rgb(255 255 255 / 98%),
-    rgb(239 249 252 / 72%) 55%,
-    rgb(236 253 245 / 60%)
-  );
-  box-shadow:
-    0 18px 40px -18px rgb(12 41 72 / 48%),
-    0 6px 14px -8px rgb(12 41 72 / 30%),
-    inset 0 1px 0 rgb(255 255 255 / 80%);
-  animation: milestone-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
+  background: linear-gradient(110deg, #14b655 0%, #a4ecb7 52%, #14b655 100%);
 
-.digital-milestone__accent {
-  animation: milestone-accent 2.8s ease-in-out infinite;
+  border: 1px solid rgb(18 52 91 / 14%);
+
+  box-shadow:
+    0 16px 34px -18px rgb(18 52 91 / 30%),
+    0 6px 14px -7px rgb(18 52 91 / 18%),
+    inset 0 1px 0 rgb(255 255 255 / 75%);
+
+  animation: milestone-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .digital-milestone__icon {
   animation: milestone-icon-settle 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.digital-milestone__trees {
+  transform-origin: bottom center;
+  animation: milestone-trees-sway 2.4s ease-in-out infinite;
 }
 
 .digital-milestone__glow {
@@ -517,6 +527,7 @@
   .digital-milestone__accent,
   .digital-milestone__glow,
   .digital-milestone__icon,
+  .digital-milestone__trees,
   .digital-milestone__title,
   .digital-milestone__details,
   .digital-milestone__message,
