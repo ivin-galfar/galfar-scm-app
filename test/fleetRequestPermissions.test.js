@@ -58,10 +58,10 @@ test("Fleet Request frontend capability matrix", () => {
 
 test("Fleet Request frontend uses CM-first workflows", () => {
   assert.deepEqual(FLEET_APPROVAL_ROLES.STANDARD, [
-    "INITIATOR", "CM", "PM", "HOD", "GM", "CEO",
+    "INITIATOR", "CM", "PM", "HOD", "GM",
   ]);
   assert.deepEqual(getFleetApprovalFlow(7102, [7102]), [
-    "INITIATOR", "CM", "PM", "PD", "HOD", "GM", "CEO",
+    "INITIATOR", "CM", "PM", "PD", "HOD", "GM",
   ]);
 });
 

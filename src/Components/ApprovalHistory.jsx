@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchallid } from "../APIs/api";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useHistoryData, useIdHistory } from "../store/logisticsStore";
@@ -23,7 +23,7 @@ const ApprovalHistory = () => {
 
   return (
     <div className="flex">
-      <div className="flex  items-start ">
+      <div className="sticky left-0 top-0 z-20 flex shrink-0 self-start items-start bg-slate-50 py-2 pr-4">
         <div className="flex items-center gap-5">
           <div className="text-sm font-medium text-gray-700 text-nowrap justify-center">
             Select Doc. NO:

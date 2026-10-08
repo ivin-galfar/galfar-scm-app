@@ -1,10 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  calculatePaperPagesSaved,
+  calculateTreesSaved,
   getDashboardTimePeriod,
   getMilestoneStorageKey,
   isManagementUser,
 } from "../src/Helpers/dashboardMilestone.js";
+
+test("calculates estimated paper pages saved from the milestone threshold", () => {
+  assert.equal(calculatePaperPagesSaved(1000), 105000);
+  assert.equal(calculatePaperPagesSaved("1000"), 105000);
+  assert.equal(calculatePaperPagesSaved(1000, 120), 120000);
+  assert.equal(calculatePaperPagesSaved("invalid"), 0);
+});
+
+test("calculates estimated trees saved from paper pages", () => {
+  assert.equal(calculateTreesSaved(105000), 13);
+  assert.equal(calculateTreesSaved("105000"), 13);
+  assert.equal(calculateTreesSaved(10000, 5000), 2);
+  assert.equal(calculateTreesSaved("invalid"), 0);
+  assert.equal(calculateTreesSaved(105000, 0), 0);
+});
 
 test("uses the same morning, afternoon, and evening greeting boundaries", () => {
   assert.equal(getDashboardTimePeriod(new Date(2026, 9, 2, 4, 59)), "evening");

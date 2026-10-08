@@ -28,14 +28,14 @@ const isSpecialProject = (fleetRequest) => {
 /**
  * Returns the next role in a Fleet Request approval flow.
  *
- * Standard: Initiator -> CM -> PM -> HOD -> GM -> CEO
- * Special:  Initiator -> CM -> PM -> PD -> HOD -> GM -> CEO
+ * Standard: Initiator -> CM -> PM -> HOD -> GM
+ * Special:  Initiator -> CM -> PM -> PD -> HOD -> GM
  *
  * @param {object} fleetRequest Fleet Request containing `project_code` or
  * `projectCode`.
  * @param {string|object} currentApprover Current role string or an approver
  * object containing a `role` property.
- * @returns {string[]} The next role, or an empty array after the CEO or when
+ * @returns {string[]} The next role, or an empty array after the GM or when
  * the current role is invalid.
  */
 export const getNextFleetApprovalRoles = (fleetRequest, currentApprover) => {

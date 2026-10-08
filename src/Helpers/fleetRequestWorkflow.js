@@ -1,6 +1,6 @@
 export const FLEET_APPROVAL_ROLES = {
-  STANDARD: ["INITIATOR", "CM", "PM", "HOD", "GM", "CEO"],
-  SPECIAL_PROJECT: ["INITIATOR", "CM", "PM", "PD", "HOD", "GM", "CEO"],
+  STANDARD: ["INITIATOR", "CM", "PM", "HOD", "GM"],
+  SPECIAL_PROJECT: ["INITIATOR", "CM", "PM", "PD", "HOD", "GM"],
 };
 
 export const getFleetApprovalFlow = (project, specialProjects = []) =>

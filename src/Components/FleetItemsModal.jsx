@@ -45,8 +45,8 @@ const validateItem = (item) => {
     errors.similarMachinesAvailable = "Value cannot be negative.";
   }
 
-  if (item.tpi && !["Normal", "CPIS"].includes(item.tpi)) {
-    errors.tpi = "Select Normal or CPIS.";
+  if (item.tpi && !["Normal", "CP - 19"].includes(item.tpi)) {
+    errors.tpi = "Select Normal or CP - 19.";
   }
 
   return errors;
@@ -486,7 +486,7 @@ const FleetItemsModal = ({
                         <select
                           className={inputClass}
                           value={
-                            ["Normal", "CPIS"].includes(item.tpi)
+                            ["Normal", "CP - 19"].includes(item.tpi)
                               ? item.tpi
                               : ""
                           }
@@ -496,7 +496,7 @@ const FleetItemsModal = ({
                         >
                           <option value="">Select TPI</option>
                           <option value="Normal">Normal</option>
-                          <option value="CPIS">CPIS</option>
+                          <option value="CP - 19">CP - 19</option>
                         </select>
                         {renderError(itemIndex, "tpi")}
                       </label>

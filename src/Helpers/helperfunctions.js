@@ -516,7 +516,6 @@ export const handleFrPrint = async (
   const completeRequest = hasCompleteData
     ? fleetRequest
     : await GetFleetRequestById(userInfo, requestId);
-  console.log("comp", completeRequest);
 
   return generateFRPDF(completeRequest, userInfo, emailPdf);
 };

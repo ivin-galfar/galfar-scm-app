@@ -85,7 +85,6 @@ const statusDetails = (status) => {
     pd: 50,
     hod: 60,
     gm: 80,
-    ceo: 90,
   };
   const colorByRole = {
     cm: "bg-amber-500",
@@ -93,7 +92,6 @@ const statusDetails = (status) => {
     pd: "bg-teal-500",
     hod: "bg-yellow-400",
     gm: "bg-orange-500",
-    ceo: "bg-violet-600",
   };
   return {
     label: pendingRole ? `Pending for ${pendingRole.toUpperCase()}` : "Pending",
@@ -164,7 +162,6 @@ const FRDashboards = () => {
         deleted: 1,
         userInfo,
       });
-      console.log(updatedRequest);
 
       if (Number(updatedRequest?.deleted) !== 1) {
         throw new Error(
@@ -194,7 +191,7 @@ const FRDashboards = () => {
   };
 
   const approvalRoles = roles.filter((role) =>
-    ["cm", "pm", "pd", "hod", "gm", "ceo"].includes(role),
+    ["cm", "pm", "pd", "hod", "gm"].includes(role),
   );
   const canViewAllPending = Boolean(userInfo?.is_admin || fleetAccess.canEdit);
   const serverStatusFilter =

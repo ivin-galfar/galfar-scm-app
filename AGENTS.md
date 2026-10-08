@@ -55,6 +55,8 @@ The frontend talks directly to the Express API with Axios. Most API calls build 
 - `VITE_SPECIAL_PROJECTS`: comma-separated project codes with special approval flows.
 - `VITE_INHOUSE_PROJECTS`: comma-separated in-house project codes.
 - `VITE_APP_VERSION`: client version used to invalidate stale sessions.
+- `VITE_PAPERLESS_MILESTONE_THRESHOLD`: statement-count threshold that triggers the management-only paperless milestone notice.
+- `VITE_ESTIMATED_PAGES_PER_STATEMENT`: multiplier used to estimate paper pages saved for the paperless milestone.
 
 Never document the values from `.env`; document names and meaning only.
 
@@ -73,15 +75,15 @@ Routes currently declared in `src/App.jsx`:
 | `/dashboard` | Hiring/Asset dashboard | `NavigationPermissionRoute` |
 | `/dashboardlg` | Logistics dashboard | `NavigationPermissionRoute` |
 | `/dashboardbr` | Buy vs Rent dashboard | `NavigationPermissionRoute` |
-| `/dashboardfn` | FN/IOC dashboard | No route wrapper currently |
+| `/dashboardfn` | General or Projects FN/IOC dashboard, selected by `view=projects-ioc` | `NavigationPermissionRoute` with scope-dependent permission |
 | `/pendingdashboard` | Consolidated pending approvals | No route wrapper currently |
 | `/brstatement`, `/brstatement/:cs_no` | Buy vs Rent statement | `NavigationPermissionRoute` |
-| `/filenote`, `/filenote/:fn_no` | File Note/IOC editor | `ProtectedRoute` |
-| `/fleetrequest`, `/fleetrequest/:id` | Fleet Request editor/viewer | `FleetRequestRoute` |
-| `/dashboardfr/` | Fleet Request dashboard | `FleetRequestRoute` |
+| `/filenote`, `/filenote/:fn_no` | File Note/IOC editor | `NavigationPermissionRoute` (`canAccessFNIOC`) |
+| `/fleetrequest`, `/fleetrequest/:id` | Fleet Request editor/viewer | `NavigationPermissionRoute` (`canAccessProjects`) plus `FleetRequestRoute` |
+| `/dashboardfr/` | Fleet Request dashboard | `NavigationPermissionRoute` (`canAccessProjects`) plus `FleetRequestRoute` |
 | `/contact` | Contact page | No route wrapper currently |
 
-`ProtectedRoute` checks only for `userInfo.token`. `FleetRequestRoute` additionally checks `getFleetRequestAccess(userInfo).canAccess`. Do not assume a hidden navigation item protects an unguarded route.
+`NavigationPermissionRoute` resolves module permissions and redirects denied direct navigation. `FleetRequestRoute` additionally checks `getFleetRequestAccess(userInfo).canAccess`. The Home route, pending dashboard, and contact page remain outside these module wrappers; do not assume a hidden navigation item protects an unguarded route.
 
 ## Functional Modules
 
@@ -98,6 +100,7 @@ Routes currently declared in `src/App.jsx`:
 - `GetAnalyticsData` calls `/analytics/approvals`.
 - `GetAnnouncementsData` calls `/announcements`.
 - Quick-access links set shared filters and then navigate to module dashboards/forms.
+- `DigitalMilestone` is shown once per user/local-date/time-period to management roles after the configured statement threshold is reached. `dashboardMilestone.js` owns management-role recognition, storage keys, the paper-saving estimate (`threshold * estimated pages per statement`), and the tree-saving estimate (paper pages divided by 8,333 and rounded to the nearest whole tree).
 
 ### Templates/particulars
 
@@ -120,6 +123,7 @@ Routes currently declared in `src/App.jsx`:
 - Standard UI flow uses initiator -> incharge -> PM -> GM -> FM -> CEO, with PD inserted after PM for special projects.
 - `expectedstatus`, `role_finder`, and backend logistics update logic are the current sources for transition/comment-field behavior.
 - Email is dispatched with `dept=logistics`.
+- The dashboard Approval History view uses `ApprovalHistory`, `ApproverTimeline`, and `TimelineGraph`. Because the dashboard shell intentionally hides page overflow, the history branch owns its own bounded scroll container; the document selector and status legend remain sticky while the responsive timeline scrolls.
 
 ### Buy vs Rent
 
@@ -148,6 +152,7 @@ Routes currently declared in `src/App.jsx`:
 - Edit access can create/update/send; view access can approve the currently assigned step; manage combines both.
 - Project access is restricted except for HOD/GM/CEO, who can view all projects on the backend.
 - Email is dispatched through `/emailnotify/:id?dept=plant&type=fr` after the workflow update succeeds.
+- Fleet Request PDFs are generated through `generateFRPDF` in `print_helper.js`; keep PDF column order aligned with the item body order and rebalance explicit column widths rather than allowing the table to exceed the printable landscape width.
 
 ## Shared State Map
 
@@ -174,6 +179,7 @@ The frontend API wrapper currently covers:
 - `/projects`: project details and project-specific CM/PM names.
 - `/analytics`: consolidated approval analytics.
 - `/announcements`: home-page announcements.
+- `/department`: department creation/reference operations.
 - `/flreq`: Fleet Request document number, create, list, detail, and workflow update.
 - `/emailnotify`: workflow email dispatch and password-reset operations.
 
@@ -229,7 +235,7 @@ Keep the report proportional to the change. A small edit may need a compact para
 - Frontend initiator capabilities are resolved by `src/Helpers/initiatorCapabilities.js`: `initfn` is the general FN/IOC fallback, `initpr` enables Demobilization, `initdc` enables HWA, and `initfr` enables Fleet Request. Specialized FN/IOC roles take precedence over `initfn` for creation choices, and multiple specialized capabilities produce the Home dashboard Create New menu.
 - Fleet Request access is derived through `src/Helpers/fleetRequestPermissions.js` using the `fl_req` statement role.
 - Fleet Request workflow actions are derived through `src/Helpers/approvalFlowHelper.js`.
-- Route protection is implemented through components such as `ProtectedRoute` and `FleetRequestRoute`.
+- Route protection is implemented primarily through `NavigationPermissionRoute`; Fleet Request routes additionally use `FleetRequestRoute` for `fl_req` statement access.
 - When adding navigation, update active-route detection as well as the destination and permission state.
 
 ## Fleet Request Workflow
@@ -237,19 +243,20 @@ Keep the report proportional to the change. A small edit may need a compact para
 The normal flow is:
 
 ```text
-Initiator -> CM -> PM -> HOD -> GM -> CEO -> Approved
+Initiator -> CM -> PM -> HOD -> GM -> Approved
 ```
 
 Special projects include PD between PM and HOD. The project-dependent flow is defined by the Fleet Request workflow helpers; do not duplicate it in UI components.
 
 - `create` saves the request with `created` status.
 - `send-for-approval` sends or resubmits it to the first approver.
-- `approve` advances it to the next approver or to `approved`.
+- `approve` advances it to the next approver; GM approval moves it to `approved`.
 - `reject` ends the active approval path and notifies the initiator.
 - `review` sends it back to the initiator for changes.
 - `recall` lets an edit-capable initiator withdraw a pending request into the editable `recalled` state; it does not send email.
 - Send workflow email only after the workflow API update succeeds.
-- Every Fleet Request item requires an explicit `Yes`/`No` selection for ADNOC Fitments and a `Normal`/`CPIS` selection for TPI; both values are persisted, editable, and included in generated PDFs.
+- Every Fleet Request item requires an explicit `Yes`/`No` selection for ADNOC Fitments and a `Normal`/`CP - 19` selection for TPI; both values are persisted, editable, and included in generated PDFs.
+- TPI accepts only the documented canonical labels `Normal` and `CP - 19`; do not add aliases or display-time value rewriting without an explicit contract change.
 - Fleet Request location is entered as required free text and does not depend on an environment-configured list.
 
 ### Fleet Request UI action contract
@@ -295,6 +302,7 @@ Action-specific success messages are generated by `getFleetRequestSuccessMessage
 - When changing a menu item, verify expanded view, collapsed tooltip, active state, permission-disabled state, and destination route.
 - Dashboard status navigation styling is centralized in `dashboardStatusNav.js`; Hiring/Asset, Logistics, Buy vs Rent, FN/IOC, and Fleet Request use the same status-aware active and hover treatment.
 - `DashboardStatusNav` owns the shared responsive status-tab container and mobile overflow affordance used by all dashboards.
+- Logistics Approval History must retain its dedicated scroll container under the dashboard's `overflow-hidden` shell. Its document selector is sticky at the top-left, its legend is sticky at the top-right, and timeline steps expose text/icon status indicators rather than color alone.
 - FN/IOC dashboard filters use a full-width two-column layout at medium widths and switch to a non-collapsing single row on large screens; the File Note editor retains its existing wrapping filter layout.
 - The FN/IOC dashboard shows the project selector only when more than one project is available; the File Note editor retains its project selector behavior for document entry.
 - Disabled submenu and Header links remain keyboard-focusable for explanation, expose an unavailable-role description, and prevent navigation. Permission-denied direct routes redirect home silently.
@@ -302,7 +310,7 @@ Action-specific success messages are generated by `getFleetRequestSuccessMessage
 ## Known Constraints and Caveats
 
 - The repository contains generated `dist`; full ESLint currently reports generated and legacy errors.
-- Several routes are not wrapped in authentication guards even though navigation is permission-aware.
+- `/`, `/pendingdashboard`, and `/contact` are not wrapped in authentication/module guards even though portions of their navigation and data fetching are permission-aware.
 - Role and status comparisons mix casing in legacy modules. Normalize at boundaries and preserve backend-expected strings.
 - `useUserInfo` is not reactive to localStorage changes inside the same mounted component tree; navigation/reload behavior currently handles session changes.
 - Module state is split across local state, Zustand, context, and TanStack Query. Trace ownership before changing reset behavior.
