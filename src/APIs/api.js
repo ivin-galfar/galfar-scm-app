@@ -1181,7 +1181,7 @@ export const GetSharePointItemCount = async ({ userInfo, listName }) => {
 
 export const fetchSharePointUserPhoto = async (userInfo, email) => {
   const response = await axios.get(
-    `${REACT_SERVER_URL}/api/sharepoint/user-photo/${encodeURIComponent(email)}`,
+    `${REACT_SERVER_URL}/users/user-photo/${encodeURIComponent(email)}`,
     {
       headers: {
         Authorization: `Bearer ${userInfo?.token}`,
