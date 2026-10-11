@@ -54,6 +54,7 @@ The frontend talks directly to the Express API with Axios. Most API calls build 
 - `VITE_REACT_PROD_SERVER_URL`: production API base URL.
 - `VITE_SPECIAL_PROJECTS`: comma-separated project codes with special approval flows.
 - `VITE_INHOUSE_PROJECTS`: comma-separated in-house project codes.
+- `VITE_SHAREPOINT_LISTS`: comma-separated SharePoint list names shown in the viewer; keep these aligned with the backend SharePoint allowed-list configuration.
 - `VITE_APP_VERSION`: client version used to invalidate stale sessions.
 - `VITE_PAPERLESS_MILESTONE_THRESHOLD`: statement-count threshold that triggers the management-only paperless milestone notice.
 - `VITE_ESTIMATED_PAGES_PER_STATEMENT`: multiplier used to estimate paper pages saved for the paperless milestone.
@@ -76,6 +77,7 @@ Routes currently declared in `src/App.jsx`:
 | `/dashboardlg` | Logistics dashboard | `NavigationPermissionRoute` |
 | `/dashboardbr` | Buy vs Rent dashboard | `NavigationPermissionRoute` |
 | `/dashboardfn` | General or Projects FN/IOC dashboard, selected by `view=projects-ioc` | `NavigationPermissionRoute` with scope-dependent permission |
+| `/sharepoint` | SharePoint list viewer | `NavigationPermissionRoute` (`canAccessPlant`) |
 | `/pendingdashboard` | Consolidated pending approvals | No route wrapper currently |
 | `/brstatement`, `/brstatement/:cs_no` | Buy vs Rent statement | `NavigationPermissionRoute` |
 | `/filenote`, `/filenote/:fn_no` | File Note/IOC editor | `NavigationPermissionRoute` (`canAccessFNIOC`) |
@@ -90,6 +92,7 @@ Routes currently declared in `src/App.jsx`:
 ### Authentication and user session
 
 - Login and registration call `/users/login` and `/users/register`.
+- The authenticated header loads the profile photo into in-memory component state and releases its object URL when the header unmounts or the image changes. A full page reload loads the photo again.
 - Password reset uses `/users/validateemail` followed by public `/emailnotify` reset endpoints.
 - User roles, department codes, project codes, admin state, token, and statement permission are returned as part of `userInfo`.
 - Role checks accept role arrays; keep role normalization consistent and case-insensitive when adding logic.
@@ -179,6 +182,7 @@ The frontend API wrapper currently covers:
 - `/projects`: project details and project-specific CM/PM names.
 - `/analytics`: consolidated approval analytics.
 - `/announcements`: home-page announcements.
+- `/api/sharepoint`: authenticated, allowlisted SharePoint list reads with server-side field selection, indexed filtering, cursor pagination, and an overall list `ItemCount` metadata total that is independent of the viewer's OData filter. The viewer list selector is sourced from `VITE_SHAREPOINT_LISTS`.
 - `/department`: department creation/reference operations.
 - `/flreq`: Fleet Request document number, create, list, detail, and workflow update.
 - `/emailnotify`: workflow email dispatch and password-reset operations.

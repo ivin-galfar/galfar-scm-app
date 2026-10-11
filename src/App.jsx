@@ -24,6 +24,7 @@ import FleetRequestRoute from "./Components/FleetRequestRoute";
 import FRDashboards from "./Pages/FRDashboards";
 import AdminRoute from "./Components/AdminRoute";
 import NavigationPermissionRoute from "./Components/NavigationPermissionRoute";
+import SharePointPage from "./Pages/SharePointPage";
 
 const App = () => {
   const location = useLocation();
@@ -147,6 +148,14 @@ const App = () => {
               }
             />
             <Route path="/pendingdashboard" element={<PendingDashboard />} />
+            <Route
+              path="/sharepoint"
+              element={
+                <NavigationPermissionRoute permission="canAccessPlant">
+                  <SharePointPage />
+                </NavigationPermissionRoute>
+              }
+            />
             <Route path="/contact" element={<Contact />} />
             <Route path="/resetpwd" element={<ResetPwd />} />
             <Route

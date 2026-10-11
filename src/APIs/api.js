@@ -1140,6 +1140,63 @@ export const GetAnnouncementsData = async ({ userInfo }) => {
   }
 };
 
+export const GetSharePointItems = async ({
+  userInfo,
+  listName,
+  pageSize,
+  fields,
+  filter,
+  cursor,
+}) => {
+  const response = await axios.get(`${REACT_SERVER_URL}/api/sharepoint/items`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userInfo?.token}`,
+    },
+    params: {
+      listName,
+      pageSize,
+      fields,
+      filter,
+      ...(cursor ? { cursor } : {}),
+    },
+  });
+
+  return response.data;
+};
+
+export const GetSharePointItemCount = async ({ userInfo, listName }) => {
+  const response = await axios.get(`${REACT_SERVER_URL}/api/sharepoint/count`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userInfo?.token}`,
+    },
+    params: {
+      listName,
+    },
+  });
+
+  return response.data;
+};
+
+export const fetchSharePointUserPhoto = async (userInfo, email) => {
+  try {
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/users/user-photo/${encodeURIComponent(email)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${userInfo?.token}`,
+        },
+        responseType: "blob",
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const GetFleetDocId = async (userInfo, project) => {
   try {
     const config = {

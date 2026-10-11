@@ -8,6 +8,10 @@ export const SPECIAL_PROJECTS =
   environment.VITE_SPECIAL_PROJECTS?.split(",").map(Number);
 export const INHOUSE_PROJECTS =
   environment.VITE_INHOUSE_PROJECTS?.split(",").map(Number) ?? [];
+export const SHAREPOINT_LISTS =
+  environment.VITE_SHAREPOINT_LISTS?.split(",")
+    .map((listName) => listName.trim())
+    .filter(Boolean) ?? [];
 
 export const APP_VERSION = environment.VITE_APP_VERSION;
 export const PAPERLESS_MILESTONE_THRESHOLD =

@@ -9,3 +9,9 @@ export const useSelectedDept = create((set) => ({
   selectedDept: "",
   setSelectedDept: (dept) => set({ selectedDept: dept }),
 }));
+
+export const useProfileImageUrl = create((set) => ({
+  profileImageUrl: "",
+  setProfileImageUrl: (url) => set({ profileImageUrl: url }),
+  resetProfileImageUrl: "",
+}));
