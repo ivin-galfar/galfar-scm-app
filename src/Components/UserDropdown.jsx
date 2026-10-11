@@ -6,14 +6,15 @@ import { FiExternalLink } from "react-icons/fi";
 import { fetchSharePointUserPhoto, updatedocread } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
 import LogoutButton from "./LogoutButton";
+import { useProfileImageUrl } from "../store/userStore";
 
 const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState("");
   const [, setShowFavourites] = useState(false);
   const dropdownRef = useRef(null);
   const userInfo = useUserInfo();
-
+  const { profileImageUrl, setProfileImageUrl, resetProfileImageUrl } =
+    useProfileImageUrl();
   const userEmail = userInfo?.email;
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
@@ -46,9 +47,7 @@ const UserDropdown = () => {
         }
         setProfileImageUrl(imageUrl);
       } catch (err) {
-        console.log(err);
-
-        if (isCurrent) setProfileImageUrl("");
+        if (isCurrent) resetProfileImageUrl();
       }
     };
 

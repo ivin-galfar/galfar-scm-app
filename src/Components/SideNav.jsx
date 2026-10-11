@@ -28,6 +28,7 @@ import { getModuleNavigationAccess } from "../Helpers/navigationPermissions";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 import { getProjectIocAccess } from "../Helpers/projectIocAccess";
 import { FaShip } from "react-icons/fa6";
+import { useProfileImageUrl } from "../store/userStore";
 
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const [submenuOpen, setSubmenuOpen] = useState(false);
@@ -65,7 +66,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
     new URLSearchParams(search).get("view") === "projects-ioc";
   const isDemobIocRoute = isProjectIocRoute && projectIocCategory !== "FWA";
   const isHwaIocRoute = isProjectIocRoute && projectIocCategory === "FWA";
-
+  const { profileImageUrl, resetProfileImageUrl } = useProfileImageUrl();
   useEffect(() => {
     if (isPlant) {
       setDashboardType("plant");
@@ -604,8 +605,17 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
       <div className="shrink-0 border-t border-white/10 p-2.5">
         {userInfo && isOpen && (
           <div className="mb-2 flex min-w-0 items-center gap-3 rounded-lg bg-black/10 px-3 py-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-sky-100 ring-1 ring-white/10">
-              <FaUserTie className="h-4 w-4" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-sky-100 ring-1 ring-white/10">
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt="Profile"
+                  className="h-full w-full rounded-full object-cover"
+                  onError={resetProfileImageUrl}
+                />
+              ) : (
+                <FaUserTie className="h-4 w-4" />
+              )}
             </div>
             <div className="min-w-0">
               <p className="truncate text-xs font-semibold capitalize text-white">
