@@ -1180,17 +1180,21 @@ export const GetSharePointItemCount = async ({ userInfo, listName }) => {
 };
 
 export const fetchSharePointUserPhoto = async (userInfo, email) => {
-  const response = await axios.get(
-    `${REACT_SERVER_URL}/users/user-photo/${encodeURIComponent(email)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${userInfo?.token}`,
+  try {
+    const response = await axios.get(
+      `${REACT_SERVER_URL}/users/user-photo/${encodeURIComponent(email)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${userInfo?.token}`,
+        },
+        responseType: "blob",
       },
-      responseType: "blob",
-    },
-  );
+    );
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const GetFleetDocId = async (userInfo, project) => {

@@ -39,12 +39,15 @@ const UserDropdown = () => {
         const photoBlob = await fetchSharePointUserPhoto(userInfo, userEmail);
 
         if (!isCurrent) return;
-
-        imageUrl = URL.createObjectURL(photoBlob);
-        console.log(imageUrl);
-
+        if (photoBlob.size > 0) {
+          imageUrl = URL.createObjectURL(photoBlob);
+        } else {
+          imageUrl = "";
+        }
         setProfileImageUrl(imageUrl);
-      } catch {
+      } catch (err) {
+        console.log(err);
+
         if (isCurrent) setProfileImageUrl("");
       }
     };
