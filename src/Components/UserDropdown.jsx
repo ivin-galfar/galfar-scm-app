@@ -3,12 +3,13 @@ import { FaUserTie } from "react-icons/fa";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link } from "react-router-dom";
 import { FiExternalLink } from "react-icons/fi";
-import { updatedocread } from "../APIs/api";
+import { fetchSharePointUserPhoto, updatedocread } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
 import LogoutButton from "./LogoutButton";
 
 const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState("");
   const [, setShowFavourites] = useState(false);
   const dropdownRef = useRef(null);
   const userInfo = useUserInfo();
@@ -26,6 +27,35 @@ const UserDropdown = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!userInfo?.token || !userEmail) return undefined;
+
+    let isCurrent = true;
+    let imageUrl;
+
+    const fetchProfileImage = async () => {
+      try {
+        const photoBlob = await fetchSharePointUserPhoto(userInfo, userEmail);
+
+        if (!isCurrent) return;
+
+        imageUrl = URL.createObjectURL(photoBlob);
+        console.log(imageUrl);
+
+        setProfileImageUrl(imageUrl);
+      } catch {
+        if (isCurrent) setProfileImageUrl("");
+      }
+    };
+
+    fetchProfileImage();
+
+    return () => {
+      isCurrent = false;
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    };
+  }, [userInfo, userEmail]);
 
   const { mutate: updateDocReadMutation } = useMutation({
     mutationFn: updatedocread,
@@ -48,8 +78,17 @@ const UserDropdown = () => {
         className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/12 text-white shadow-sm transition hover:border-white/50 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40"
         aria-expanded={isOpen}
         aria-haspopup="menu"
+        aria-label="Open user profile menu"
       >
-        <FaUserTie size={17} aria-hidden="true" />
+        {profileImageUrl ? (
+          <img
+            src={profileImageUrl}
+            alt=""
+            className="h-full w-full rounded-full object-cover"
+          />
+        ) : (
+          <FaUserTie size={17} aria-hidden="true" />
+        )}
       </button>
 
       {isOpen && (

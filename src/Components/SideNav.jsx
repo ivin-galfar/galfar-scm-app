@@ -11,6 +11,7 @@ import {
   FaUserTie,
   FaProjectDiagram,
   FaLock,
+  FaDatabase,
 } from "react-icons/fa";
 import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
 import { HiDocumentText } from "react-icons/hi2";
@@ -96,6 +97,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const isPlantRoute =
     pathname === "/dashboard" ||
     pathname === "/dashboardbr" ||
+    pathname.startsWith("/sharepoint") ||
     pathname.startsWith("/particulars/1") ||
     pathname.startsWith("/receipts") ||
     pathname.startsWith("/brstatement") ||
@@ -374,6 +376,24 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 />
                 <span className="min-w-0 flex-1 truncate">Templates</span>
               </Link>
+              {/* <Link
+                to="/sharepoint"
+                className={itemClass(
+                  pathname.startsWith("/sharepoint") && canAccessPlant,
+                  !canAccessPlant,
+                )}
+                {...disabledLinkProps(!canAccessPlant)}
+                aria-current={
+                  pathname.startsWith("/sharepoint") && canAccessPlant
+                    ? "page"
+                    : undefined
+                }
+              >
+                <FaDatabase
+                  className={iconClass(pathname.startsWith("/sharepoint"))}
+                />
+                <span className="min-w-0 flex-1 truncate">SharePoint</span>
+              </Link> */}
             </div>
           )}
 

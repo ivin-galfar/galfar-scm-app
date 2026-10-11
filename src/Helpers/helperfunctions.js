@@ -526,7 +526,6 @@ export const generateFRApprovedPDF = async (fleetRequestId, userInfo) => {
       "Fleet Request id is required to generate the approved PDF.",
     );
   }
-  console.log("entering into", fleetRequestId);
 
   const approvedRequest = await GetFleetRequestById(userInfo, fleetRequestId);
   if (
@@ -554,8 +553,6 @@ export const generateFRApprovedPDF = async (fleetRequestId, userInfo) => {
       "Fleet Request PDF generation did not return a valid Blob.",
     );
   }
-  console.log(pdfBlob);
-  console.log("approvedreq", approvedRequest);
 
   const safeDocumentNumber = String(approvedRequest?.doc_id).replace(
     /[^a-zA-Z0-9_-]+/g,
@@ -570,7 +567,6 @@ export const generateFRApprovedPDF = async (fleetRequestId, userInfo) => {
   try {
     const uploadedFiles = await handleAttachmentsUpload([pdfFile], userInfo);
     const uploadedUrl = uploadedFiles?.[0]?.fileUrl || uploadedFiles?.[0]?.url;
-    console.log(uploadedUrl);
 
     if (typeof uploadedUrl !== "string" || !uploadedUrl.trim()) {
       throw new Error(
@@ -626,3 +622,7 @@ export const initiatorRoles = [
   "initlg",
   "initfr",
 ];
+
+export const formatNumbers = (value) => {
+  return Math.round(value || 0).toLocaleString("en-IN");
+};
