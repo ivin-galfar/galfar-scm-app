@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   FaBalanceScale,
@@ -11,7 +11,6 @@ import {
   FaUserTie,
   FaProjectDiagram,
   FaLock,
-  FaDatabase,
 } from "react-icons/fa";
 import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
 import { HiDocumentText } from "react-icons/hi2";
@@ -31,12 +30,14 @@ import { FaShip } from "react-icons/fa6";
 import { useProfileImageUrl } from "../store/userStore";
 
 const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
+
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const [submenu1Open, setSubmenu1Open] = useState(false);
   const [projectsSubmenuOpen, setProjectsSubmenuOpen] = useState(false);
   const { setDashboardType } = useDashboardType();
   const { pathname, search } = useLocation();
-
   const userInfo = useUserInfo();
   const isPlant = is_plant(userInfo?.dept_code);
   const {
@@ -68,16 +69,30 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   const isHwaIocRoute = isProjectIocRoute && projectIocCategory === "FWA";
   const { profileImageUrl, resetProfileImageUrl } = useProfileImageUrl();
   useEffect(() => {
-    if (isPlant) {
-      setDashboardType("plant");
-    } else {
-      setDashboardType("bvrplant");
-    }
-    // Keep nav open if user is not logged in
+    const handleClickOutside = (event) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    setDashboardType(isPlant ? "plant" : "bvrplant");
+
     if (!userInfo) {
       setIsMenuOpen(true);
     }
-  }, [userInfo, setIsMenuOpen, isPlant]);
+  }, [userInfo, setIsMenuOpen, isPlant, setDashboardType]);
+
   const { mutate: updateDocReadMutation } = useMutation({
     mutationFn: updatedocread,
     onSuccess: (data) => {
@@ -133,11 +148,17 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
       return;
     }
 
-    if (section === "plant") setSubmenuOpen((current) => !current);
+    if (section === "plant") {
+      setSubmenuOpen((current) => !current);
+    }
+
     if (section === "projects") {
       setProjectsSubmenuOpen((current) => !current);
     }
-    if (section === "logistics") setSubmenu1Open((current) => !current);
+
+    if (section === "logistics") {
+      setSubmenu1Open((current) => !current);
+    }
   };
 
   const itemClass = (isActive = false, isDisabled = false) =>
@@ -182,7 +203,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   return (
     <aside
       ref={ref}
-      className={`app-sidenav fixed left-0 top-0 z-50 flex h-dvh flex-col overflow-hidden shadow transition-[width] duration-300 ease-out ${
+      className={`app-sidenav fixed left-0 top-0 z-50 flex h-dvh flex-col overflow-visible shadow transition-[width] duration-300 ease-out ${
         isOpen ? "w-68" : "w-15"
       }`}
       aria-label="Primary navigation"
@@ -206,10 +227,10 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
               />
             </span>
             <span className="min-w-0 leading-tight">
-              <span className="block text-[10px] font-semibod uppercase tracking-normal text-white">
+              <span className="block text-[10px] font-semibold uppercase tracking-normal text-white">
                 GALFAR
               </span>
-              <span className="mt-1 block whitespace-nowrap text-[10px] font-sembold uppercase tracking-normal text-white">
+              <span className="mt-1 block whitespace-nowrap text-[10px] font-semibold uppercase tracking-normal text-white">
                 Integrated Web Application
               </span>
             </span>
@@ -377,24 +398,6 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
                 />
                 <span className="min-w-0 flex-1 truncate">Templates</span>
               </Link>
-              {/* <Link
-                to="/sharepoint"
-                className={itemClass(
-                  pathname.startsWith("/sharepoint") && canAccessPlant,
-                  !canAccessPlant,
-                )}
-                {...disabledLinkProps(!canAccessPlant)}
-                aria-current={
-                  pathname.startsWith("/sharepoint") && canAccessPlant
-                    ? "page"
-                    : undefined
-                }
-              >
-                <FaDatabase
-                  className={iconClass(pathname.startsWith("/sharepoint"))}
-                />
-                <span className="min-w-0 flex-1 truncate">SharePoint</span>
-              </Link> */}
             </div>
           )}
 
@@ -604,7 +607,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
 
       <div className="shrink-0 border-t border-white/10 p-2.5">
         {userInfo && isOpen && (
-          <div className="mb-2 flex min-w-0 items-center gap-3 rounded-lg bg-black/10 px-3 py-2.5">
+          <div className="mb-2 flex min-w-0 items-center gap-3 rounded-lg bg-black/10 px-1 py-2.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-sky-100 ring-1 ring-white/10">
               {profileImageUrl ? (
                 <img
@@ -630,11 +633,55 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
           </div>
         )}
 
-        {userInfo ? (
-          <LogoutButton
-            className={itemClass(false)}
-            title={!isOpen ? "Sign out" : undefined}
-          >
+        {/* Simple profile dropdown */}
+        {userInfo && !isOpen ? (
+          <div ref={profileMenuRef} className="relative">
+            <button
+              type="button"
+              className={itemClass(false)}
+              title="Account options"
+              aria-label="Open account options"
+              aria-haspopup="menu"
+              aria-expanded={isProfileMenuOpen}
+              onClick={() => setIsProfileMenuOpen((open) => !open)}
+            >
+              <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white/10 text-sky-100 ring-1 ring-white/20">
+                {profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt=""
+                    className="h-full w-full rounded-full object-cover"
+                    onError={resetProfileImageUrl}
+                  />
+                ) : (
+                  <FaUserTie className="h-6 w-6" />
+                )}
+              </span>
+            </button>
+
+            {isProfileMenuOpen && (
+              <div
+                className="absolute bottom-0 left-full z-[1000] ml-2 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-slate-800 shadow-xl"
+                role="menu"
+              >
+                <div className="border-b border-slate-100 px-3 py-2">
+                  <p className="truncate text-xs font-medium">{userLabel}</p>
+                  <p className="truncate text-xs text-slate-500">
+                    {userInfo.email}
+                  </p>
+                </div>
+
+                <LogoutButton
+                  className="w-full cursor-pointer px-3 py-2.5 text-left text-sm font-medium text-red-600 transition hover:bg-red-50"
+                  onLogoutRequested={() => setIsProfileMenuOpen(false)}
+                >
+                  Sign out
+                </LogoutButton>
+              </div>
+            )}
+          </div>
+        ) : userInfo ? (
+          <LogoutButton className={itemClass(false)}>
             <FaSignOutAlt className={iconClass(false)} />
             {isOpen && <span className="truncate">Sign out</span>}
           </LogoutButton>

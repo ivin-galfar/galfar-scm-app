@@ -963,24 +963,24 @@ const TableHeader = ({ isAdmin }) => {
         />
       )}
       {showToast && !errormessage && isReverted && isEdit && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform  -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ Statement Reverted Successfully!
         </div>
       )}
       {showToast && !errormessage && !isReverted && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           {!isEdit
             ? "✅ Attachments uploaded!"
             : "Statement is Successfully updated!"}
         </div>
       )}
       {showToast && errormessage && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           {errormessage}
         </div>
       )}
       {showToast && !errormessage && deleted && (
-        <div className="z-[9999] fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ Statement successfully Deleted!!
         </div>
       )}

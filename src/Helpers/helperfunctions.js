@@ -520,7 +520,11 @@ export const handleFrPrint = async (
   return generateFRPDF(completeRequest, userInfo, emailPdf);
 };
 
-export const generateFRApprovedPDF = async (fleetRequestId, userInfo) => {
+export const generateFRApprovedPDF = async (
+  fleetRequestId,
+  userInfo,
+  requiredApprovedPDF,
+) => {
   if (!fleetRequestId) {
     throw new Error(
       "Fleet Request id is required to generate the approved PDF.",
@@ -531,10 +535,11 @@ export const generateFRApprovedPDF = async (fleetRequestId, userInfo) => {
   if (
     String(approvedRequest?.status ?? "")
       .trim()
-      .toLowerCase() !== "approved"
+      .toLowerCase() !== "approved" &&
+    !requiredApprovedPDF
   ) {
     throw new Error(
-      "The latest Fleet Request data is not in the approved state.",
+      "The latest Fleet Request data is not in the printable state.",
     );
   }
 
@@ -625,4 +630,16 @@ export const initiatorRoles = [
 
 export const formatNumbers = (value) => {
   return Math.round(value || 0).toLocaleString("en-IN");
+};
+
+export const normalize = (value) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+export const shouldSendInithIntimation = ({ role, status }) => {
+  const nextRole = normalize(status)
+    .match(/^pending for\s+(.+)$/)?.[1]
+    ?.trim();
+  return normalize(role) === "pm" && ["hod", "pd"].includes(nextRole);
 };
