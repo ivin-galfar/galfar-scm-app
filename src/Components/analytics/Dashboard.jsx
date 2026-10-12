@@ -28,11 +28,10 @@ const buildStatuses = (summary, intiator) => [
   ...(!intiator
     ? [
         {
-          title: "Awaiting For Your Approval",
+          title: "Awaiting Your Approval",
           value: summary.pending,
           description: "Awaiting your action",
           status: "pending",
-          // trend: "up",
         },
       ]
     : [
@@ -41,7 +40,6 @@ const buildStatuses = (summary, intiator) => [
           value: summary?.returned_to_you?.length,
           description: "Awaiting your action",
           status: "pending",
-          // trend: "down",
         },
       ]),
   {
@@ -56,21 +54,18 @@ const buildStatuses = (summary, intiator) => [
     value: summary.total_approved,
     description: "Total approved",
     status: "approved",
-    // trend: "down",
   },
   {
     title: "Rejected",
     value: summary.total_rejected,
     description: "Total rejected",
     status: "rejected",
-    // trend: "neutral",
   },
   {
     title: "All Statements",
     value: summary.all,
     description: "Total statements",
     status: "all",
-    // trend: "neutral",
   },
 ];
 

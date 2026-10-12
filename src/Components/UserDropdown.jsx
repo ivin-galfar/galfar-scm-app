@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { FaUserTie } from "react-icons/fa";
+import { FiExternalLink } from "react-icons/fi";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link } from "react-router-dom";
-import { FiExternalLink } from "react-icons/fi";
 import { fetchSharePointUserPhoto, updatedocread } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
 import LogoutButton from "./LogoutButton";

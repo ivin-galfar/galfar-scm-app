@@ -38,6 +38,7 @@ import {
   formatDateDMY,
   formatwords,
   generateFRApprovedPDF,
+  shouldSendInithIntimation,
 } from "../Helpers/helperfunctions";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 import { normalizeDateForInput } from "../Helpers/fleetRequestDocument";
@@ -569,6 +570,11 @@ const FleetRequest = () => {
         "review",
       ].includes(buttonAction.action);
 
+      const requiredApprovedPDF = shouldSendInithIntimation({
+        role: userInfo.role?.[0],
+        status: savedStatus,
+      });
+
       if (buttonAction.action === "create") {
         clearTimeout(draftWriteTimerRef.current);
         draftWriteTimerRef.current = null;
@@ -607,11 +613,15 @@ const FleetRequest = () => {
 
       if (shouldSendWorkflowEmail) {
         let exportedStatementAttachment;
-        if (savedStatus.trim().toLowerCase() === "approved") {
+        if (
+          savedStatus.trim().toLowerCase() === "approved" ||
+          requiredApprovedPDF
+        ) {
           try {
             exportedStatementAttachment = await generateFRApprovedPDF(
               savedId,
               userInfo,
+              requiredApprovedPDF,
             );
           } catch (pdfError) {
             console.error(

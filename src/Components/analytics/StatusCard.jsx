@@ -1,14 +1,12 @@
 /* eslint-disable react/prop-types */
 import {
-  LuArrowDownRight,
-  LuArrowRightFromLine,
-  LuArrowUpRight,
   LuCircleCheck,
   LuCircleDot,
   LuCircleX,
   LuLayers3,
   LuTimer,
 } from "react-icons/lu";
+import { Link } from "react-router-dom";
 import { Card, CardContent, Skeleton } from "./ui";
 
 const icons = {
@@ -60,24 +58,16 @@ const StatusCard = ({ title, value, description, status, trend, loading }) => {
   const Icon = icons[status] || LuLayers3;
   const styles = statusStyles[status] || statusStyles.all;
 
-  const TrendIcon =
-    trend === "down"
-      ? LuArrowDownRight
-      : trend === "neutral"
-        ? LuArrowRightFromLine
-        : LuArrowUpRight;
-
   const isPending = status === "pending";
+  const cardClassName = `
+    relative min-h-28 overflow-hidden border
+    transition-all duration-200
+    hover:-translate-y-0.5 hover:shadow-md
+    ${styles.card}
+  `;
 
-  return (
-    <Card
-      className={`
-        relative min-h-28 overflow-hidden border
-        transition-all duration-200
-        hover:-translate-y-0.5 hover:shadow-md
-        ${styles.card}
-      `}
-    >
+  const content = (
+    <>
       {/* Status accent */}
       <span className={`absolute inset-y-0 left-0 w-1 ${styles.accent}`} />
 
@@ -113,25 +103,11 @@ const StatusCard = ({ title, value, description, status, trend, loading }) => {
             <Skeleton className="h-8 w-16" />
           ) : (
             <p
-              className={` font-bold leading-none tracking-tight ${title == "Awaiting For Your Approval" ? "text-[32px]" : "text-2xl"}`}
+              className={` font-bold leading-none tracking-tight ${title == "Awaiting Your Approval" ? "text-[32px]" : "text-2xl"}`}
             >
               {value}
             </p>
           )}
-          {/* {trend && (
-            <span
-              className={`flex items-center text-xs font-medium ${
-                trend === "down"
-                  ? "text-rose-600"
-                  : trend === "neutral"
-                    ? "text-gray-500"
-                    : "text-emerald-600"
-              }`}
-            >
-              <TrendIcon size={14} />
-              {trend}
-            </span>
-          )} */}
         </div>
         {loading ? (
           <Skeleton className="mt-2 h-3 w-28" />
@@ -139,7 +115,19 @@ const StatusCard = ({ title, value, description, status, trend, loading }) => {
           <p className="mt-1 text-xs text-muted-foreground">{description}</p>
         )}
       </CardContent>
-    </Card>
+    </>
+  );
+
+  return title === "Awaiting Your Approval" ? (
+    <Link
+      to="/pendingdashboard"
+      aria-label={`${title}: ${value}. Open pending dashboard`}
+      className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2"
+    >
+      <Card className={`${cardClassName} cursor-pointer`}>{content}</Card>
+    </Link>
+  ) : (
+    <Card className={cardClassName}>{content}</Card>
   );
 };
 

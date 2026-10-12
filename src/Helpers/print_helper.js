@@ -251,7 +251,7 @@ export const generateFRPDF = async (
       pdfText(item.capacity),
       pdfText(item.quantity),
       pdfText(item.duration),
-      pdfText(item.rentalType),
+      pdfText(item.rental_type),
       pdfText(item.purpose),
       formatDateDDMMYYYY(item.required_from) || "--",
       pdfText(item.production_qty_envisaged),
@@ -1961,16 +1961,19 @@ export const handleHirePrint = async (
   const approvalsStatus =
     formData?.approverdetails?.reduce((acc, d) => {
       if (d.action !== "review") {
-        acc[d.role] = d.action;
+        acc[d.role] = {
+          action: d.action,
+          timestamp: d.timestamp,
+        };
       }
       return acc;
     }, {}) || {};
-
   const rolesToShow = ["hod", "gm", "ceo"];
   rolesToShow.forEach((dbRole, index) => {
-    const rawStatus = approvalsStatus[dbRole] || "--";
-    const status =
-      rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+    const rawStatus = approvalsStatus[dbRole]?.action;
+    const status = rawStatus
+      ? rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase()
+      : "--";
     const displayName = roleDisplayMap[dbRole] || dbRole;
     const displayRole = `(${dbRole.toUpperCase()})`;
 
@@ -2012,7 +2015,7 @@ export const handleHirePrint = async (
     doc.text(displayName, roleX, labelY + offsetY + 6);
     doc.text(displayRole, roleX + 5, labelY + offsetY + 12);
   });
-  const rightText = `Generated on: ${new Date().toLocaleString()}`;
+  const rightText = `Generated on: ${formatDateDDMMYYYY(approvalsStatus.ceo?.timestamp ?? new Date())}`;
   const footerPadding = 6;
   const pageCount = doc.internal.getNumberOfPages();
   const rightWidth = doc.getTextWidth(rightText);
@@ -2023,15 +2026,11 @@ export const handleHirePrint = async (
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
 
-    doc.text(
-      `System Generated Comparative Statement `,
-      14,
-      pageHeight - footerPadding,
-    );
+    doc.text(`System Generated Statement `, 14, pageHeight - footerPadding);
 
     doc.text(
       rightText,
-      pageWidth - rightWidth - 48,
+      pageWidth - rightWidth - 80,
       pageHeight - footerPadding,
     );
 

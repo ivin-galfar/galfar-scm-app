@@ -512,22 +512,22 @@ const Receipts = () => {
         )}
       </div>
       {showToast && errormessage && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           {errormessage}
         </div>
       )}
       {showToast && isMRSelected && !errormessage && !isReview && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ Receipt details added successfully!
         </div>
       )}{" "}
       {showToast && isMRSelected && !errormessage && isReview && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ Receipt details has been updated successfully!
         </div>
       )}
       {!isReview && showToast && reqApprovalstatus && !errormessage && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5 left-1/2 z-[9999] transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ You have succesfully requested for Approval!
         </div>
       )}
