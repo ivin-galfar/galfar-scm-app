@@ -16,12 +16,17 @@ import {
   LuChevronRight,
   LuEye,
   LuFileDown,
+  LuFolderKanban,
   LuTrash2,
   LuTruck,
 } from "react-icons/lu";
 import { MdOutlineError } from "react-icons/md";
 import { SiTicktick } from "react-icons/si";
-import { GetFleetRequests, UpdateFleetRequestWorkflow } from "../APIs/api";
+import {
+  fetchProjectDetails,
+  GetFleetRequests,
+  UpdateFleetRequestWorkflow,
+} from "../APIs/api";
 import Alerts from "../Components/Alerts";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
@@ -113,10 +118,26 @@ const FRDashboards = () => {
   const queryClient = useQueryClient();
 
   const canViewAllProjects = roles.some((role) =>
-    ["hod", "gm", "ceo"].includes(role),
+    ["inith", "hod", "gm", "ceo"].includes(role),
   );
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
+  const [selectedProject, setSelectedProject] = useState("");
+  const { data: projectDetails, isLoading: isProjectsLoading } = useQuery({
+    queryKey: ["fleet-request-projects", userInfo?.id],
+    queryFn: () => fetchProjectDetails(userInfo),
+    enabled: Boolean(userInfo?.token),
+    staleTime: 5 * 60 * 1000,
+  });
+  const availableProjects = Array.isArray(projectDetails)
+    ? projectDetails
+        .map((project) => String(project?.project ?? "").trim())
+        .filter(
+          (project) =>
+            project &&
+            (canViewAllProjects || assignedProjects.includes(project)),
+        )
+    : assignedProjects;
   const [deleteRequest, setDeleteRequest] = useState({
     id: null,
     docId: "",
@@ -206,6 +227,7 @@ const FRDashboards = () => {
     queryKey: [
       "fleet-requests",
       canViewAllProjects ? "all" : assignedProjects.join(","),
+      selectedProject,
       page,
       limit,
       serverStatusFilter,
@@ -213,7 +235,11 @@ const FRDashboards = () => {
     queryFn: () =>
       GetFleetRequests(
         userInfo,
-        canViewAllProjects ? undefined : assignedProjects,
+        selectedProject
+          ? [selectedProject]
+          : canViewAllProjects
+            ? undefined
+            : assignedProjects,
         "frdashboard",
         page,
         limit,
@@ -462,6 +488,29 @@ const FRDashboards = () => {
                 )}
               </DashboardStatusNav>
             </div>
+            {canViewAllProjects && (
+              <label className="flex w-full items-center gap-3 bg-slate-100 px-3 py-2.5 sm:w-64">
+                <LuFolderKanban className="size-4 shrink-0 text-slate-600" />
+                <span className="sr-only">Filter by project</span>
+                <select
+                  aria-label="Filter fleet requests by project"
+                  value={selectedProject}
+                  disabled={isProjectsLoading || availableProjects.length === 0}
+                  onChange={(event) => {
+                    setSelectedProject(event.target.value);
+                    setPage(0);
+                  }}
+                  className="h-6 min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-medium text-slate-700 outline-none"
+                >
+                  <option value="">All projects</option>
+                  {availableProjects.map((project) => (
+                    <option key={project} value={project}>
+                      {project}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
         </header>
 

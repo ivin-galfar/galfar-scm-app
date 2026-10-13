@@ -1246,7 +1246,7 @@ export const GetFleetRequests = async (
       .map((projectCode) => String(projectCode).trim())
       .filter(Boolean);
     const canViewAllProjects = roles.some((role) =>
-      ["hod", "gm", "ceo"].includes(role),
+      ["inith", "hod", "gm", "ceo"].includes(role),
     );
     const requestedProjects = (Array.isArray(project) ? project : [project])
       .filter(

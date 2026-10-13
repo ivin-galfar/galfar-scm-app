@@ -124,7 +124,9 @@ const Dashboard = () => {
         {isError && <DashboardError onRetry={refetch} />}
         {!isLoading && !isError && (
           <DigitalMilestone
-            totalStatements={analyticsData.summary.all}
+            alldepttotalStatementscount={
+              analyticsData.allDeptTotalStatementsCount
+            }
             userInfo={userInfo}
           />
         )}
@@ -160,6 +162,7 @@ const Dashboard = () => {
             <NearingReminder
               items={analyticsData.nearingReminder}
               escalated_times={analyticsData.summary.escalated_times}
+              isinit={initiator}
             />
           </div>
           <div className="min-w-0 xl:col-span-3">

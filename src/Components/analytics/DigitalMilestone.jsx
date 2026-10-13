@@ -2,40 +2,41 @@
 import { useEffect, useState } from "react";
 import {
   LuEye,
+  LuArrowRight,
   LuFileText,
   LuLeaf,
   LuTrees,
   LuWorkflow,
   LuX,
   LuZap,
+  LuWind,
 } from "react-icons/lu";
 import {
+  calculateCo2SavedKg,
   calculatePaperPagesSaved,
   calculateTreesSaved,
+  formatLocalDate,
   getMilestoneStorageKey,
-  isManagementUser,
 } from "../../Helpers/dashboardMilestone";
 import { PAPERLESS_MILESTONE_THRESHOLD } from "../../../config/ENV";
 
 const AUTO_DISMISS_MS = 12000;
 
-const DigitalMilestone = ({ totalStatements, userInfo }) => {
+const DigitalMilestone = ({ alldepttotalStatementscount, userInfo }) => {
   const [isVisible, setIsVisible] = useState(false);
   const papersaved = calculatePaperPagesSaved(PAPERLESS_MILESTONE_THRESHOLD);
   const treesSaved = calculateTreesSaved(papersaved);
+  const co2SavedKg = calculateCo2SavedKg(papersaved);
 
   useEffect(() => {
-    if (
-      Number(totalStatements) < PAPERLESS_MILESTONE_THRESHOLD ||
-      !isManagementUser(userInfo)
-    ) {
+    if (Number(alldepttotalStatementscount) < PAPERLESS_MILESTONE_THRESHOLD) {
       return;
     }
 
     const storageKey = getMilestoneStorageKey(userInfo);
     if (!storageKey) return;
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = formatLocalDate(new Date());
     const lastShownDate = localStorage.getItem(storageKey);
 
     // Already shown today
@@ -50,7 +51,7 @@ const DigitalMilestone = ({ totalStatements, userInfo }) => {
     );
 
     return () => window.clearTimeout(dismissTimer);
-  }, [totalStatements, userInfo]);
+  }, [alldepttotalStatementscount, userInfo]);
 
   if (!isVisible) return null;
 
@@ -72,29 +73,36 @@ const DigitalMilestone = ({ totalStatements, userInfo }) => {
       />
 
       <div className="relative px-3 py-2.5 sm:px-4">
-        <div className="flex items-center gap-2.5 justify-between">
+        <div className="flex items-center justify-between gap-2.5">
           <div
             className="flex min-w-0 items-center gap-4 rounded-xl border border-emerald-300 bg-gradient-to-r from-emerald-50 to-emerald-100/70 px-3 py-2 shadow-sm shadow-emerald-100"
             title="Digital paperless workflow milestone"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-white text-emerald-700 shadow-sm">
-              <LuLeaf aria-hidden="true" className="size-4.5" />
+              <LuLeaf aria-hidden="true" className="size-6.5" />
             </span>
 
             <div className="min-w-0">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">
-                Digital milestone
+                Go Green Initiatives
               </p>
 
               <p className="mt-0.5 truncate text-xl font-black leading-none text-emerald-900 sm:text-2xl">
                 {Number(PAPERLESS_MILESTONE_THRESHOLD).toLocaleString("en-US")}+
               </p>
 
-              <p className="mt-1 text-xs font-black leading-tight text-emerald-800 sm:text-sm">
+              <p className="mt-1 font-black leading-tight text-emerald-800 sm:text-lg">
                 Paperless Approvals
               </p>
             </div>
+            <p className="ml-1 self-end whitespace-nowrap pb-0.5 text-[9px] font-medium leading-tight text-emerald-700/80 sm:text-[10px]">
+              *Collectively across company
+            </p>
           </div>
+          <p className="hidden min-w-0 flex-1 px-2 text-center text-lg font-extrabold  text-slate-700 lg:block">
+            Galfar&apos;s Journey Towards a{" "}
+            <span className="text-green-700">Greener Tomorrow</span>
+          </p>
 
           <div
             className="flex shrink-0 items-center gap-2"
@@ -105,7 +113,7 @@ const DigitalMilestone = ({ totalStatements, userInfo }) => {
               title="Including attachments and supporting documents"
             >
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-sky-100 bg-white text-[var(--galfar-600)] shadow-sm">
-                <LuFileText aria-hidden="true" className="size-4.5" />
+                <LuFileText aria-hidden="true" className="size-6.5" />
               </span>
 
               <div className="min-w-0">
@@ -113,12 +121,11 @@ const DigitalMilestone = ({ totalStatements, userInfo }) => {
                   {papersaved.toLocaleString("en-US")}+
                 </p>
 
-                <p className="mt-1 whitespace-nowrap text-xs font-extrabold leading-tight text-slate-600 sm:text-sm">
+                <p className="mt-1 whitespace-nowrap text-xs font-extrabold leading-tight text-slate-600 sm:text-lg">
                   Papers saved
                 </p>
               </div>
             </div>
-
             <div
               className="flex min-w-[165px] items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/80 px-3 py-2"
               aria-label={`Approximately ${treesSaved.toLocaleString(
@@ -129,7 +136,7 @@ const DigitalMilestone = ({ totalStatements, userInfo }) => {
               )} trees saved`}
             >
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-white text-emerald-700 shadow-sm">
-                <LuTrees aria-hidden="true" size={40} />
+                <LuTrees aria-hidden="true" className="size-8.5" />
               </span>
 
               <div className="min-w-0">
@@ -137,8 +144,27 @@ const DigitalMilestone = ({ totalStatements, userInfo }) => {
                   {treesSaved.toLocaleString("en-IN")}+
                 </p>
 
-                <p className="mt-1 whitespace-nowrap text-xs font-extrabold leading-tight text-slate-600 sm:text-sm">
+                <p className="mt-1 whitespace-nowrap text-xs font-extrabold leading-tight text-slate-600 sm:text-lg">
                   Trees saved
+                </p>
+              </div>
+            </div>
+            <div
+              className="flex min-w-[165px] items-center gap-2 rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50 to-emerald-50 px-3 py-2 shadow-sm shadow-teal-100"
+              aria-label={`Approximately ${co2SavedKg.toLocaleString("en-US")} kilograms of carbon dioxide emissions avoided`}
+              title="Estimated carbon dioxide emissions avoided by the paper saved"
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-teal-200 bg-white text-teal-700 shadow-sm">
+                <LuWind aria-hidden="true" className="size-6.5" />
+              </span>
+
+              <div className="min-w-0">
+                <p className="text-xl font-black leading-none text-teal-900 sm:text-2xl">
+                  {co2SavedKg.toLocaleString("en-US")} kg
+                </p>
+
+                <p className="mt-1 whitespace-nowrap text-xs font-extrabold leading-tight text-teal-800 sm:text-lg">
+                  CO₂ emissions avoided
                 </p>
               </div>
             </div>
@@ -146,16 +172,25 @@ const DigitalMilestone = ({ totalStatements, userInfo }) => {
               type="button"
               aria-label="Close digital milestone notification"
               onClick={() => setIsVisible(false)}
-              className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-[var(--galfar-900)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--galfar-600)] focus-visible:ring-offset-2"
+              title="Dismiss milestone"
+              className="group inline-flex size-8 shrink-0 items-center justify-center
+    rounded-lg border border-slate-200 bg-white text-slate-400
+    shadow-sm transition-all duration-200
+    hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600
+    focus-visible:outline-none focus-visible:ring-2
+    focus-visible:ring-emerald-500 focus-visible:ring-offset-2 cursor-pointer"
             >
-              <LuX aria-hidden="true" className="size-3.5" />
-              <span className="hidden sm:inline cursor-pointer">Close</span>
+              <LuX
+                aria-hidden="true"
+                className="size-4 transition-transform duration-200
+      group-hover:rotate-90"
+              />
             </button>
           </div>
         </div>
 
         <div
-          className="mt-2 border-t border-slate-100 pt-1.5"
+          className="mt-1.5 border-t border-slate-100 pt-1.5"
           aria-label="Digital workflow benefits"
         >
           <div className="grid grid-cols-3 gap-1 sm:gap-2">

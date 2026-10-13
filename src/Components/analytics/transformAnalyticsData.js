@@ -49,6 +49,10 @@ export const transformAnalyticsData = (response) => {
     undefined,
   );
 
+  const overallTotalStatementsCount = firstValue(data, [
+    "overall_statements_count",
+  ]);
+
   const summary = {
     total_approved: firstValue(data, ["total_approved"]),
     pending: pendingRecords,
@@ -73,5 +77,6 @@ export const transformAnalyticsData = (response) => {
       { name: "In Progress", value: summary.inProgress },
       { name: "Rejected", value: summary.total_rejected },
     ],
+    allDeptTotalStatementsCount: overallTotalStatementsCount,
   };
 };

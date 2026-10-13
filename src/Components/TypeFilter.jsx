@@ -39,7 +39,9 @@ const TypeFilter = ({
 
       const allocatedprcodes = userInfo.pr_code;
       const matchedprcodes =
-        userInfo.role.includes("gm") || userInfo?.role.includes("hod")
+        userInfo.role.includes("gm") ||
+        userInfo?.role.includes("hod") ||
+        userInfo?.role.includes("inith")
           ? projectids
           : projectids.filter((project) => allocatedprcodes?.includes(project));
 
@@ -154,33 +156,33 @@ const TypeFilter = ({
             )}
           {(showClearFilters ?? type != "") &&
             location.pathname == "/dashboardfn" && (
-            <button
-              type="button"
-              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/10"
-              aria-label="Clear filters"
-              title="Clear filters"
-              onClick={() => {
-                if (onClearFilters) {
-                  onClearFilters();
-                  return;
-                }
-                settype("");
-                setCategory("");
-                sessionStorage.removeItem("filenoteFilters");
-                setSelectedProject("");
-                setProjectCodes([]);
-                setPageIndex(0);
-                setSearch({
-                  isText: true,
-                  isNumber: false,
-                  value: "",
-                });
-                setSearchCSNo("");
-                setSearchCSName("");
-              }}
-            >
-              <FaRegTimesCircle size={17} />
-            </button>
+              <button
+                type="button"
+                className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/10"
+                aria-label="Clear filters"
+                title="Clear filters"
+                onClick={() => {
+                  if (onClearFilters) {
+                    onClearFilters();
+                    return;
+                  }
+                  settype("");
+                  setCategory("");
+                  sessionStorage.removeItem("filenoteFilters");
+                  setSelectedProject("");
+                  setProjectCodes([]);
+                  setPageIndex(0);
+                  setSearch({
+                    isText: true,
+                    isNumber: false,
+                    value: "",
+                  });
+                  setSearchCSNo("");
+                  setSearchCSName("");
+                }}
+              >
+                <FaRegTimesCircle size={17} />
+              </button>
             )}
         </div>
       }

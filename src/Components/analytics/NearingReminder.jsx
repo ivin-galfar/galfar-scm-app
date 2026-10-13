@@ -6,7 +6,7 @@ import { Badge, Card, CardContent, Separator } from "./ui";
 import ZeroPendings from "../../Components/ZeroPendings";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 
-const NearingReminder = ({ items, escalated_times }) => {
+const NearingReminder = ({ items, escalated_times, isinit }) => {
   const escalatedCount = Number(escalated_times) || 0;
 
   return (
@@ -17,17 +17,19 @@ const NearingReminder = ({ items, escalated_times }) => {
         icon={AiFillAlert}
         tone="rose"
         action={
-          <div
-            className="flex items-center gap-2 rounded-lg border border-rose-200/80 bg-rose-50 px-2.5 py-1.5 text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/35 dark:text-rose-300"
-            aria-label={`${escalatedCount} reminders escalated for you`}
-          >
-            <span className="text-[11px] font-semibold leading-tight">
-              Reminders esclated to you{" "}
-            </span>
-            <Badge className="h-5 min-w-5 justify-center rounded-full border-0 bg-rose-600 px-1.5 text-[11px] font-bold text-white dark:bg-rose-500">
-              {escalatedCount}
-            </Badge>
-          </div>
+          !isinit && (
+            <div
+              className="flex items-center gap-2 rounded-lg border border-rose-200/80 bg-rose-50 px-2.5 py-1.5 text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/35 dark:text-rose-300"
+              aria-label={`${escalatedCount} reminders escalated for you`}
+            >
+              <span className="text-[11px] font-semibold leading-tight">
+                Reminders escalated to you
+              </span>
+              <Badge className="h-5 min-w-5 justify-center rounded-full border-0 bg-rose-600 px-1.5 text-[11px] font-bold text-white dark:bg-rose-500">
+                {escalatedCount}
+              </Badge>
+            </div>
+          )
         }
       />
       <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-3">
@@ -65,7 +67,11 @@ const NearingReminder = ({ items, escalated_times }) => {
         ) : (
           <div className="py-6 text-center text-sm text-muted-foreground">
             <ZeroPendings
-              message={"All statements are within their required timelines."}
+              message={
+                !isinit
+                  ? "All statements are within their required timelines."
+                  : "Initiators won't have any reminders"
+              }
             />
           </div>
         )}

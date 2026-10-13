@@ -8,13 +8,13 @@ const LogoutButton = ({ children, className, title, onLogoutRequested }) => {
   const navigate = useNavigate();
 
   const requestLogout = () => {
-    onLogoutRequested?.();
     setShowConfirm(true);
   };
 
   const confirmLogout = () => {
     localStorage.removeItem("userInfo");
     setShowConfirm(false);
+    onLogoutRequested?.();
     navigate("/login");
   };
 

@@ -636,6 +636,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
         {/* Simple profile dropdown */}
         {userInfo && !isOpen ? (
           <div ref={profileMenuRef} className="relative">
+            {/* collapse state user icon */}
             <button
               type="button"
               className={itemClass(false)}

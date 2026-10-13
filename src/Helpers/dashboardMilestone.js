@@ -1,13 +1,8 @@
 import {
+  CO2_GRAMS_PER_SHEET,
   ESTIMATED_PAPER_FOR_TREE,
   ESTIMATED_PAPERS_PER_STATEMENT,
 } from "../../config/ENV.js";
-import { categoryapprovers } from "./roles_helper.js";
-
-const managementRoles = new Set([
-  ...Object.values(categoryapprovers).flat(),
-  "INCHARGE",
-]);
 
 export const calculatePaperPagesSaved = (
   milestoneThreshold,
@@ -57,21 +52,7 @@ export const getDashboardTimePeriod = (date = new Date()) => {
   return "evening";
 };
 
-export const isManagementUser = (userInfo) => {
-  const roles = Array.isArray(userInfo?.role)
-    ? userInfo.role
-    : [userInfo?.role];
-
-  return roles.some((role) =>
-    managementRoles.has(
-      String(role ?? "")
-        .trim()
-        .toUpperCase(),
-    ),
-  );
-};
-
-const formatLocalDate = (date) => {
+export const formatLocalDate = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -79,9 +60,27 @@ const formatLocalDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+export const calculateCo2SavedKg = (
+  papersaved,
+  co2GramsPerSheet = CO2_GRAMS_PER_SHEET,
+) => {
+  const paperPages = Number(papersaved);
+  const gramsPerSheet = Number(co2GramsPerSheet);
+
+  if (
+    !Number.isFinite(paperPages) ||
+    !Number.isFinite(gramsPerSheet) ||
+    paperPages < 0 ||
+    gramsPerSheet < 0
+  ) {
+    return 0;
+  }
+
+  return Math.round((paperPages * gramsPerSheet) / 1000);
+};
+
 const getSafeUserIdentifier = (userInfo) => {
-  const identifier =
-    userInfo?.id ?? userInfo?.user_id ?? userInfo?.email?.split("@")[0];
+  const identifier = userInfo?.id ?? userInfo?.email?.split("@")[0];
 
   return String(identifier ?? "")
     .trim()
@@ -94,5 +93,5 @@ export const getMilestoneStorageKey = (userInfo, date = new Date()) => {
 
   if (!identifier) return null;
 
-  return `milestone_${identifier}_${formatLocalDate(date)}_${getDashboardTimePeriod(date)}`;
+  return `milestone_${identifier}_${formatLocalDate(date)}`;
 };
