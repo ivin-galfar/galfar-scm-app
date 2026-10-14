@@ -44,15 +44,6 @@ const App = () => {
       window.location.replace("/login");
     }
   }, []);
-  console.log("Paperless milestone environment", {
-    VITE_PAPERLESS_MILESTONE_THRESHOLD: import.meta.env
-      .VITE_PAPERLESS_MILESTONE_THRESHOLD,
-    VITE_ESTIMATED_PAPERS_PER_STATEMENT: import.meta.env
-      .VITE_ESTIMATED_PAPERS_PER_STATEMENT,
-    VITE_ESTIMATED_PAPERS_PER_TREE: import.meta.env
-      .VITE_ESTIMATED_PAPERS_PER_TREE,
-    VITE_CO2_GRAMS_PER_SHEET: import.meta.env.VITE_CO2_GRAMS_PER_SHEET,
-  });
 
   return (
     <div
