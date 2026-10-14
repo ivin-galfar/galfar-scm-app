@@ -122,14 +122,14 @@ const Dashboard = () => {
           </div>
         </div>
         {isError && <DashboardError onRetry={refetch} />}
-        {!isLoading && !isError && (
+        {/* {!isLoading && !isError && (
           <DigitalMilestone
             alldepttotalStatementscount={
               analyticsData.allDeptTotalStatementsCount
             }
             userInfo={userInfo}
           />
-        )}
+        )} */}
         <StatusSummary statuses={statuses} loading={isLoading} />
         <section
           className="grid grid-cols-2  gap-3 lg:grid-cols-1 xl:grid-cols-12 "
