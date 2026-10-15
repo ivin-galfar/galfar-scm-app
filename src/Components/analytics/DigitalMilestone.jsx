@@ -22,7 +22,7 @@ import { PAPERLESS_MILESTONE_THRESHOLD } from "../../../config/ENV";
 
 const DigitalMilestone = ({ alldepttotalStatementscount, userInfo }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const papersaved = calculatePaperPagesSaved(PAPERLESS_MILESTONE_THRESHOLD);
+  const papersaved = calculatePaperPagesSaved(alldepttotalStatementscount);
   const treesSaved = calculateTreesSaved(papersaved);
   const co2SavedKg = calculateCo2SavedKg(papersaved);
 
