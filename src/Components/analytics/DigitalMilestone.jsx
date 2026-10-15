@@ -20,6 +20,8 @@ import {
 } from "../../Helpers/dashboardMilestone";
 import { PAPERLESS_MILESTONE_THRESHOLD } from "../../../config/ENV";
 
+const AUTO_DISMISS_MS = 30000;
+
 const DigitalMilestone = ({ alldepttotalStatementscount, userInfo }) => {
   const [isVisible, setIsVisible] = useState(false);
   const papersaved = calculatePaperPagesSaved(PAPERLESS_MILESTONE_THRESHOLD);
@@ -42,9 +44,18 @@ const DigitalMilestone = ({ alldepttotalStatementscount, userInfo }) => {
 
     localStorage.setItem(storageKey, today);
     setIsVisible(true);
-  }, [alldepttotalStatementscount, userInfo]);
 
+    const dismissTimer = window.setTimeout(
+      () => setIsVisible(false),
+      AUTO_DISMISS_MS,
+    );
+
+    console.log("in", isVisible);
+    console.log(AUTO_DISMISS_MS);
+    return () => window.clearTimeout(dismissTimer);
+  }, [alldepttotalStatementscount, userInfo]);
   if (!isVisible) return null;
+  console.log("out", isVisible);
 
   return (
     <aside
