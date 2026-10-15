@@ -12,7 +12,7 @@ import {
 } from "./pdfHelpers";
 import { categoryapprovers, nextRole, roles } from "./roles_helper";
 import { fetchReceipt, getcmpmNames } from "../APIs/api";
-import { SPECIAL_PROJECTS } from "../../config/ENV";
+import { NORMAL_PROJECTS, SPECIAL_PROJECTS } from "../../config/ENV";
 import { getFleetApprovalFlow } from "./fleetRequestWorkflow";
 import { formatwords } from "./helperfunctions";
 
@@ -102,6 +102,7 @@ export const generateFRPDF = async (
   const workflow = getFleetApprovalFlow(
     fleetRequest?.project,
     SPECIAL_PROJECTS,
+    NORMAL_PROJECTS,
   ).filter((role) => role !== "INITIATOR");
   const projectApproverRoles = workflow.filter((role) =>
     ["CM", "PM", "PD"].includes(role),

@@ -641,5 +641,8 @@ export const shouldSendInithIntimation = ({ role, status }) => {
   const nextRole = normalize(status)
     .match(/^pending for\s+(.+)$/)?.[1]
     ?.trim();
-  return normalize(role) === "pm" && ["hod", "pd"].includes(nextRole);
+
+  return (
+    ["pm", "cm"].includes(normalize(role)) && ["hod", "pd"].includes(nextRole)
+  );
 };

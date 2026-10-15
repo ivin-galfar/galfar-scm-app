@@ -1158,9 +1158,8 @@ const FleetRequest = () => {
             confirmationAction.action === "recall" ? "warning" : "primary"
           }
           allowComments={
-            confirmationAction.action === "create" ||
-            (confirmationAction.action === "send-for-approval" &&
-              normalizedStatus === "review")
+            confirmationAction.action === "send-for-approval" ||
+            normalizedStatus === "review"
           }
           onCancel={() => setConfirmationAction(null)}
           onConfirm={(comments) =>
