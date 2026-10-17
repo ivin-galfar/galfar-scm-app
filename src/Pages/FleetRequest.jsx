@@ -1265,7 +1265,7 @@ const FleetRequest = () => {
                                     ? "w-12 max-w-12 whitespace-nowrap"
                                     : cell.column.id === "capacity" ||
                                         cell.column.id === "requiredFrom"
-                                      ? "w-20 max-w-20 whitespace-nowrap"
+                                      ? "w-20 max-w-20"
                                       : cell.column.id === "quantity" ||
                                           cell.column.id === "tpi"
                                         ? "w-12 max-w-12 whitespace-nowrap"
