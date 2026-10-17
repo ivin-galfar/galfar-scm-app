@@ -255,9 +255,8 @@ const TableHeader = ({ isAdmin }) => {
       setErrormessage("");
       setfreezeQuantity(false);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       setfreezeQuantity(true);
-      setIsupdated();
       setShowToast(true);
       resetSortVendors();
       setIsMRSelected(true);
@@ -287,23 +286,23 @@ const TableHeader = ({ isAdmin }) => {
   });
 
   useEffect(() => {
-    if (isupdated) {
-      const updatedData = {
-        ...sharedTableData,
-        formData: {
-          ...sharedTableData.formData,
-          status: null,
-          sentforapproval: "pending",
-        },
-      };
-      setSharedTableData(updatedData);
-      updateReceiptMutation.mutate({
-        sharedTableData: updatedData,
-        selectedVendorIndex,
-        selectedVendorReason,
-        userInfo,
-      });
-    }
+    if (!isupdated) return;
+    revertisupdated();
+    const updatedData = {
+      ...sharedTableData,
+      formData: {
+        ...sharedTableData.formData,
+        status: null,
+        sentforapproval: "pending",
+      },
+    };
+    setSharedTableData(updatedData);
+    updateReceiptMutation.mutate({
+      sharedTableData: updatedData,
+      selectedVendorIndex,
+      selectedVendorReason,
+      userInfo,
+    });
   }, [isupdated]);
 
   const createNewReceipt = () => {

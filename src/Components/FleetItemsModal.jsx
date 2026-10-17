@@ -401,6 +401,7 @@ const FleetItemsModal = ({
                         <option value="yes">Yes</option>
                         <option value="no">No</option>
                       </select>
+                      {renderError(itemIndex, "cicpa")}
                     </label>
 
                     <label>

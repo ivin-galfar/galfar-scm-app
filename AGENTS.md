@@ -260,6 +260,7 @@ Special projects include PD between PM and HOD. The project-dependent flow is de
 - `recall` lets an edit-capable initiator withdraw a pending request into the editable `recalled` state; it does not send email.
 - Send workflow email only after the workflow API update succeeds.
 - Every Fleet Request item requires an explicit `Yes`/`No` selection for ADNOC Fitments and a `Normal`/`CP - 19` selection for TPI; both values are persisted, editable, and included in generated PDFs.
+- Fleet Request items expose a Ref No. to all users. Hire users with Fleet Request access can edit it inline; debounced saves use the `update-ref-no` action and must not modify workflow status or approval history. The backend `fleet_request_items.ref_no` column is introduced by a reviewed SQL migration.
 - TPI accepts only the documented canonical labels `Normal` and `CP - 19`; do not add aliases or display-time value rewriting without an explicit contract change.
 - Fleet Request location is entered as required free text and does not depend on an environment-configured list.
 

@@ -43,6 +43,41 @@ import {
 import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 import { normalizeDateForInput } from "../Helpers/fleetRequestDocument";
 import { canRecallFleetRequest } from "../Helpers/approvalFlowHelper";
+import { IoIosSave } from "react-icons/io";
+
+/* eslint-disable react/prop-types */
+const FleetRefNoCell = ({ row, table }) => {
+  const item = row.original;
+  const itemIndex = row.index;
+  const { canEdit, onValueChange } = table.options.meta;
+  const value = item.refNo ?? "";
+
+  if (!canEdit) {
+    return (
+      <span
+        className="block w-full min-w-0  font-medium text-slate-800"
+        title={item.refNo || ""}
+      >
+        {item.refNo || "—"}
+      </span>
+    );
+  }
+
+  return (
+    <div className="relative flex w-full min-w-0 items-center gap-1 overflow-hidden">
+      <input
+        type="text"
+        value={value}
+        onChange={(event) => {
+          onValueChange(itemIndex, event.target.value);
+        }}
+        aria-label={`Ref No. for item ${item.item_no ?? ""}`}
+        className="box-border min-w-0 flex-1 truncate rounded border border-transparent bg-transparent px-1 py-1 text-center text-sm text-slate-800 outline-none hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+      />
+    </div>
+  );
+};
+/* eslint-enable react/prop-types */
 
 const getToday = () => {
   const today = new Date();
@@ -70,6 +105,29 @@ const getFleetRequestSuccessMessage = (action) => {
       return "Fleet request action completed successfully!";
   }
 };
+
+const normalizeFleetRequestItem = (item) => ({
+  fleetDescription: item.fleet_description ?? "",
+  capacity: item.capacity ?? "",
+  cicpa: String(item?.cicpa ?? "").toLowerCase(),
+  quantity: item.quantity ?? "",
+  requiredFrom: normalizeDateForInput(item.required_from),
+  rentalType: item.rentalType ?? item.rental_type ?? "",
+  duration: item.duration ?? "",
+  purpose: item.purpose ?? "",
+  productionQtyEnvisaged:
+    item.productionQtyEnvisaged ?? item.production_qty_envisaged ?? "",
+  similarMachinesAvailable: item.qty_similar_machines_available ?? "",
+  remarks: item.remarks ?? "",
+  utilization: item.utilization ?? 0,
+  id: item.id,
+  item_no: item.item_no,
+  refNo: item.ref_no ?? item.refNo ?? "",
+  adnocFitments: String(
+    item?.adnoc_fitments ?? item?.adnocFitments ?? "",
+  ).toLowerCase(),
+  tpi: item?.tpi ?? "",
+});
 
 const FleetRequest = () => {
   const userInfo = useUserInfo();
@@ -109,6 +167,9 @@ const FleetRequest = () => {
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [hasPendingUpdates, setHasPendingUpdates] = useState(false);
+  const [pendingRefNoChanges, setPendingRefNoChanges] = useState({});
+  const [showRefNoConfirmation, setShowRefNoConfirmation] = useState(false);
+  const [isSavingRefNos, setIsSavingRefNos] = useState(false);
   const { errormessage, setErrorMessage, clearErrorMessage } =
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
@@ -120,6 +181,15 @@ const FleetRequest = () => {
         normalizedStatus === "review" ||
         normalizedStatus === "recalled"),
   );
+  const hireUser = (
+    Array.isArray(userInfo?.role) ? userInfo.role : [userInfo?.role]
+  ).some(
+    (role) =>
+      String(role ?? "")
+        .trim()
+        .toLowerCase() === "inith",
+  );
+  const canEditRefNo = Boolean(hireUser);
   const canRecall = Boolean(
     selectedFleetRequestId &&
       canRecallFleetRequest({
@@ -257,27 +327,7 @@ const FleetRequest = () => {
           status: fleetRequest.status ?? "",
           location: fleetRequest.location ?? "",
           date: normalizeDateForInput(fleetRequest.created_at),
-          items: responseItems.map((item) => ({
-            fleetDescription: item.fleet_description ?? "",
-            capacity: item.capacity ?? "",
-            cicpa: formatwords(item?.cicpa) ?? "",
-            quantity: item.quantity ?? "",
-            requiredFrom: normalizeDateForInput(item.required_from),
-            rentalType: item.rentalType ?? item.rental_type ?? "",
-            duration: item.duration ?? "",
-            purpose: item.purpose ?? "",
-            productionQtyEnvisaged:
-              item.productionQtyEnvisaged ??
-              item.production_qty_envisaged ??
-              "",
-            similarMachinesAvailable: item.qty_similar_machines_available ?? "",
-            remarks: item.remarks ?? "",
-            utilization: item.utilization ?? 0,
-            adnocFitments: item?.adnoc_fitments
-              ? formatwords(item?.adnoc_fitments)
-              : "",
-            tpi: item?.tpi ? item.tpi : "",
-          })),
+          items: responseItems.map(normalizeFleetRequestItem),
         };
 
         setProject(normalizedDocument.project);
@@ -444,6 +494,65 @@ const FleetRequest = () => {
     setTimeout(() => setItemsAddedMessage(""), 2000);
   };
 
+  const handleRefNoChange = (itemIndex, refNo) => {
+    const item = fleetItems[itemIndex];
+
+    if (!item) return;
+    const itemKey = String(item.id ?? itemIndex);
+    setPendingRefNoChanges((current) => {
+      const original = current[itemKey]?.original ?? String(item.refNo ?? "");
+      if (refNo === original) {
+        const next = { ...current };
+        delete next[itemKey];
+        return next;
+      }
+      return { ...current, [itemKey]: { original, value: refNo } };
+    });
+    setFleetItems((currentItems) =>
+      currentItems.map((item, index) =>
+        index === itemIndex ? { ...item, refNo } : item,
+      ),
+    );
+  };
+
+  const changedRefNoItems = Object.entries(pendingRefNoChanges)
+    .map(([key, change]) => {
+      const index = fleetItems.findIndex(
+        (item, itemIndex) =>
+          String(item.id ?? item.item_no ?? itemIndex) === key,
+      );
+      return index < 0 ? null : { item: fleetItems[index], index, ...change };
+    })
+    .filter(Boolean);
+
+  const saveRefNoChanges = async () => {
+    if (!selectedFleetRequestId || !changedRefNoItems.length) return;
+    setIsSavingRefNos(true);
+    try {
+      for (const { item, value } of changedRefNoItems) {
+        await UpdateFleetRequestWorkflow({
+          id: selectedFleetRequestId,
+          action: "update-ref-no",
+          itemId: item.id,
+          refNo: value,
+          userInfo,
+        });
+      }
+      setPendingRefNoChanges({});
+      setShowRefNoConfirmation(false);
+      setShowToast(true);
+      setSuccessMessage("EM Ref No. saved successfully!");
+      setTimeout(resetshowtoast, 2500);
+    } catch (error) {
+      setErrorMessage(
+        error?.response?.data?.message || "Unable to save EM Ref No.",
+      );
+      setShowToast(true);
+    } finally {
+      setIsSavingRefNos(false);
+    }
+  };
+
   const handleEditItems = () => {
     const headerErrors = {};
     if (!String(project).trim()) headerErrors.project = "Project is required.";
@@ -560,6 +669,9 @@ const FleetRequest = () => {
             });
 
       const savedRequest = response;
+      if (Array.isArray(savedRequest?.items)) {
+        setFleetItems(savedRequest.items.map(normalizeFleetRequestItem));
+      }
       const savedStatus = savedRequest?.status ?? buttonAction.nextStatus;
       const savedId = String(savedRequest?.id ?? selectedFleetRequestId ?? "");
 
@@ -683,7 +795,18 @@ const FleetRequest = () => {
   };
 
   const columnHelper = createColumnHelper();
-  const compactColumnIds = new Set(["capacity", "cicpa", "duration"]);
+  const compactColumnIds = new Set([
+    "capacity",
+    "quantity",
+    "productionQtyEnvisaged",
+    "adnocFitments",
+    "tpi",
+    "cicpa",
+    "duration",
+    "rentalType",
+    "utilization",
+    "requiredFrom",
+  ]);
   const preservedWidthColumnIds = new Set(["fleetDescription", "remarks"]);
 
   const columns = [
@@ -693,20 +816,28 @@ const FleetRequest = () => {
       cell: ({ row }) => row.index + 1,
     }),
     columnHelper.accessor("fleetDescription", {
-      header: "Fleet Description",
+      header: "Fleet Desc.",
     }),
     columnHelper.accessor("capacity", { header: "Capacity" }),
-    columnHelper.accessor("quantity", { header: "Quantity" }),
+    columnHelper.accessor("quantity", { header: "Qty" }),
     columnHelper.accessor("duration", {
       header: "Duration",
       cell: (info) => <div className="w-10">{info.getValue() || "—"}</div>,
     }),
-    columnHelper.accessor("rentalType", { header: "Rental Type" }),
+    columnHelper.accessor("rentalType", {
+      header: () => (
+        <span className="leading-tight">
+          Rental <br />
+          Type
+        </span>
+      ),
+    }),
     columnHelper.accessor("purpose", { header: "Purpose" }),
     columnHelper.accessor("requiredFrom", {
       header: () => (
         <span className="leading-tight">
-          Required From <br />
+          Req.
+          <br /> From
         </span>
       ),
       cell: (info) => formatDateDMY(info.getValue()) || "—",
@@ -730,14 +861,22 @@ const FleetRequest = () => {
         </span>
       ),
     }),
-    columnHelper.accessor("utilization", { header: "Utilization" }),
+    columnHelper.accessor("utilization", {
+      header: () => (
+        <span className="leading-tight">
+          Util. <br />
+          (%)
+        </span>
+      ),
+    }),
     columnHelper.accessor("cicpa", {
       header: () => (
         <span className="leading-tight">
           CICPA <br />
-          (Yes/No)
+          (Y/N)
         </span>
       ),
+      cell: (info) => formatwords(info.getValue()) || "—",
     }),
     columnHelper.accessor("adnocFitments", {
       header: () => (
@@ -746,6 +885,7 @@ const FleetRequest = () => {
           Fitments
         </span>
       ),
+      cell: (info) => formatwords(info.getValue()) || "—",
     }),
     columnHelper.accessor("tpi", {
       header: "TPI",
@@ -760,6 +900,10 @@ const FleetRequest = () => {
           {info.getValue() || "—"}
         </div>
       ),
+    }),
+    columnHelper.accessor("refNo", {
+      header: "EM Ref No.",
+      cell: FleetRefNoCell,
     }),
     ...(canEdit
       ? [
@@ -802,6 +946,12 @@ const FleetRequest = () => {
     data: fleetItems,
     columns,
     features: tableFeatures,
+    meta: {
+      requestId: selectedFleetRequestId,
+      userInfo,
+      canEdit: Boolean(canEditRefNo && selectedFleetRequestId && !newfn),
+      onValueChange: handleRefNoChange,
+    },
   });
 
   const readOnlyValueClass =
@@ -973,19 +1123,43 @@ const FleetRequest = () => {
 
           <label className={fieldClass}>
             <span className="font-medium">Date :</span>
-            {canEdit ? (
-              <input
-                type="date"
-                value={date}
-                disabled
-                className="h-9 w-full cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-2.5 text-slate-700 disabled:opacity-100"
-                aria-label="Fleet request date"
-              />
-            ) : (
-              <output className={readOnlyValueClass}>
-                {formatDateDDMMYYYY(date) || "—"}
-              </output>
-            )}
+            <div className="flex min-w-0 items-center flex-1">
+              {canEdit ? (
+                <input
+                  type="date"
+                  value={date}
+                  disabled
+                  className="h-9 min-w-0 flex-1 cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-2.5 text-slate-700 disabled:opacity-100"
+                  aria-label="Fleet request date"
+                />
+              ) : (
+                <output className={`${readOnlyValueClass} flex-1`}>
+                  {formatDateDDMMYYYY(date) || "—"}
+                </output>
+              )}
+              {fleetItems.length > 0 &&
+                canEditRefNo &&
+                selectedFleetRequestId && (
+                  <button
+                    type="button"
+                    onClick={() => setShowRefNoConfirmation(true)}
+                    disabled={!changedRefNoItems.length || isSavingRefNos}
+                    aria-label="Save EM Ref No. changes"
+                    title={
+                      changedRefNoItems.length
+                        ? "Save EM Ref No. changes"
+                        : "No EM Ref No. changes to save"
+                    }
+                    className="flex size-5 shrink-0 items-center  justify-center rounded border border-green-700 bg-green-600 text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-slate-400 disabled:bg-slate-200 disabled:text-slate-600 disabled:shadow-none cursor-pointer"
+                  >
+                    <IoIosSave
+                      size={17}
+                      aria-hidden="true"
+                      className="text-green-700 bg-green-100"
+                    />
+                  </button>
+                )}
+            </div>
             {canEdit && validationErrors.date && (
               <span className="absolute left-0 top-full mt-1 text-xs font-medium text-red-600">
                 {validationErrors.date}
@@ -1010,8 +1184,8 @@ const FleetRequest = () => {
           </button>
         )}
         {fleetItems.length > 0 && (
-          <div className="overflow-x-auto rounded border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200  text-sm text-center">
+          <div className="overflow-x-hidden rounded border border-slate-200">
+            <table className="w-full table-fixed divide-y divide-slate-200 text-sm text-center">
               <thead className="border-b-2 border-slate-300 bg-slate-100 ">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
@@ -1019,20 +1193,49 @@ const FleetRequest = () => {
                       <th
                         key={header.id}
                         className={`${
-                          compactColumnIds.has(header.column.id)
-                            ? header.column.id === "cicpa"
-                              ? "w-16 whitespace-nowrap"
-                              : "w-20 whitespace-nowrap"
-                            : header.column.id === "productionQtyEnvisaged" ||
-                                header.column.id === "similarMachinesAvailable"
-                              ? "w-32 max-w-32 whitespace-normal"
-                              : header.column.id === "actions"
-                                ? "w-14 text-center"
-                                : "whitespace-nowrap"
-                        } border-r border-slate-200 py-3.5 text-md font-bold upperse tracking-wide text-slate-700 last:border-r-0 ${
+                          header.column.id === "serialNumber"
+                            ? "w-7 min-w-7 max-w-7 whitespace-nowrap"
+                            : header.column.id === "refNo"
+                              ? "w-28 min-w-28 max-w-28 whitespace-nowrap"
+                              : compactColumnIds.has(header.column.id)
+                                ? header.column.id === "rentalType"
+                                  ? "w-14 whitespace-normal"
+                                  : header.column.id === "utilization"
+                                    ? "w-12 whitespace-nowrap"
+                                    : header.column.id === "capacity"
+                                      ? "w-18 whitespace-nowrap"
+                                      : header.column.id ===
+                                          "productionQtyEnvisaged"
+                                        ? "w-24 whitespace-normal"
+                                        : header.column.id === "adnocFitments"
+                                          ? "w-18 whitespace-normal"
+                                          : header.column.id === "cicpa" ||
+                                              header.column.id ===
+                                                "requiredFrom"
+                                            ? "w-20 whitespace-nowrap"
+                                            : header.column.id === "quantity" ||
+                                                header.column.id === "tpi" ||
+                                                header.column.id ===
+                                                  "utilization"
+                                              ? "w-12 whitespace-nowrap"
+                                              : "w-20 whitespace-nowrap"
+                                : header.column.id ===
+                                      "productionQtyEnvisaged" ||
+                                    header.column.id ===
+                                      "similarMachinesAvailable"
+                                  ? "w-32 max-w-32 whitespace-normal"
+                                  : header.column.id === "actions"
+                                    ? "w-14 text-center"
+                                    : "whitespace-nowrap"
+                        } border-r border-slate-200 py-1 text-md font-bold upperse tracking-wide text-slate-700 last:border-r-0 ${
                           preservedWidthColumnIds.has(header.column.id)
-                            ? "px-3"
-                            : "px-2"
+                            ? "px-1"
+                            : header.column.id === "serialNumber"
+                              ? "px-0.5"
+                              : compactColumnIds.has(header.column.id) ||
+                                  header.column.id === "refNo"
+                                ? "px-1"
+                                : "px-2"
                         }`}
                       >
                         {flexRender(
@@ -1052,26 +1255,50 @@ const FleetRequest = () => {
                         <td
                           key={cell.id}
                           className={`${
-                            cell.column.id === "cicpa"
-                              ? "w-16 whitespace-nowrap"
-                              : cell.column.id === "capacity"
-                                ? "w-24 max-w-24 whitespace-normal"
-                                : cell.column.id === "duration"
-                                  ? "w-20 whitespace-nowrap"
-                                  : cell.column.id === "remarks"
-                                    ? "w-48 max-w-48"
-                                    : cell.column.id ===
-                                          "productionQtyEnvisaged" ||
-                                        cell.column.id ===
-                                          "similarMachinesAvailable"
-                                      ? "w-32 max-w-24 whitespace-normal"
-                                      : cell.column.id === "actions"
-                                        ? "w-14 text-center"
-                                        : "max-w-24"
+                            cell.column.id === "serialNumber"
+                              ? "w-7 min-w-7 max-w-7 whitespace-nowrap"
+                              : cell.column.id === "refNo"
+                                ? "w-28 min-w-28 max-w-28 overflow-hidden"
+                                : cell.column.id === "rentalType"
+                                  ? "w-12 max-w-12 whitespace-normal"
+                                  : cell.column.id === "utilization"
+                                    ? "w-12 max-w-12 whitespace-nowrap"
+                                    : cell.column.id === "capacity" ||
+                                        cell.column.id === "requiredFrom"
+                                      ? "w-20 max-w-20 whitespace-nowrap"
+                                      : cell.column.id === "quantity" ||
+                                          cell.column.id === "tpi"
+                                        ? "w-12 max-w-12 whitespace-nowrap"
+                                        : cell.column.id === "adnocFitments"
+                                          ? "w-16 max-w-16 whitespace-nowrap"
+                                          : cell.column.id ===
+                                              "productionQtyEnvisaged"
+                                            ? "w-24 max-w-24 whitespace-normal"
+                                            : cell.column.id === "cicpa"
+                                              ? "w-16 whitespace-nowrap"
+                                              : cell.column.id === "capacity"
+                                                ? "w-20 max-w-24 whitespace-normal"
+                                                : cell.column.id === "duration"
+                                                  ? "w-20 whitespace-nowrap"
+                                                  : cell.column.id === "remarks"
+                                                    ? "w-48 max-w-48"
+                                                    : cell.column.id ===
+                                                          "productionQtyEnvisaged" ||
+                                                        cell.column.id ===
+                                                          "similarMachinesAvailable"
+                                                      ? "w-32 max-w-24 whitespace-normal"
+                                                      : cell.column.id ===
+                                                          "actions"
+                                                        ? "w-14 text-center"
+                                                        : "max-w-24"
                           } py-3 align-middle text-slate-700 ${
                             preservedWidthColumnIds.has(cell.column.id)
                               ? "px-3"
-                              : "px-2"
+                              : cell.column.id === "serialNumber"
+                                ? "px-0.5"
+                                : compactColumnIds.has(cell.column.id)
+                                  ? "px-0.5"
+                                  : "px-1"
                           }`}
                         >
                           {flexRender(
@@ -1168,6 +1395,22 @@ const FleetRequest = () => {
           }
         />
       )}
+      {showRefNoConfirmation && (
+        <FleetRequestConfirmationModal
+          title="Add EM Ref No."
+          message={changedRefNoItems
+            .map(
+              ({ item, value }, index) =>
+                `${index + 1}. EM Ref No. ${value || "(blank)"} for record ${item.fleetDescription ?? ""} of quaanity${item.quantity ? ` (${item.quantity}).` : ""}`,
+            )
+            .join("\n")}
+          confirmLabel="Yes"
+          cancelLabel="No"
+          isLoading={isSavingRefNos}
+          onCancel={() => setShowRefNoConfirmation(false)}
+          onConfirm={saveRefNoChanges}
+        />
+      )}
       {isApprovalModalOpen && (
         <ApprovalModalFR
           fleetRequest={{ project, status: fleetRequestStatus }}
@@ -1188,6 +1431,16 @@ const FleetRequest = () => {
         </div>
       )}
       {showtoast && saveSucceeded && !errormessage && (
+        <div
+          className="animate-slide-in fixed left-1/2 top-5 z-[1100] flex -translate-x-1/2 items-center gap-2 rounded bg-green-500 px-6 py-3 text-white shadow-lg"
+          role="status"
+          aria-live="polite"
+        >
+          <LuCircleCheck size={18} aria-hidden="true" />
+          {successMessage}
+        </div>
+      )}
+      {showtoast && !errormessage && (
         <div
           className="animate-slide-in fixed left-1/2 top-5 z-[1100] flex -translate-x-1/2 items-center gap-2 rounded bg-green-500 px-6 py-3 text-white shadow-lg"
           role="status"
