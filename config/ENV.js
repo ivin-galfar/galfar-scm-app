@@ -6,6 +6,8 @@ export const REACT_SERVER_URL =
     : environment.VITE_REACT_PROD_SERVER_URL;
 export const SPECIAL_PROJECTS =
   environment.VITE_SPECIAL_PROJECTS?.split(",").map(Number);
+export const NORMAL_PROJECTS =
+  environment.VITE_NORMAL_PROJECTS?.split(",").map(Number);
 export const INHOUSE_PROJECTS =
   environment.VITE_INHOUSE_PROJECTS?.split(",").map(Number) ?? [];
 export const SHAREPOINT_LISTS =

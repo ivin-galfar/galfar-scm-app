@@ -1,4 +1,4 @@
-import { SPECIAL_PROJECTS } from "../../config/ENV.js";
+import { NORMAL_PROJECTS, SPECIAL_PROJECTS } from "../../config/ENV.js";
 import { getFleetRequestAccess } from "./fleetRequestPermissions.js";
 import { getFleetApprovalFlow } from "./fleetRequestWorkflow.js";
 
@@ -19,17 +19,12 @@ const getCurrentRole = (currentApprover) => {
   return role.startsWith("INIT") ? "INITIATOR" : role;
 };
 
-const isSpecialProject = (fleetRequest) => {
-  const projectCode = Number(fleetRequest?.project);
-
-  return (SPECIAL_PROJECTS ?? []).map(Number).includes(projectCode);
-};
-
 /**
  * Returns the next role in a Fleet Request approval flow.
  *
- * Standard: Initiator -> CM -> PM -> HOD -> GM
- * Special:  Initiator -> CM -> PM -> PD -> HOD -> GM
+ * Normal projects: Initiator -> CM -> HOD -> GM
+ * Special projects: Initiator -> CM -> PM -> PD -> HOD -> GM
+ * Unlisted projects retain the legacy standard flow through PM.
  *
  * @param {object} fleetRequest Fleet Request containing `project_code` or
  * `projectCode`.
@@ -43,7 +38,8 @@ export const getNextFleetApprovalRoles = (fleetRequest, currentApprover) => {
 
   const flow = getFleetApprovalFlow(
     fleetRequest.project,
-    isSpecialProject(fleetRequest) ? [fleetRequest.project] : [],
+    SPECIAL_PROJECTS,
+    NORMAL_PROJECTS,
   );
   const currentRole = getCurrentRole(currentApprover);
   const currentRoleIndex = flow.indexOf(currentRole);

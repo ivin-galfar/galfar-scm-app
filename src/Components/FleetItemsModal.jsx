@@ -313,6 +313,7 @@ const FleetItemsModal = ({
                         type="date"
                         value={item.requiredFrom}
                         min={minDate}
+                        onKeyDown={(e) => e.preventDefault()}
                         onChange={(event) =>
                           updateItem(
                             itemIndex,

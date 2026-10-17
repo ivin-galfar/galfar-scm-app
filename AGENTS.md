@@ -53,6 +53,7 @@ The frontend talks directly to the Express API with Axios. Most API calls build 
 - `VITE_REACT_SERVER_URL`: development API base URL.
 - `VITE_REACT_PROD_SERVER_URL`: production API base URL.
 - `VITE_SPECIAL_PROJECTS`: comma-separated project codes with special approval flows.
+- `VITE_NORMAL_PROJECTS`: comma-separated Fleet Request project codes using the normal flow.
 - `VITE_INHOUSE_PROJECTS`: comma-separated in-house project codes.
 - `VITE_SHAREPOINT_LISTS`: comma-separated SharePoint list names shown in the viewer; keep these aligned with the backend SharePoint allowed-list configuration.
 - `VITE_APP_VERSION`: client version used to invalidate stale sessions.
@@ -244,17 +245,24 @@ Keep the report proportional to the change. A small edit may need a compact para
 
 ## Fleet Request Workflow
 
-The normal flow is:
+The normal Fleet Request flow for projects listed in `VITE_NORMAL_PROJECTS` / `NORMAL_PROJECTS` is:
 
 ```text
-Initiator -> CM -> PM -> HOD -> GM -> Approved
+Initiator -> CM -> HOD -> GM -> Approved
 ```
 
-Special projects include PD between PM and HOD. The project-dependent flow is defined by the Fleet Request workflow helpers; do not duplicate it in UI components.
+Special projects listed in `VITE_SPECIAL_PROJECTS` / `SPECIAL_PROJECTS` use:
+
+```text
+Initiator -> CM -> PM -> PD -> HOD -> GM -> Approved
+```
+
+Projects absent from both lists retain the legacy standard flow: Initiator -> CM -> PM -> HOD -> GM -> Approved. The project-dependent flow is defined by the Fleet Request workflow helper on the frontend and `fleetRequestAuthorization.js` on the backend; keep them aligned.
 
 - `create` saves the request with `created` status.
 - `send-for-approval` sends or resubmits it to the first approver.
 - `approve` advances it to the next approver; GM approval moves it to `approved`.
+- On normal projects, CM approval notifies the HOD and sends an intimation to department `inith` users.
 - `reject` ends the active approval path and notifies the initiator.
 - `review` sends it back to the initiator for changes.
 - `recall` lets an edit-capable initiator withdraw a pending request into the editable `recalled` state; it does not send email.
