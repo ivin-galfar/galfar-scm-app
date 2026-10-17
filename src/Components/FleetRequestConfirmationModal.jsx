@@ -5,6 +5,7 @@ const FleetRequestConfirmationModal = ({
   title,
   message,
   confirmLabel,
+  cancelLabel = "Cancel",
   isLoading,
   variant = "primary",
   allowComments = false,
@@ -27,7 +28,7 @@ const FleetRequestConfirmationModal = ({
         >
           {title}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{message}</p>
+        <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{message}</p>
 
         {allowComments && (
           <label htmlFor="fleet-resubmission-comments" className="mt-4 block">
@@ -54,7 +55,7 @@ const FleetRequestConfirmationModal = ({
             disabled={isLoading}
             className="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
           >
-            Cancel
+            {cancelLabel}
           </button>
           <button
             type="button"
