@@ -1264,46 +1264,48 @@ const FleetRequest = () => {
                         className={`${
                           header.column.id === "serialNumber"
                             ? "w-7 min-w-7 max-w-7 whitespace-nowrap"
-                            : header.column.id === "actions"
-                              ? "w-20 min-w-20 max-w-20 text-center"
-                              : header.column.id === "purpose"
-                                ? "w-24 min-w-24 max-w-24 whitespace-normal"
-                                : header.column.id === "remarks"
-                                  ? "w-36 min-w-36 max-w-48 whitespace-normal"
-                                  : header.column.id === "refNo"
-                                    ? "w-36 min-w-36 max-w-28 whitespace-nowrap"
-                                    : compactColumnIds.has(header.column.id)
-                                      ? header.column.id === "rentalType"
-                                        ? "w-14 whitespace-normal"
-                                        : header.column.id === "utilization"
-                                          ? "w-12 whitespace-nowrap"
-                                          : header.column.id === "capacity"
-                                            ? "w-18 whitespace-nowrap"
-                                            : header.column.id ===
-                                                "productionQtyEnvisaged"
-                                              ? "w-24 whitespace-normal"
+                            : header.column.id === "fleetDescription"
+                              ? "w-32 min-w-32 max-w-32 whitespace-nowrap"
+                              : header.column.id === "actions"
+                                ? "w-20 min-w-20 max-w-20 text-center"
+                                : header.column.id === "purpose"
+                                  ? "w-24 min-w-24 max-w-24 whitespace-normal"
+                                  : header.column.id === "remarks"
+                                    ? "w-36 min-w-36 max-w-48 whitespace-normal"
+                                    : header.column.id === "refNo"
+                                      ? "w-36 min-w-36 max-w-28 whitespace-nowrap"
+                                      : compactColumnIds.has(header.column.id)
+                                        ? header.column.id === "rentalType"
+                                          ? "w-14 whitespace-normal"
+                                          : header.column.id === "utilization"
+                                            ? "w-12 whitespace-nowrap"
+                                            : header.column.id === "capacity"
+                                              ? "w-18 whitespace-nowrap"
                                               : header.column.id ===
-                                                  "adnocFitments"
-                                                ? "w-18 whitespace-normal"
+                                                  "productionQtyEnvisaged"
+                                                ? "w-24 whitespace-normal"
                                                 : header.column.id ===
-                                                      "cicpa" ||
-                                                    header.column.id ===
-                                                      "requiredFrom"
-                                                  ? "w-16 whitespace-nowrap"
+                                                    "adnocFitments"
+                                                  ? "w-18 whitespace-normal"
                                                   : header.column.id ===
-                                                        "quantity" ||
+                                                        "cicpa" ||
                                                       header.column.id ===
-                                                        "tpi" ||
-                                                      header.column.id ===
-                                                        "utilization"
-                                                    ? "w-12 whitespace-nowrap"
-                                                    : "w-20 whitespace-nowrap"
-                                      : header.column.id ===
-                                            "productionQtyEnvisaged" ||
-                                          header.column.id ===
-                                            "similarMachinesAvailable"
-                                        ? "w-24 max-w-32 whitespace-normal"
-                                        : "whitespace-nowrap"
+                                                        "requiredFrom"
+                                                    ? "w-16 whitespace-nowrap"
+                                                    : header.column.id ===
+                                                          "quantity" ||
+                                                        header.column.id ===
+                                                          "tpi" ||
+                                                        header.column.id ===
+                                                          "utilization"
+                                                      ? "w-12 whitespace-nowrap"
+                                                      : "w-20 whitespace-nowrap"
+                                        : header.column.id ===
+                                              "productionQtyEnvisaged" ||
+                                            header.column.id ===
+                                              "similarMachinesAvailable"
+                                          ? "w-24 max-w-32 whitespace-normal"
+                                          : "whitespace-nowrap"
                         } border-r border-slate-200 py-1 text-md font-bold upperse tracking-wide text-slate-700 last:border-r-0 ${
                           preservedWidthColumnIds.has(header.column.id)
                             ? "px-1"
@@ -1337,7 +1339,7 @@ const FleetRequest = () => {
                               : cell.column.id === "actions"
                                 ? "w-20 min-w-20 max-w-20 text-center"
                                 : cell.column.id === "purpose"
-                                  ? "w-24 min-w-24 max-w-24 whitespace-normal"
+                                  ? "w-24 min-w-24 max-w-24 whitespace-normal text-left"
                                   : cell.column.id === "refNo"
                                     ? "w-28 min-w-28 max-w-28 overflow-hidden"
                                     : cell.column.id === "rentalType"
@@ -1365,7 +1367,7 @@ const FleetRequest = () => {
                                                       ? "w-20 whitespace-nowrap"
                                                       : cell.column.id ===
                                                           "remarks"
-                                                        ? "w-36 max-w-36"
+                                                        ? "w-36 max-w-36 text-left"
                                                         : cell.column.id ===
                                                               "productionQtyEnvisaged" ||
                                                             cell.column.id ===
@@ -1375,7 +1377,7 @@ const FleetRequest = () => {
                                                               "actions"
                                                             ? "w-14 text-center"
                                                             : "max-w-24"
-                          } py-3 align-middle text-slate-700 ${
+                          } py-3 align-midde text-slate-700 ${
                             preservedWidthColumnIds.has(cell.column.id)
                               ? "px-3"
                               : cell.column.id === "serialNumber"

@@ -300,8 +300,10 @@ const BRDashboards = () => {
           const comments = info.getValue();
           if (
             comments &&
-            typeof comments === "object" &&
-            Object.keys(comments).length > 0
+            Object.values(comments).some(
+              (item) =>
+                item.comment != null && String(item.comment).trim() !== "",
+            )
           ) {
             return (
               <div className="space-y-1 overflow-y-auto max-h-30 ">

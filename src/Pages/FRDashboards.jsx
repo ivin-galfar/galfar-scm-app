@@ -334,7 +334,10 @@ const FRDashboards = () => {
           if (
             comments &&
             typeof comments === "object" &&
-            Object.values(comments).length > 0
+            Object.values(comments).some(
+              (item) =>
+                item.comment != null && String(item.comment).trim() !== "",
+            )
           ) {
             return (
               <div className="space-y-1">
@@ -360,6 +363,8 @@ const FRDashboards = () => {
                 </div>
               </div>
             );
+          } else {
+            return "-";
           }
         },
       },
