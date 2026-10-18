@@ -335,8 +335,6 @@ const FleetRequest = () => {
 
         const fleetRequest = response ?? {};
         const responseItems = response.items ?? [];
-        console.log(responseItems);
-
         const normalizedDocument = {
           project: String(fleetRequest.project ?? ""),
           docId: fleetRequest.doc_id ?? "",
