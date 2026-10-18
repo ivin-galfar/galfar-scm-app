@@ -595,22 +595,24 @@ const LogisticsDashboard = () => {
                         >
                           <LuFileDown size={14} /> PDF
                         </button>
-                        <button
-                          type="button"
-                          className={`inline-flex h-7 w-7 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-700 transition hover:border-red-300 hover:bg-red-100 ${!userInfo?.is_admin ? "hidden" : row.original.status === "Approved" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-                          aria-label="Delete statement"
-                          title="Delete statement"
-                          onClick={() => {
-                            if (row.original.status === "Approved") return;
-                            // setdeleteMr(row.original.formData.id);
-                            setDeleteStatement({
-                              id: row.original.id,
-                              open: true,
-                            });
-                          }}
-                        >
-                          <LuTrash2 size={14} />
-                        </button>
+                        {userInfo?.is_admin && (
+                          <button
+                            type="button"
+                            className={`flex h-7 w-7 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-700 transition hover:border-red-300 hover:bg-red-100 ${!userInfo?.is_admin ? "hidden" : row.original.status === "Approved" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                            aria-label="Delete statement"
+                            title="Delete statement"
+                            onClick={() => {
+                              if (row.original.status === "Approved") return;
+                              // setdeleteMr(row.original.formData.id);
+                              setDeleteStatement({
+                                id: row.original.id,
+                                open: true,
+                              });
+                            }}
+                          >
+                            <LuTrash2 size={14} />
+                          </button>
+                        )}
                       </div>
                     </td>
                     <td className="border-gray-300 border-b px-4 py-2 text-sm text-gray-700 text-center">

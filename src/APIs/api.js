@@ -1277,7 +1277,9 @@ export const GetFleetRequests = async (
             ? undefined
             : assignedProjects.join(","),
           statusfilter,
-          ...(projects && { projects }),
+          ...{
+            projects: canViewAllProjects ? undefined : projects,
+          },
         },
       },
     );

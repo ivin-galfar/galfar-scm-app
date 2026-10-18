@@ -595,19 +595,23 @@ const Dashboard = () => {
                       >
                         <LuFileDown size={14} /> PDF
                       </button>
-                      <button
-                        type="button"
-                        className={`inline-flex h-7 items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 ${!userInfo?.is_admin ? "hidden" : row.original.formData.status === "Approved" ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
-                        aria-label="Delete statement"
-                        onClick={() => {
-                          if (row.original.formData.status === "Approved")
-                            return;
-                          setdeleteMr(row.original.formData.id);
-                          setTriggerdelete(true);
-                        }}
-                      >
-                        <LuTrash2 size={14} /> Delete
-                      </button>
+                      {userInfo?.is_admin && (
+                        <>
+                          <button
+                            type="button"
+                            className={`inline-flex h-7 items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 ${row.original.formData.status === "Approved" ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
+                            aria-label="Delete statement"
+                            onClick={() => {
+                              if (row.original.formData.status === "Approved")
+                                return;
+                              setdeleteMr(row.original.formData.id);
+                              setTriggerdelete(true);
+                            }}
+                          >
+                            <LuTrash2 size={14} /> Delete
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                   <td className="whitespace-nowrap border-b border-slate-100 px-3 py-2 text-center text-sm text-slate-600">

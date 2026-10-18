@@ -89,7 +89,12 @@ export const generateFRPDF = async (
   userInfo,
   emailPdf = false,
 ) => {
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4",
+  });
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 10;
@@ -99,14 +104,17 @@ export const generateFRPDF = async (
   const approvals = Array.isArray(fleetRequest?.approver_info)
     ? fleetRequest.approver_info
     : [];
+
   const workflow = getFleetApprovalFlow(
     fleetRequest?.project,
     SPECIAL_PROJECTS,
     NORMAL_PROJECTS,
   ).filter((role) => role !== "INITIATOR");
+
   const projectApproverRoles = workflow.filter((role) =>
     ["CM", "PM", "PD"].includes(role),
   );
+
   const projectApproverNames = Object.fromEntries(
     await Promise.all(
       projectApproverRoles.map(async (role) => {
@@ -115,18 +123,23 @@ export const generateFRPDF = async (
           fleetRequest?.project,
           userInfo,
         );
+
         const name = Array.isArray(result) ? result[0] : result;
+
         return [role.toLowerCase(), String(name ?? "").trim()];
       }),
     ),
   );
+
   const approverNames = {
     ...projectApproverNames,
     hod: roles.HOD,
     gm: roles.GM,
     ceo: roles.CEO,
   };
+
   const approvalFlow = ["INITIATOR", ...workflow];
+
   const pendingRole = getPendingFleetApprovalRole(
     approvals,
     approvalFlow,
@@ -136,6 +149,7 @@ export const generateFRPDF = async (
   const drawPageHeader = () => {
     const logoWidth = 60;
     const logoHeight = 10;
+
     doc.addImage(
       galfarlogo,
       "PNG",
@@ -144,31 +158,42 @@ export const generateFRPDF = async (
       logoWidth,
       logoHeight,
     );
+
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(0);
-    doc.text("FLEET REQUEST", pageWidth / 2, 20, { align: "center" });
+
+    doc.text("FLEET REQUEST", pageWidth / 2, 20, {
+      align: "center",
+    });
   };
 
   const drawPageFooter = (pageNumber) => {
     doc.setDrawColor(190);
+
     doc.line(margin, pageHeight - 8, pageWidth - margin, pageHeight - 8);
+
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(0, 0, 0);
+
     doc.text(
       "This document is electronically generated; signatures are not required for completed digital approvals.",
       margin,
       pageHeight - 4,
     );
+
     doc.text(`Page ${pageNumber}`, pageWidth - margin, pageHeight - 4, {
       align: "right",
     });
   };
 
   drawPageHeader();
+
+  // Request details table - unchanged
   const detailsTableWidth = 210;
   const detailsTableMargin = pageWidth - detailsTableWidth;
+
   autoTable(doc, {
     startY: 26,
     margin: {
@@ -182,7 +207,12 @@ export const generateFRPDF = async (
       font: "helvetica",
       fontSize: 8.5,
       textColor: [0, 0, 0],
-      cellPadding: { top: 1.25, right: 1.5, bottom: 1.25, left: 1.5 },
+      cellPadding: {
+        top: 1.25,
+        right: 1.5,
+        bottom: 1.25,
+        left: 1.5,
+      },
       minCellHeight: 8,
       overflow: "linebreak",
       valign: "middle",
@@ -190,9 +220,17 @@ export const generateFRPDF = async (
       lineWidth: 0.1,
     },
     columnStyles: {
-      0: { fontStyle: "bold", fillColor: [226, 232, 240], cellWidth: 28 },
+      0: {
+        fontStyle: "bold",
+        fillColor: [226, 232, 240],
+        cellWidth: 28,
+      },
       1: { cellWidth: 40 },
-      2: { fontStyle: "bold", fillColor: [226, 232, 240], cellWidth: 28 },
+      2: {
+        fontStyle: "bold",
+        fillColor: [226, 232, 240],
+        cellWidth: 28,
+      },
       3: { cellWidth: 40 },
     },
     body: [
@@ -212,21 +250,28 @@ export const generateFRPDF = async (
   });
 
   let startY = (doc.lastAutoTable?.finalY ?? 26) + 7;
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
+
   doc.text("Fleet Request Items", margin, startY);
+
+  // Fleet request items table
   autoTable(doc, {
     startY: startY + 3,
+
     margin: {
       left: margin,
       right: margin,
       top: 26,
       bottom: footerHeight + approvalHeight + 2,
     },
+
     tableWidth: pageWidth - margin * 2,
     theme: "grid",
     showHead: "everyPage",
+
     head: [
       [
         "#",
@@ -236,16 +281,19 @@ export const generateFRPDF = async (
         "Duration",
         "Rental\nType",
         "Purpose",
+        "Allocation\nType",
         "Required\nFrom",
-        "Production Qty\nEnvisaged",
+        "Prod. Qty\nEnvisaged",
         "Similar Machines\nat Site",
-        "Utilization",
+        "Utili.",
         "CICPA",
         "ADNOC\nFitments",
         "TPI",
+        "EM Ref. No.",
         "Remarks",
       ],
     ],
+
     body: items.map((item, index) => [
       item.item_no ?? index + 1,
       pdfText(item.fleet_description),
@@ -254,6 +302,7 @@ export const generateFRPDF = async (
       pdfText(item.duration),
       pdfText(item.rental_type),
       pdfText(item.purpose),
+      formatwords(item.allocation_type),
       formatDateDDMMYYYY(item.required_from) || "--",
       pdfText(item.production_qty_envisaged),
       pdfText(item.qty_similar_machines_available),
@@ -261,11 +310,19 @@ export const generateFRPDF = async (
       pdfText(formatwords(item.cicpa)),
       pdfText(formatwords(item.adnoc_fitments) ?? ""),
       pdfText(item.tpi),
+      pdfText(item.ref_no),
       pdfText(item.remarks),
     ]),
+
     styles: {
-      fontSize: 9,
-      cellPadding: { top: 2.5, right: 1.5, bottom: 2.5, left: 1.5 },
+      font: "helvetica",
+      fontSize: 8,
+      cellPadding: {
+        top: 2,
+        right: 1,
+        bottom: 2,
+        left: 1,
+      },
       minCellHeight: 11,
       overflow: "linebreak",
       valign: "middle",
@@ -273,33 +330,40 @@ export const generateFRPDF = async (
       lineColor: [203, 213, 225],
       lineWidth: 0.1,
     },
+
     headStyles: {
       fillColor: [226, 232, 240],
       textColor: [0, 0, 0],
       fontStyle: "bold",
-      fontSize: 8.5,
+      fontSize: 7.5,
       minCellHeight: 14,
       overflow: "linebreak",
       halign: "center",
       valign: "middle",
     },
+
+    // Total width = 277 mm, matching the available page width.
+    // Short fields have smaller widths; longer text wraps inside cells.
     columnStyles: {
       0: { cellWidth: 5, halign: "center" },
       1: { cellWidth: 30 },
-      2: { cellWidth: 17 },
-      3: { cellWidth: 14 },
-      4: { cellWidth: 19, halign: "center" },
-      5: { cellWidth: 19 },
+      2: { cellWidth: 15 },
+      3: { cellWidth: 9, halign: "center" },
+      4: { cellWidth: 16, halign: "center" },
+      5: { cellWidth: 16 },
       6: { cellWidth: 16 },
-      7: { cellWidth: 17 },
-      8: { cellWidth: 24 },
-      9: { cellWidth: 19, halign: "center" },
-      10: { cellWidth: 17, halign: "center" },
-      11: { cellWidth: 16, halign: "center" },
-      12: { cellWidth: 16, halign: "center" },
-      13: { cellWidth: 14, halign: "center" },
-      14: { cellWidth: 35 },
+      7: { cellWidth: 16 },
+      8: { cellWidth: 16, halign: "center" },
+      9: { cellWidth: 20 },
+      10: { cellWidth: 18, halign: "center" },
+      11: { cellWidth: 12, halign: "center" },
+      12: { cellWidth: 13, halign: "center" },
+      13: { cellWidth: 15, halign: "center" },
+      14: { cellWidth: 9, halign: "center" },
+      15: { cellWidth: 18 },
+      16: { cellWidth: 39 },
     },
+
     didDrawPage: () => {
       drawPageHeader();
     },
@@ -318,32 +382,47 @@ export const generateFRPDF = async (
       approvalFlow,
       pendingRole,
     );
+
     const displayName = pdfText(approverNames[normalizedRole]);
+
     const centerX = margin + blockWidth * (index + 0.5);
+
     const wrappedName = doc.splitTextToSize(
       displayName,
       Math.max(blockWidth - 4, 10),
     );
 
     let color = [128, 128, 128];
-    if (approvalStatus.toLowerCase() === "approved") color = [0, 128, 0];
-    else if (approvalStatus.toLowerCase() === "rejected") color = [200, 0, 0];
-    else if (approvalStatus.toLowerCase() === "(pending)")
+
+    if (approvalStatus.toLowerCase() === "approved") {
+      color = [0, 128, 0];
+    } else if (approvalStatus.toLowerCase() === "rejected") {
+      color = [200, 0, 0];
+    } else if (approvalStatus.toLowerCase() === "(pending)") {
       color = [255, 165, 0];
+    }
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...color);
-    doc.text(approvalStatus, centerX, approvalTop + 4, { align: "center" });
+
+    doc.text(approvalStatus, centerX, approvalTop + 4, {
+      align: "center",
+    });
 
     doc.setDrawColor(0);
     doc.setLineWidth(0.2);
+
     doc.line(centerX - 9, approvalTop + 5.5, centerX + 9, approvalTop + 5.5);
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setTextColor(0, 0, 0);
-    doc.text(wrappedName, centerX, approvalTop + 10, { align: "center" });
+
+    doc.text(wrappedName, centerX, approvalTop + 10, {
+      align: "center",
+    });
+
     doc.text(
       `(${role})`,
       centerX,
@@ -353,12 +432,15 @@ export const generateFRPDF = async (
   });
 
   const pageCount = doc.internal.getNumberOfPages();
+
   for (let page = 1; page <= pageCount; page += 1) {
     doc.setPage(page);
     drawPageFooter(page);
   }
+
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
+
   if (emailPdf) {
     return { pdfBlob, blobUrl };
   }

@@ -115,6 +115,7 @@ const normalizeFleetRequestItem = (item) => ({
   rentalType: item.rentalType ?? item.rental_type ?? "",
   duration: item.duration ?? "",
   purpose: item.purpose ?? "",
+  allocationType: item.allocation_type ?? "",
   productionQtyEnvisaged:
     item.productionQtyEnvisaged ?? item.production_qty_envisaged ?? "",
   similarMachinesAvailable: item.qty_similar_machines_available ?? "",
@@ -174,6 +175,19 @@ const FleetRequest = () => {
     useErrorMessage();
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const normalizedStatus = fleetRequestStatus.trim().toLowerCase();
+  const userRoles = Array.isArray(userInfo?.role)
+    ? userInfo.role
+    : [userInfo?.role];
+  const canSetAllocationType = Boolean(
+    fleetAccess.canApprove &&
+      normalizedStatus === "pending for hod" &&
+      userRoles.some(
+        (role) =>
+          String(role ?? "")
+            .trim()
+            .toLowerCase() === "hod",
+      ),
+  );
   const canEdit = Boolean(
     fleetAccess.canEdit &&
       (newfn ||
@@ -321,6 +335,8 @@ const FleetRequest = () => {
 
         const fleetRequest = response ?? {};
         const responseItems = response.items ?? [];
+        console.log(responseItems);
+
         const normalizedDocument = {
           project: String(fleetRequest.project ?? ""),
           docId: fleetRequest.doc_id ?? "",
@@ -470,13 +486,20 @@ const FleetRequest = () => {
   };
 
   const handleSaveItems = (items) => {
+    const itemsWithoutAllocationChanges = items.map((item) => ({
+      ...item,
+      allocationType:
+        fleetItems[editingItemIndex ?? 0]?.allocationType ??
+        item.allocationType ??
+        "",
+    }));
     const wasEditingSingleItem = editingItemIndex !== null;
     if (editingItemIndex === null) {
-      setFleetItems(items);
+      setFleetItems(itemsWithoutAllocationChanges);
     } else {
       setFleetItems((currentItems) => [
         ...currentItems.slice(0, editingItemIndex),
-        ...items,
+        ...itemsWithoutAllocationChanges,
         ...currentItems.slice(editingItemIndex + 1),
       ]);
     }
@@ -665,6 +688,14 @@ const FleetRequest = () => {
                 location,
                 items: fleetItems,
               }),
+              ...(buttonAction.action === "approve" &&
+                canSetAllocationType && {
+                  items: fleetItems.map((item) => ({
+                    id: item.id,
+                    item_no: item.item_no,
+                    allocation_type: item.allocationType ?? "",
+                  })),
+                }),
               userInfo,
             });
 
@@ -806,6 +837,7 @@ const FleetRequest = () => {
     "rentalType",
     "utilization",
     "requiredFrom",
+    "allocationType",
   ]);
   const preservedWidthColumnIds = new Set(["fleetDescription", "remarks"]);
 
@@ -833,6 +865,45 @@ const FleetRequest = () => {
       ),
     }),
     columnHelper.accessor("purpose", { header: "Purpose" }),
+    columnHelper.accessor("allocationType", {
+      header: () => (
+        <span className="leading-tight">
+          Allocation
+          <br />
+          Type
+        </span>
+      ),
+      cell: ({ row, getValue }) =>
+        canSetAllocationType ? (
+          <select
+            value={getValue() || ""}
+            onChange={(event) => {
+              const allocationType = event.target.value;
+              setFleetItems((currentItems) =>
+                currentItems.map((item, index) =>
+                  index === row.index ? { ...item, allocationType } : item,
+                ),
+              );
+            }}
+            disabled={isSaving}
+            aria-label={`Allocation Type for item ${row.index + 1}`}
+            className="h-8 w-full min-w-0 rounded border border-slate-300 bg-white px-1 text-xs text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+          >
+            <option value="">Select</option>
+            <option value="Owned">Own</option>
+            <option value="Rented">Hire</option>
+            <option value="new-purchase">New Purchase</option>
+            <option value="new-purchase-project-cost">
+              New Purchase- Project Cost
+            </option>{" "}
+            <option value="reject-exclude">Reject/Exclude</option>
+            <option value="rental-short-term">Rental Short term</option>
+            <option value="hold">Hold</option>
+          </select>
+        ) : (
+          formatwords(getValue()) || "—"
+        ),
+    }),
     columnHelper.accessor("requiredFrom", {
       header: () => (
         <span className="leading-tight">
@@ -855,7 +926,7 @@ const FleetRequest = () => {
     columnHelper.accessor("similarMachinesAvailable", {
       header: () => (
         <span className="leading-tight w-64! ">
-          Qty - Similar Machines
+          Similar Machines
           <br />
           at Site
         </span>
@@ -1195,38 +1266,46 @@ const FleetRequest = () => {
                         className={`${
                           header.column.id === "serialNumber"
                             ? "w-7 min-w-7 max-w-7 whitespace-nowrap"
-                            : header.column.id === "refNo"
-                              ? "w-28 min-w-28 max-w-28 whitespace-nowrap"
-                              : compactColumnIds.has(header.column.id)
-                                ? header.column.id === "rentalType"
-                                  ? "w-14 whitespace-normal"
-                                  : header.column.id === "utilization"
-                                    ? "w-12 whitespace-nowrap"
-                                    : header.column.id === "capacity"
-                                      ? "w-18 whitespace-nowrap"
+                            : header.column.id === "actions"
+                              ? "w-20 min-w-20 max-w-20 text-center"
+                              : header.column.id === "purpose"
+                                ? "w-24 min-w-24 max-w-24 whitespace-normal"
+                                : header.column.id === "remarks"
+                                  ? "w-36 min-w-36 max-w-48 whitespace-normal"
+                                  : header.column.id === "refNo"
+                                    ? "w-36 min-w-36 max-w-28 whitespace-nowrap"
+                                    : compactColumnIds.has(header.column.id)
+                                      ? header.column.id === "rentalType"
+                                        ? "w-14 whitespace-normal"
+                                        : header.column.id === "utilization"
+                                          ? "w-12 whitespace-nowrap"
+                                          : header.column.id === "capacity"
+                                            ? "w-18 whitespace-nowrap"
+                                            : header.column.id ===
+                                                "productionQtyEnvisaged"
+                                              ? "w-24 whitespace-normal"
+                                              : header.column.id ===
+                                                  "adnocFitments"
+                                                ? "w-18 whitespace-normal"
+                                                : header.column.id ===
+                                                      "cicpa" ||
+                                                    header.column.id ===
+                                                      "requiredFrom"
+                                                  ? "w-16 whitespace-nowrap"
+                                                  : header.column.id ===
+                                                        "quantity" ||
+                                                      header.column.id ===
+                                                        "tpi" ||
+                                                      header.column.id ===
+                                                        "utilization"
+                                                    ? "w-12 whitespace-nowrap"
+                                                    : "w-20 whitespace-nowrap"
                                       : header.column.id ===
-                                          "productionQtyEnvisaged"
-                                        ? "w-24 whitespace-normal"
-                                        : header.column.id === "adnocFitments"
-                                          ? "w-18 whitespace-normal"
-                                          : header.column.id === "cicpa" ||
-                                              header.column.id ===
-                                                "requiredFrom"
-                                            ? "w-20 whitespace-nowrap"
-                                            : header.column.id === "quantity" ||
-                                                header.column.id === "tpi" ||
-                                                header.column.id ===
-                                                  "utilization"
-                                              ? "w-12 whitespace-nowrap"
-                                              : "w-20 whitespace-nowrap"
-                                : header.column.id ===
-                                      "productionQtyEnvisaged" ||
-                                    header.column.id ===
-                                      "similarMachinesAvailable"
-                                  ? "w-32 max-w-32 whitespace-normal"
-                                  : header.column.id === "actions"
-                                    ? "w-14 text-center"
-                                    : "whitespace-nowrap"
+                                            "productionQtyEnvisaged" ||
+                                          header.column.id ===
+                                            "similarMachinesAvailable"
+                                        ? "w-24 max-w-32 whitespace-normal"
+                                        : "whitespace-nowrap"
                         } border-r border-slate-200 py-1 text-md font-bold upperse tracking-wide text-slate-700 last:border-r-0 ${
                           preservedWidthColumnIds.has(header.column.id)
                             ? "px-1"
@@ -1257,47 +1336,54 @@ const FleetRequest = () => {
                           className={`${
                             cell.column.id === "serialNumber"
                               ? "w-7 min-w-7 max-w-7 whitespace-nowrap"
-                              : cell.column.id === "refNo"
-                                ? "w-28 min-w-28 max-w-28 overflow-hidden"
-                                : cell.column.id === "rentalType"
-                                  ? "w-12 max-w-12 whitespace-normal"
-                                  : cell.column.id === "utilization"
-                                    ? "w-12 max-w-12 whitespace-nowrap"
-                                    : cell.column.id === "capacity" ||
-                                        cell.column.id === "requiredFrom"
-                                      ? "w-20 max-w-20"
-                                      : cell.column.id === "quantity" ||
-                                          cell.column.id === "tpi"
+                              : cell.column.id === "actions"
+                                ? "w-20 min-w-20 max-w-20 text-center"
+                                : cell.column.id === "purpose"
+                                  ? "w-24 min-w-24 max-w-24 whitespace-normal"
+                                  : cell.column.id === "refNo"
+                                    ? "w-28 min-w-28 max-w-28 overflow-hidden"
+                                    : cell.column.id === "rentalType"
+                                      ? "w-12 max-w-12 whitespace-normal"
+                                      : cell.column.id === "utilization"
                                         ? "w-12 max-w-12 whitespace-nowrap"
-                                        : cell.column.id === "adnocFitments"
-                                          ? "w-16 max-w-16 whitespace-nowrap"
-                                          : cell.column.id ===
-                                              "productionQtyEnvisaged"
-                                            ? "w-24 max-w-24 whitespace-normal"
-                                            : cell.column.id === "cicpa"
-                                              ? "w-16 whitespace-nowrap"
-                                              : cell.column.id === "capacity"
-                                                ? "w-20 max-w-24 whitespace-normal"
-                                                : cell.column.id === "duration"
-                                                  ? "w-20 whitespace-nowrap"
-                                                  : cell.column.id === "remarks"
-                                                    ? "w-48 max-w-48"
+                                        : cell.column.id === "capacity" ||
+                                            cell.column.id === "requiredFrom"
+                                          ? "w-20 max-w-20"
+                                          : cell.column.id === "quantity" ||
+                                              cell.column.id === "tpi"
+                                            ? "w-12 max-w-12 whitespace-nowrap"
+                                            : cell.column.id === "adnocFitments"
+                                              ? "w-16 max-w-16 whitespace-nowrap"
+                                              : cell.column.id ===
+                                                  "productionQtyEnvisaged"
+                                                ? "w-24 max-w-24 whitespace-normal"
+                                                : cell.column.id === "cicpa"
+                                                  ? "w-16 whitespace-nowrap"
+                                                  : cell.column.id ===
+                                                      "capacity"
+                                                    ? "w-20 max-w-24 whitespace-normal"
                                                     : cell.column.id ===
-                                                          "productionQtyEnvisaged" ||
-                                                        cell.column.id ===
-                                                          "similarMachinesAvailable"
-                                                      ? "w-32 max-w-24 whitespace-normal"
+                                                        "duration"
+                                                      ? "w-20 whitespace-nowrap"
                                                       : cell.column.id ===
-                                                          "actions"
-                                                        ? "w-14 text-center"
-                                                        : "max-w-24"
+                                                          "remarks"
+                                                        ? "w-36 max-w-36"
+                                                        : cell.column.id ===
+                                                              "productionQtyEnvisaged" ||
+                                                            cell.column.id ===
+                                                              "similarMachinesAvailable"
+                                                          ? "w-32 max-w-24 whitespace-normal"
+                                                          : cell.column.id ===
+                                                              "actions"
+                                                            ? "w-14 text-center"
+                                                            : "max-w-24"
                           } py-3 align-middle text-slate-700 ${
                             preservedWidthColumnIds.has(cell.column.id)
                               ? "px-3"
                               : cell.column.id === "serialNumber"
                                 ? "px-0.5"
                                 : compactColumnIds.has(cell.column.id)
-                                  ? "px-0.5"
+                                  ? "px-0"
                                   : "px-1"
                           }`}
                         >
@@ -1320,7 +1406,10 @@ const FleetRequest = () => {
           </p>
         )}
         {fleetItems.length > 0 && (
-          <div className="mt-4 flex justify-end gap-3">
+          <div className="mt-4 flex justify-between gap-3">
+            <div className="text-xs text-gray-500">
+              Allocation Type is assigned by the HOD for each item.
+            </div>{" "}
             {canEdit && selectedFleetRequestId && hasPendingUpdates && (
               <button
                 type="button"
