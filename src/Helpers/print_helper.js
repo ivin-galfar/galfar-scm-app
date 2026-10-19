@@ -118,6 +118,7 @@ export const generateFRPDF = async (
   const projectApproverNames = Object.fromEntries(
     await Promise.all(
       projectApproverRoles.map(async (role) => {
+        console.log("role", role);
         const result = await getcmpmNames(
           role.toLowerCase(),
           fleetRequest?.project,

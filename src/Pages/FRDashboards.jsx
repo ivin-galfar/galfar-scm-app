@@ -155,6 +155,7 @@ const FRDashboards = () => {
     try {
       await handleFrPrint(request, userInfo);
     } catch (error) {
+      console.log("error", error);
       setErrorMessage(
         error?.response?.data?.error ||
           error?.message ||
