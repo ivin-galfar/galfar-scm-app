@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
@@ -146,7 +147,6 @@ const FleetRequest = () => {
   const [location, setLocation] = useState("");
   const [date, setDate] = useState(getToday);
   const [fleetId, setFleetId] = useState("");
-  const [fleetIds, setFleetIds] = useState([]);
   const path = useLocation("");
   const navigate = useNavigate();
   const { id: routeFleetRequestId = "" } = useParams();
@@ -215,55 +215,56 @@ const FleetRequest = () => {
   const hasModalItemValues = modalItems.some((item) =>
     Object.values(item).some((value) => String(value).trim() !== ""),
   );
+  const { data: fetchedFleetIds, error: fleetRequestsError } = useQuery({
+    queryKey: [
+      "fleet-requests",
+      "editor",
+      userInfo?.id,
+      projects.map(String).join(","),
+    ],
+    queryFn: async () => {
+      const response = await GetFleetRequests(
+        userInfo,
+        projects,
+        "fleetrequest",
+      );
+      return response.data;
+    },
+    enabled: Boolean(userInfo?.token && !newfn),
+  });
+  const fleetIds = Array.isArray(fetchedFleetIds) ? fetchedFleetIds : [];
 
   useEffect(() => {
-    if (!userInfo?.token) return;
+    if (!newfn || !userInfo?.token) return;
     let ignore = false;
 
     const fetchFleetIds = async () => {
       try {
-        if (newfn) {
-          if (!String(project).trim()) return;
+        if (!String(project).trim()) return;
 
-          const response = await GetFleetDocId(userInfo, project);
-          if (ignore) return;
-
-          const docId = response?.formatted_doc_id;
-
-          if (docId) {
-            const parts = docId.split("/");
-            const lastIndex = parts.length - 1;
-            parts[lastIndex] = String(Number(parts[lastIndex]) + 1).padStart(
-              parts[lastIndex].length,
-              "0",
-            );
-            setFleetId(parts.join("/"));
-          } else {
-            if (response.last_id == 0) {
-              setFleetId(`FR/${project}/0001`);
-            } else {
-              setFleetId("");
-            }
-          }
-          return;
-        }
-
-        const response = await GetFleetRequests(
-          userInfo,
-          projects,
-          path.pathname.startsWith("/fleetrequest")
-            ? "fleetrequest"
-            : path.pathname,
-        );
+        const response = await GetFleetDocId(userInfo, project);
         if (ignore) return;
 
-        setFleetIds(response.data);
+        const docId = response?.formatted_doc_id;
+
+        if (docId) {
+          const parts = docId.split("/");
+          const lastIndex = parts.length - 1;
+          parts[lastIndex] = String(Number(parts[lastIndex]) + 1).padStart(
+            parts[lastIndex].length,
+            "0",
+          );
+          setFleetId(parts.join("/"));
+        } else if (response.last_id == 0) {
+          setFleetId(`FR/${project}/0001`);
+        } else {
+          setFleetId("");
+        }
       } catch (error) {
         if (ignore) return;
         setFleetId("");
-        setFleetIds([]);
         setErrorMessage(error);
-        console.error("Unable to fetch Fleet Request IDs", error);
+        console.error("Unable to fetch Fleet Request document number", error);
       }
     };
 
@@ -272,7 +273,13 @@ const FleetRequest = () => {
     return () => {
       ignore = true;
     };
-  }, [newfn, path.pathname, project, userInfo]);
+  }, [newfn, project, userInfo?.token, setErrorMessage]);
+
+  useEffect(() => {
+    if (!fleetRequestsError) return;
+    setErrorMessage(fleetRequestsError);
+    console.error("Unable to fetch Fleet Request IDs", fleetRequestsError);
+  }, [fleetRequestsError, setErrorMessage]);
 
   useEffect(() => {
     setSelectedFleetRequestId(routeFleetRequestId);
