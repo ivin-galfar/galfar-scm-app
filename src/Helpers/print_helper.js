@@ -118,7 +118,6 @@ export const generateFRPDF = async (
   const projectApproverNames = Object.fromEntries(
     await Promise.all(
       projectApproverRoles.map(async (role) => {
-        console.log("role", role);
         const result = await getcmpmNames(
           role.toLowerCase(),
           fleetRequest?.project,
@@ -303,7 +302,7 @@ export const generateFRPDF = async (
       pdfText(item.duration),
       pdfText(item.rental_type),
       pdfText(item.purpose),
-      formatwords(item.allocation_type),
+      formatwords(item?.allocation_type),
       formatDateDDMMYYYY(item.required_from) || "--",
       pdfText(item.production_qty_envisaged),
       pdfText(item.qty_similar_machines_available),
@@ -311,8 +310,8 @@ export const generateFRPDF = async (
       pdfText(formatwords(item.cicpa)),
       pdfText(formatwords(item.adnoc_fitments) ?? ""),
       pdfText(item.tpi),
-      pdfText(item.ref_no),
-      pdfText(item.remarks),
+      pdfText(item?.ref_no),
+      pdfText(item?.remarks),
     ]),
 
     styles: {

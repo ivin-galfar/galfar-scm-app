@@ -1304,7 +1304,6 @@ export const GetFleetRequestById = async (userInfo, id) => {
   };
 
   const response = await axios.get(`${REACT_SERVER_URL}/flreq/${id}`, config);
-  console.log("res", response.data);
 
   return response.data;
 };
