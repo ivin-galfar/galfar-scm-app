@@ -835,7 +835,6 @@ const FleetRequest = () => {
     "rentalType",
     "utilization",
     "requiredFrom",
-    "allocationType",
   ]);
   const preservedWidthColumnIds = new Set(["fleetDescription", "remarks"]);
 
@@ -1274,38 +1273,40 @@ const FleetRequest = () => {
                                     ? "w-36 min-w-36 max-w-48 whitespace-normal"
                                     : header.column.id === "refNo"
                                       ? "w-36 min-w-36 max-w-28 whitespace-nowrap"
-                                      : compactColumnIds.has(header.column.id)
-                                        ? header.column.id === "rentalType"
-                                          ? "w-14 whitespace-normal"
-                                          : header.column.id === "utilization"
-                                            ? "w-12 whitespace-nowrap"
-                                            : header.column.id === "capacity"
-                                              ? "w-18 whitespace-nowrap"
-                                              : header.column.id ===
-                                                  "productionQtyEnvisaged"
-                                                ? "w-24 whitespace-normal"
+                                      : header.column.id === "allocationType"
+                                        ? "w-18 min-w-18 max-w-20 whitespace-nowrap"
+                                        : compactColumnIds.has(header.column.id)
+                                          ? header.column.id === "rentalType"
+                                            ? "w-14 whitespace-normal"
+                                            : header.column.id === "utilization"
+                                              ? "w-12 whitespace-nowrap"
+                                              : header.column.id === "capacity"
+                                                ? "w-18 whitespace-nowrap"
                                                 : header.column.id ===
-                                                    "adnocFitments"
-                                                  ? "w-18 whitespace-normal"
+                                                    "productionQtyEnvisaged"
+                                                  ? "w-24 whitespace-normal"
                                                   : header.column.id ===
-                                                        "cicpa" ||
-                                                      header.column.id ===
-                                                        "requiredFrom"
-                                                    ? "w-16 whitespace-nowrap"
+                                                      "adnocFitments"
+                                                    ? "w-18 whitespace-normal"
                                                     : header.column.id ===
-                                                          "quantity" ||
+                                                          "cicpa" ||
                                                         header.column.id ===
-                                                          "tpi" ||
-                                                        header.column.id ===
-                                                          "utilization"
-                                                      ? "w-12 whitespace-nowrap"
-                                                      : "w-20 whitespace-nowrap"
-                                        : header.column.id ===
-                                              "productionQtyEnvisaged" ||
-                                            header.column.id ===
-                                              "similarMachinesAvailable"
-                                          ? "w-24 max-w-32 whitespace-normal"
-                                          : "whitespace-nowrap"
+                                                          "requiredFrom"
+                                                      ? "w-16 whitespace-nowrap"
+                                                      : header.column.id ===
+                                                            "quantity" ||
+                                                          header.column.id ===
+                                                            "tpi" ||
+                                                          header.column.id ===
+                                                            "utilization"
+                                                        ? "w-12 whitespace-nowrap"
+                                                        : "w-20 whitespace-nowrap"
+                                          : header.column.id ===
+                                                "productionQtyEnvisaged" ||
+                                              header.column.id ===
+                                                "similarMachinesAvailable"
+                                            ? "w-24 max-w-32 whitespace-normal"
+                                            : "whitespace-nowrap"
                         } border-r border-slate-200 py-1 text-md font-bold upperse tracking-wide text-slate-700 last:border-r-0 ${
                           preservedWidthColumnIds.has(header.column.id)
                             ? "px-1"
