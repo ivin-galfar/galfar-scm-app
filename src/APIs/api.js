@@ -1271,13 +1271,10 @@ export const GetFleetRequests = async (
           module: module,
           page,
           limit,
-          roles: roles.join(","),
-          access_scope: canViewAllProjects ? "all" : "assigned",
-          project_codes: canViewAllProjects
-            ? undefined
-            : assignedProjects.join(","),
           statusfilter,
-          ...(projects && { projects }),
+          ...(module === "fleetrequest" && canViewAllProjects
+            ? {}
+            : projects && { projects }),
         },
       },
     );
