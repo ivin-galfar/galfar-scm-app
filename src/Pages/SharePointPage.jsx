@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { SHAREPOINT_LISTS } from "../../config/ENV";
 import { GetSharePointItemCount, GetSharePointItems } from "../APIs/api";
@@ -103,7 +103,7 @@ const SharePointPage = () => {
     pageSize,
     requestVersion,
     userInfo?.email,
-    userInfo?.token,
+    userInfo?.id,
   ]);
 
   useEffect(() => {
@@ -143,7 +143,7 @@ const SharePointPage = () => {
         countRequestSequenceRef.current += 1;
       }
     };
-  }, [listName, countRetryVersion, userInfo?.email, userInfo?.token]);
+  }, [listName, countRetryVersion, userInfo?.email, userInfo?.id]);
 
   const resetPagination = () => {
     requestSequenceRef.current += 1;

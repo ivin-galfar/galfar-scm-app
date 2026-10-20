@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../APIs/api";
 import Alerts from "./Alerts";
 
 const LogoutButton = ({ children, className, title, onLogoutRequested }) => {
@@ -11,7 +12,13 @@ const LogoutButton = ({ children, className, title, onLogoutRequested }) => {
     setShowConfirm(true);
   };
 
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Failed to clear the authentication cookie during logout.", error);
+    }
+
     localStorage.removeItem("userInfo");
     setShowConfirm(false);
     onLogoutRequested?.();

@@ -30,14 +30,14 @@ const UserDropdown = () => {
   }, []);
 
   useEffect(() => {
-    if (!userInfo?.token || !userEmail) return undefined;
+    if (!userInfo || !userEmail) return undefined;
 
     let isCurrent = true;
     let imageUrl;
 
     const fetchProfileImage = async () => {
       try {
-        const photoBlob = await fetchSharePointUserPhoto(userInfo, userEmail);
+        const photoBlob = await fetchSharePointUserPhoto(userEmail);
 
         if (!isCurrent) return;
         if (photoBlob.size > 0) {

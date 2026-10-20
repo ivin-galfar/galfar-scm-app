@@ -16,8 +16,7 @@ import {
 import { useRecallAlert, useRecallStatement } from "../store/helperStore";
 import fetchParticulars from "../APIs/ParticularsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
+import { api } from "../APIs/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   fetchallid,
@@ -68,7 +67,7 @@ const StatementHeader = () => {
 
   useEffect(() => {
     // If there's no user info or token, redirect to login
-    if (!userInfo || !userInfo.token) {
+    if (!userInfo || !userInfo.id) {
       navigate("/login");
     }
   }, [userInfo, navigate]);
@@ -85,17 +84,7 @@ const StatementHeader = () => {
 
     const fetchparticularvalues = async () => {
       try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
-        const response = await axios.get(
-          `${REACT_SERVER_URL}/particulars/${particular}`,
-          config,
-        );
+        const response = await api.get(`/particulars/${particular}`);
         setParticularValue(response.data.particular.particulars);
       } catch (error) {
         const message = error?.response?.data || error.message;
@@ -121,17 +110,7 @@ const StatementHeader = () => {
   const fetchStatement = async (cs_id) => {
     if (cs_id != "default") {
       try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
-        const response = await axios.get(
-          `${REACT_SERVER_URL}/logistics/${cs_id}`,
-          config,
-        );
+        const response = await api.get(`/logistics/${cs_id}`);
         let filteredresponse = response;
 
         if (userInfo.role?.includes("pm")) {
@@ -260,16 +239,7 @@ const StatementHeader = () => {
       files.forEach((file) => {
         formData.append("file", file);
       });
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.post(
-        `${REACT_SERVER_URL}/receipts/file`,
-        formData,
-        config,
-      );
+      const response = await api.post(`/receipts/file`, formData);
 
       const newFiles = response.data.uploadedFiles.map((file) => file.fileUrl);
       const newFileNames = response.data.uploadedFiles.map(
@@ -335,7 +305,7 @@ const StatementHeader = () => {
   const recallStatement = () => {
     setIsRecalled();
     setIsEditing();
-    recallStatementValues(userInfo, formData.id, formData.recalled_times + 1);
+    recallStatementValues(formData.id, formData.recalled_times + 1);
     resetFreeze();
     setShowToast();
     resetIsAlerted();

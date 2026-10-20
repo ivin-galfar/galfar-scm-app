@@ -1,53 +1,55 @@
 import axios from "axios";
 import { REACT_SERVER_URL } from "../../config/ENV";
 
+export const api = axios.create({
+  baseURL: REACT_SERVER_URL,
+  withCredentials: true,
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const requestUrl = error.config?.url ?? "";
+    const isLoginRequest = /\/users\/login(?:\?|$)/.test(requestUrl);
+
+    if (
+      error.response?.status === 401 &&
+      !isLoginRequest &&
+      window.location.pathname !== "/login"
+    ) {
+      localStorage.removeItem("userInfo");
+      window.location.assign("/login");
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 export const loginUser = async ({ email, password }) => {
-  const config = {
-    "Content-type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-  };
-  const { data } = await axios.post(
-    `${REACT_SERVER_URL}/users/login`,
-    {
-      email,
-      password,
-    },
-    config,
-  );
+  const { data } = await api.post(`/users/login`, {
+    email,
+    password,
+  });
   return data;
+};
+
+export const logoutUser = async () => {
+  await api.post(`/users/logout`);
 };
 
 export const registerUser = async ({ email, password }) => {
-  const config = {
-    "Content-type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-  };
-  const { data } = await axios.post(
-    `${REACT_SERVER_URL}/users/register`,
-    {
-      email,
-      password,
-    },
-    config,
-  );
+  const { data } = await api.post(`/users/register`, {
+    email,
+    password,
+  });
   return data;
 };
 
-export const feedReceipt = async ({ sharedTableData, userInfo }) => {
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${userInfo.token}`,
-    },
-  };
-  const { data } = await axios.post(
-    `${REACT_SERVER_URL}/receipts`,
-    {
-      formData: sharedTableData.formData,
-      tableData: sharedTableData["tableData"],
-    },
-    config,
-  );
+export const feedReceipt = async ({ sharedTableData }) => {
+  const { data } = await api.post(`/receipts`, {
+    formData: sharedTableData.formData,
+    tableData: sharedTableData["tableData"],
+  });
   return data;
 };
 
@@ -55,25 +57,16 @@ export const updateReceipt = async ({
   sharedTableData,
   selectedVendorIndex,
   selectedVendorReason,
-  userInfo,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-
-    const { data } = await axios.put(
-      `${REACT_SERVER_URL}/receipts/updatereceipt/${sharedTableData.formData.id}`,
+    const { data } = await api.put(
+      `/receipts/updatereceipt/${sharedTableData.formData.id}`,
       {
         formData: sharedTableData.formData,
         tableData: sharedTableData["tableData"],
         selectedIndex: selectedVendorIndex,
         selectedReason: selectedVendorReason,
       },
-      config,
     );
     return data;
   } catch (error) {
@@ -81,22 +74,12 @@ export const updateReceipt = async ({
   }
 };
 
-export const feedlgstatement = async ({ formData, tableData, userInfo }) => {
+export const feedlgstatement = async ({ formData, tableData }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/logistics`,
-      {
-        formData,
-        tableData,
-      },
-      config,
-    );
+    const response = await api.post(`/logistics`, {
+      formData,
+      tableData,
+    });
     return response;
   } catch (error) {
     console.log(error);
@@ -105,21 +88,14 @@ export const feedlgstatement = async ({ formData, tableData, userInfo }) => {
   }
 };
 
-export const updatelgstatement = async ({ formData, tableData, userInfo }) => {
+export const updatelgstatement = async ({ formData, tableData }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/logistics/updatestatementvalues/${formData.id}`,
+    const response = await api.put(
+      `/logistics/updatestatementvalues/${formData.id}`,
       {
         formData,
         tableData,
       },
-      config,
     );
     return response;
   } catch (error) {
@@ -129,15 +105,8 @@ export const updatelgstatement = async ({ formData, tableData, userInfo }) => {
 
 export const fetchallid = async (userInfo, module) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
-    const response = await axios.get(`${REACT_SERVER_URL}/logistics/allcs`, {
-      ...config,
+    const response = await api.get(`/logistics/allcs`, {
       params: {
         module,
         project: userInfo.pr_code,
@@ -161,29 +130,19 @@ export const fetchallstatements = async (
   searchcsname,
 ) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/logistics/statements`,
-      {
-        ...config,
-        params: {
-          statusfilter,
-          searchcsno,
-          searchcsname,
-          pageIndex,
-          pageSize,
-          role: userInfo.role[0],
-          project: userInfo.pr_code,
-          showinactive,
-        },
+    const response = await api.get(`/logistics/statements`, {
+      params: {
+        statusfilter,
+        searchcsno,
+        searchcsname,
+        pageIndex,
+        pageSize,
+        role: userInfo.role[0],
+        project: userInfo.pr_code,
+        showinactive,
       },
-    );
+    });
 
     return response.data;
   } catch (error) {
@@ -211,33 +170,23 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
     project_code = typeof project === "string" ? Number(project) : project;
   }
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
+    const response = await api.post(`/emailnotify/${cs_id}?dept=${dept}`, {
+      status,
+      userInfo: {
+        role: userInfo.role[0],
+        pr_code: userInfo.pr_code,
       },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
-      {
-        status,
-        userInfo: {
-          role: userInfo.role[0],
-          pr_code: userInfo.pr_code,
-        },
-        project_code,
-        cargo_details,
-        shipment_no,
-        rejectedby,
-        comments,
-        created_at,
-        approvedPdfUrl,
-        approvedpdfName,
-        file,
-        filename,
-      },
-      config,
-    );
+      project_code,
+      cargo_details,
+      shipment_no,
+      rejectedby,
+      comments,
+      created_at,
+      approvedPdfUrl,
+      approvedpdfName,
+      file,
+      filename,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -246,17 +195,7 @@ export const EmailAlert = async (cs_id, userInfo, dept, formData) => {
 
 export const fetchStatement = async (userInfo, cs_id) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/logistics/${cs_id}`,
-      config,
-    );
+    const response = await api.get(`/logistics/${cs_id}`);
     let filteredresponse = response;
 
     if (userInfo.role?.includes("pm")) {
@@ -281,20 +220,10 @@ export const fetchStatement = async (userInfo, cs_id) => {
   }
 };
 
-export const fetchReceipt = async (id, userInfo) => {
+export const fetchReceipt = async (id) => {
   if (id && id != "default") {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.get(
-        `${REACT_SERVER_URL}/receipts/${id}`,
-        config,
-      );
+      const response = await api.get(`/receipts/${id}`);
       const receipt = response.data;
       return receipt;
     } catch (error) {
@@ -305,20 +234,10 @@ export const fetchReceipt = async (id, userInfo) => {
   }
 };
 
-export const fetchReceiptsApproverDetails = async (id, userInfo) => {
+export const fetchReceiptsApproverDetails = async (id) => {
   if (id && id != "default") {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.get(
-        `${REACT_SERVER_URL}/receipts/approverdetails/${id}`,
-        config,
-      );
+      const response = await api.get(`/receipts/approverdetails/${id}`);
       const receipt = response.data.approverDetails;
 
       return receipt;
@@ -340,49 +259,31 @@ export const fetchReceiptCount = async ({
   type,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
 
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/receipts/totalreceipts/`,
-      {
-        ...config,
-        params: {
-          type,
-          expectedStatuses: expectedStatuses?.length
-            ? expectedStatuses.join(",")
-            : null,
-          statusfilter: status != "All" ? status : null,
-          multiStatus: multiStatus?.length ? multiStatus.join(",") : null,
-          searchcsno,
-          searchcsname,
-          showinactive,
-        },
+    const response = await api.get(`/receipts/totalreceipts/`, {
+      params: {
+        type,
+        expectedStatuses: expectedStatuses?.length
+          ? expectedStatuses.join(",")
+          : null,
+        statusfilter: status != "All" ? status : null,
+        multiStatus: multiStatus?.length ? multiStatus.join(",") : null,
+        searchcsno,
+        searchcsname,
+        showinactive,
       },
-    );
+    });
     return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-export const fetchApproverDetails = async (userInfo, cs_id) => {
+export const fetchApproverDetails = async (cs_id) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/logistics/statements/approverdetails/${cs_id}`,
-      config,
+    const response = await api.get(
+      `/logistics/statements/approverdetails/${cs_id}`,
     );
     return response.data;
   } catch (error) {
@@ -398,28 +299,18 @@ export const fetchCsCount = async (
   project,
 ) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
 
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/logistics/totalreceipts/`,
-      {
-        ...config,
-        params: {
-          statusfilter,
-          role: userInfo.role[0],
-          searchcsno,
-          searchcsname,
-          project,
-          showinactive,
-        },
+    const response = await api.get(`/logistics/totalreceipts/`, {
+      params: {
+        statusfilter,
+        role: userInfo.role[0],
+        searchcsno,
+        searchcsname,
+        project,
+        showinactive,
       },
-    );
+    });
 
     return response.data;
   } catch (error) {
@@ -429,48 +320,37 @@ export const fetchCsCount = async (
   }
 };
 
-export const recallStatementValues = async (
-  userInfo,
-  cs_id,
-  recalled_times,
-) => {
+export const recallStatementValues = async (cs_id, recalled_times) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    await axios.post(
-      `${REACT_SERVER_URL}/logistics/updatestatement/${cs_id}`,
-      {
-        updatedstatus: "created",
-        sentforapproval: null,
-        recalled_times,
-      },
-      config,
-    );
+    await api.post(`/logistics/updatestatement/${cs_id}`, {
+      updatedstatus: "created",
+      sentforapproval: null,
+      recalled_times,
+    });
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
 
-export const feedbrstatement = async ({ formData, userInfo }) => {
+export const feedbrstatement = async ({ formData }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/brstatement`,
+    const response = await api.post(`/brstatement`, {
+      formData,
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatebrstatement = async ({ formData }) => {
+  try {
+    const response = await api.put(
+      `/brstatement/updatebrstatementvalues/${formData.id}`,
       {
         formData,
       },
-      config,
     );
     return response;
   } catch (error) {
@@ -478,41 +358,13 @@ export const feedbrstatement = async ({ formData, userInfo }) => {
   }
 };
 
-export const updatebrstatement = async ({ formData, userInfo }) => {
+export const updatebrstatementImages = async ({ brtabledata }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/brstatement/updatebrstatementvalues/${formData.id}`,
-      {
-        formData,
-      },
-      config,
-    );
-    return response;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const updatebrstatementImages = async ({ brtabledata, userInfo }) => {
-  try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/brstatement/updatebrimages/${brtabledata?.id}`,
+    const response = await api.put(
+      `/brstatement/updatebrimages/${brtabledata?.id}`,
       {
         brtabledata,
       },
-      config,
     );
     return response;
   } catch (error) {
@@ -520,19 +372,9 @@ export const updatebrstatementImages = async ({ brtabledata, userInfo }) => {
   }
 };
 
-export const fetchbrstatement = async (cs_id, userInfo) => {
+export const fetchbrstatement = async (cs_id) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/brstatement/${cs_id}`,
-
-      config,
-    );
+    const response = await api.get(`/brstatement/${cs_id}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -549,16 +391,9 @@ export const fetchbrstatements = async ({
   module,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userinfo.token}`,
-      },
-    };
     const showinactive = userinfo?.is_admin || userinfo?.role.includes("hod");
 
-    const response = await axios.get(`${REACT_SERVER_URL}/brstatement/`, {
-      ...config,
+    const response = await api.get(`/brstatement/`, {
       params: {
         module,
         role: userinfo.role[0],
@@ -585,29 +420,19 @@ export const fetchbrstatementscount = async (
   limit,
 ) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
 
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/brstatement/totalstatements`,
-      {
-        ...config,
-        params: {
-          statusfilter,
-          role: userInfo.role[0],
-          searchcsno,
-          searchcsname,
-          page,
-          limit,
-          showinactive,
-        },
+    const response = await api.get(`/brstatement/totalstatements`, {
+      params: {
+        statusfilter,
+        role: userInfo.role[0],
+        searchcsno,
+        searchcsname,
+        page,
+        limit,
+        showinactive,
       },
-    );
+    });
 
     return response.data;
   } catch (error) {
@@ -626,23 +451,13 @@ export const updatebrstatements = async ({
   filename,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo?.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/brstatement/updatebrstatement/${cs_id}`,
-      {
-        status,
-        comments,
-        role: userInfo.role[0],
-        file,
-        filename,
-      },
-      config,
-    );
+    const response = await api.put(`/brstatement/updatebrstatement/${cs_id}`, {
+      status,
+      comments,
+      role: userInfo.role[0],
+      file,
+      filename,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -651,29 +466,19 @@ export const updatebrstatements = async ({
 
 export const BrEmailAlert = async (cs_id, userInfo, dept, data) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
+    const response = await api.post(`/emailnotify/${cs_id}?dept=${dept}`, {
+      id: data.id,
+      userInfo: {
+        role: userInfo.role[0],
       },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
-      {
-        id: data.id,
-        userInfo: {
-          role: userInfo.role[0],
-        },
-        type: data.chosentype,
-        created_at: data.created_at,
-        status: data.status,
-        item: data.item,
-        file: data.file,
-        filename: data.filename,
-        approvedPdfUrl: data.approvedPdfUrl,
-      },
-      config,
-    );
+      type: data.chosentype,
+      created_at: data.created_at,
+      status: data.status,
+      item: data.item,
+      file: data.file,
+      filename: data.filename,
+      approvedPdfUrl: data.approvedPdfUrl,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -688,32 +493,21 @@ export const createfilenote = async ({
   file_urls,
   category,
   type,
-  userInfo,
   project,
   wef,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/filenote/addfn`,
-      {
-        content,
-        name,
-        dept_id,
-        category,
-        type,
-        file_names,
-        file_urls,
-        project,
-        wef,
-      },
-      config,
-    );
+    const response = await api.post(`/filenote/addfn`, {
+      content,
+      name,
+      dept_id,
+      category,
+      type,
+      file_names,
+      file_urls,
+      project,
+      wef,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -740,32 +534,22 @@ export const updatefilenotevalues = async ({
   wefchangeddate,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/filenote/updatefn/${fnid}`,
-      {
-        status,
-        sentforapproval,
-        role: userInfo.role,
-        comments,
-        type,
-        category,
-        name,
-        action,
-        content,
-        attachments,
-        project_code,
-        exportedstatement,
-        wefchanged,
-        wefchangeddate,
-      },
-      config,
-    );
+    const response = await api.put(`/filenote/updatefn/${fnid}`, {
+      status,
+      sentforapproval,
+      role: userInfo.role,
+      comments,
+      type,
+      category,
+      name,
+      action,
+      content,
+      attachments,
+      project_code,
+      exportedstatement,
+      wefchanged,
+      wefchangeddate,
+    });
 
     return response.data;
   } catch (error) {
@@ -789,40 +573,29 @@ export const fetchfilenoteids = async ({
   projectFilter,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/filenote/`,
-      {
-        ...config,
-        params: {
-          module,
-          role: userInfo.role.join(","),
-          isadmin: userInfo.is_admin,
-          dept_id: dept_id.join(","),
-          project_code: projectFilter
-            ? [projectFilter]?.join(",")
-            : userInfo.pr_code
-              ? userInfo.pr_code.join(",")
-              : "",
-          statusfilter,
-          count,
-          page,
-          limit,
-          searchcsno,
-          searchcsname,
-          categoryFilter,
-          typeFilter,
-          showinactive,
-        },
+    const response = await api.get(`/filenote/`, {
+      params: {
+        module,
+        role: userInfo.role.join(","),
+        isadmin: userInfo.is_admin,
+        dept_id: dept_id.join(","),
+        project_code: projectFilter
+          ? [projectFilter]?.join(",")
+          : userInfo.pr_code
+            ? userInfo.pr_code.join(",")
+            : "",
+        statusfilter,
+        count,
+        page,
+        limit,
+        searchcsno,
+        searchcsname,
+        categoryFilter,
+        typeFilter,
+        showinactive,
       },
-      config,
-    );
+    });
 
     return response.data;
   } catch (error) {
@@ -834,14 +607,7 @@ export const fetchfilenoteids = async ({
 
 export const fetchfilenoteidvalue = async (fnid, userInfo) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(`${REACT_SERVER_URL}/filenote/${fnid}`, {
-      ...config,
+    const response = await api.get(`/filenote/${fnid}`, {
       params: {
         role: userInfo.role.join(","),
         isadmin: userInfo.is_admin,
@@ -857,28 +623,17 @@ export const fetchlastid = async ({
   dept_id,
   type,
   category,
-  userInfo,
   selectedproject,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
+    const response = await api.get(`/filenote/fetchdocno`, {
+      params: {
+        dept_id,
+        type: type,
+        category: category || "file_note",
+        project_code: selectedproject,
       },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/filenote/fetchdocno`,
-      {
-        ...config,
-        params: {
-          dept_id,
-          type: type,
-          category: category || "file_note",
-          project_code: selectedproject,
-        },
-      },
-    );
+    });
 
     return response.data;
   } catch (error) {
@@ -886,34 +641,18 @@ export const fetchlastid = async ({
   }
 };
 
-export const fetchProjectDetails = async (userInfo, project_code, role) => {
+export const fetchProjectDetails = async () => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(`${REACT_SERVER_URL}/projects/`, config);
+    const response = await api.get(`/projects/`);
     return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-export const deletefn = async (fnid, userInfo) => {
+export const deletefn = async (fnid) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/filenote/deletefn/${fnid}`,
-      {},
-      config,
-    );
+    const response = await api.put(`/filenote/deletefn/${fnid}`, {});
     return response.data;
   } catch (error) {
     throw error;
@@ -922,14 +661,8 @@ export const deletefn = async (fnid, userInfo) => {
 
 export const FnEmailAlert = async (id, userInfo, dept, data) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/emailnotify/${id}?dept=${dept}&type=${data.type}&category=${data.category}`,
+    const response = await api.post(
+      `/emailnotify/${id}?dept=${dept}&type=${data.type}&category=${data.category}`,
       {
         id: data.id,
         role: userInfo.is_admin
@@ -946,7 +679,6 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
         file: data.file,
         file_name: data.file_name,
       },
-      config,
     );
     return response.data;
   } catch (error) {
@@ -954,16 +686,9 @@ export const FnEmailAlert = async (id, userInfo, dept, data) => {
   }
 };
 
-export const getcmpmNames = async (role, project, userInfo) => {
+export const getcmpmNames = async (role, project) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(`${REACT_SERVER_URL}/projects/cmpmnames`, {
-      ...config,
+    const response = await api.get(`/projects/cmpmnames`, {
       params: { requiredrole: role, project: project },
     });
     return response.data;
@@ -972,18 +697,11 @@ export const getcmpmNames = async (role, project, userInfo) => {
   }
 };
 
-export const getcategory = async (userInfo, dept_id) => {
+export const getcategory = async (dept_id) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/filenote/fetchcategory`,
-      { config, params: { dept_id: dept_id } },
-    );
+    const response = await api.get(`/filenote/fetchcategory`, {
+      params: { dept_id },
+    });
 
     return response.data;
   } catch (error) {
@@ -993,20 +711,10 @@ export const getcategory = async (userInfo, dept_id) => {
 
 export const updateiocintimation = async (userInfo, fnid, flag) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/filenote/updatedemob/${fnid}`,
-      {
-        flag: flag,
-        email: userInfo.email.split("@")[0],
-      },
-      config,
-    );
+    const response = await api.put(`/filenote/updatedemob/${fnid}`, {
+      flag: flag,
+      email: userInfo.email.split("@")[0],
+    });
 
     return response.data;
   } catch (error) {
@@ -1016,20 +724,10 @@ export const updateiocintimation = async (userInfo, fnid, flag) => {
 
 export const updatedocread = async (userInfo) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/users/updatedocread`,
-      {
-        email: userInfo.email,
-        click: 1,
-      },
-      config,
-    );
+    const response = await api.put(`/users/updatedocread`, {
+      email: userInfo.email,
+      click: 1,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -1038,12 +736,9 @@ export const updatedocread = async (userInfo) => {
 
 export const validateemail = async (email) => {
   try {
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/users/validateemail`,
-      {
-        email: email,
-      },
-    );
+    const response = await api.post(`/users/validateemail`, {
+      email: email,
+    });
 
     return response.data;
   } catch (error) {
@@ -1053,14 +748,11 @@ export const validateemail = async (email) => {
 
 export const ResetEmail = async (email, resetToken, expiry) => {
   try {
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/emailnotify/pwdresetreq`,
-      {
-        email: email,
-        resettoken: resetToken,
-        expiry: expiry,
-      },
-    );
+    const response = await api.post(`/emailnotify/pwdresetreq`, {
+      email: email,
+      resettoken: resetToken,
+      expiry: expiry,
+    });
 
     return response.data;
   } catch (error) {
@@ -1070,12 +762,9 @@ export const ResetEmail = async (email, resetToken, expiry) => {
 
 export const VerifyResetToken = async (resetToken) => {
   try {
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/emailnotify/verifyresettoken`,
-      {
-        resettoken: resetToken,
-      },
-    );
+    const response = await api.post(`/emailnotify/verifyresettoken`, {
+      resettoken: resetToken,
+    });
 
     return response.data;
   } catch (error) {
@@ -1084,13 +773,10 @@ export const VerifyResetToken = async (resetToken) => {
 };
 export const ResetUserPassword = async (token, password) => {
   try {
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/emailnotify/pwdreset`,
-      {
-        token,
-        password,
-      },
-    );
+    const response = await api.post(`/emailnotify/pwdreset`, {
+      token,
+      password,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -1099,18 +785,9 @@ export const ResetUserPassword = async (token, password) => {
   }
 };
 
-export const GetAnalyticsData = async (userInfo) => {
+export const GetAnalyticsData = async () => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/analytics/approvals`,
-      config,
-    );
+    const response = await api.get(`/analytics/approvals`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -1119,18 +796,9 @@ export const GetAnalyticsData = async (userInfo) => {
   }
 };
 
-export const GetAnnouncementsData = async ({ userInfo }) => {
+export const GetAnnouncementsData = async () => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo?.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/announcements/`,
-      config,
-    );
+    const response = await api.get(`/announcements/`);
 
     return response.data;
   } catch (error) {
@@ -1141,18 +809,13 @@ export const GetAnnouncementsData = async ({ userInfo }) => {
 };
 
 export const GetSharePointItems = async ({
-  userInfo,
   listName,
   pageSize,
   fields,
   filter,
   cursor,
 }) => {
-  const response = await axios.get(`${REACT_SERVER_URL}/api/sharepoint/items`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${userInfo?.token}`,
-    },
+  const response = await api.get(`/api/sharepoint/items`, {
     params: {
       listName,
       pageSize,
@@ -1165,12 +828,8 @@ export const GetSharePointItems = async ({
   return response.data;
 };
 
-export const GetSharePointItemCount = async ({ userInfo, listName }) => {
-  const response = await axios.get(`${REACT_SERVER_URL}/api/sharepoint/count`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${userInfo?.token}`,
-    },
+export const GetSharePointItemCount = async ({ listName }) => {
+  const response = await api.get(`/api/sharepoint/count`, {
     params: {
       listName,
     },
@@ -1179,14 +838,11 @@ export const GetSharePointItemCount = async ({ userInfo, listName }) => {
   return response.data;
 };
 
-export const fetchSharePointUserPhoto = async (userInfo, email) => {
+export const fetchSharePointUserPhoto = async (email) => {
   try {
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/users/user-photo/${encodeURIComponent(email)}`,
+    const response = await api.get(
+      `/users/user-photo/${encodeURIComponent(email)}`,
       {
-        headers: {
-          Authorization: `Bearer ${userInfo?.token}`,
-        },
         responseType: "blob",
       },
     );
@@ -1197,18 +853,9 @@ export const fetchSharePointUserPhoto = async (userInfo, email) => {
   }
 };
 
-export const GetFleetDocId = async (userInfo, project) => {
+export const GetFleetDocId = async (project) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo?.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/flreq/fetchdocid/${project}`,
-      config,
-    );
+    const response = await api.get(`/flreq/fetchdocid/${project}`);
 
     return response.data;
   } catch (error) {
@@ -1225,13 +872,6 @@ export const GetFleetRequests = async (
   statusfilter,
 ) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo?.token}`,
-      },
-    };
-
     const roles = (
       Array.isArray(userInfo?.role) ? userInfo.role : [userInfo?.role]
     )
@@ -1263,21 +903,17 @@ export const GetFleetRequests = async (
         : assignedProjects;
     if (!canViewAllProjects && permittedProjects.length === 0) return [];
     const projects = permittedProjects.join(",");
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/flreq/fetchdocsdata`,
-      {
-        ...config,
-        params: {
-          module: module,
-          page,
-          limit,
-          statusfilter,
-          ...(module === "fleetrequest" && canViewAllProjects
-            ? {}
-            : projects && { projects }),
-        },
+    const response = await api.get(`/flreq/fetchdocsdata`, {
+      params: {
+        module: module,
+        page,
+        limit,
+        statusfilter,
+        ...(module === "fleetrequest" && canViewAllProjects
+          ? {}
+          : projects && { projects }),
       },
-    );
+    });
 
     if (canViewAllProjects || !Array.isArray(response.data)) {
       return response.data;
@@ -1295,15 +931,8 @@ export const GetFleetRequests = async (
   }
 };
 
-export const GetFleetRequestById = async (userInfo, id) => {
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${userInfo?.token}`,
-    },
-  };
-
-  const response = await axios.get(`${REACT_SERVER_URL}/flreq/${id}`, config);
+export const GetFleetRequestById = async (id) => {
+  const response = await api.get(`/flreq/${id}`);
 
   return response.data;
 };
@@ -1314,16 +943,8 @@ export const AddNewFleetRequests = async ({
   location,
   items,
   comments,
-  userInfo,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo?.token}`,
-      },
-    };
-
     const payload = {
       project,
       date,
@@ -1348,11 +969,7 @@ export const AddNewFleetRequests = async ({
       })),
     };
 
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/flreq`,
-      payload,
-      config,
-    );
+    const response = await api.post(`/flreq`, payload);
     return response.data;
   } catch (error) {
     throw error;
@@ -1370,33 +987,21 @@ export const UpdateFleetRequestWorkflow = async ({
   date,
   location,
   items,
-  userInfo,
   deleted,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo?.token}`,
-      },
-    };
-
-    const response = await axios.put(
-      `${REACT_SERVER_URL}/flreq/${id}`,
-      {
-        status,
-        action,
-        comments,
-        ...(itemId !== undefined && { item_id: itemId }),
-        ...(refNo !== undefined && { ref_no: refNo }),
-        ...(project !== undefined && { project }),
-        ...(date !== undefined && { date }),
-        ...(location !== undefined && { location }),
-        ...(items !== undefined && { items }),
-        ...(deleted !== undefined && { deleted }),
-      },
-      config,
-    );
+    const response = await api.put(`/flreq/${id}`, {
+      status,
+      action,
+      comments,
+      ...(itemId !== undefined && { item_id: itemId }),
+      ...(refNo !== undefined && { ref_no: refNo }),
+      ...(project !== undefined && { project }),
+      ...(date !== undefined && { date }),
+      ...(location !== undefined && { location }),
+      ...(items !== undefined && { items }),
+      ...(deleted !== undefined && { deleted }),
+    });
 
     return response.data;
   } catch (error) {
@@ -1406,32 +1011,22 @@ export const UpdateFleetRequestWorkflow = async ({
 
 export const FREmailAlert = async (id, userInfo, dept, data) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/emailnotify/${id}?dept=${dept}&type=fr`,
-      {
-        id: data.id,
-        role: userInfo.is_admin
-          ? userInfo.role?.includes("initfr")
-            ? "initfr"
-            : (userInfo.role?.[1] ?? userInfo.role?.[0])
-          : userInfo.role?.[0],
-        doc_id: data.doc_id,
-        created_date: data.created_date,
-        location: data.location,
-        project: data.project,
-        status: data.status,
-        ...(data.exportedStatementAttachment && {
-          exportedStatementAttachment: data.exportedStatementAttachment,
-        }),
-      },
-      config,
-    );
+    const response = await api.post(`/emailnotify/${id}?dept=${dept}&type=fr`, {
+      id: data.id,
+      role: userInfo.is_admin
+        ? userInfo.role?.includes("initfr")
+          ? "initfr"
+          : (userInfo.role?.[1] ?? userInfo.role?.[0])
+        : userInfo.role?.[0],
+      doc_id: data.doc_id,
+      created_date: data.created_date,
+      location: data.location,
+      project: data.project,
+      status: data.status,
+      ...(data.exportedStatementAttachment && {
+        exportedStatementAttachment: data.exportedStatementAttachment,
+      }),
+    });
     return response.data;
   } catch (error) {
     throw error;

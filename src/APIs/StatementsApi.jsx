@@ -1,5 +1,4 @@
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
+import { api } from "./api";
 
 const fetchStatments = async ({
   expectedStatuses,
@@ -14,18 +13,9 @@ const fetchStatments = async ({
   type,
 }) => {
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-
     const showinactive = userInfo?.is_admin || userInfo?.role.includes("hod");
 
-    const response = await axios.get(`${REACT_SERVER_URL}/receipts/`, {
-      ...config,
+    const response = await api.get(`/receipts/`, {
       params: {
         type: type ?? "",
         module,

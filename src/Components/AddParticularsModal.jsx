@@ -1,7 +1,5 @@
 import { useState } from "react";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { REACT_SERVER_URL } from "../../config/ENV";
-import axios from "axios";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { useStatementupdated } from "../store/statementStore";
 import { useParams } from "react-router-dom";
@@ -51,13 +49,6 @@ const AddParticularsModal = ({ setShowmodal, editTemplate }) => {
       return;
     }
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
       const payload = {
         created: {
           owner: formattedName,
@@ -72,13 +63,12 @@ const AddParticularsModal = ({ setShowmodal, editTemplate }) => {
       if (editTemplate) {
         console.log("con");
 
-        await axios.put(
-          `${REACT_SERVER_URL}/particulars/${editTemplate.id}`,
+        await api.put(
+          `/particulars/${editTemplate.id}`,
           payload,
-          config,
         );
       } else {
-        await axios.post(`${REACT_SERVER_URL}/particulars`, payload, config);
+        await api.post(`/particulars`, payload);
       }
 
       setShowToast(true);

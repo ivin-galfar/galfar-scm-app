@@ -90,7 +90,7 @@ const DashboardError = ({ onRetry }) => (
 const Dashboard = () => {
   const userInfo = useUserInfo();
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["analytics-approvals", userInfo?.token],
+    queryKey: ["analytics-approvals", userInfo?.id],
     queryFn: () => GetAnalyticsData(userInfo),
     enabled: !!userInfo,
     select: transformAnalyticsData,

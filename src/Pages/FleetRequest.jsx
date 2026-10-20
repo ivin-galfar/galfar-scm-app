@@ -230,19 +230,19 @@ const FleetRequest = () => {
       );
       return response.data;
     },
-    enabled: Boolean(userInfo?.token && !newfn),
+    enabled: Boolean(userInfo?.id && !newfn),
   });
   const fleetIds = Array.isArray(fetchedFleetIds) ? fetchedFleetIds : [];
 
   useEffect(() => {
-    if (!newfn || !userInfo?.token) return;
+    if (!newfn || !userInfo) return;
     let ignore = false;
 
     const fetchFleetIds = async () => {
       try {
         if (!String(project).trim()) return;
 
-        const response = await GetFleetDocId(userInfo, project);
+        const response = await GetFleetDocId(project);
         if (ignore) return;
 
         const docId = response?.formatted_doc_id;
@@ -273,7 +273,7 @@ const FleetRequest = () => {
     return () => {
       ignore = true;
     };
-  }, [newfn, project, userInfo?.token, setErrorMessage]);
+  }, [newfn, project, userInfo?.id, setErrorMessage]);
 
   useEffect(() => {
     if (!fleetRequestsError) return;
@@ -323,7 +323,7 @@ const FleetRequest = () => {
   ]);
 
   useEffect(() => {
-    if (newfn || !selectedFleetRequestId || !userInfo?.token) {
+    if (newfn || !selectedFleetRequestId || !userInfo) {
       if (!newfn && !selectedFleetRequestId) {
         setFleetId("");
         setFleetItems([]);
@@ -335,7 +335,6 @@ const FleetRequest = () => {
     const fetchFleetRequest = async () => {
       try {
         const response = await GetFleetRequestById(
-          userInfo,
           selectedFleetRequestId,
         );
         if (ignore) return;

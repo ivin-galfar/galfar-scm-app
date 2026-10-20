@@ -16,8 +16,7 @@ import fetchStatments from "../APIs/StatementsApi";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { Link, useLocation, Navigate } from "react-router-dom";
 import Alerts from "../Components/Alerts";
-import { REACT_SERVER_URL } from "../../config/ENV";
-import axios from "axios";
+import { api } from "../APIs/api";
 import { IoWarningOutline } from "react-icons/io5";
 import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import { useToggleAsset } from "../store/assetStore";
@@ -235,17 +234,9 @@ const Dashboard = () => {
 
   const handleDelete = async (mr) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.post(
-        `${REACT_SERVER_URL}/receipts/${mr}`,
+      const response = await api.post(
+        `/receipts/${mr}`,
         {},
-        config,
       );
       setShowToast(true);
       setErrormessage("");

@@ -18,7 +18,8 @@ const Login = () => {
   const { mutate: loginMutation, isPending: isLoading } = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      const userInfo = { ...data };
+      localStorage.setItem("userInfo", JSON.stringify(userInfo));
       setErrormessage("");
       setShowToast(true);
       setTimeout(() => {

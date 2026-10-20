@@ -1,7 +1,5 @@
 /* eslint-disable react/prop-types */
 import { useContext, useState } from "react";
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
 import { AppContext } from "./Context";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +17,7 @@ import { RxCross1 } from "react-icons/rx";
 import { is_plant } from "../Helpers/dept_helper";
 import { useClickFromDashboard, useComments } from "../store/helperStore";
 import { generatePDFHire } from "../Helpers/helperfunctions";
-import { fetchReceiptsApproverDetails } from "../APIs/api";
+import { api, fetchReceiptsApproverDetails } from "../APIs/api";
 import { statusMapping } from "../Helpers/roles_helper";
 
 const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
@@ -78,14 +76,8 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
     }
 
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const currentApproval = await axios.put(
-        `${REACT_SERVER_URL}/receipts/approver/${cs_id}`,
+      const currentApproval = await api.put(
+        `/receipts/approver/${cs_id}`,
         {
           userId: userInfo.id,
           role: userInfo.role[0],
@@ -95,7 +87,6 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
           rejectedby: rejectedBy,
           status: finalStatus,
         },
-        config,
       );
       approverDetails.push(currentApproval.data[0]);
       setErrormessage("");
@@ -166,9 +157,9 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
         );
       }
 
-      axios
+      api
         .post(
-          `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
+          `/emailnotify/${cs_id}?dept=${dept}`,
           {
             userInfo,
             formData: sharedTableData.formData,
@@ -176,7 +167,6 @@ const ApproveModal = ({ setShowmodal, cs_id, doc_no }) => {
             doc_no: doc_no,
             approvedPdfUrl: generatedPdfUrl,
           },
-          config,
         )
         .then((res) => console.log("✅ Email sent:", res.data))
         .catch((err) =>

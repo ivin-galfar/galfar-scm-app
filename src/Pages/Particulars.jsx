@@ -15,8 +15,7 @@ import { useContext } from "react";
 import { AppContext } from "../Components/Context";
 import ParticularsAccordion from "../Components/ParticularsAccordion";
 import AddParticularsModal from "../Components/AddParticularsModal";
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
+import { api } from "../APIs/api";
 import Alerts from "../Components/Alerts";
 import { useStatementupdated } from "../store/statementStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
@@ -115,16 +114,8 @@ const Particulars = () => {
   const handleDelete = async (deletetemplate) => {
     resetshowupdated();
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const { data } = await axios.delete(
-        `${REACT_SERVER_URL}/particulars/${deletetemplate}`,
-        config,
+      const { data } = await api.delete(
+        `/particulars/${deletetemplate}`,
       );
 
       setShowToast(true);

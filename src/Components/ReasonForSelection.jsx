@@ -1,5 +1,3 @@
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
 import { AppContext } from "./Context";
 import { useContext } from "react";
 import useUserInfo from "../CustomHooks/useUserInfo";
@@ -35,16 +33,7 @@ const ReasonForSelection = ({
     setfreezeQuantity(true);
     if (!effectiveId) {
       try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
-
-        const response = await axios.get(
-          `${REACT_SERVER_URL}/receipts`,
-          config,
-        );
+        const response = await api.get(`/receipts`);
         const receipts = response.data?.receipts || [];
         const lastReceipt = receipts.at(-1);
         effectiveId = lastReceipt?.formData?.id;
@@ -53,14 +42,8 @@ const ReasonForSelection = ({
       }
     }
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      await axios.put(
-        `${REACT_SERVER_URL}/receipts/approver/${cs_id}`,
+      await api.put(
+        `/receipts/approver/${cs_id}`,
         {
           userId: userInfo.id,
           role: userInfo.role[0],
@@ -68,7 +51,6 @@ const ReasonForSelection = ({
           action: status,
           approverComments: comments,
         },
-        config,
       );
     } catch (error) {
       let message = error?.response?.data?.message;
@@ -91,31 +73,23 @@ const ReasonForSelection = ({
         ) || "";
     }
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.put(
-        `${REACT_SERVER_URL}/receipts/updatereceiptstatus/${effectiveId}`,
+      const response = await api.put(
+        `/receipts/updatereceiptstatus/${effectiveId}`,
         {
           selectedVendorIndex: selectedVendorIndex,
           selectedVendorReason: selectedRecommendation,
           status: statusMap[userInfo.role[0]],
         },
-        config,
       );
-      axios
+      api
         .post(
-          `${REACT_SERVER_URL}/emailnotify/${cs_id}?dept=${dept}`,
+          `/emailnotify/${cs_id}?dept=${dept}`,
           {
             userInfo,
             formData: sharedTableData.formData,
             status: statusMap[userInfo.role[0]],
             doc_no: doc_no,
           },
-          config,
         )
         .then((res) => console.log("✅ Email sent:", res.data))
         .catch((err) =>

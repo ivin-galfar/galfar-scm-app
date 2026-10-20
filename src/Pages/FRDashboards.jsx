@@ -126,7 +126,7 @@ const FRDashboards = () => {
   const { data: projectDetails, isLoading: isProjectsLoading } = useQuery({
     queryKey: ["fleet-request-projects", userInfo?.id],
     queryFn: () => fetchProjectDetails(userInfo),
-    enabled: Boolean(userInfo?.token),
+    enabled: Boolean(userInfo?.id),
     staleTime: 5 * 60 * 1000,
   });
   const availableProjects = Array.isArray(projectDetails)
@@ -245,7 +245,7 @@ const FRDashboards = () => {
         limit,
         serverStatusFilter,
       ),
-    enabled: Boolean(userInfo?.token),
+    enabled: Boolean(userInfo?.id),
     placeholderData: (previousData) => previousData,
   });
 

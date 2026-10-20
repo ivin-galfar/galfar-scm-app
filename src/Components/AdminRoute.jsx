@@ -7,7 +7,7 @@ const AdminRoute = ({ children }) => {
   const userInfo = useUserInfo();
   const { dept_id: departmentId } = useParams();
 
-  if (!userInfo?.token) {
+  if (!userInfo) {
     return <Navigate to="/login" replace />;
   }
 

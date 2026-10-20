@@ -10,8 +10,8 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 
 const Annoucements = (userInfo) => {
   const { data, isLoading } = useQuery({
-    queryKey: ["anouncements", userInfo?.token],
-    queryFn: () => GetAnnouncementsData(userInfo),
+    queryKey: ["anouncements", userInfo?.id],
+    queryFn: () => GetAnnouncementsData(),
     enabled: !!userInfo,
   });
 
