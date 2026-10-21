@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createColumnHelper,
@@ -17,6 +17,7 @@ import {
   LuEye,
   LuFileDown,
   LuFolderKanban,
+  LuX,
   LuTrash2,
   LuTruck,
 } from "react-icons/lu";
@@ -37,6 +38,7 @@ import { useToast } from "../store/toastStore";
 import { useClickFromDashboard } from "../store/helperStore";
 import { getDashboardStatusTabClass } from "../Helpers/dashboardStatusNav";
 import DashboardStatusNav from "../Components/DashboardStatusNav";
+import { is_hire, is_hod } from "../Helpers/dept_helper";
 
 const normalizeList = (value) =>
   (Array.isArray(value) ? value : [value])
@@ -122,7 +124,13 @@ const FRDashboards = () => {
   );
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
-  const [selectedProject, setSelectedProject] = useState("");
+  const [selectedProject, setSelectedProject] = useState(() => {
+    try {
+      return sessionStorage.getItem("fleetRequestProjectFilter") || "";
+    } catch {
+      return "";
+    }
+  });
   const { data: projectDetails, isLoading: isProjectsLoading } = useQuery({
     queryKey: ["fleet-request-projects", userInfo?.id],
     queryFn: () => fetchProjectDetails(userInfo),
@@ -138,6 +146,38 @@ const FRDashboards = () => {
             (canViewAllProjects || assignedProjects.includes(project)),
         )
     : assignedProjects;
+
+  useEffect(() => {
+    try {
+      if (selectedProject) {
+        sessionStorage.setItem("fleetRequestProjectFilter", selectedProject);
+      } else {
+        sessionStorage.removeItem("fleetRequestProjectFilter");
+      }
+    } catch (error) {
+      console.error(
+        "Unable to persist the Fleet Request project filter",
+        error,
+      );
+    }
+  }, [selectedProject]);
+
+  useEffect(() => {
+    if (
+      selectedProject &&
+      !isProjectsLoading &&
+      !availableProjects.includes(selectedProject)
+    ) {
+      setSelectedProject("");
+      setPage(0);
+    }
+  }, [
+    selectedProject,
+    isProjectsLoading,
+    projectDetails,
+    canViewAllProjects,
+    assignedProjects.join(","),
+  ]);
   const [deleteRequest, setDeleteRequest] = useState({
     id: null,
     docId: "",
@@ -210,7 +250,7 @@ const FRDashboards = () => {
       }, 3000);
     }
   };
-
+  const showActionTaken = is_hire(userInfo.role) || is_hod(userInfo.role);
   const approvalRoles = roles.filter((role) =>
     ["cm", "pm", "pd", "hod", "gm"].includes(role),
   );
@@ -315,6 +355,23 @@ const FRDashboards = () => {
         );
       },
     }),
+    ...(showActionTaken
+      ? [
+          columnHelper.accessor("action_taken", {
+            header: "Action Taken",
+            cell: (info) =>
+              Number(info.getValue()) === 1 ? (
+                <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
+                  Yes
+                </span>
+              ) : (
+                <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
+                  No
+                </span>
+              ),
+          }),
+        ]
+      : []),
     columnHelper.accessor(
       (row) => {
         const comments = row?.approver_info?.filter(
@@ -514,6 +571,20 @@ const FRDashboards = () => {
                     </option>
                   ))}
                 </select>
+                {selectedProject && (
+                  <button
+                    type="button"
+                    aria-label="Clear project filter"
+                    title="Clear project filter"
+                    onClick={() => {
+                      setSelectedProject("");
+                      setPage(0);
+                    }}
+                    className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-slate-500 transition hover:bg-white hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/20 cursor-pointer"
+                  >
+                    <LuX size={16} aria-hidden="true" />
+                  </button>
+                )}
               </label>
             )}
           </div>

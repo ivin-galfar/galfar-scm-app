@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
@@ -132,6 +132,7 @@ const normalizeFleetRequestItem = (item) => ({
 });
 
 const FleetRequest = () => {
+  const queryClient = useQueryClient();
   const userInfo = useUserInfo();
   const fleetAccess = getFleetRequestAccess(userInfo);
   const { newfn, setNewfn } = usenewfn();
@@ -164,6 +165,8 @@ const FleetRequest = () => {
   const [saveSucceeded, setSaveSucceeded] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [fleetRequestStatus, setFleetRequestStatus] = useState("");
+  const [actionTaken, setActionTaken] = useState(false);
+  const [savedActionTaken, setSavedActionTaken] = useState(false);
   const [confirmationAction, setConfirmationAction] = useState(null);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
@@ -204,6 +207,7 @@ const FleetRequest = () => {
         .toLowerCase() === "inith",
   );
   const canEditRefNo = Boolean(hireUser);
+  const canMarkActionTaken = Boolean(hireUser);
   const canRecall = Boolean(
     selectedFleetRequestId &&
       canRecallFleetRequest({
@@ -289,6 +293,8 @@ const FleetRequest = () => {
       return;
     }
     setFleetRequestStatus("");
+    setActionTaken(false);
+    setSavedActionTaken(false);
   }, [routeFleetRequestId]);
 
   useEffect(() => {
@@ -354,6 +360,8 @@ const FleetRequest = () => {
         setProject(normalizedDocument.project);
         setFleetId(normalizedDocument.docId);
         setFleetRequestStatus(normalizedDocument.status);
+        setActionTaken(Number(fleetRequest.action_taken) === 1);
+        setSavedActionTaken(Number(fleetRequest.action_taken) === 1);
         setLocation(normalizedDocument.location);
         setDate(normalizedDocument.date);
         setFleetItems(normalizedDocument.items);
@@ -405,6 +413,8 @@ const FleetRequest = () => {
   const startNewFleetRequest = ({ replace = false } = {}) => {
     const projectCode = projects[0]?.toString() ?? "";
     setFleetRequestStatus("");
+    setActionTaken(false);
+    setSavedActionTaken(false);
     setSelectedFleetRequestId("");
     navigate("/fleetrequest", { replace, state: null });
     loadProjectDraft(projectCode);
@@ -451,6 +461,8 @@ const FleetRequest = () => {
       setDate("");
       setFleetId("");
       setFleetRequestStatus("");
+      setActionTaken(false);
+      setSavedActionTaken(false);
       setFleetItems([]);
       setModalItems([createEmptyFleetItem()]);
       setEditingItemIndex(null);
@@ -552,10 +564,20 @@ const FleetRequest = () => {
       return index < 0 ? null : { item: fleetItems[index], index, ...change };
     })
     .filter(Boolean);
+  const actionTakenChanged =
+    canMarkActionTaken && actionTaken !== savedActionTaken;
 
   const saveRefNoChanges = async () => {
-    if (!selectedFleetRequestId || !changedRefNoItems.length) return;
+    if (
+      !selectedFleetRequestId ||
+      (!changedRefNoItems.length && !actionTakenChanged)
+    ) {
+      return;
+    }
     setIsSavingRefNos(true);
+    clearErrorMessage();
+    setSaveSucceeded(false);
+    resetshowtoast();
     try {
       for (const { item, value } of changedRefNoItems) {
         await UpdateFleetRequestWorkflow({
@@ -566,14 +588,36 @@ const FleetRequest = () => {
           userInfo,
         });
       }
+      if (actionTakenChanged) {
+        const savedRequest = await UpdateFleetRequestWorkflow({
+          id: selectedFleetRequestId,
+          action: "update-action-taken",
+          action_taken: actionTaken ? 1 : 0,
+          userInfo,
+        });
+        const savedValue = Number(savedRequest?.action_taken) === 1;
+        setActionTaken(savedValue);
+        setSavedActionTaken(savedValue);
+        await queryClient.invalidateQueries({ queryKey: ["fleet-requests"] });
+      }
       setPendingRefNoChanges({});
       setShowRefNoConfirmation(false);
       setShowToast(true);
-      setSuccessMessage("EM Ref No. saved successfully!");
+      setSaveSucceeded(true);
+      setSuccessMessage(
+        changedRefNoItems.length && actionTakenChanged
+          ? "EM Ref No. and Action Taken saved successfully!"
+          : actionTakenChanged
+            ? "Action Taken status saved successfully!"
+            : "EM Ref No. saved successfully!",
+      );
       setTimeout(resetshowtoast, 2500);
     } catch (error) {
+      setSaveSucceeded(false);
       setErrorMessage(
-        error?.response?.data?.message || "Unable to save EM Ref No.",
+        error?.response?.data?.error ||
+          error?.response?.data?.message ||
+          "Unable to save Fleet Request changes.",
       );
       setShowToast(true);
     } finally {
@@ -632,6 +676,8 @@ const FleetRequest = () => {
     setDate(getToday());
     setFleetId("");
     setFleetRequestStatus("");
+    setActionTaken(false);
+    setSavedActionTaken(false);
     setFleetItems([]);
     setModalItems([createEmptyFleetItem()]);
     setEditingItemIndex(null);
@@ -740,6 +786,8 @@ const FleetRequest = () => {
       }
 
       setFleetRequestStatus(savedStatus);
+      setActionTaken(Number(savedRequest?.action_taken) === 1);
+      setSavedActionTaken(Number(savedRequest?.action_taken) === 1);
       if (["update", "recall"].includes(buttonAction.action)) {
         setHasPendingUpdates(false);
       }
@@ -1036,8 +1084,8 @@ const FleetRequest = () => {
   }`;
 
   return (
-    <div className="flex min-h-0 w-full   flex-col rounded border border-slate-200 bg-white shadow-sm">
-      <header className="shrink-0 border-b border-slate-200 px-4 py-4 sm:px-8">
+    <div className="flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-md">
+      <header className="shrink-0 border-b border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50/50 px-4 py-5 sm:px-8">
         <div className="grid gap-3 sm:grid-cols-[minmax(10rem,1fr)_auto_minmax(10rem,1fr)] sm:items-start">
           <div className="flex flex-wrap items-center gap-3 sm:justify-self-start">
             {fleetAccess.canEdit && (
@@ -1077,10 +1125,10 @@ const FleetRequest = () => {
           </div>
 
           <div className="text-center">
-            <h1 className="text-lg font-semibold tracking-wide text-slate-800 sm:text-xl ">
+            <h1 className="text-lg font-bold tracking-tight text-slate-900 sm:text-xl ">
               Galfar Engineering &amp; Contracting WLL Emirates
             </h1>
-            <h2 className="mt-1 text-base font-medium text-slate-600 sm:text-lg">
+            <h2 className="mt-1 text-base font-semibold text-blue-700 sm:text-lg">
               Fleet Request
             </h2>
           </div>
@@ -1106,7 +1154,7 @@ const FleetRequest = () => {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 gap-x-3 gap-y-6 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(9rem,0.7fr)_minmax(9rem,0.7fr)] sm:items-end sm:gap-5">
+        <div className="mt-6 grid grid-cols-1 gap-x-3 gap-y-6 rounded-b-xl border border-slate-200 bg-white/80 p-4 text-sm shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(9rem,0.7fr)_minmax(9rem,0.7fr)] sm:items-end sm:gap-5 sm:p-5">
           <label className={fieldClass}>
             <span className="font-medium">Project :</span>
             {canEdit ? (
@@ -1213,25 +1261,25 @@ const FleetRequest = () => {
                 </output>
               )}
               {fleetItems.length > 0 &&
-                canEditRefNo &&
-                selectedFleetRequestId && (
+                selectedFleetRequestId &&
+                (canEditRefNo || canMarkActionTaken) && (
                   <button
                     type="button"
                     onClick={() => setShowRefNoConfirmation(true)}
-                    disabled={!changedRefNoItems.length || isSavingRefNos}
-                    aria-label="Save EM Ref No. changes"
-                    title={
-                      changedRefNoItems.length
-                        ? "Save EM Ref No. changes"
-                        : "No EM Ref No. changes to save"
+                    disabled={
+                      (!changedRefNoItems.length && !actionTakenChanged) ||
+                      isSavingRefNos
                     }
-                    className="flex size-5 shrink-0 items-center  justify-center rounded border border-green-700 bg-green-600 text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-slate-400 disabled:bg-slate-200 disabled:text-slate-600 disabled:shadow-none cursor-pointer"
+                    aria-label="Save Fleet Request changes"
+                    title={
+                      changedRefNoItems.length || actionTakenChanged
+                        ? "Save Fleet Request changes"
+                        : "No Fleet Request changes to save"
+                    }
+                    className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border border-green-700 bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:border-slate-400 disabled:shadow-none disabled:bg-gray-400"
                   >
-                    <IoIosSave
-                      size={17}
-                      aria-hidden="true"
-                      className="text-green-700 bg-green-100"
-                    />
+                    <IoIosSave size={17} aria-hidden="true" />
+                    <span>Save</span>
                   </button>
                 )}
             </div>
@@ -1243,12 +1291,12 @@ const FleetRequest = () => {
           </label>
         </div>
       </header>
-      <div className="min-h-0 flex-1 px-2 py-2 sm:px-4">
+      <div className="min-h-0 flex-1 bg-slate-50/70 px-3 py-4 sm:px-5 sm:py-5">
         {canEdit && !isItemsModalOpen && (
           <button
             type="button"
             onClick={handleEditItems}
-            className="mb-3 flex cursor-pointer items-center gap-2 rounded border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+            className="mb-4 flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50"
           >
             {fleetItems.length > 0 && <LuPencil size={16} />}
             {fleetItems.length > 0
@@ -1259,9 +1307,9 @@ const FleetRequest = () => {
           </button>
         )}
         {fleetItems.length > 0 && (
-          <div className="overflow-x-hidden rounded border border-slate-200">
+          <div className="overflow-x-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
             <table className="w-full table-fixed divide-y divide-slate-200 text-sm text-center">
-              <thead className="border-b-2 border-slate-300 bg-slate-100 ">
+              <thead className="border-b-2 border-slate-200 bg-slate-100/90 ">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
@@ -1336,7 +1384,10 @@ const FleetRequest = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
                 {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50">
+                  <tr
+                    key={row.id}
+                    className="transition-colors odd:bg-white even:bg-slate-50/50 hover:bg-blue-50/60"
+                  >
                     {(row.getVisibleCells?.() ?? row.getAllCells()).map(
                       (cell) => (
                         <td
@@ -1414,8 +1465,8 @@ const FleetRequest = () => {
           </p>
         )}
         {fleetItems.length > 0 && (
-          <div className="mt-4 flex justify-between gap-3">
-            <div className="text-xs text-gray-500">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            <div className="text-xs font-medium text-slate-500">
               Allocation Type is assigned by the HOD for each item.
             </div>{" "}
             {canEdit && selectedFleetRequestId && hasPendingUpdates && (
@@ -1434,13 +1485,29 @@ const FleetRequest = () => {
                 Update Fleet Request
               </button>
             )}
-            <ButtonTxtFR
-              fleetRequest={{ project, status: fleetRequestStatus }}
-              userInfo={userInfo}
-              isNew={newfn}
-              isLoading={isSaving}
-              onAction={handleFleetRequestButton}
-            />
+            <div className="flex gap-5">
+              {canMarkActionTaken && selectedFleetRequestId && (
+                <div className="inline-flex  items-center ">
+                  <label className="inline-flex  items-center gap-2 text-sm font-medium text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={actionTaken}
+                      disabled={isSaving || isSavingRefNos}
+                      onChange={(event) => setActionTaken(event.target.checked)}
+                      className="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    Action Taken
+                  </label>
+                </div>
+              )}
+              <ButtonTxtFR
+                fleetRequest={{ project, status: fleetRequestStatus }}
+                userInfo={userInfo}
+                isNew={newfn}
+                isLoading={isSaving}
+                onAction={handleFleetRequestButton}
+              />
+            </div>
           </div>
         )}
       </div>
@@ -1493,13 +1560,16 @@ const FleetRequest = () => {
       )}
       {showRefNoConfirmation && (
         <FleetRequestConfirmationModal
-          title="Add EM Ref No."
-          message={changedRefNoItems
-            .map(
+          title="Save Fleet Request changes?"
+          message={[
+            ...changedRefNoItems.map(
               ({ item, value }, index) =>
-                `${index + 1}. EM Ref No. ${value || "(blank)"} for record ${item.fleetDescription ?? ""} of quaanity${item.quantity ? ` (${item.quantity}).` : ""}`,
-            )
-            .join("\n")}
+                `${index + 1}. EM Ref No. ${value || "(blank)"} for record ${item.fleetDescription ?? ""} of quantity${item.quantity ? ` (${item.quantity}).` : ""}`,
+            ),
+            ...(actionTakenChanged
+              ? [`Action Taken will be ${actionTaken ? "marked" : "cleared"}.`]
+              : []),
+          ].join("\n")}
           confirmLabel="Yes"
           cancelLabel="No"
           isLoading={isSavingRefNos}

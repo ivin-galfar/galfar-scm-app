@@ -1372,6 +1372,7 @@ export const UpdateFleetRequestWorkflow = async ({
   items,
   userInfo,
   deleted,
+  action_taken,
 }) => {
   try {
     const config = {
@@ -1394,6 +1395,7 @@ export const UpdateFleetRequestWorkflow = async ({
         ...(location !== undefined && { location }),
         ...(items !== undefined && { items }),
         ...(deleted !== undefined && { deleted }),
+        ...(action_taken !== undefined && { action_taken }),
       },
       config,
     );
