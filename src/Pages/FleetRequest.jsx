@@ -906,7 +906,9 @@ const FleetRequest = () => {
     columnHelper.accessor("quantity", { header: "Qty" }),
     columnHelper.accessor("duration", {
       header: "Duration",
-      cell: (info) => <div className="w-10">{info.getValue() || "—"}</div>,
+      cell: (info) => (
+        <div className="w-full text-center">{info.getValue() || "—"}</div>
+      ),
     }),
     columnHelper.accessor("rentalType", {
       header: () => (
@@ -1436,7 +1438,7 @@ const FleetRequest = () => {
                                                               "actions"
                                                             ? "w-14 text-center"
                                                             : "max-w-24"
-                          } py-3 align-midde text-slate-700 ${
+                          } py-3 text-center text-slate-700 ${
                             preservedWidthColumnIds.has(cell.column.id)
                               ? "px-3"
                               : cell.column.id === "serialNumber"

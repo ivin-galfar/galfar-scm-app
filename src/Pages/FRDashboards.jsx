@@ -355,23 +355,6 @@ const FRDashboards = () => {
         );
       },
     }),
-    ...(showActionTaken
-      ? [
-          columnHelper.accessor("action_taken", {
-            header: "Action Taken",
-            cell: (info) =>
-              Number(info.getValue()) === 1 ? (
-                <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
-                  Yes
-                </span>
-              ) : (
-                <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
-                  No
-                </span>
-              ),
-          }),
-        ]
-      : []),
     columnHelper.accessor(
       (row) => {
         const comments = row?.approver_info?.filter(
@@ -474,6 +457,23 @@ const FRDashboards = () => {
         );
       },
     }),
+    ...(showActionTaken
+      ? [
+          columnHelper.accessor("action_taken", {
+            header: "Action Taken",
+            cell: (info) =>
+              Number(info.getValue()) === 1 ? (
+                <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
+                  Yes
+                </span>
+              ) : (
+                <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
+                  No
+                </span>
+              ),
+          }),
+        ]
+      : []),
   ];
 
   const pagination = { pageIndex: page, pageSize: limit };
