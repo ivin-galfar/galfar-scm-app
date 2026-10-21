@@ -1276,7 +1276,7 @@ const FleetRequest = () => {
                         ? "Save Fleet Request changes"
                         : "No Fleet Request changes to save"
                     }
-                    className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border border-green-700 bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:border-slate-400 disabled:shadow-none disabled:bg-gray-400"
+                    className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border border-green-700 bg-green-600 px-3 py-1 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:border-slate-400 disabled:shadow-none disabled:bg-gray-400"
                   >
                     <IoIosSave size={17} aria-hidden="true" />
                     <span>Save</span>
