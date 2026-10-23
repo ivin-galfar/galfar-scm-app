@@ -27,14 +27,12 @@ import { handleRemoveFile } from "../Helpers/helperfunctions";
 import { is_logistics } from "../Helpers/dept_helper";
 
 const LogisticsTable = () => {
-  // const [columns, setColumns] = useState(["Forwarder"]);
-  const { columns, setColumns, resetcolumns } = usecolumns();
+  const { columns, setColumns } = usecolumns();
   const [newVendor, setNewVendor] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { showtoast, setShowToast, resetshowtoast } = useToast();
   const { csselected, resetCsSelected } = useSelectCS();
   const { setCsSelectedval } = useSelectCSValue();
-  // const [reqapproval, setReqApproval] = useState(false);
   const [showmodal, setShowmodal] = useState(false);
   const userInfo = useUserInfo();
   const [columnvalues, setColumnvalues] = useState([]);
@@ -55,24 +53,11 @@ const LogisticsTable = () => {
   const { comments, setComments } = useComments();
   const isReview = formData.status == "review";
 
-  // const [selectedVendor, setSelectedVendor] = useState(0);
-  // const { selectedindex, setSelectedIndex } = useSelectedIndex();
   const { mutate: feedstatement, isPending: isLoading } = useMutation({
     mutationFn: feedlgstatement,
     onSuccess: (data) => {
-      // setShowToast();
       setShowmodal(true);
-      // setCsSelectedval(data.data.receipts.id);
-      // clearErrorMessage();
-      // setTimeout(() => {
-      //   resetshowtoast();
-      // }, 1500);
-      // resetCsSelected();
-      // resetData();
-      // setColumns(["Forwarder"]);
       resetnewStatement();
-      // resetcolumns();
-      // console.log(data.data.receipts.id);
       setTimeout(() => {
         navigate(`/lstatements/${data.data.receipts.id}`, { replace: true });
       }, 1000);

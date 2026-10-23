@@ -58,7 +58,6 @@ const TableHeader = ({ isAdmin }) => {
 
   const formData = sharedTableData?.formData;
   const userInfo = useUserInfo();
-  // const [editing, setEditing] = useState(false);
   const [errormessage, setErrormessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [triggerdelete, setTriggerdelete] = useState(false);
@@ -73,7 +72,6 @@ const TableHeader = ({ isAdmin }) => {
   const { deleted, resetDeleted, setDeleted } = useDeleteStatement();
   const { isEdit, setIsEdit, resetIsEdit } = useEdit();
   const { isReverted, setIsReverted, resetIsReverted } = userevertrequest();
-  // const [update, setUpdate] = useState(false);
   const { isupdated, setIsupdated, revertisupdated } = useUpdate();
   const { isAlerted, setIsAlerted, resetIsAlerted } = useRecallAlert();
   const Asset =
@@ -185,11 +183,6 @@ const TableHeader = ({ isAdmin }) => {
         setIsMRSelected(true);
         setSelectedMr(mrnumber);
       }
-      // default navigating to latest cs
-      //  else {
-      //   const defaultMr = mrno[0];
-      //   if (defaultMr) fetchReceipt(defaultMr);
-      // }
     }
   }, []);
   useEffect(() => {
@@ -370,7 +363,6 @@ const TableHeader = ({ isAdmin }) => {
         revertisupdated();
       }, 1500);
     } catch (error) {
-      console.log(error);
       let message = error?.response?.data?.message;
       setErrormessage(message ? message : error.message);
     }

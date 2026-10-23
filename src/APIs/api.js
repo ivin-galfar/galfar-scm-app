@@ -99,8 +99,6 @@ export const feedlgstatement = async ({ formData, tableData, userInfo }) => {
     );
     return response;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -423,8 +421,6 @@ export const fetchCsCount = async (
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -452,7 +448,6 @@ export const recallStatementValues = async (
       config,
     );
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -516,7 +511,7 @@ export const updatebrstatementImages = async ({ brtabledata, userInfo }) => {
     );
     return response;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
@@ -611,8 +606,6 @@ export const fetchbrstatementscount = async (
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -716,8 +709,6 @@ export const createfilenote = async ({
     );
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -769,8 +760,6 @@ export const updatefilenotevalues = async ({
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -826,8 +815,6 @@ export const fetchfilenoteids = async ({
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -1093,8 +1080,6 @@ export const ResetUserPassword = async (token, password) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -1113,8 +1098,6 @@ export const GetAnalyticsData = async (userInfo) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -1134,8 +1117,6 @@ export const GetAnnouncementsData = async ({ userInfo }) => {
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };

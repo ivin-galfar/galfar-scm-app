@@ -70,8 +70,6 @@ const AddParticularsModal = ({ setShowmodal, editTemplate }) => {
       };
 
       if (editTemplate) {
-        console.log("con");
-
         await axios.put(
           `${REACT_SERVER_URL}/particulars/${editTemplate.id}`,
           payload,
@@ -112,8 +110,6 @@ const AddParticularsModal = ({ setShowmodal, editTemplate }) => {
 
   const moveField = (fromIndex, toIndex) => {
     if (toIndex < 0 || toIndex >= fields.length) return;
-    console.log(fromIndex);
-    console.log(toIndex);
 
     setFields((prev) => {
       const updated = [...prev];
