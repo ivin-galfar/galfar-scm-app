@@ -1,4 +1,4 @@
-import { SPECIAL_PROJECTS } from "../../config/ENV.js";
+import { NORMAL_PROJECTS, SPECIAL_PROJECTS } from "../../config/ENV.js";
 
 export const roles = {
   INITIATOR: {
@@ -18,7 +18,9 @@ export const categoryapprovers = {
   BUYRENT: ["HOD", "FM", "GM", "CEO"],
   FNIOC: ["HOD", "FM", "GM", "CEO"],
   FNIOCM: ["HOD", "GM", "CEO"],
-  FNDEMOB: ["CM", "PM", "PD"],
+  FNDEMOBSP: ["CM", "PM", "PD"],
+  FNDEMOBN: ["CM"],
+  FNDEMOB: ["CM", "PM"],
   FNFWA: ["CM", "PM", "GM"],
   FNFWASP: ["CM", "PM", "PD", "GM"],
   FNFWAS: ["CM", "GM"],
@@ -53,6 +55,19 @@ export const nextRole = (role, category, project_code) => {
     initdc: "cm",
     cm: "gm",
   };
+  const roleMapdemob = {
+    initpr: "cm",
+  };
+  const roleMapdemobother = {
+    initpr: "cm",
+    cm: "pm",
+  };
+
+  const roleMapdemobpd = {
+    initpr: "cm",
+    cm: "pm",
+    pm: "pd",
+  };
 
   const roleMapfwapd = {
     initdc: "cm",
@@ -60,13 +75,19 @@ export const nextRole = (role, category, project_code) => {
     pm: "pd",
     pd: "gm",
   };
-  return category != "FWA"
-    ? roleMap[normalizedRole]
-    : category == "FWA" && project_code == 1501
+  return category === "FWA"
+    ? NORMAL_PROJECTS.includes(project_code)
       ? roleMapfwas[normalizedRole] || null
       : SPECIAL_PROJECTS.includes(project_code)
         ? roleMapfwapd[normalizedRole] || null
-        : roleMapfwa[normalizedRole] || null;
+        : roleMapfwa[normalizedRole] || null
+    : category === "Demob"
+      ? NORMAL_PROJECTS.includes(project_code)
+        ? roleMapdemob[normalizedRole] || null
+        : SPECIAL_PROJECTS.includes(project_code)
+          ? roleMapdemobpd[normalizedRole] || null
+          : roleMapdemobother[normalizedRole] || null
+      : roleMap[normalizedRole];
 };
 
 export const prevRole = (role, module) => {

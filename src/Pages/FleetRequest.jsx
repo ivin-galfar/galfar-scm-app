@@ -1471,23 +1471,23 @@ const FleetRequest = () => {
             <div className="text-xs font-medium text-slate-500">
               Allocation Type is assigned by the HOD for each item.
             </div>{" "}
-            {canEdit && selectedFleetRequestId && hasPendingUpdates && (
-              <button
-                type="button"
-                disabled={isSaving}
-                onClick={() =>
-                  setConfirmationAction({
-                    action: "update",
-                    label: "Update Fleet Request",
-                    nextStatus: fleetRequestStatus,
-                  })
-                }
-                className="cursor-pointer rounded border border-blue-600 bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                Update Fleet Request
-              </button>
-            )}
             <div className="flex gap-5">
+              {canEdit && selectedFleetRequestId && hasPendingUpdates && (
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() =>
+                    setConfirmationAction({
+                      action: "update",
+                      label: "Update Fleet Request",
+                      nextStatus: fleetRequestStatus,
+                    })
+                  }
+                  className="cursor-pointer rounded border border-blue-600 bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  Update Fleet Request
+                </button>
+              )}
               {canMarkActionTaken && selectedFleetRequestId && (
                 <div className="inline-flex  items-center ">
                   <label className="inline-flex  items-center gap-2 text-sm font-medium text-slate-700">
