@@ -56,7 +56,7 @@ import TypeFilter from "../Components/TypeFilter";
 import { IoSave, IoWarning } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { LuUndo2 } from "react-icons/lu";
-import { INHOUSE_PROJECTS } from "../../config/ENV";
+import { NORMAL_PROJECTS } from "../../config/ENV";
 
 const FileNote = () => {
   const editorinfo = useEditorInfo();
@@ -215,8 +215,7 @@ const FileNote = () => {
     const cleanCategory = category?.trim();
     const ccvalue =
       selectedproject != "" &&
-      selectedproject != 1501 &&
-      !INHOUSE_PROJECTS.includes(Number(selectedproject))
+      !NORMAL_PROJECTS.includes(Number(selectedproject))
         ? await getCCValue(category, selectedproject, userInfo)
         : "";
     const cmname = selectedproject

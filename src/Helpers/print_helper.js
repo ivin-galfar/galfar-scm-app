@@ -279,7 +279,7 @@ export const generateFRPDF = async (
         "Capacity",
         "Qty",
         "Duration",
-        "Rental\nType",
+        "Type",
         "Purpose",
         "Allocation\nType",
         "Required\nFrom",
@@ -346,22 +346,22 @@ export const generateFRPDF = async (
     // Short fields have smaller widths; longer text wraps inside cells.
     columnStyles: {
       0: { cellWidth: 5, halign: "center" },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 15 },
+      1: { cellWidth: 30, halign: "center" },
+      2: { cellWidth: 15, halign: "center" },
       3: { cellWidth: 9, halign: "center" },
       4: { cellWidth: 16, halign: "center" },
-      5: { cellWidth: 16 },
-      6: { cellWidth: 16 },
-      7: { cellWidth: 16 },
+      5: { cellWidth: 16, halign: "center" },
+      6: { cellWidth: 16, halign: "center" },
+      7: { cellWidth: 16, halign: "center" },
       8: { cellWidth: 16, halign: "center" },
-      9: { cellWidth: 20 },
+      9: { cellWidth: 20, halign: "center" },
       10: { cellWidth: 18, halign: "center" },
       11: { cellWidth: 12, halign: "center" },
       12: { cellWidth: 13, halign: "center" },
       13: { cellWidth: 15, halign: "center" },
       14: { cellWidth: 9, halign: "center" },
-      15: { cellWidth: 18 },
-      16: { cellWidth: 39 },
+      15: { cellWidth: 18, halign: "center" },
+      16: { cellWidth: 39, halign: "center" },
     },
 
     didDrawPage: () => {
@@ -1583,23 +1583,26 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   if (skipSfm) {
     approverLabels = ["(HOD)", "(GM)", "(CEO)"];
   } else if (demob) {
-    approverLabels = ["(CM / SCM)", "(PM)"];
+    approverLabels = ["(CM / SCM)"];
+    if (!NORMAL_PROJECTS.includes(data.project_code)) {
+      approverLabels.push("(PM)");
+    }
     if (SPECIAL_PROJECTS.includes(data.project_code)) {
       approverLabels.push("(PD)");
     }
   } else if (
     fwa &&
-    data.project_code != 1501 &&
+    !NORMAL_PROJECTS.includes(data.project_code) &&
     !SPECIAL_PROJECTS.includes(data.project_code)
   ) {
     approverLabels = ["(CM / SCM)", "(PM / SPM)", "(GM)"];
   } else if (
     fwa &&
     SPECIAL_PROJECTS.includes(data.project_code) &&
-    data.project_code != 1501
+    !NORMAL_PROJECTS.includes(data.project_code)
   ) {
     approverLabels = ["(CM / SCM)", "(PM / SPM)", "(PD)", "(GM)"];
-  } else if (fwa && data.project_code == 1501) {
+  } else if (fwa && !NORMAL_PROJECTS.includes(data.project_code)) {
     approverLabels = ["(CM / SCM)", "(GM)"];
   } else {
     approverLabels = ["(HOD)", "(SFM)", "(GM)", "(CEO)"];
@@ -1610,17 +1613,18 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   if (skipSfm) {
     approverIndexes = [0, 1, 2];
   } else if (fwa) {
-    approverIndexes =
-      data.project_code === 1501
-        ? [0, 1]
-        : SPECIAL_PROJECTS.includes(data.project_code)
-          ? [0, 1, 2, 3]
-          : [0, 1, 2];
+    approverIndexes = NORMAL_PROJECTS.includes(data.project_code)
+      ? [0, 1]
+      : SPECIAL_PROJECTS.includes(data.project_code)
+        ? [0, 1, 2, 3]
+        : [0, 1, 2];
   } else if (demob) {
-    approverIndexes = SPECIAL_PROJECTS.includes(data.project_code)
-      ? [0, 1, 2]
-      : [0, 1];
-  } else if (fwa && data.project_code !== 1501) {
+    approverIndexes = NORMAL_PROJECTS.includes(data.project_code)
+      ? [0]
+      : SPECIAL_PROJECTS.includes(data.project_code)
+        ? [0, 1, 2]
+        : [0, 1];
+  } else if (fwa && !NORMAL_PROJECTS.includes(data.project_code)) {
     approverIndexes = [0, 1, 2];
   } else {
     approverIndexes = [0, 1, 2, 3];
@@ -1645,12 +1649,12 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   if (category == "Demob") {
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
     names.push(cmName);
-    if (data.project_code != 1501) {
+    if (!NORMAL_PROJECTS.includes(data.project_code)) {
       pmName = await getcmpmNames("pm", data.project_code, userInfo);
       names.push(pmName);
     }
     if (
-      data.project_code != 1501 &&
+      !NORMAL_PROJECTS.includes(data.project_code) &&
       SPECIAL_PROJECTS.includes(data.project_code)
     ) {
       pdName = await getcmpmNames("pd", data.project_code, userInfo);
@@ -1659,7 +1663,7 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
   } else if (category == "FWA") {
     const cmName = await getcmpmNames("cm", data.project_code, userInfo);
     names.push(cmName);
-    if (data.project_code != 1501) {
+    if (!NORMAL_PROJECTS.includes(data.project_code)) {
       pmName = await getcmpmNames("pm", data.project_code, userInfo);
       names.push(pmName);
     }
@@ -1681,21 +1685,40 @@ export const handleFnPrint = async (data, userInfo, emailPdf = false) => {
     data.category == "Insurance"
   ) {
     approvers = categoryapprovers.FNIOC;
-  } else if (data.category == "Demob") {
+  } else if (
+    data.category == "Demob" &&
+    !NORMAL_PROJECTS.includes(data.project_code) &&
+    SPECIAL_PROJECTS.includes(data.project_code)
+  ) {
+    approvers = categoryapprovers.FNDEMOBSP;
+  } else if (
+    data.category == "Demob" &&
+    NORMAL_PROJECTS.includes(data.project_code) &&
+    !SPECIAL_PROJECTS.includes(data.project_code)
+  ) {
+    approvers = categoryapprovers.FNDEMOBN;
+  } else if (
+    data.category == "Demob" &&
+    !NORMAL_PROJECTS.includes(data.project_code) &&
+    !SPECIAL_PROJECTS.includes(data.project_code)
+  ) {
     approvers = categoryapprovers.FNDEMOB;
   } else if (
     data.category == "FWA" &&
-    data.project_code != 1501 &&
+    !NORMAL_PROJECTS.includes(data.project_code) &&
     !SPECIAL_PROJECTS.includes(data.project_code)
   ) {
     approvers = categoryapprovers.FNFWA;
   } else if (
     data.category == "FWA" &&
-    data.project_code != 1501 &&
+    !NORMAL_PROJECTS.includes(data.project_code) &&
     SPECIAL_PROJECTS.includes(data.project_code)
   ) {
     approvers = categoryapprovers.FNFWASP;
-  } else if (data.category == "FWA" && data.project_code == 1501) {
+  } else if (
+    data.category == "FWA" &&
+    NORMAL_PROJECTS.includes(data.project_code)
+  ) {
     approvers = categoryapprovers.FNFWAS;
   }
 
