@@ -16,6 +16,7 @@ import {
   is_ceo,
   is_dc,
   is_hire,
+  is_fnote,
 } from "../Helpers/dept_helper";
 import { useDashboardType, useStatusFilter } from "../store/logisticsStore";
 import { usePagination } from "../store/statementStore";
@@ -45,6 +46,7 @@ const Header = () => {
   const ishod = is_hod(userInfo?.role);
   const isgm = is_gm(userInfo?.role);
   const isceo = is_ceo(userInfo?.role);
+  const isfnote = is_fnote(userInfo.role);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (canvasRef.current && !canvasRef.current.contains(event.target)) {
@@ -80,6 +82,7 @@ const Header = () => {
     isgm,
     isdc,
     ishire,
+    isfnote,
   });
 
   const effectiveDept = defaultDept || selectedDept;
