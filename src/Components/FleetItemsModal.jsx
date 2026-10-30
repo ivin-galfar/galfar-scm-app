@@ -189,7 +189,12 @@ const FleetItemsModal = ({
         <div className="overflow-y-auto p-5">
           <div className="space-y-5">
             {items.map((item, itemIndex) => {
-              const durationCount = item.rentalType === "Weekly" ? 4 : 12;
+              const durationCount =
+                item.rentalType === "Weekly"
+                  ? 4
+                  : item.rentalType === "Daily"
+                    ? 6
+                    : 12;
 
               return (
                 <fieldset
@@ -298,6 +303,7 @@ const FleetItemsModal = ({
                         }
                       >
                         <option value="">Select type</option>
+                        <option value="Daily">Daily</option>
                         <option value="Weekly">Weekly</option>
                         <option value="Monthly">Monthly</option>
                       </select>

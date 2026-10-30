@@ -82,8 +82,6 @@ export const feedlgstatement = async ({ formData, tableData }) => {
     });
     return response;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -314,8 +312,6 @@ export const fetchCsCount = async (
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -328,7 +324,6 @@ export const recallStatementValues = async (cs_id, recalled_times) => {
       recalled_times,
     });
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -368,7 +363,7 @@ export const updatebrstatementImages = async ({ brtabledata }) => {
     );
     return response;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
@@ -436,8 +431,6 @@ export const fetchbrstatementscount = async (
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -510,8 +503,6 @@ export const createfilenote = async ({
     });
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -553,8 +544,6 @@ export const updatefilenotevalues = async ({
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -599,8 +588,6 @@ export const fetchfilenoteids = async ({
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -779,8 +766,6 @@ export const ResetUserPassword = async (token, password) => {
     });
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -790,8 +775,6 @@ export const GetAnalyticsData = async () => {
     const response = await api.get(`/analytics/approvals`);
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -802,8 +785,6 @@ export const GetAnnouncementsData = async () => {
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     throw error;
   }
 };
@@ -988,6 +969,7 @@ export const UpdateFleetRequestWorkflow = async ({
   location,
   items,
   deleted,
+  action_taken,
 }) => {
   try {
     const response = await api.put(`/flreq/${id}`, {

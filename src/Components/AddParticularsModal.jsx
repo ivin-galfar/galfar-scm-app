@@ -61,12 +61,7 @@ const AddParticularsModal = ({ setShowmodal, editTemplate }) => {
       };
 
       if (editTemplate) {
-        console.log("con");
-
-        await api.put(
-          `/particulars/${editTemplate.id}`,
-          payload,
-        );
+        await api.put(`/particulars/${editTemplate.id}`, payload);
       } else {
         await api.post(`/particulars`, payload);
       }
@@ -102,8 +97,6 @@ const AddParticularsModal = ({ setShowmodal, editTemplate }) => {
 
   const moveField = (fromIndex, toIndex) => {
     if (toIndex < 0 || toIndex >= fields.length) return;
-    console.log(fromIndex);
-    console.log(toIndex);
 
     setFields((prev) => {
       const updated = [...prev];
