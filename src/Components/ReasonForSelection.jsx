@@ -3,6 +3,7 @@ import { useContext } from "react";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { is_plant } from "../Helpers/dept_helper";
 import { useComments } from "../store/helperStore";
+import { api } from "../APIs/api";
 
 const ReasonForSelection = ({
   setShowmodal,
@@ -42,16 +43,13 @@ const ReasonForSelection = ({
       }
     }
     try {
-      await api.put(
-        `/receipts/approver/${cs_id}`,
-        {
-          userId: userInfo.id,
-          role: userInfo.role[0],
-          approverstatus: statusMap[userInfo.role[0]],
-          action: status,
-          approverComments: comments,
-        },
-      );
+      await api.put(`/receipts/approver/${cs_id}`, {
+        userId: userInfo.id,
+        role: userInfo.role[0],
+        approverstatus: statusMap[userInfo.role[0]],
+        action: status,
+        approverComments: comments,
+      });
     } catch (error) {
       let message = error?.response?.data?.message;
       setErrormessage(message ? message : error.message);
@@ -82,15 +80,12 @@ const ReasonForSelection = ({
         },
       );
       api
-        .post(
-          `/emailnotify/${cs_id}?dept=${dept}`,
-          {
-            userInfo,
-            formData: sharedTableData.formData,
-            status: statusMap[userInfo.role[0]],
-            doc_no: doc_no,
-          },
-        )
+        .post(`/emailnotify/${cs_id}?dept=${dept}`, {
+          userInfo,
+          formData: sharedTableData.formData,
+          status: statusMap[userInfo.role[0]],
+          doc_no: doc_no,
+        })
         .then((res) => console.log("✅ Email sent:", res.data))
         .catch((err) =>
           console.error("❌ Email send failed:", err.response.data.message),

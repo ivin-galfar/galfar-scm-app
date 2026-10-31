@@ -20,8 +20,7 @@ api.interceptors.response.use(
       localStorage.removeItem("userInfo");
       window.location.assign("/login");
     }
-
-    return Promise.reject(error);
+    throw error;
   },
 );
 
@@ -46,11 +45,15 @@ export const registerUser = async ({ email, password }) => {
 };
 
 export const feedReceipt = async ({ sharedTableData }) => {
-  const { data } = await api.post(`/receipts`, {
-    formData: sharedTableData.formData,
-    tableData: sharedTableData["tableData"],
-  });
-  return data;
+  try {
+    const { data } = await api.post(`/receipts`, {
+      formData: sharedTableData.formData,
+      tableData: sharedTableData["tableData"],
+    });
+    return data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const updateReceipt = async ({
@@ -709,16 +712,9 @@ export const updateiocintimation = async (userInfo, fnid, flag) => {
   }
 };
 
-export const updatedocread = async (userInfo) => {
-  try {
-    const response = await api.put(`/users/updatedocread`, {
-      email: userInfo.email,
-      click: 1,
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+export const updatedocread = async () => {
+  const response = await api.put(`/users/updatedocread`);
+  return response.data;
 };
 
 export const validateemail = async (email) => {

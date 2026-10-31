@@ -46,7 +46,7 @@ const UserDropdown = () => {
           imageUrl = "";
         }
         setProfileImageUrl(imageUrl);
-      } catch (err) {
+      } catch {
         if (isCurrent) resetProfileImageUrl();
       }
     };
@@ -70,7 +70,7 @@ const UserDropdown = () => {
   });
 
   const handleUpdateDocRead = () => {
-    updateDocReadMutation(userInfo);
+    updateDocReadMutation();
   };
 
   return (
