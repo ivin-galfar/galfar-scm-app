@@ -1,8 +1,7 @@
-import axios from "axios";
-import { REACT_SERVER_URL, SPECIAL_PROJECTS } from "../../config/ENV";
+import { SPECIAL_PROJECTS } from "../../config/ENV";
 import { prevRole } from "./roles_helper";
 import { CategoryForUi, TypeForFeedUi, TypeValue } from "./category_helper";
-import { GetFleetRequestById, getcmpmNames } from "../APIs/api";
+import { api, GetFleetRequestById, getcmpmNames } from "../APIs/api";
 import {
   generateFRPDF,
   handleBrPrint,
@@ -179,16 +178,7 @@ export const handleFileUpload = async (files, userInfo, setFormData) => {
       formData.append("file", file);
     });
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/receipts/file`,
-      formData,
-      config,
-    );
+    const response = await api.post(`/receipts/file`, formData);
 
     const newFiles = response.data.uploadedFiles.map((file) => file.fileUrl);
     const newFileNames = response.data.uploadedFiles.map(
@@ -213,17 +203,7 @@ export const handleAttachmentsUpload = async (files, userInfo) => {
       formData.append("file", file);
     });
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-
-    const response = await axios.post(
-      `${REACT_SERVER_URL}/receipts/file`,
-      formData,
-      config,
-    );
+    const response = await api.post(`/receipts/file`, formData);
 
     return response.data.uploadedFiles;
   } catch (error) {
@@ -515,7 +495,7 @@ export const handleFrPrint = async (
     Array.isArray(fleetRequest.items);
   const completeRequest = hasCompleteData
     ? fleetRequest
-    : await GetFleetRequestById(userInfo, requestId);
+    : await GetFleetRequestById(requestId);
 
   return generateFRPDF(completeRequest, userInfo, emailPdf);
 };
@@ -531,7 +511,7 @@ export const generateFRApprovedPDF = async (
     );
   }
 
-  const approvedRequest = await GetFleetRequestById(userInfo, fleetRequestId);
+  const approvedRequest = await GetFleetRequestById(fleetRequestId);
   if (
     String(approvedRequest?.status ?? "")
       .trim()

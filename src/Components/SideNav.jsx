@@ -104,7 +104,7 @@ const SideNav = ({ isOpen, setIsMenuOpen, ref }) => {
   });
 
   const handleUpdateDocRead = () => {
-    updateDocReadMutation(userInfo);
+    updateDocReadMutation();
   };
 
   const isFnRoute =

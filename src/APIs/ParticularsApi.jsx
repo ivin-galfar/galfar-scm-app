@@ -1,5 +1,4 @@
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
+import { api } from "./api";
 
 const fetchParticulars = async (userInfo, dept_id) => {
   if (
@@ -10,17 +9,7 @@ const fetchParticulars = async (userInfo, dept_id) => {
     return;
   }
   try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const response = await axios.get(
-      `${REACT_SERVER_URL}/particulars?dept_code=${dept_id}`,
-      config,
-    );
+    const response = await api.get(`/particulars?dept_code=${dept_id}`);
     return response.data;
   } catch (error) {
     throw error;

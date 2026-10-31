@@ -29,7 +29,7 @@ const PendingDashboard = () => {
   const roles = userInfo?.role || [];
   const initiatorCapabilities = getInitiatorCapabilities(roles);
   const { data } = useQuery({
-    queryKey: ["analytics-approvals", userInfo?.token],
+    queryKey: ["analytics-approvals", userInfo?.id],
     queryFn: () => GetAnalyticsData(userInfo),
     enabled: !!userInfo,
     select: transformAnalyticsData,

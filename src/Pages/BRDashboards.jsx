@@ -36,10 +36,9 @@ import { useEffect, useState } from "react";
 import { IoWarningOutline } from "react-icons/io5";
 import { LuEye, LuFileDown, LuTrash2 } from "react-icons/lu";
 import Alerts from "../Components/Alerts";
-import { REACT_SERVER_URL } from "../../config/ENV";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
-import axios from "axios";
+import { api } from "../APIs/api";
 import { SiTicktick } from "react-icons/si";
 import { MdOutlineError } from "react-icons/md";
 import { handleBrPrint, handlePrint } from "../Helpers/print_helper";
@@ -124,17 +123,9 @@ const BRDashboards = () => {
 
   const handleDelete = async (id) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userinfo.token}`,
-        },
-      };
-      await axios.post(
-        `${REACT_SERVER_URL}/brstatement/delete/${id}`,
+      await api.post(
+        `/brstatement/delete/${id}`,
         {},
-        config,
       );
       setShowToast();
       setTimeout(() => {

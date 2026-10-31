@@ -7,8 +7,7 @@ import {
 import { tableFeatures } from "@tanstack/table-core";
 import { AppContext } from "./Context";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { REACT_SERVER_URL } from "../../config/ENV";
-import axios from "axios";
+import { api } from "../APIs/api";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import VendorSelectionTooltip from "./VendorSelectionTooltip";
 import Currency from "../Helpers/Currency";
@@ -50,17 +49,7 @@ export default function VerticalTable({ showcalc }) {
 
   const fetchParticular = async (particularname) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.get(
-        `${REACT_SERVER_URL}/particulars/${particularname}`,
-        config,
-      );
+      const response = await api.get(`/particulars/${particularname}`);
       setParticular(response.data.particular.particulars);
     } catch (error) {
       setParticular([]);

@@ -10,7 +10,7 @@ import {
   useStatement,
 } from "../store/logisticsStore";
 import { useComments, useRecallStatement } from "../store/helperStore";
-import { EmailAlert, feedlgstatement } from "../APIs/api";
+import { api, EmailAlert, feedlgstatement } from "../APIs/api";
 import { useMutation } from "@tanstack/react-query";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { useErrorMessage } from "../store/errorStore";
@@ -18,8 +18,6 @@ import { useToast } from "../store/toastStore";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { SiTicktick } from "react-icons/si";
 import Alerts from "./Alerts";
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
 import { expectedstatus } from "../Helpers/statusfinder";
 import { useNavigate, useParams } from "react-router-dom";
 import ApproveModallog from "./ApproveModallog";
@@ -224,15 +222,8 @@ const LogisticsTable = () => {
     try {
       setShowmodal(true);
       setShowToast();
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.post(
-        `${REACT_SERVER_URL}/logistics/updatestatement/${cs_id}`,
+      const response = await api.post(
+        `/logistics/updatestatement/${cs_id}`,
         {
           updatedstatus,
           sentforapproval,
@@ -241,7 +232,6 @@ const LogisticsTable = () => {
           comments_init: comments,
           role: userInfo.role[0],
         },
-        config,
       );
 
       clearErrorMessage();

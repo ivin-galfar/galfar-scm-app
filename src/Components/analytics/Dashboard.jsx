@@ -90,7 +90,7 @@ const DashboardError = ({ onRetry }) => (
 const Dashboard = () => {
   const userInfo = useUserInfo();
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["analytics-approvals", userInfo?.token],
+    queryKey: ["analytics-approvals", userInfo?.id],
     queryFn: () => GetAnalyticsData(userInfo),
     enabled: !!userInfo,
     select: transformAnalyticsData,
@@ -139,6 +139,8 @@ const Dashboard = () => {
             <PendingForYou
               items={analyticsData.pendingForYou}
               pending_count={analyticsData.summary.pending}
+              loading={isLoading}
+              isError={isError}
             />
           </div>
           <div className="min-w-0 xl:col-span-4">

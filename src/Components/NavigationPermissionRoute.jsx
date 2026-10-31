@@ -6,7 +6,7 @@ import { getModuleNavigationAccess } from "../Helpers/navigationPermissions";
 const NavigationPermissionRoute = ({ children, permission }) => {
   const userInfo = useUserInfo();
 
-  if (!userInfo?.token) {
+  if (!userInfo) {
     return <Navigate to="/login" replace />;
   }
 

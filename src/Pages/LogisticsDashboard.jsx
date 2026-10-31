@@ -42,8 +42,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Alerts from "../Components/Alerts";
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
+import { api } from "../APIs/api";
 import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
 import { SiTicktick } from "react-icons/si";
@@ -147,17 +146,9 @@ const LogisticsDashboard = () => {
 
   const handleDelete = async (id) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      await axios.post(
-        `${REACT_SERVER_URL}/logistics/delete/${id}`,
+      await api.post(
+        `/logistics/delete/${id}`,
         {},
-        config,
       );
       setShowToast();
       setTimeout(() => {
@@ -198,7 +189,7 @@ const LogisticsDashboard = () => {
 
   const handleApprovalHistory = async (cs_id) => {
     setStatusFilter("Approval History");
-    const Approvals = await fetchApproverDetails(userInfo, cs_id);
+    const Approvals = await fetchApproverDetails(cs_id);
     const name = fetchPmName(Approvals.project);
     setPmName(name);
     setSelectedProject(Approvals.project);

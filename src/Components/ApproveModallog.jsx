@@ -4,11 +4,9 @@ import { useErrorMessage } from "../store/errorStore";
 import { useToast } from "../store/toastStore";
 import { useStatement, useStatusFilter } from "../store/logisticsStore";
 import useUserInfo from "../CustomHooks/useUserInfo";
-import { REACT_SERVER_URL } from "../../config/ENV";
-import axios from "axios";
 import { expectedstatus, role_finder } from "../Helpers/statusfinder";
 import { RxCross1 } from "react-icons/rx";
-import { EmailAlert } from "../APIs/api";
+import { api, EmailAlert } from "../APIs/api";
 import { is_logistics } from "../Helpers/dept_helper";
 import { useNavigate } from "react-router-dom";
 import {
@@ -78,15 +76,8 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
 
     let comments_role = role_finder(userInfo.role);
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      await axios.post(
-        `${REACT_SERVER_URL}/logistics/updatestatement/${cs_id}`,
+      await api.post(
+        `/logistics/updatestatement/${cs_id}`,
         {
           updatedstatus,
           [comments_role]: comments,
@@ -95,7 +86,6 @@ const ApproveModallog = ({ setShowmodal, cs_id }) => {
           role: userInfo.role[0],
           project: project,
         },
-        config,
       );
 
       if (updatedstatus?.toLowerCase() == "rejected") {

@@ -7,8 +7,7 @@ import {
 } from "react";
 import useUserInfo from "../CustomHooks/useUserInfo";
 import { AppContext } from "./Context";
-import axios from "axios";
-import { REACT_SERVER_URL } from "../../config/ENV";
+import { api } from "../APIs/api";
 import { TiTick } from "react-icons/ti";
 import { RxCrossCircled } from "react-icons/rx";
 import { FaEdit, FaFileUpload } from "react-icons/fa";
@@ -144,17 +143,7 @@ const TableHeader = ({ isAdmin }) => {
     setSortVendors();
     if (id && id != "default") {
       try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
-        const response = await axios.get(
-          `${REACT_SERVER_URL}/receipts/${receiptid}`,
-          config,
-        );
+        const response = await api.get(`/receipts/${receiptid}`);
         const receipt = response.data;
         setSharedTableData({
           formData: receipt.formData || {},
@@ -332,18 +321,7 @@ const TableHeader = ({ isAdmin }) => {
   }, [location.state]);
   const handleEdit = async (cs_id, approvalstatus, status) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      await axios.put(
-        `${REACT_SERVER_URL}/receipts/initiator/${cs_id}`,
-        { approvalstatus, status },
-        config,
-      );
+      await api.put(`/receipts/initiator/${cs_id}`, { approvalstatus, status });
       setSharedTableData((prev) => ({
         ...prev,
         formData: {
@@ -375,16 +353,7 @@ const TableHeader = ({ isAdmin }) => {
       files.forEach((file) => {
         formData.append("file", file);
       });
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.post(
-        `${REACT_SERVER_URL}/receipts/file`,
-        formData,
-        config,
-      );
+      const response = await api.post(`/receipts/file`, formData);
 
       const newFiles = response.data.uploadedFiles.map((file) => file.fileUrl);
       const newFileNames = response.data.uploadedFiles.map(
@@ -412,18 +381,7 @@ const TableHeader = ({ isAdmin }) => {
   };
   const handleDelete = async (mr) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      const response = await axios.post(
-        `${REACT_SERVER_URL}/receipts/${mr}`,
-        {},
-        config,
-      );
+      const response = await api.post(`/receipts/${mr}`, {});
       setShowToast(true);
       setErrormessage("");
       setDeleted();

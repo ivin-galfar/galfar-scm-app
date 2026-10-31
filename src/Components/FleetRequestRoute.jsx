@@ -6,7 +6,7 @@ import { getFleetRequestAccess } from "../Helpers/fleetRequestPermissions";
 const FleetRequestRoute = ({ children }) => {
   const userInfo = useUserInfo();
 
-  if (!userInfo?.token) return <Navigate to="/login" replace />;
+  if (!userInfo) return <Navigate to="/login" replace />;
   if (!getFleetRequestAccess(userInfo).canAccess) {
     return <Navigate to="/" replace />;
   }

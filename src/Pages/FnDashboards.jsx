@@ -205,7 +205,7 @@ const FnDashboards = () => {
 
   const handleDelete = async (id) => {
     try {
-      await deletefn(id, userInfo);
+      await deletefn(id);
       setShowToast();
       setTimeout(() => {
         resetshowtoast();
