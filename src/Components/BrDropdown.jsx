@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   useBrCsIds,
   useBrTableData,
@@ -17,14 +17,9 @@ const BrDropdown = () => {
   const { datasaved } = useDatasaved();
   const { setbrtabledata, resetbrtabledata } = useBrTableData();
   const { newstatement } = useNewStatement();
-  const location = useLocation();
   const fetchBrStatement = async (cs_id) => {
-    if (cs_id !== "default") {
-      const selectedbr = await fetchbrstatement(cs_id, userinfo);
-      setbrtabledata(selectedbr);
-    } else {
-      resetbrtabledata();
-    }
+    const selectedbr = await fetchbrstatement(cs_id, userinfo);
+    setbrtabledata(selectedbr);
   };
   useEffect(() => {
     if (brcs_ids?.length > 0 && !datasaved && newstatement) {
@@ -32,13 +27,13 @@ const BrDropdown = () => {
         replace: true,
       });
     }
-    if (datasaved) {
+    if (datasaved && cs_no && cs_no !== "default") {
       fetchBrStatement(cs_no);
     }
   }, [datasaved]);
 
   useEffect(() => {
-    if (cs_no != "" && cs_no != "default" && cs_no != undefined) {
+    if (cs_no && cs_no !== "default") {
       fetchBrStatement(cs_no);
     } else {
       resetbrtabledata();
