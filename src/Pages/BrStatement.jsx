@@ -92,7 +92,7 @@ const BrStatement = () => {
           </div>
         )}
       {showtoast && userinfo?.is_admin && brtabledata.status == "reverted" && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
+        <div className="fixed top-5  z-70 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-300 animate-slide-in">
           ✅ You have successfully Recalled the Statement!
         </div>
       )}
