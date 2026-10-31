@@ -4,6 +4,7 @@ import {
   Badge,
   Card,
   CardContent,
+  Skeleton,
   Separator,
 } from "./ui";
 import {
@@ -20,7 +21,7 @@ import { MdPendingActions } from "react-icons/md";
 import ZeroPendings from "../../Components/ZeroPendings";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 
-const PendingForYou = ({ items }) => {
+const PendingForYou = ({ items, loading, isError }) => {
   const userInfo = useUserInfo();
   const { setIsClicked } = useClickFromDashboard();
   const isAdmin = userInfo?.is_admin;
@@ -82,7 +83,28 @@ const PendingForYou = ({ items }) => {
         }
       />
       <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-3">
-        {filteredItems.length ? (
+        {loading ? (
+          <div
+            className="max-h-60 space-y-4 overflow-hidden px-2 py-2"
+            aria-label="Loading pending items"
+            aria-busy="true"
+          >
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <Skeleton className="size-8 shrink-0 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="h-5 w-16" />
+              </div>
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Pending items could not be loaded.
+          </div>
+        ) : filteredItems.length ? (
           <div className="max-h-60 min-h-0 space-y-2 overflow-y-auto pr-1">
             {filteredItems.map((item, index) => (
               <div

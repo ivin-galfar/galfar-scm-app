@@ -139,6 +139,8 @@ const Dashboard = () => {
             <PendingForYou
               items={analyticsData.pendingForYou}
               pending_count={analyticsData.summary.pending}
+              loading={isLoading}
+              isError={isError}
             />
           </div>
           <div className="min-w-0 xl:col-span-4">
